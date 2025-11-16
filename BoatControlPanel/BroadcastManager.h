@@ -30,7 +30,7 @@ public:
     /**
      * @brief allows for specific updates at regulated intervals.
      *
-	 * @param current time in milliseconds
+	 * @param now current time in milliseconds
      */
     void update(unsigned long now);
 
