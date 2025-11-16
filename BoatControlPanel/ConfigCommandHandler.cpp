@@ -185,11 +185,15 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const Str
             // Auto-update the relay name to include "Sound Signals"
             if (relay != DefaultValue)
             {
-                strncpy(cfg->relayShortNames[relay], "Sound", sizeof(cfg->relayShortNames[relay]) - 1);
-                cfg->relayShortNames[relay][sizeof(cfg->relayShortNames[relay]) - 1] = '\0';
-                
-                strncpy(cfg->relayLongNames[relay], "Sound\r\nSignals", sizeof(cfg->relayLongNames[relay]) - 1);
-                cfg->relayLongNames[relay][sizeof(cfg->relayLongNames[relay]) - 1] = '\0';
+                // Only auto-rename if the relay does not already have a custom name
+                if (cfg->relayShortNames[relay][0] == '\0') {
+                    strncpy(cfg->relayShortNames[relay], "Sound", sizeof(cfg->relayShortNames[relay]) - 1);
+                    cfg->relayShortNames[relay][sizeof(cfg->relayShortNames[relay]) - 1] = '\0';
+                }
+                if (cfg->relayLongNames[relay][0] == '\0') {
+                    strncpy(cfg->relayLongNames[relay], "Sound\r\nSignals", sizeof(cfg->relayLongNames[relay]) - 1);
+                    cfg->relayLongNames[relay][sizeof(cfg->relayLongNames[relay]) - 1] = '\0';
+                }
             }
 
             sendAckOk(sender, cmd, &params[0]);
