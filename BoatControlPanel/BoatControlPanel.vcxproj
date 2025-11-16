@@ -137,7 +137,6 @@
     <ClInclude Include="__vm\.BoatControlPanel.vsarduino.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Broadcast" />
   </ItemGroup>
   <PropertyGroup>
     <DebuggerFlavor>VisualMicroDebugger</DebuggerFlavor>
