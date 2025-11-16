@@ -3,7 +3,7 @@
 #include <NextionControl.h>
 
 #include "BoatControlPanelConstants.h"
-
+#include "BroadcastManager.h"
 #include "InterceptDebugCommandHandler.h"
 #include "AckCommandHandler.h"
 #include "ConfigCommandHandler.h"
@@ -49,6 +49,9 @@ TLVCompass compass(15);
 SerialCommandManager commandMgrComputer(&COMPUTER_SERIAL, onComputerCommandReceived, '\n', ':', '=', 500, 64);
 SerialCommandManager commandMgrLink(&LINK_SERIAL, onLinkCommandReceived, '\n', ':', '=', 500, 64);
 
+// Broadcast manager for coordinated messaging
+BroadcastManager broadcastManager(&commandMgrComputer, &commandMgrLink);
+
 // Warning manager with heartbeat monitoring
 WarningManager warningManager(&commandMgrLink, HeartbeatIntervalMs, HeartbeatTimeoutMs);
 
@@ -68,16 +71,16 @@ BaseDisplayPage* displayPages[] = { &homePage, &warningPage, &relayPage, &soundS
 NextionControl nextion(&NEXTION_SERIAL, displayPages, sizeof(displayPages) / sizeof(displayPages[0]));
 
 // link command handlers
-InterceptDebugHandler interceptDebugHandler(&commandMgrComputer);
-SensorCommandHandler sensorCommandHandler(&commandMgrComputer, &nextion, &warningManager);
-WarningCommandHandler warningCommandHandler(&commandMgrComputer, &nextion, &warningManager);
+InterceptDebugHandler interceptDebugHandler(&broadcastManager);
+SensorCommandHandler sensorCommandHandler(&broadcastManager, &nextion, &warningManager);
+WarningCommandHandler warningCommandHandler(&broadcastManager, &nextion, &warningManager);
 
 // computer command handlers
-ConfigCommandHandler configHandler(&homePage);
+ConfigCommandHandler configHandler(&broadcastManager, &homePage);
 
 // shared command handlers
-AckCommandHandler ackHandler(&commandMgrComputer, &nextion, &warningManager);
-SystemCommandHandler systemCommandHandler(&commandMgrComputer, &commandMgrLink);
+AckCommandHandler ackHandler(&broadcastManager, &nextion, &warningManager);
+SystemCommandHandler systemCommandHandler(&broadcastManager);
 
 // Timers
 unsigned long lastUpdate = 0;
@@ -120,8 +123,11 @@ void setup()
         warningManager.raiseWarning(WarningType::CompassFailure);
     }
 
-    commandMgrComputer.sendCommand(SystemInitialized, "");
-    commandMgrLink.sendCommand(SystemInitialized, "");
+    // Simplified broadcasting
+    broadcastManager.sendCommand(ConfigSoundRelayId, String(config->hornRelayIndex));
+    broadcastManager.sendCommand(ConfigBoatType, String(static_cast<int>(config->vesselType)));
+    broadcastManager.sendCommand(SystemInitialized, "");
+
 	nextion.sendCommand(PageOne);
 }
 
@@ -134,6 +140,7 @@ void loop()
 
     nextion.update(now);
 	warningManager.update(now);
+	broadcastManager.update(now);
 
     if (now - lastUpdate >= UpdateIntervalMs)
     {

@@ -2,8 +2,8 @@
 
 const char AckCommand[] = "ACK";
 
-AckCommandHandler::AckCommandHandler(SerialCommandManager* computerCommandManager, NextionControl* nextionControl, WarningManager* warningManager)
-    : BaseBoatCommandHandler(computerCommandManager, nextionControl, warningManager)
+AckCommandHandler::AckCommandHandler(BroadcastManager* broadcastManager, NextionControl* nextionControl, WarningManager* warningManager)
+    : BaseBoatCommandHandler(broadcastManager, nextionControl, warningManager)
 {
 }
 

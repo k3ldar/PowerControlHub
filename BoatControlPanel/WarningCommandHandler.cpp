@@ -8,8 +8,8 @@ const char WarningsClear[] = "W3";
 const char WarningsAdd[] = "W4";
 
 
-WarningCommandHandler::WarningCommandHandler(SerialCommandManager* computerCommandManager, NextionControl* nextionControl, WarningManager* warningManager)
-    : BaseBoatCommandHandler(computerCommandManager, nextionControl, warningManager)
+WarningCommandHandler::WarningCommandHandler(BroadcastManager* broadcastManager, NextionControl* nextionControl, WarningManager* warningManager)
+    : BaseBoatCommandHandler(broadcastManager, nextionControl, warningManager)
 {
 }
 

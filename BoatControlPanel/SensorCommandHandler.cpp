@@ -10,8 +10,8 @@ const char SensorWaterLevel[] = "S6";
 const char SensorWaterPumpActive[] = "S7";
 const char SensorHornActive[] = "S8";
 
-SensorCommandHandler::SensorCommandHandler(SerialCommandManager* computerCommandManager, NextionControl* nextionControl, WarningManager* warningManager)
-    : BaseBoatCommandHandler(computerCommandManager, nextionControl, warningManager)
+SensorCommandHandler::SensorCommandHandler(BroadcastManager* broadcastManager, NextionControl* nextionControl, WarningManager* warningManager)
+    : BaseBoatCommandHandler(broadcastManager, nextionControl, warningManager)
 {
 }
 

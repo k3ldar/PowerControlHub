@@ -1,18 +1,8 @@
 #include "ConfigCommandHandler.h"
 
-constexpr char ConfigSaveSettings[] = "C0";
-constexpr char ConfigGetSettings[] = "C1";
-constexpr char ConfigResetSettings[] = "C2";
-constexpr char ConfigRenameBoat[] = "C3";
-constexpr char ConfigRenameRelay[] = "C4";
-constexpr char ConfigMapHomeButton[] = "C5";
-constexpr char ConfigSetButtonColor[] = "C6";
-constexpr char ConfigBoatType[] = "C7";
-constexpr char ConfigSoundRelayId[] = "C8";
 
-
-ConfigCommandHandler::ConfigCommandHandler(HomePage* homePage)
-    : _homePage(homePage)
+ConfigCommandHandler::ConfigCommandHandler(BroadcastManager* broadcastManager, HomePage* homePage)
+	: _broadcastManager(broadcastManager), _homePage(homePage)
 {
 }
 
@@ -178,8 +168,8 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const Str
     }
     else if (cmd == ConfigSoundRelayId)
     {
-        // Expect "MAP <value>=<relay>" where relay 0..7 (or 255 to unmap)
-        if (paramCount >= 1)
+        // Expect "C8:<value>=<relay>" where relay 0..7 (or 255 to unmap)
+        if (paramCount == 1 && params[0].value.length() > 0)
         {
             uint8_t relay = params[0].value.toInt(); // if value empty, toInt() -> 0
 
@@ -190,6 +180,18 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const Str
             }
 
             cfg->hornRelayIndex = relay;
+			_broadcastManager->sendCommand(ConfigSoundRelayId, "v=" + String(relay), true);
+
+            // Auto-update the relay name to include "Sound Signals"
+            if (relay != DefaultValue)
+            {
+                strncpy(cfg->relayShortNames[relay], "Sound", sizeof(cfg->relayShortNames[relay]) - 1);
+                cfg->relayShortNames[relay][sizeof(cfg->relayShortNames[relay]) - 1] = '\0';
+                
+                strncpy(cfg->relayLongNames[relay], "Sound\r\nSignals", sizeof(cfg->relayLongNames[relay]) - 1);
+                cfg->relayLongNames[relay][sizeof(cfg->relayLongNames[relay]) - 1] = '\0';
+            }
+
             sendAckOk(sender, cmd, &params[0]);
         }
         else

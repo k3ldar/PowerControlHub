@@ -56,7 +56,7 @@ unsigned long lastSerialConnectAttempt = 0;
 
 void setup()
 {
-	ISerialCommandHandler* linkHandlers[] = { &relayHandler, &soundHandler } ;
+	ISerialCommandHandler* linkHandlers[] = { &relayHandler, &soundHandler, &configHandler } ;
 	size_t linkHandlerCount = sizeof(linkHandlers) / sizeof(linkHandlers[0]);
 	commandMgrLink.registerHandlers(linkHandlers, linkHandlerCount);
 

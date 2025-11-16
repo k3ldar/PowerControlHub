@@ -1,11 +1,11 @@
 #include "BaseBoatCommandHandler.h"
 
 BaseBoatCommandHandler::BaseBoatCommandHandler(
-    SerialCommandManager* computerCommandManager,
+    BroadcastManager* broadcaster,
     NextionControl* nextionControl,
     WarningManager* warningManager
 )
-    : _computerCommandManager(computerCommandManager)
+    : _broadcaster(broadcaster)
     , _nextionControl(nextionControl)
     , _warningManager(warningManager)
 {
@@ -26,9 +26,33 @@ void BaseBoatCommandHandler::notifyCurrentPage(uint8_t updateType, const void* d
 
 void BaseBoatCommandHandler::sendDebugMessage(const String& message, const String& identifier)
 {
-    if (_computerCommandManager)
+    if (_broadcaster)
     {
-        _computerCommandManager->sendDebug(message, identifier);
+        _broadcaster->sendDebug(message, identifier);
+    }
+}
+
+void BaseBoatCommandHandler::sendDebugMessage(const char* message, const char* identifier)
+{
+    if (_broadcaster)
+    {
+        _broadcaster->sendDebug(message, identifier);
+    }
+}
+
+void BaseBoatCommandHandler::sendErrorMessage(const String& message, const String& identifier)
+{
+    if (_broadcaster)
+    {
+        _broadcaster->sendError(message, identifier);
+    }
+}
+
+void BaseBoatCommandHandler::sendErrorMessage(const char* message, const char* identifier)
+{
+    if (_broadcaster)
+    {
+        _broadcaster->sendError(message, identifier);
     }
 }
 

@@ -80,6 +80,7 @@
       <FileType>CppCode</FileType>
       <DeploymentContent>true</DeploymentContent>
     </ClCompile>
+    <ClCompile Include="BroadcastManager.cpp" />
     <ClCompile Include="RelayPage.cpp" />
     <ClCompile Include="ConfigCommandHandler.cpp" />
     <ClCompile Include="HomePage.cpp">
@@ -114,6 +115,7 @@
     <ClInclude Include="BaseBoatCommandHandler.h" />
     <ClInclude Include="BaseBoatPage.h" />
     <ClInclude Include="BoatControlPanelConstants.h" />
+    <ClInclude Include="BroadcastManager.h" />
     <ClInclude Include="NextionIds.h" />
     <ClInclude Include="RelayPage.h" />
     <ClInclude Include="Config.h" />
@@ -133,6 +135,9 @@
     <ClInclude Include="WarningManager.h" />
     <ClInclude Include="WarningPage.h" />
     <ClInclude Include="__vm\.BoatControlPanel.vsarduino.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Broadcast" />
   </ItemGroup>
   <PropertyGroup>
     <DebuggerFlavor>VisualMicroDebugger</DebuggerFlavor>

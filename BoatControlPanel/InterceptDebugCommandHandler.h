@@ -4,10 +4,10 @@
 
 class InterceptDebugHandler : public ISerialCommandHandler {
 private:
-    SerialCommandManager* _computerCommandManager;
+    BroadcastManager* _broadcastManager;
 public:
-    InterceptDebugHandler(SerialCommandManager* computerCommandManager)
-        : _computerCommandManager(computerCommandManager)
+    InterceptDebugHandler(BroadcastManager* broadcastManager)
+        : _broadcastManager(broadcastManager)
     {
     }
 
@@ -24,7 +24,7 @@ public:
 		(void)command;
 		(void)params;
 		(void)paramCount;
-        _computerCommandManager->sendCommand(sender->getRawMessage(), "");
+        _broadcastManager->getComputerSerial()->sendCommand(sender->getRawMessage(), "");
 		return false; // Indicate that we did not fully handle the command
     }
 

@@ -4,19 +4,20 @@
 #include "BaseCommandHandler.h"
 #include "NextionControl.h"
 #include "WarningManager.h"
+#include "BroadcastManager.h"
 
 /**
  * @brief Base class for command handlers that interact with boat-specific systems.
  * 
  * This class extends BaseCommandHandler with common dependencies and helper methods
  * used by command handlers that need to:
- * - Send debug messages to the computer command manager
+ * - Send commands, debug messages, and errors via BroadcastManager
  * - Notify the current Nextion display page of updates
  * - Access the warning management system
  * - Parse common data formats (booleans, digits)
  * 
- * Handlers like AckCommandHandler and SensorCommandHandler should inherit from this
- * class to get access to these shared capabilities without code duplication.
+ * Handlers like AckCommandHandler, SensorCommandHandler, and WarningCommandHandler
+ * should inherit from this class to get access to these shared capabilities.
  * 
  * For handlers that don't need these boat-specific dependencies (like ConfigCommandHandler),
  * inherit directly from BaseCommandHandler instead.
@@ -27,12 +28,12 @@ protected:
     /**
      * @brief Constructor with boat-specific dependencies.
      * 
-     * @param computerCommandManager Manager for sending debug/error messages to computer
+     * @param broadcaster Manager for broadcasting commands/debug/errors
      * @param nextionControl Controller for interacting with Nextion display
      * @param warningManager Manager for system warnings (can be nullptr if not needed)
      */
     BaseBoatCommandHandler(
-        SerialCommandManager* computerCommandManager,
+        BroadcastManager* broadcaster,
         NextionControl* nextionControl,
         WarningManager* warningManager = nullptr
     );
@@ -49,15 +50,36 @@ protected:
     void notifyCurrentPage(uint8_t updateType, const void* data);
 
     /**
-     * @brief Send a debug message to the computer command manager.
-     * 
-     * Automatically includes the handler's identifier in the message.
-     * Override getHandlerIdentifier() to customize the identifier string.
+     * @brief Send a debug message to the computer serial (via BroadcastManager).
      * 
      * @param message Debug message content
-	 * @param identifier Command handler identifier
+     * @param identifier Command handler identifier
      */
     void sendDebugMessage(const String& message, const String& identifier);
+
+    /**
+     * @brief Send a debug message to the computer serial (via BroadcastManager).
+     * 
+     * @param message Debug message content (const char* for efficiency)
+     * @param identifier Command handler identifier
+     */
+    void sendDebugMessage(const char* message, const char* identifier);
+
+    /**
+     * @brief Send an error message to the computer serial (via BroadcastManager).
+     * 
+     * @param message Error message content
+     * @param identifier Command handler identifier
+     */
+    void sendErrorMessage(const String& message, const String& identifier);
+
+    /**
+     * @brief Send an error message to the computer serial (via BroadcastManager).
+     * 
+     * @param message Error message content (const char* for efficiency)
+     * @param identifier Command handler identifier
+     */
+    void sendErrorMessage(const char* message, const char* identifier);
 
     /**
      * @brief Parse a string value as a boolean.
@@ -81,7 +103,7 @@ protected:
     bool isAllDigits(const String& s) const;
 
     // Protected member variables for derived classes to access
-    SerialCommandManager* _computerCommandManager;
+    BroadcastManager* _broadcaster;
     NextionControl* _nextionControl;
     WarningManager* _warningManager;
 };
