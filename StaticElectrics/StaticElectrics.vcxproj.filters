@@ -19,6 +19,9 @@
     <Filter Include="Source Files\CommandHandlers">
       <UniqueIdentifier>{116e7f36-ca32-4d49-9f14-c2cadc47a1be}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Sensors">
+      <UniqueIdentifier>{b2560382-112e-4051-8e71-7cbe1f03a4f2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="StaticElectrics.ino" />
@@ -74,6 +77,15 @@
     </ClInclude>
     <ClInclude Include="SystemCommandHandler.h">
       <Filter>Header Files\CommandHandlers</Filter>
+    </ClInclude>
+    <ClInclude Include="SensorManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="WaterSensorHandler.h">
+      <Filter>Header Files\Sensors</Filter>
+    </ClInclude>
+    <ClInclude Include="Dht11SensorHandler.h">
+      <Filter>Header Files\Sensors</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

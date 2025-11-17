@@ -8,6 +8,8 @@ SystemCommandHandler::SystemCommandHandler(SerialCommandManager* commandMgrCompu
 
 bool SystemCommandHandler::handleCommand(SerialCommandManager* sender, const String command, const StringKeyValue params[], int paramCount)
 {
+	(void)params;
+
     // Access the in-memory config
     Config* config = ConfigManager::getConfigPtr();
 
@@ -16,6 +18,13 @@ bool SystemCommandHandler::handleCommand(SerialCommandManager* sender, const Str
         sendAckErr(sender, command, F("Config not available"));
         return true;
     }
+
+    if (paramCount > 0)
+    {
+        // This command does not accept parameters
+        sendAckErr(sender, command, F("Parameters not supported"));
+        return true;
+	}
 
     // Normalize command
     String cmd = command;
