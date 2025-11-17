@@ -4,7 +4,7 @@
 #include "SensorManager.h"
 #include "Queue.h"
 #include <SerialCommandManager.h>
-
+#include "StaticElectricConstants.h"
 constexpr unsigned long WaterSensorCheckIntervalMs = 5000;
 constexpr unsigned long WaterSensorStabilizeMs = 10;
 
