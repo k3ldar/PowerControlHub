@@ -69,9 +69,9 @@ protected:
 		return WaterSensorCheckIntervalMs;
 	};
 public:
-	WaterSensorHandler(SerialCommandManager* commandMangerLink, SerialCommandManager* commandManagerComputer, 
+	WaterSensorHandler(SerialCommandManager* commandManagerLink, SerialCommandManager* commandManagerComputer, 
 		uint8_t sensorPin, uint8_t activePin)
-		: _commandMgrLink(commandMangerLink), _commandMgrComputer(commandManagerComputer), _sensorPin(sensorPin), _activePin(activePin),
+		: _commandMgrLink(commandManagerLink), _commandMgrComputer(commandManagerComputer), _sensorPin(sensorPin), _activePin(activePin),
 			_waterPumpQueue(15), _waitingForStabilization(false)
 	{
 		pinMode(sensorPin, OUTPUT);
