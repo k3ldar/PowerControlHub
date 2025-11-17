@@ -2,6 +2,14 @@
 
 #include <Arduino.h>
 
+constexpr int DefaultDelay = 5;
+constexpr unsigned long serialInitTimeoutMs = 300;
+
+
+constexpr uint8_t WaterSensorPin = A0;
+constexpr uint8_t WaterSensorActivePin = D8;
+constexpr uint8_t Dht11SensorPin = D9;
+
 
 // Digital pins for relays
 constexpr uint8_t Relay4 = D4;
@@ -27,7 +35,6 @@ constexpr char SystemFreeMemoryCommand[] = "F2";
 constexpr char SensorWaterLevel[] = "S6";
 constexpr char SensorTemperature[] = "S0";
 constexpr char SensorHumidity[] = "S1";
-
 
 
 constexpr char AckSuccess[] = "ok";
