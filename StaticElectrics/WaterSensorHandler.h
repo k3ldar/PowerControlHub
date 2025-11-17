@@ -74,7 +74,7 @@ public:
 		: _commandMgrLink(commandManagerLink), _commandMgrComputer(commandManagerComputer), _sensorPin(sensorPin), _activePin(activePin),
 			_waterPumpQueue(15), _waitingForStabilization(false)
 	{
-		pinMode(sensorPin, OUTPUT);
+		pinMode(sensorPin, INPUT);
 		digitalWrite(_activePin, LOW);
 	};
 };
