@@ -4,6 +4,7 @@
 #include "SensorManager.h"
 #include <SerialCommandManager.h>
 #include <dht11.h>
+#include "StaticElectricConstants.h"
 
 constexpr unsigned long TempHumidityCheckMs = 2500;
 
