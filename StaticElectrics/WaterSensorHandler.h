@@ -44,7 +44,7 @@ protected:
 		}
 
 		_waitingForStabilization = false;
-		int sensorValue = analogRead(WaterSensorPin);
+		int sensorValue = analogRead(_sensorPin);
 		_waterPumpQueue.enqueue(sensorValue);
 
 		digitalWrite(WaterSensorActivePin, LOW);
