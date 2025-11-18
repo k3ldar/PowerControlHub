@@ -1,12 +1,6 @@
 #include "WarningCommandHandler.h"
 
 
-const char WarningsActive[] = "W0";
-const char WarningsList[] = "W1";
-const char WarningStatus[] = "W2";
-const char WarningsClear[] = "W3";
-const char WarningsAdd[] = "W4";
-
 
 WarningCommandHandler::WarningCommandHandler(BroadcastManager* broadcastManager, NextionControl* nextionControl, WarningManager* warningManager)
     : BaseBoatCommandHandler(broadcastManager, nextionControl, warningManager)

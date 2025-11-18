@@ -1,7 +1,7 @@
 #pragma once
 
 
-#include "SensorManager.h"
+#include <SensorManager.h>
 #include <SerialCommandManager.h>
 #include <dht11.h>
 #include "StaticElectricConstants.h"
@@ -37,6 +37,8 @@ protected:
 		{
 			if (_commandMgrComputer)
 			{
+				_commandMgrLink->sendCommand(WarningAdd, "0x07=1", "");
+
 				_commandMgrComputer->sendDebug(String(result), F("DHT11 Error"));
 			}
 
@@ -48,6 +50,8 @@ protected:
 			_commandMgrComputer->sendDebug(String(_dht11Sensor.humidity, 1), F("Humidity"));
 			_commandMgrComputer->sendDebug(String(_dht11Sensor.temperature, 1), F("Temperature"));
 		}
+
+		_commandMgrLink->sendCommand(WarningAdd, "0x07=0", "");
 
 		float humidity = _dht11Sensor.humidity;
 		float tempCelsius = _dht11Sensor.temperature;

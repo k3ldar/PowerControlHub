@@ -13,18 +13,19 @@
  * The manager tracks which warnings are currently active.
  */
 enum class WarningType : uint8_t {
-    None = 0x00,                    // No warning
-	DefaultConfiguration = 0x01,    // Using default config
-    ConnectionLost = 0x02,          // Link heartbeat lost
-    HighCompassTemperature = 0x03,  // Compass temperature threshold exceeded
-    LowBattery = 0x04,              // Battery voltage low
-    SensorFailure = 0x05,           // Sensor communication failure
-    CompassFailure = 0x06,          // Compass failed to initialize
-    
-    // Add new warning types here (0x07 - 0xFF)
+    None = 0x00,                        // No warning
+	DefaultConfiguration = 0x01,        // Using default config
+    ConnectionLost = 0x02,              // Link heartbeat lost
+    HighCompassTemperature = 0x03,      // Compass temperature threshold exceeded
+    LowBattery = 0x04,                  // Battery voltage low
+    SensorFailure = 0x05,               // Sensor communication failure
+    CompassFailure = 0x06,              // Compass failed to initialize
+	TemperatureSensorFailure = 0x07,    // Temperature sensor failure
+
+    // Add new warning types above here (0x08 - 0xFF) and update count below!
 };
 
-const uint8_t WarningCount = 7; // Update this if you add more warning types
+const uint8_t WarningCount = 8; // Update this if you add more warning types
 
 /**
  * @class WarningManager

@@ -50,6 +50,8 @@ String warningTypeToString(WarningType type)
         return F("Sensor Failure");
     case WarningType::CompassFailure:
         return F("Compass Failure");
+    case WarningType::TemperatureSensorFailure:
+		return F("Temperature Sensor Failure");
     default:
         return F("Unknown Warning");
     }

@@ -36,6 +36,8 @@ constexpr char SensorWaterLevel[] = "S6";
 constexpr char SensorTemperature[] = "S0";
 constexpr char SensorHumidity[] = "S1";
 
+constexpr char WarningAdd[] = "W4";
+
 
 constexpr char AckSuccess[] = "ok";
 constexpr char ValueParamName[] = "v";

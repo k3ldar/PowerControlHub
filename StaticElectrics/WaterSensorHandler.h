@@ -1,10 +1,12 @@
 #pragma once
 
 
-#include "SensorManager.h"
-#include "Queue.h"
+#include <SensorManager.h>
 #include <SerialCommandManager.h>
+#include "Queue.h"
 #include "StaticElectricConstants.h"
+
+
 constexpr unsigned long WaterSensorCheckIntervalMs = 5000;
 constexpr unsigned long WaterSensorStabilizeMs = 10;
 

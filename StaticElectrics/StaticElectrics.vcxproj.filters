@@ -78,9 +78,6 @@
     <ClInclude Include="SystemCommandHandler.h">
       <Filter>Header Files\CommandHandlers</Filter>
     </ClInclude>
-    <ClInclude Include="SensorManager.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="WaterSensorHandler.h">
       <Filter>Header Files\Sensors</Filter>
     </ClInclude>

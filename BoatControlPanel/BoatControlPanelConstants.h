@@ -33,6 +33,13 @@ constexpr char ConfigBoatType[] = "C7";
 constexpr char ConfigSoundRelayId[] = "C8";
 
 
+constexpr char WarningsActive[] = "W0";
+constexpr char WarningsList[] = "W1";
+constexpr char WarningStatus[] = "W2";
+constexpr char WarningsClear[] = "W3";
+constexpr char WarningsAdd[] = "W4";
+
+
 constexpr char AckSuccess[] = "ok";
 constexpr char ValueParamName[] = "v";
 

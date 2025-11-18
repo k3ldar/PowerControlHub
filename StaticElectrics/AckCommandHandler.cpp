@@ -34,16 +34,15 @@ bool AckCommandHandler::handleCommand(SerialCommandManager* sender, const String
 	String val = params[0].value;
 	val.trim();
 
-    if (key == SystemHeartbeatCommand && val.equalsIgnoreCase(AckSuccess))
+    if (!val.equalsIgnoreCase(AckSuccess))
     {
-        // Heartbeat acknowledgement
-        sendAckOk(sender, cmd);
-	}
-	else
-    {
-        _commandMgrComputer->sendDebug("Unknown or invalid ACK: key='" + key + "', val='" + val + "'", AckCommand);
+        _commandMgrComputer->sendDebug("ACK indicates failure: key='" + key + "', val='" + val + "'", AckCommand);
+		return false;
     }
 
+	// only process known ACK keys if you need to take action
+    
+    sendAckOk(sender, cmd);
     return true;
 }
 
