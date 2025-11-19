@@ -54,7 +54,10 @@ protected:
 			_commandMgrComputer->sendDebug(String(_dht11Sensor.temperature, 1), F("Temperature"));
 		}
 
-		_commandMgrLink->sendCommand(WarningAdd, "0x07=0", "");
+		if (_commandMgrLink)
+		{
+			_commandMgrLink->sendCommand(WarningAdd, "0x07=0", "");
+		}
 
 		float humidity = _dht11Sensor.humidity;
 		float tempCelsius = _dht11Sensor.temperature;
