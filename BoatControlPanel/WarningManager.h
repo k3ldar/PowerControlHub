@@ -20,15 +20,15 @@ enum class WarningType : uint32_t {
     None = 0x00,                                // No warning
     
     // System warnings (bits 0-19)
-    DefaultConfiguration = 1ULL << 0,           // 0x01 - Using default config
-    ConnectionLost = 1ULL << 1,                 // 0x02 - Link heartbeat lost
-    HighCompassTemperature = 1ULL << 2,         // 0x04 - Compass temperature threshold exceeded
-    LowBattery = 1ULL << 3,                     // 0x08 - Battery voltage low
+    DefaultConfiguration = 1UL << 0,           // 0x01 - Using default config
+    ConnectionLost = 1UL << 1,                 // 0x02 - Link heartbeat lost
+    HighCompassTemperature = 1UL << 2,         // 0x04 - Compass temperature threshold exceeded
+    LowBattery = 1UL << 3,                     // 0x08 - Battery voltage low
     
     // Sensor warnings (bits 20+)
-    SensorFailure = 1ULL << 20,                 // Sensor communication failure
-    TemperatureSensorFailure = 1ULL << 21,      // Temperature sensor failure
-    CompassFailure = 1ULL << 22,                // Compass failed to initialize
+    SensorFailure = 1UL << 20,                 // Sensor communication failure
+    TemperatureSensorFailure = 1UL << 21,      // Temperature sensor failure
+    CompassFailure = 1UL << 22,                // Compass failed to initialize
 };
 
 // Warning type display strings - keep in sync with WarningType enum
