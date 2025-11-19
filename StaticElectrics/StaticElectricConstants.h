@@ -15,7 +15,7 @@ enum class WarningType : uint32_t {
     SensorFailure = 1ULL << 20,                 // Sensor communication failure
     TemperatureSensorFailure = 1ULL << 21,      // Temperature sensor failure
     CompassFailure = 1ULL << 22,                 // 0x10 - Compass failed to initialize
-    HighCompassTemperature = 1ULL << 2,         // 0x04 - Compass temperature threshold exceeded
+    HighCompassTemperature = 1ULL << 23,        // 0x80 - Compass temperature threshold exceeded (sensor warning)
 };
 
 
