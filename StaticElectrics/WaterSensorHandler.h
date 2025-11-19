@@ -51,14 +51,13 @@ protected:
 
 		digitalWrite(WaterSensorActivePin, LOW);
 
-
-		StringKeyValue params[] = {
-			{"avg", String(_waterPumpQueue.average())},
-			{"v", String(sensorValue) }
-		};
-
 		if (_commandMgrLink)
 		{
+			StringKeyValue params[] = {
+				{"avg", String(_waterPumpQueue.average())},
+				{"v", String(sensorValue) }
+			};
+
 			_commandMgrLink->sendCommand(SensorWaterLevel, "", "", params, 2);
 		}
 

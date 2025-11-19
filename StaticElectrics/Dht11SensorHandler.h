@@ -39,7 +39,7 @@ protected:
 			{
 				if (_commandMgrLink)
 				{
-					_commandMgrLink->sendCommand(WarningAdd, "0x07=1", "");
+					_commandMgrLink->sendCommand(WarningAdd, F("0x07=1"), "");
 				}
 
 				_commandMgrComputer->sendDebug(String(result), F("DHT11 Error"));
@@ -56,7 +56,7 @@ protected:
 
 		if (_commandMgrLink)
 		{
-			_commandMgrLink->sendCommand(WarningAdd, "0x07=0", "");
+			_commandMgrLink->sendCommand(WarningAdd, F("0x07=0"), "");
 		}
 
 		float humidity = _dht11Sensor.humidity;
@@ -64,8 +64,10 @@ protected:
 
 		if (_commandMgrLink)
 		{
-			_commandMgrLink->sendCommand(SensorTemperature, String(tempCelsius, 1));
-			_commandMgrLink->sendCommand(SensorHumidity, String(humidity, 0));
+			StringKeyValue params[] = { { "v", String(tempCelsius, 1) } };
+			_commandMgrLink->sendCommand(SensorTemperature, "", "", params, 1);
+			params->value = String(humidity, 0);
+			_commandMgrLink->sendCommand(SensorHumidity, "", "", params, 1);
 		}
 
 		return TempHumidityCheckMs;

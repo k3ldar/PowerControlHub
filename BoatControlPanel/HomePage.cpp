@@ -93,7 +93,7 @@ void HomePage::refresh(unsigned long now)
         }
         
         // Update connection-related displays
-        if (warningMgr->isWarningActive(WarningType::ConnectionLost))
+        if (warningMgr->isWarningActive(WarningType::ConnectionLost) || warningMgr->isWarningActive(WarningType::TemperatureSensorFailure))
         {
             sendText(ControlHumidity, NoValueText);
             sendText(ControlTemperature, NoValueText);
