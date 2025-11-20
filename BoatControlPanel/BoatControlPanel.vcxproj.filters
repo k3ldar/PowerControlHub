@@ -206,5 +206,11 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
+    <None Include="CleanSymLinks.bat">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="CleanAllSymLinks.bat">
+      <Filter>Source Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

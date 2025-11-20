@@ -16,6 +16,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{02EA681E-C
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SymLinks", "SymLinks", "{740544D1-B9F2-4E46-B3B9-BEFA7A04F940}"
 	ProjectSection(SolutionItems) = preProject
+		CleanSymLinks.bat = CleanSymLinks.bat
 		SymLinks.bat = SymLinks.bat
 	EndProjectSection
 EndProject
