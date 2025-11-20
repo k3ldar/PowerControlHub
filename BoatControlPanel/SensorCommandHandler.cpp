@@ -1,15 +1,5 @@
 #include "SensorCommandHandler.h"
 
-const char SensorTemperature[] = "S0";
-const char SensorHumidity[] = "S1";
-const char SensorBearing[] = "S2";
-const char SensorDirection[] = "S3";
-const char SensorSpeed[] = "S4";
-const char SensorCompassTemp[] = "S5";
-const char SensorWaterLevel[] = "S6";
-const char SensorWaterPumpActive[] = "S7";
-const char SensorHornActive[] = "S8";
-
 SensorCommandHandler::SensorCommandHandler(BroadcastManager* broadcastManager, NextionControl* nextionControl, WarningManager* warningManager)
     : BaseBoatCommandHandler(broadcastManager, nextionControl, warningManager)
 {

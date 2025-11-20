@@ -40,18 +40,21 @@
     <Filter Include="Source Files\Sensors">
       <UniqueIdentifier>{acc3133c-1004-4c60-9b5f-c21f378d0ccc}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\SharedCode">
+      <UniqueIdentifier>{e046eb0b-0bb5-4980-b261-544281510b1c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\SharedCode">
+      <UniqueIdentifier>{9d719c01-bb47-4298-9f3d-90770b6cd2a1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\SharedCode\CommandHandlers">
+      <UniqueIdentifier>{c5254fb2-4978-482f-9e73-5c074c367dfb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\SharedCode\CommandHandlers">
+      <UniqueIdentifier>{ef1dabf8-aa0d-4157-9749-1f26386d9b9f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BoatControlPanel.ino" />
-    <ClCompile Include="ConfigManager.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="WarningManager.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="AckCommandHandler.cpp">
-      <Filter>Source Files\CommandHandlers</Filter>
-    </ClCompile>
     <ClCompile Include="ConfigCommandHandler.cpp">
       <Filter>Source Files\CommandHandlers</Filter>
     </ClCompile>
@@ -85,9 +88,6 @@
     <ClCompile Include="WarningPage.cpp">
       <Filter>Source Files\Pages</Filter>
     </ClCompile>
-    <ClCompile Include="SystemCommandHandler.cpp">
-      <Filter>Source Files\CommandHandlers</Filter>
-    </ClCompile>
     <ClCompile Include="SoundEmergencyPage.cpp">
       <Filter>Source Files\Pages</Filter>
     </ClCompile>
@@ -106,27 +106,30 @@
     <ClCompile Include="SoundSignalsPage.cpp">
       <Filter>Source Files\Pages</Filter>
     </ClCompile>
+    <ClCompile Include="ConfigManager.cpp">
+      <Filter>Source Files\SharedCode</Filter>
+    </ClCompile>
+    <ClCompile Include="AckCommandHandler.cpp">
+      <Filter>Source Files\SharedCode\CommandHandlers</Filter>
+    </ClCompile>
+    <ClCompile Include="SystemCommandHandler.cpp">
+      <Filter>Source Files\SharedCode\CommandHandlers</Filter>
+    </ClCompile>
     <ClCompile Include="BroadcastManager.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\SharedCode</Filter>
+    </ClCompile>
+    <ClCompile Include="WarningManager.cpp">
+      <Filter>Source Files\SharedCode</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="__vm\.BoatControlPanel.vsarduino.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ConfigManager.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Config.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="WarningManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ConfigCommandHandler.h">
-      <Filter>Header Files\CommandHandlers</Filter>
-    </ClInclude>
-    <ClInclude Include="AckCommandHandler.h">
       <Filter>Header Files\CommandHandlers</Filter>
     </ClInclude>
     <ClInclude Include="SensorCommandHandler.h">
@@ -153,9 +156,6 @@
     <ClInclude Include="BaseBoatPage.h">
       <Filter>Header Files\Pages</Filter>
     </ClInclude>
-    <ClInclude Include="SystemCommandHandler.h">
-      <Filter>Header Files\CommandHandlers</Filter>
-    </ClInclude>
     <ClInclude Include="BoatControlPanelConstants.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -177,8 +177,32 @@
     <ClInclude Include="SoundSignalsPage.h">
       <Filter>Header Files\Pages</Filter>
     </ClInclude>
+    <ClInclude Include="Config.h">
+      <Filter>Header Files\SharedCode</Filter>
+    </ClInclude>
+    <ClInclude Include="ConfigManager.h">
+      <Filter>Header Files\SharedCode</Filter>
+    </ClInclude>
+    <ClInclude Include="Local.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SystemCommandHandler.h">
+      <Filter>Header Files\SharedCode\CommandHandlers</Filter>
+    </ClInclude>
+    <ClInclude Include="WarningType.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="BroadcastManager.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AckCommandHandler.h">
+      <Filter>Header Files\SharedCode\CommandHandlers</Filter>
+    </ClInclude>
+    <ClInclude Include="SharedBaseCommandHandler.h">
+      <Filter>Header Files\SharedCode\CommandHandlers</Filter>
+    </ClInclude>
+    <ClInclude Include="SharedConstants.h">
+      <Filter>Header Files\SharedCode</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

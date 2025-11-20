@@ -4,43 +4,10 @@
 #include <SensorManager.h>
 #include <SerialCommandManager.h>
 #include <dht11.h>
-#include "StaticElectricConstants.h"
+#include "SharedConstants.h"
+#include "WarningType.h"
 
 constexpr unsigned long TempHumidityCheckMs = 2500;
-
-
-
-// Convert uint64_t to char array (buffer must be at least 21 chars)
-inline void uint64ToCharArray(uint64_t value, char* buffer) {
-	if (value == 0) {
-		buffer[0] = '0';
-		buffer[1] = '\0';
-		return;
-	}
-
-	char temp[21];
-	int pos = 0;
-
-	// Extract digits in reverse order
-	while (value > 0) {
-		temp[pos++] = '0' + (value % 10);
-		value /= 10;
-	}
-
-	// Reverse into output buffer
-	for (int i = 0; i < pos; i++) {
-		buffer[i] = temp[pos - 1 - i];
-	}
-	buffer[pos] = '\0';
-}
-
-// Convenience wrapper for WarningType
-inline String warningTypeToString(WarningType type) {
-	char buffer[21];
-	uint64ToCharArray(static_cast<uint64_t>(type), buffer);
-	return String(buffer);
-}
-
 
 /**
  * @brief Sensor handler for DHT11 monitoring.
@@ -72,7 +39,7 @@ protected:
 			{
 				if (_commandMgrLink)
 				{
-					_commandMgrLink->sendCommand(WarningAdd, warningTypeToString(WarningType::TemperatureSensorFailure) + F("=1"), "");
+					_commandMgrLink->sendCommand(WarningsAdd, String(getWarningString(WarningType::TemperatureSensorFailure)) + F("=1"), "");
 				}
 
 				_commandMgrComputer->sendDebug(String(result), F("DHT11 Error"));
@@ -89,7 +56,7 @@ protected:
 
 		if (_commandMgrLink)
 		{
-			_commandMgrLink->sendCommand(WarningAdd, warningTypeToString(WarningType::TemperatureSensorFailure) + F("=0"), "");
+			_commandMgrLink->sendCommand(WarningsAdd, String(getWarningString(WarningType::TemperatureSensorFailure)) + F("=0"), "");
 		}
 
 		float humidity = _dht11Sensor.humidity;

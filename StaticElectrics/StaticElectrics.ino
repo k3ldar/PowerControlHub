@@ -30,10 +30,13 @@ void onLinkCommandReceived(SerialCommandManager* mgr);
 SerialCommandManager commandMgrComputer(&COMPUTER_SERIAL, onComputerCommandReceived, '\n', ':', '=', 500, 64);
 SerialCommandManager commandMgrLink(&LINK_SERIAL, onLinkCommandReceived, '\n', ':', '=', 500, 64);
 
+// Broadcast manager for coordinated messaging
+BroadcastManager broadcastManager(&commandMgrComputer, &commandMgrLink);
+
 SoundManager soundManager;
 
-SystemCommandHandler systemHandler(&commandMgrComputer);
-AckCommandHandler ackHandler(&commandMgrComputer);
+SystemCommandHandler systemHandler(&broadcastManager);
+AckCommandHandler ackHandler(&broadcastManager);
 RelayCommandHandler relayHandler(&commandMgrComputer, &commandMgrLink, Relays, TotalRelays);
 SoundCommandHandler soundHandler(&commandMgrComputer, &commandMgrLink, &soundManager);
 ConfigCommandHandler configHandler(&soundManager);
@@ -67,7 +70,7 @@ void setup()
 
 	soundManager.configUpdated(ConfigManager::getConfigPtr());
 
-	commandMgrComputer.sendCommand(SystemInitializedCommand, "");
+	commandMgrComputer.sendCommand(SystemInitialized, "");
 }
 
 void loop() 

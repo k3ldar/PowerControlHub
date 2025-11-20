@@ -5,6 +5,7 @@
 #include <SerialCommandManager.h>
 #include "Queue.h"
 #include "StaticElectricConstants.h"
+#include "WarningType.h"
 
 
 constexpr unsigned long WaterSensorCheckIntervalMs = 5000;

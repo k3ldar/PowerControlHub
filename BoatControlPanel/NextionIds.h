@@ -13,8 +13,6 @@ constexpr uint8_t PageSoundOther = 9;
 
 constexpr uint8_t InvalidButtonIndex = 0xFF;
 
-constexpr uint8_t DefaultValue = 0xFF; // Use default value (color/unmap etc)
-
 // Button color constants (Nextion picture IDs)
 constexpr uint8_t ImageButtonColorBlue = 2;
 constexpr uint8_t ImageButtonColorGreen = 3;

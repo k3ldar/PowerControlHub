@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 18
-VisualStudioVersion = 18.3.11206.111 d18.3
+VisualStudioVersion = 18.3.11206.111
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BoatControlPanel", "BoatControlPanel.vcxproj", "{69BF9B87-5C12-FD9D-3BB7-0A7CD90CDEB6}"
 EndProject
@@ -12,6 +12,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{02EA681E-C
 		..\ExternalUpdatePattern.md = ..\ExternalUpdatePattern.md
 		..\LICENSE = ..\LICENSE
 		..\README.md = ..\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SymLinks", "SymLinks", "{740544D1-B9F2-4E46-B3B9-BEFA7A04F940}"
+	ProjectSection(SolutionItems) = preProject
+		SymLinks.bat = SymLinks.bat
 	EndProjectSection
 EndProject
 Global
