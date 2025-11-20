@@ -116,7 +116,7 @@ void WarningManager::updateConnection(unsigned long now)
     }
 }
 
-uint64_t WarningManager::getActiveWarningsMask() const
+uint32_t WarningManager::getActiveWarningsMask() const
 {
     return _activeWarnings;
 }

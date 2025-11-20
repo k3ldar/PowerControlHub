@@ -22,6 +22,18 @@
     <Filter Include="Header Files\Sensors">
       <UniqueIdentifier>{b2560382-112e-4051-8e71-7cbe1f03a4f2}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\SharedCode">
+      <UniqueIdentifier>{161e671c-dae2-4c3b-9b3d-810d308ef21f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\SharedCode">
+      <UniqueIdentifier>{2c5c1b61-1f57-461e-9bb6-4da6def3c316}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\SharedCode\CommandHandlers">
+      <UniqueIdentifier>{c1b264e0-e00a-461f-bdac-3792ee219b47}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\SharedCode\CommandHandlers">
+      <UniqueIdentifier>{83156138-a987-43b1-a64d-b3cb5c3ce530}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="StaticElectrics.ino" />
@@ -37,9 +49,6 @@
     <ClCompile Include="SoundManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ConfigManager.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="ConfigCommandHandler.cpp">
       <Filter>Source Files\CommandHandlers</Filter>
     </ClCompile>
@@ -48,6 +57,15 @@
     </ClCompile>
     <ClCompile Include="SystemCommandHandler.cpp">
       <Filter>Source Files\CommandHandlers</Filter>
+    </ClCompile>
+    <ClCompile Include="BroadcastManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ConfigManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SystemCommandHandler.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -61,12 +79,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="StaticElectricConstants.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ConfigManager.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Config.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ConfigCommandHandler.h">
@@ -83,6 +95,30 @@
     </ClInclude>
     <ClInclude Include="Dht11SensorHandler.h">
       <Filter>Header Files\Sensors</Filter>
+    </ClInclude>
+    <ClInclude Include="Local.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Config.h">
+      <Filter>Header Files\SharedCode</Filter>
+    </ClInclude>
+    <ClInclude Include="BroadcastManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ConfigManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SharedConstants.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="WarningType.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SystemCommandHandler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Shared\CommandHandlers\SharedBaseCommandHandler.h">
+      <Filter>Header Files\SharedCode</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -2,13 +2,6 @@
 #include "StaticElectricConstants.h"
 
 
-constexpr char RelayTurnAllOff[] = "R0";
-constexpr char RelayTurnAllOn[] = "R1";
-constexpr char RelayRetrieveStates[] = "R2";
-constexpr char RelaySetState[] = "R3";
-constexpr char RelayStatusGet[] = "R4";
-
-
 RelayCommandHandler::RelayCommandHandler(SerialCommandManager* commandMgrComputer, SerialCommandManager* commandMgrLink, const uint8_t* relayPins, uint8_t totalRelays)
     : _relayStatus(nullptr), _relays(nullptr), _relayCount(totalRelays), _reservedSoundRelay(DefaultValue), 
     _commandMgrComputer(commandMgrComputer), _commandMgrLink(commandMgrLink)

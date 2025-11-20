@@ -3,22 +3,6 @@
 #include <Arduino.h>
 #include <stdint.h>
 
-enum class WarningType : uint32_t {
-    None = 0x00,                                // No warning
-
-    // System warnings (bits 0-19)
-    DefaultConfiguration = 1ULL << 0,           // 0x01 - Using default config
-    ConnectionLost = 1ULL << 1,                 // 0x02 - Link heartbeat lost
-    LowBattery = 1ULL << 3,                     // 0x08 - Battery voltage low
-
-    // Sensor warnings (bits 20+)
-    SensorFailure = 1ULL << 20,                 // Sensor communication failure
-    TemperatureSensorFailure = 1ULL << 21,      // Temperature sensor failure
-    CompassFailure = 1ULL << 22,                 // 0x10 - Compass failed to initialize
-    HighCompassTemperature = 1ULL << 23,        // 0x80 - Compass temperature threshold exceeded (sensor warning)
-};
-
-
 constexpr int DefaultDelay = 5;
 constexpr unsigned long serialInitTimeoutMs = 300;
 
@@ -45,19 +29,6 @@ constexpr uint8_t TotalRelays = 8;
 constexpr uint8_t Relays[TotalRelays] = { Relay1, Relay2, Relay3, Relay4, Relay5, Relay6, Relay7, Relay8 };
 
 
-constexpr char SystemHeartbeatCommand[] = "F0";
-constexpr char SystemInitializedCommand[] = "F1";
-constexpr char SystemFreeMemoryCommand[] = "F2";
-
-constexpr char SensorWaterLevel[] = "S6";
-constexpr char SensorTemperature[] = "S0";
-constexpr char SensorHumidity[] = "S1";
-
-constexpr char WarningAdd[] = "W4";
-
-
-constexpr char AckSuccess[] = "ok";
-constexpr char ValueParamName[] = "v";
 
 
 constexpr unsigned long SerialInitTimeoutMs = 300;

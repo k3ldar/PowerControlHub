@@ -1,17 +1,16 @@
 #pragma once
 
 #include <Arduino.h>
-#include "BaseCommandHandler.h"
+#include "SharedBaseCommandHandler.h"
 #include "NextionControl.h"
 #include "WarningManager.h"
-#include "BroadcastManager.h"
 
 /**
  * @brief Base class for command handlers that interact with boat-specific systems.
  * 
- * This class extends BaseCommandHandler with common dependencies and helper methods
- * used by command handlers that need to:
- * - Send commands, debug messages, and errors via BroadcastManager
+ * This class extends SharedBaseCommandHandler with additional boat-specific dependencies
+ * and helper methods used by command handlers that need to:
+ * - Send commands, debug messages, and errors via BroadcastManager (inherited)
  * - Notify the current Nextion display page of updates
  * - Access the warning management system
  * - Parse common data formats (booleans, digits)
@@ -19,10 +18,12 @@
  * Handlers like AckCommandHandler, SensorCommandHandler, and WarningCommandHandler
  * should inherit from this class to get access to these shared capabilities.
  * 
- * For handlers that don't need these boat-specific dependencies (like ConfigCommandHandler),
- * inherit directly from BaseCommandHandler instead.
+ * For handlers that only need broadcasting (like some shared command handlers),
+ * inherit from SharedBaseCommandHandler instead.
+ * For handlers that don't need any of these dependencies (like ConfigCommandHandler),
+ * inherit directly from BaseCommandHandler.
  */
-class BaseBoatCommandHandler : public BaseCommandHandler
+class BaseBoatCommandHandler : public SharedBaseCommandHandler
 {
 protected:
     /**
@@ -50,38 +51,6 @@ protected:
     void notifyCurrentPage(uint8_t updateType, const void* data);
 
     /**
-     * @brief Send a debug message to the computer serial (via BroadcastManager).
-     * 
-     * @param message Debug message content
-     * @param identifier Command handler identifier
-     */
-    void sendDebugMessage(const String& message, const String& identifier);
-
-    /**
-     * @brief Send a debug message to the computer serial (via BroadcastManager).
-     * 
-     * @param message Debug message content (const char* for efficiency)
-     * @param identifier Command handler identifier
-     */
-    void sendDebugMessage(const char* message, const char* identifier);
-
-    /**
-     * @brief Send an error message to the computer serial (via BroadcastManager).
-     * 
-     * @param message Error message content
-     * @param identifier Command handler identifier
-     */
-    void sendErrorMessage(const String& message, const String& identifier);
-
-    /**
-     * @brief Send an error message to the computer serial (via BroadcastManager).
-     * 
-     * @param message Error message content (const char* for efficiency)
-     * @param identifier Command handler identifier
-     */
-    void sendErrorMessage(const char* message, const char* identifier);
-
-    /**
      * @brief Parse a string value as a boolean.
      * 
      * Accepts multiple formats:
@@ -103,7 +72,7 @@ protected:
     bool isAllDigits(const String& s) const;
 
     // Protected member variables for derived classes to access
-    BroadcastManager* _broadcaster;
+    // Note: _broadcaster is inherited from SharedBaseCommandHandler
     NextionControl* _nextionControl;
     WarningManager* _warningManager;
 };

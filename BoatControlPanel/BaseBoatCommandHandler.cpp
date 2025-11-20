@@ -5,7 +5,7 @@ BaseBoatCommandHandler::BaseBoatCommandHandler(
     NextionControl* nextionControl,
     WarningManager* warningManager
 )
-    : _broadcaster(broadcaster)
+	: SharedBaseCommandHandler(broadcaster)
     , _nextionControl(nextionControl)
     , _warningManager(warningManager)
 {
@@ -22,38 +22,6 @@ void BaseBoatCommandHandler::notifyCurrentPage(uint8_t updateType, const void* d
         return;
 
     p->handleExternalUpdate(updateType, data);
-}
-
-void BaseBoatCommandHandler::sendDebugMessage(const String& message, const String& identifier)
-{
-    if (_broadcaster)
-    {
-        _broadcaster->sendDebug(message, identifier);
-    }
-}
-
-void BaseBoatCommandHandler::sendDebugMessage(const char* message, const char* identifier)
-{
-    if (_broadcaster)
-    {
-        _broadcaster->sendDebug(message, identifier);
-    }
-}
-
-void BaseBoatCommandHandler::sendErrorMessage(const String& message, const String& identifier)
-{
-    if (_broadcaster)
-    {
-        _broadcaster->sendError(message, identifier);
-    }
-}
-
-void BaseBoatCommandHandler::sendErrorMessage(const char* message, const char* identifier)
-{
-    if (_broadcaster)
-    {
-        _broadcaster->sendError(message, identifier);
-    }
 }
 
 bool BaseBoatCommandHandler::parseBooleanValue(const String& value) const

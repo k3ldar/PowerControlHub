@@ -1,11 +1,5 @@
 #include "ConfigCommandHandler.h"
 
-constexpr char ConfigSaveSettings[] = "C0";
-constexpr char ConfigGetSettings[] = "C1";
-constexpr char ConfigResetSettings[] = "C2";
-constexpr char ConfigBoatType[] = "C7";
-constexpr char ConfigSoundRelayId[] = "C8";
-constexpr char ConfigSoundStartDelay[] = "C9";
 
 ConfigCommandHandler::ConfigCommandHandler(SoundManager* soundManager)
     : _soundManager(soundManager)

@@ -1,3 +1,4 @@
+#include "WarningType.h"
 #include <Arduino.h>
 #include <SerialCommandManager.h>
 #include <NextionControl.h>
