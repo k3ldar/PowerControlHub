@@ -76,6 +76,11 @@ SmartFuseBox was born out of the need for:
 
 ---
 
+## Setup Instructions (Code)
+Please read the [SETUP.md](SETUP.md) file for detailed instructions on setting up the Arduino code.
+
+---
+
 ## 🤝 Contributing
 
 Contributions, ideas, and improvements are welcome!  
