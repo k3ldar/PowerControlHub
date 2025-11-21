@@ -12,6 +12,9 @@ REM ============================================================================
 echo Cleaning symbolic links in ALL project directories...
 echo.
 
+REM Navigate to the SymLinks directory
+cd /d "%~dp0" || (echo Failed to navigate to SymLinks directory && pause && exit /b 1)
+
 REM Check for administrator privileges
 net session >nul 2>&1
 if %errorlevel% neq 0 (
@@ -22,28 +25,25 @@ if %errorlevel% neq 0 (
     exit /b 1
 )
 
-REM Store the root directory
-set ROOT_DIR=%~dp0
-
 echo ======================================
 echo Cleaning BoatControlPanel symlinks...
 echo ======================================
-cd /d "%ROOT_DIR%BoatControlPanel"
-if exist CleanSymLinks.bat (
-    call CleanSymLinks.bat
-) else (
-    echo ERROR: CleanSymLinks.bat not found in BoatControlPanel
+call CleanSymLinksDefinition.bat SymLinkDefinitionsBoatControlPanel.txt ..\BoatControlPanel
+if errorlevel 1 (
+    echo Failed to clean BoatControlPanel symbolic links
+    pause
+    exit /b 1
 )
 
 echo.
 echo ======================================
 echo Cleaning StaticElectrics symlinks...
 echo ======================================
-cd /d "%ROOT_DIR%StaticElectrics"
-if exist CleanSymLinks.bat (
-    call CleanSymLinks.bat
-) else (
-    echo ERROR: CleanSymLinks.bat not found in StaticElectrics
+call CleanSymLinksDefinition.bat SymLinkDefinitionsStaticElectrics.txt ..\StaticElectrics
+if errorlevel 1 (
+    echo Failed to clean StaticElectrics symbolic links
+    pause
+    exit /b 1
 )
 
 echo.
@@ -51,9 +51,7 @@ echo ======================================
 echo All symbolic links cleaned!
 echo ======================================
 echo.
-echo To recreate symbolic links:
-echo   1. cd BoatControlPanel ^&^& SymLinks.bat
-echo   2. cd StaticElectrics ^&^& SymLinks.bat
+echo To recreate symbolic links, run: UpdateSymLinks.bat
 echo.
-pause
+
 exit /b 0
