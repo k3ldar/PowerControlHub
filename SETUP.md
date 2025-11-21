@@ -21,7 +21,7 @@ This guide covers everything you need to know to successfully check out and buil
 
 ## ⚙️ Windows Configuration for Symbolic Links
 
-**IMPORTANT:** This repository uses symbolic links to share code between `BoatControlPanel` and `StaticElectrics` projects. You must configure Windows to handle them properly.
+**IMPORTANT:** This repository uses symbolic links to share code between `BoatControlPanel` and `SmartFuseBox` projects. You must configure Windows to handle them properly.
 
 ### Option 1: Enable Developer Mode (Recommended)
 1. Open **Settings** → **Update & Security** → **For developers**
@@ -49,7 +49,7 @@ After cloning, you **must** manually create symbolic links:
 #### For BoatControlPanel:
 *(Right-click → "Run as administrator")*
 
-#### For StaticElectrics:
+#### For SmartFuseBox:
 *(Right-click → "Run as administrator")*
 
 ---
@@ -96,8 +96,8 @@ If `NextionControl` is not in the Library Manager:
 3. Select **Port**: (your COM port)
 4. Click **Upload**
 
-### StaticElectrics (Arduino Uno R4)
-1. Open `StaticElectrics/StaticElectrics.ino` in Arduino IDE
+### SmartFuseBox (Arduino Uno R4)
+1. Open `SmartFuseBox/SmartFuseBox.ino` in Arduino IDE
 2. Select **Board**: Arduino Uno R4 WiFi (or R4 Minima)
 3. Select **Port**: (your COM port)
 4. Click **Upload**
@@ -107,7 +107,7 @@ If `NextionControl` is not in the Library Manager:
 ## 🔍 Verifying Setup
 
 ### Check Symlinks
-Run this in `BoatControlPanel` or `StaticElectrics`:
+Run this in `BoatControlPanel` or `SmartFuseBox`:
 
 You should see entries like:
 
@@ -162,7 +162,7 @@ Both projects should compile without errors. Common issues:
 When making changes to shared files:
 1. Edit files in the `Shared/` directory only
 2. Do **NOT** commit or modify symlinked files directly
-3. Test changes in both `BoatControlPanel` and `StaticElectrics`
+3. Test changes in both `BoatControlPanel` and `SmartFuseBox`
 
 ---
 

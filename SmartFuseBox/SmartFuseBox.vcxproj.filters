@@ -36,7 +36,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="StaticElectrics.ino" />
+    <ClCompile Include="SmartFuseBox.ino" />
     <ClCompile Include="RelayCommandHandler.h">
       <Filter>Header Files\CommandHandlers</Filter>
     </ClCompile>
@@ -52,12 +52,6 @@
     <ClCompile Include="ConfigCommandHandler.cpp">
       <Filter>Source Files\CommandHandlers</Filter>
     </ClCompile>
-    <ClCompile Include="BroadcastManager.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ConfigManager.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="AckCommandHandler.cpp">
       <Filter>Source Files\SharedCode\CommandHandlers</Filter>
     </ClCompile>
@@ -67,9 +61,18 @@
     <ClCompile Include="SystemCommandHandler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="SystemCommandHandler.cpp">
+      <Filter>Source Files\SharedCode</Filter>
+    </ClCompile>
+    <ClCompile Include="ConfigManager.cpp">
+      <Filter>Source Files\SharedCode</Filter>
+    </ClCompile>
+    <ClCompile Include="BroadcastManager.cpp">
+      <Filter>Source Files\SharedCode</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="__vm\.StaticElectrics.vsarduino.h">
+    <ClInclude Include="__vm\.SmartFuseBox.vsarduino.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="SoundCommandHandler.h">
@@ -116,6 +119,9 @@
     </ClInclude>
     <ClInclude Include="WarningType.h">
       <Filter>Header Files\SharedCode</Filter>
+    </ClInclude>
+    <ClInclude Include="SystemCommandHandler.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="SystemCommandHandler.h">
       <Filter>Header Files</Filter>
