@@ -2,7 +2,7 @@
 #include <stdint.h>
 #include <SerialCommandManager.h>
 
-#include "StaticElectricConstants.h"
+#include "SmartFuseBoxConstants.h"
 #include "Config.h"
 #include "ConfigManager.h"
 #include "ConfigCommandHandler.h"

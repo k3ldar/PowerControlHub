@@ -1,6 +1,6 @@
 @echo off
 REM ============================================================================
-REM Delete ALL symbolic links in both BoatControlPanel and StaticElectrics
+REM Delete ALL symbolic links in both BoatControlPanel and SmartFuseBox
 REM
 REM This master script removes symbolic links from both project directories.
 REM Useful for a complete reset before recreating symlinks.
@@ -37,11 +37,11 @@ if errorlevel 1 (
 
 echo.
 echo ======================================
-echo Cleaning StaticElectrics symlinks...
+echo Cleaning SmartFuseBox symlinks...
 echo ======================================
-call CleanSymLinksDefinition.bat SymLinkDefinitionsStaticElectrics.txt ..\StaticElectrics
+call CleanSymLinksDefinition.bat SymLinkDefinitionsSmartFuseBox.txt ..\SmartFuseBox
 if errorlevel 1 (
-    echo Failed to clean StaticElectrics symbolic links
+    echo Failed to clean SmartFuseBox symbolic links
     pause
     exit /b 1
 )

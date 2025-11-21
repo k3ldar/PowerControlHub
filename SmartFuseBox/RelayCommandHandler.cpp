@@ -1,5 +1,5 @@
 #include "RelayCommandHandler.h"
-#include "StaticElectricConstants.h"
+#include "SmartFuseBoxConstants.h"
 
 
 RelayCommandHandler::RelayCommandHandler(SerialCommandManager* commandMgrComputer, SerialCommandManager* commandMgrLink, const uint8_t* relayPins, uint8_t totalRelays)

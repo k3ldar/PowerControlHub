@@ -181,13 +181,6 @@
       <PreprocessorDefinitions>_VMICRO_INTELLISENSE;__AVR_atmega2560__;__AVR_ATmega2560__;_VMDEBUG=1;F_CPU=16000000L;ARDUINO=108010;ARDUINO_AVR_MEGA2560;ARDUINO_ARCH_AVR;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <PreBuildEvent>
-      <Command>if not exist "$(ProjectDir)..\StaticElectrics"
-mkdir "$(ProjectDir)..\StaticElectrics"
-
-copy /Y "$(ProjectDir)CommandHandler.h" "$(ProjectDir)..\StaticElectrics\"
-copy /Y "$(ProjectDir)CommandHandler.cpp" "$(ProjectDir)..\StaticElectrics\"</Command>
-    </PreBuildEvent>
-    <PreBuildEvent>
       <Message>Copy Command Handlers</Message>
     </PreBuildEvent>
   </ItemDefinitionGroup>
@@ -201,6 +194,6 @@ copy /Y "$(ProjectDir)CommandHandler.cpp" "$(ProjectDir)..\StaticElectrics\"</Co
   </ProjectExtensions>
   <Target Name="AfterBuild">
     <!-- copy only if changed -->
-    <Copy SourceFiles="$(ProjectDir)CommandHandler.h;$(ProjectDir)CommandHandler.cpp" DestinationFolder="$(ProjectDir)..\StaticElectrics\" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="$(ProjectDir)CommandHandler.h;$(ProjectDir)CommandHandler.cpp" DestinationFolder="$(ProjectDir)..\SmartFuseBox\" SkipUnchangedFiles="true" />
   </Target>
 </Project>

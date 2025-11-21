@@ -1,5 +1,5 @@
 #include "SoundManager.h"
-#include "StaticElectricConstants.h"
+#include "SmartFuseBoxConstants.h"
 
 // Define sound patterns according to COLREGS
 // Maneuvering Signals (COLREGS Rule 34 - one-shot, non-repeating)

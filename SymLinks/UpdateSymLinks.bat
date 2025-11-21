@@ -39,11 +39,11 @@ if errorlevel 1 (
 
 echo.
 
-REM Process StaticElectrics symbolic links
-echo Processing StaticElectrics symbolic links...
-call ProcessSymLinksDefinition.bat SymLinkDefinitionsStaticElectrics.txt ..\StaticElectrics
+REM Process SmartFuseBox symbolic links
+echo Processing SmartFuseBox symbolic links...
+call ProcessSymLinksDefinition.bat SymLinkDefinitionsSmartFuseBox.txt ..\SmartFuseBox
 if errorlevel 1 (
-    echo Failed to create StaticElectrics symbolic links
+    echo Failed to create SmartFuseBox symbolic links
     pause
     exit /b 1
 )

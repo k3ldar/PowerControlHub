@@ -4,7 +4,7 @@
 #include <SensorManager.h>
 #include <SerialCommandManager.h>
 #include "Queue.h"
-#include "StaticElectricConstants.h"
+#include "SmartFuseBoxConstants.h"
 #include "WarningType.h"
 
 
