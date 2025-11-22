@@ -2,6 +2,8 @@
 #include "BaseCommandHandler.h"
 #include "BroadcastManager.h"
 #include "SharedConstants.h"
+#include "SharedFunctions.h"
+#include "Local.h"
 
 class SystemCommandHandler : public BaseCommandHandler
 {

@@ -64,6 +64,12 @@ bool AckCommandHandler::handleCommand(SerialCommandManager* sender, const String
 	String val = params[0].value;
 	val.trim();
 
+    // Ignore redundant ACK:ACK=ok messages
+    if (key.equalsIgnoreCase(AckCommand))
+    {
+        return true; // Silently ignore, consider it handled
+    }
+
     if (!val.equalsIgnoreCase(AckSuccess))
     {
         _broadcaster->sendDebug("ACK indicates failure: key='" + key + "', val='" + val + "'", AckCommand);
@@ -130,7 +136,7 @@ bool AckCommandHandler::handleCommand(SerialCommandManager* sender, const String
     }
 #endif
 
-    sendAckOk(sender, cmd);
+    sendAckOk(sender, cmd, &params[1]);
     return true;
 }
 

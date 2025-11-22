@@ -56,9 +56,6 @@
       <Filter>Source Files\SharedCode\CommandHandlers</Filter>
     </ClCompile>
     <ClCompile Include="SystemCommandHandler.cpp">
-      <Filter>Source Files\SharedCode\CommandHandlers</Filter>
-    </ClCompile>
-    <ClCompile Include="SystemCommandHandler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="SystemCommandHandler.cpp">
@@ -70,20 +67,26 @@
     <ClCompile Include="BroadcastManager.cpp">
       <Filter>Source Files\SharedCode</Filter>
     </ClCompile>
-    <ClCompile Include="SensorCommandHandler.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="WarningCommandHandler.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="WarningManager.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="ConfigManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="SystemCommandHandler.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SystemCommandHandler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SensorCommandHandler.cpp">
+      <Filter>Source Files\SharedCode\CommandHandlers</Filter>
+    </ClCompile>
+    <ClCompile Include="WarningManager.cpp">
+      <Filter>Source Files\SharedCode</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Shared\CommandHandlers\SystemCommandHandler.cpp">
+      <Filter>Source Files\SharedCode\CommandHandlers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Shared\CommandHandlers\WarningCommandHandler.cpp">
+      <Filter>Source Files\SharedCode\CommandHandlers</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -95,12 +98,6 @@
     </ClInclude>
     <ClInclude Include="SoundManager.h">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="StaticElectricConstants.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ConfigCommandHandler.h">
-      <Filter>Header Files\CommandHandlers</Filter>
     </ClInclude>
     <ClInclude Include="WaterSensorHandler.h">
       <Filter>Header Files\Sensors</Filter>
@@ -126,9 +123,6 @@
     <ClInclude Include="SharedConstants.h">
       <Filter>Header Files\SharedCode</Filter>
     </ClInclude>
-    <ClInclude Include="SystemCommandHandler.h">
-      <Filter>Header Files\SharedCode\CommandHandlers</Filter>
-    </ClInclude>
     <ClInclude Include="WarningType.h">
       <Filter>Header Files\SharedCode</Filter>
     </ClInclude>
@@ -138,20 +132,26 @@
     <ClInclude Include="SystemCommandHandler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="InterceptDebugCommandHandler.h">
+    <ClInclude Include="SystemCommandHandler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="SensorCommandHandler.h">
+    <ClInclude Include="ConfigManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="WarningCommandHandler.h">
+    <ClInclude Include="SystemCommandHandler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="WarningManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="SystemCommandHandler.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="ConfigCommandHandler.h">
+      <Filter>Header Files\SharedCode\CommandHandlers</Filter>
+    </ClInclude>
+    <ClInclude Include="SensorCommandHandler.h">
+      <Filter>Header Files\SharedCode\CommandHandlers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Shared\CommandHandlers\WarningCommandHandler.h">
+      <Filter>Header Files\SharedCode\CommandHandlers</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

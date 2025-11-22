@@ -74,12 +74,12 @@
     <ProjectCapability Include="VisualMicroLinux" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="SensorCommandHandler.cpp" />
+    <ClCompile Include="SharedFunctions.cpp" />
+    <ClCompile Include="SystemCommandHandler.cpp" />
     <ClCompile Include="WarningCommandHandler.cpp" />
-    <ClCompile Include="ConfigManager.cpp" />
+    <ClCompile Include="SensorCommandHandler.cpp" />
     <ClCompile Include="WarningManager.cpp" />
     <ClCompile Include="BroadcastManager.cpp" />
-    <ClCompile Include="SystemCommandHandler.cpp" />
     <ClCompile Include="ConfigManager.cpp" />
     <ClCompile Include="AckCommandHandler.cpp" />
     <ClCompile Include="ConfigCommandHandler.cpp" />
@@ -92,31 +92,28 @@
       <FileType>CppCode</FileType>
       <DeploymentContent>true</DeploymentContent>
     </ClCompile>
-    <ClCompile Include="SystemCommandHandler.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="RelayCommandHandler.h">
       <FileType>CppCode</FileType>
       <DeploymentContent>true</DeploymentContent>
     </ClCompile>
-    <ClInclude Include="InterceptDebugCommandHandler.h" />
-    <ClInclude Include="SensorCommandHandler.h" />
+    <ClInclude Include="SharedFunctions.h" />
     <ClInclude Include="WarningCommandHandler.h" />
+    <ClInclude Include="SensorCommandHandler.h" />
     <ClInclude Include="WarningManager.h" />
     <ClInclude Include="SharedBaseCommandHandler.h" />
     <ClInclude Include="BroadcastManager.h" />
-    <ClInclude Include="SystemCommandHandler.h" />
+    <ClInclude Include="ConfigManager.h" />
     <ClInclude Include="SharedConstants.h" />
     <ClInclude Include="WarningType.h" />
     <ClInclude Include="AckCommandHandler.h" />
     <ClInclude Include="Dht11SensorHandler.h" />
     <ClInclude Include="Local.h" />
-    <ClInclude Include="StaticElectricConstants.h" />
     <ClInclude Include="Config.h" />
     <ClInclude Include="ConfigCommandHandler.h" />
     <ClInclude Include="SoundCommandHandler.h" />
     <ClInclude Include="SoundManager.h" />
-    <ClInclude Include="SystemCommandHandler.h" />
     <ClInclude Include="WaterSensorHandler.h" />
     <ClInclude Include="__vm\.SmartFuseBox.vsarduino.h" />
   </ItemGroup>
