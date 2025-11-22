@@ -207,12 +207,6 @@
     <ClInclude Include="SharedConstants.h">
       <Filter>Header Files\SharedCode</Filter>
     </ClInclude>
-    <ClInclude Include="SharedBaseCommandHandler.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="SharedBaseCommandHandler.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="SharedFunctions.h">
       <Filter>Header Files\SharedCode</Filter>
     </ClInclude>
