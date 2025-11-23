@@ -42,7 +42,6 @@ protected:
     //optional overrides
 	void onEnterPage() override;
     void handleTouch(uint8_t compId, uint8_t eventType) override;
-    void handleText(String text) override;
     void handleExternalUpdate(uint8_t updateType, const void* data) override;
 
 public:

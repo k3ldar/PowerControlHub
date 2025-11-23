@@ -94,14 +94,34 @@ public:
     bool isWarningActive(WarningType type) const;
 
     /**
-     * @brief Get the complete bitmask of all active warnings.
+     * @brief Get the complete bitmask of all active warnings (local + remote).
      * @return uint32_t containing all active warning flags
      */
     uint32_t getActiveWarningsMask() const;
 
+    /**
+     * @brief Update remote warning bitmask from connected device.
+     * This replaces (not merges) the remote warnings with the new state.
+     * @param remoteWarningMask Bitmask of warnings from remote device
+     */
+    void updateRemoteWarnings(uint32_t remoteWarningMask);
+
+    /**
+     * @brief Get only the local warning bitmask.
+     * @return uint32_t containing only locally-raised warning flags
+     */
+    uint32_t getLocalWarningsMask() const;
+
+    /**
+     * @brief Get only the remote warning bitmask.
+     * @return uint32_t containing only remotely-raised warning flags
+     */
+    uint32_t getRemoteWarningsMask() const;
+
 private:
     SerialCommandManager* _commandMgr;      // For sending heartbeat commands
-    uint32_t _activeWarnings;               // Bitmap of active warnings (bit per WarningType) - FIXED: Changed from uint64_t to uint32_t
+    uint32_t _localWarnings;                // Bitmap of LOCAL warnings (raised by this device)
+    uint32_t _remoteWarnings;               // Bitmap of REMOTE warnings (from connected device)
     
     // Heartbeat state
     unsigned long _heartbeatInterval;       // How often to send heartbeat (ms)

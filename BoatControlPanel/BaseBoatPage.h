@@ -23,6 +23,8 @@ enum class PageUpdateType : uint8_t
     WaterLevel = 0x10,
     WaterPumpActive = 0x0A,
     SoundSignal = 0x0B,
+	CpuUsage = 0x0C,
+	MemoryUsage = 0x0D
 };
 
 // Data structure for relay state updates
@@ -35,7 +37,11 @@ struct FloatStateUpdate {
     float value;
 };
 
-struct IntStateUpdate {
+struct UInt8Update {
+    uint8_t value;
+};
+
+struct UInt16Update {
     int16_t value;
 };
 

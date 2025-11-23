@@ -74,6 +74,7 @@
     <ProjectCapability Include="VisualMicroLinux" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="SystemCpuMonitor.cpp" />
     <ClCompile Include="SharedFunctions.cpp" />
     <ClCompile Include="SystemCommandHandler.cpp" />
     <ClCompile Include="BroadcastManager.cpp" />
@@ -96,6 +97,7 @@
     <ClCompile Include="SoundOtherPage.cpp" />
     <ClCompile Include="SoundOvertakingPage.cpp" />
     <ClCompile Include="SoundSignalsPage.cpp" />
+    <ClCompile Include="SystemPage.cpp" />
     <ClCompile Include="TLVCompass.cpp">
       <DeploymentContent>true</DeploymentContent>
     </ClCompile>
@@ -113,9 +115,11 @@
       <FileType>CppCode</FileType>
       <DeploymentContent>true</DeploymentContent>
     </ClCompile>
+    <ClInclude Include="SystemCpuMonitor.h" />
     <ClInclude Include="SharedFunctions.h" />
     <ClInclude Include="BroadcastManager.h" />
     <ClInclude Include="SharedConstants.h" />
+    <ClInclude Include="SystemPage.h" />
     <ClInclude Include="WarningType.h" />
     <ClInclude Include="BaseBoatCommandHandler.h" />
     <ClInclude Include="BaseBoatPage.h" />

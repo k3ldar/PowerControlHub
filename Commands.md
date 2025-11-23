@@ -9,6 +9,7 @@ These are commands used to configure the system settings and can only be sent fr
 | `F0` — Heart beat | `F0` | Send at rated intervals, if no ACK received indicates there is no connection available between control panel and fuse box. No params. |
 | `F1` — System Initialized | `F1` | Sent by the system when initialization is complete to signal readiness. No params. Used to notify connected devices or software that the control panel is ready for operation. |
 | `F2` — Free Memory | `F2` | When received will return the amount of free memory. |
+| `F3` — Cpu Usage | `F3` | When received will return the current CPU usage. No params. |
 
 ## Configuration Commands
 These are commands used to configure the system settings and can only be sent from a computer, they are not used for internal communication.

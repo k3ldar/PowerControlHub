@@ -35,6 +35,79 @@ bool AckCommandHandler::processHeartbeatAck(SerialCommandManager* sender, const 
 
     return true;
 }
+
+bool AckCommandHandler::processWarningsListAck(SerialCommandManager* sender, const String& key, const String& value, const StringKeyValue params[], int paramCount)
+{
+    // Check for warnings list acknowledgement (W1=ok)
+    if (key != WarningsList || !value.equalsIgnoreCase(AckSuccess))
+        return false;
+
+    WarningManager* warningManager = getWarningManager();
+    if (!warningManager)
+    {
+        sendDebugMessage(F("Warning manager not available"), AckCommand);
+        return false;
+    }
+
+    // Format: ACK:W1=ok:v=0x06 (paramCount == 2)
+    // The warning bitmask is in params[1].value
+    if (paramCount >= 2)
+    {
+        String warningKey = params[1].key;
+        warningKey.trim();
+        String warningValue = params[1].value;
+        warningValue.trim();
+
+        if (warningKey == ValueParamName)
+        {
+            // Parse the hexadecimal bitmask
+            uint32_t remoteWarningMask = 0;
+            
+            if (warningValue.startsWith(F("0x")) || warningValue.startsWith(F("0X")))
+            {
+                // Parse hexadecimal (skip the "0x" prefix)
+                remoteWarningMask = strtoul(warningValue.c_str() + 2, nullptr, 16);
+            }
+            else if (isAllDigits(warningValue))
+            {
+                // Parse decimal
+                remoteWarningMask = warningValue.toInt();
+            }
+            else
+            {
+                sendDebugMessage("Invalid warning mask format: " + warningValue, AckCommand);
+                return false;
+            }
+
+            // UPDATE (replace) remote warnings - this allows remote warnings to be cleared
+            warningManager->updateRemoteWarnings(remoteWarningMask);
+
+            // Notify the warning page to update display
+            notifyCurrentPage(static_cast<uint8_t>(PageUpdateType::Warning), nullptr);
+
+            if (sender)
+            {
+                sender->sendDebug("Remote warnings updated: 0x" + String(remoteWarningMask, HEX), AckCommand);
+            }
+
+            return true;
+        }
+    }
+    else
+    {
+        // No warning data provided - clear remote warnings
+        warningManager->updateRemoteWarnings(0);
+        notifyCurrentPage(static_cast<uint8_t>(PageUpdateType::Warning), nullptr);
+        
+        if (sender)
+        {
+            sender->sendDebug(F("W1 ACK received (no warnings)"), AckCommand);
+        }
+        return true;
+    }
+
+    return false;
+}
 #endif
 
 bool AckCommandHandler::handleCommand(SerialCommandManager* sender, const String command, const StringKeyValue params[], int paramCount)
@@ -84,6 +157,11 @@ bool AckCommandHandler::handleCommand(SerialCommandManager* sender, const String
         // Heartbeat acknowledgement
         processHeartbeatAck(sender, key, val);
 	}
+    else if (key == WarningsList && val.equalsIgnoreCase(AckSuccess))
+    {
+        // Warnings list acknowledgement - merge remote warnings
+        processWarningsListAck(sender, key, val, params, paramCount);
+    }
     else if (key == RelayRetrieveStates && val.equalsIgnoreCase(AckSuccess))
     {
         // Relay state acknowledgement - handle both formats:
@@ -107,7 +185,7 @@ bool AckCommandHandler::handleCommand(SerialCommandManager* sender, const String
     }
     else if (key == RelayStatusGet && val.equalsIgnoreCase(AckSuccess))
     {
-        if (paramCount == 1)
+        if (paramCount >= 2)
         {
             uint8_t relayIndex = params[1].key.toInt();
             bool isOn = parseBooleanValue(params[1].value);
@@ -122,7 +200,7 @@ bool AckCommandHandler::handleCommand(SerialCommandManager* sender, const String
     }
     else if (key == SoundSignalActive && val.equalsIgnoreCase(AckSuccess))
     {
-        if (paramCount == 1)
+        if (paramCount >= 2)
         {
             bool isOn = parseBooleanValue(params[1].value);
 
@@ -134,9 +212,34 @@ bool AckCommandHandler::handleCommand(SerialCommandManager* sender, const String
             sendDebugMessage("Invalid R4 ACK format: paramCount=" + String(paramCount), AckCommand);
         }
     }
+	else if (key == SystemCpuUsage && val.equalsIgnoreCase(AckSuccess))
+    {
+        if (paramCount >= 2)
+        {
+            uint8_t cpuUsage = params[1].value.toInt();
+            UInt8Update update = { cpuUsage };
+            notifyCurrentPage(static_cast<uint8_t>(PageUpdateType::CpuUsage), &update);
+        }
+        else
+        {
+            sendDebugMessage("Invalid F3 ACK format: paramCount=" + String(paramCount), AckCommand);
+        }
+    }
+    else if (key == SystemFreeMemory && val.equalsIgnoreCase(AckSuccess))
+    {
+        if (paramCount >= 2)
+        {
+            uint16_t freeMemory = params[1].value.toInt();
+            UInt16Update update = { freeMemory };
+            notifyCurrentPage(static_cast<uint8_t>(PageUpdateType::MemoryUsage), &update);
+        }
+        else
+        {
+            sendDebugMessage("Invalid F2 ACK format: paramCount=" + String(paramCount), AckCommand);
+        }
+	}
 #endif
 
-    sendAckOk(sender, cmd, &params[1]);
     return true;
 }
 

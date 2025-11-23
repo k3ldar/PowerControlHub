@@ -41,7 +41,7 @@ bool WarningCommandHandler::handleCommand(SerialCommandManager* sender, const St
         // Return the complete bitmask of active warnings as a single value
         uint32_t activeWarnings = warningManager->getActiveWarningsMask();
         
-        StringKeyValue param = { ValueParamName, String(activeWarnings, HEX) };
+        StringKeyValue param = { ValueParamName, HexPrefix + String(activeWarnings, HEX)};
         sendAckOk(sender, cmd, &param);
         return true;
     }

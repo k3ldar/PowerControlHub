@@ -10,10 +10,8 @@ constexpr char ControlBearingDirection[] = "t4";
 constexpr char ControlSpeed[] = "t5";
 constexpr char ControlBoatName[] = "t0";
 constexpr char ControlWarning[] = "p2";
-constexpr char NoValueText[] = "--";
 constexpr char SpeedUnitKnots[] = "%d kn";
 constexpr char BearingFormat[] = "%d°";
-constexpr char PercentSuffix[] = "%";
 constexpr char CelsiusSuffix[] = "C";
 constexpr char ButtonOn[] = "=1";
 constexpr char ButtonOff[] = "=0";
@@ -27,7 +25,7 @@ constexpr uint8_t ButtonNext = 12;
 constexpr uint8_t ButtonWarning = 13;
 constexpr uint8_t ButtonIdOffset = 1; // Offset to map button IDs to array indices
 
-constexpr unsigned long RefreshIntervalMs = 10000;
+constexpr unsigned long RefreshUpdateIntervalMs = 10000;
 
 
 HomePage::HomePage(Stream* serialPort,
@@ -72,7 +70,7 @@ void HomePage::refresh(unsigned long now)
 {
     updateAllDisplayItems();
     // Send R2 command every 10 seconds to refresh relay states
-    if (now - _lastRefreshTime >= RefreshIntervalMs)
+    if (now - _lastRefreshTime >= RefreshUpdateIntervalMs)
     {
         getCommandMgrComputer()->sendDebug(F("Sending R2"), F("HomePage"));
         _lastRefreshTime = now;
@@ -204,12 +202,6 @@ void HomePage::handleTouch(uint8_t compId, uint8_t eventType)
     }
 }
 
-void HomePage::handleText(String text)
-{
-    (void)text;
-    // nothing to handle here
-}
-
 void HomePage::handleExternalUpdate(uint8_t updateType, const void* data)
 {
     getCommandMgrComputer()->sendDebug("HomePage::handleExternalUpdate type=" + String(updateType), F("HomePage"));
@@ -254,7 +246,7 @@ void HomePage::handleExternalUpdate(uint8_t updateType, const void* data)
     }
     else if (updateType == static_cast<uint8_t>(PageUpdateType::Humidity) && data != nullptr)
     {
-        const IntStateUpdate* update = static_cast<const IntStateUpdate*>(data);
+        const UInt16Update* update = static_cast<const UInt16Update*>(data);
         setHumidity(static_cast<float>(update->value));
     }
     else if (updateType == static_cast<uint8_t>(PageUpdateType::Bearing) && data != nullptr)
@@ -269,7 +261,7 @@ void HomePage::handleExternalUpdate(uint8_t updateType, const void* data)
     }
     else if (updateType == static_cast<uint8_t>(PageUpdateType::Speed) && data != nullptr)
     {
-        const IntStateUpdate* update = static_cast<const IntStateUpdate*>(data);
+        const UInt16Update* update = static_cast<const UInt16Update*>(data);
         setSpeed(static_cast<float>(update->value));
     }
     else if (updateType == static_cast<uint8_t>(PageUpdateType::CompassTemp) && data != nullptr)

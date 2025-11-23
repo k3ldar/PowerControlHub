@@ -37,7 +37,7 @@ bool SensorCommandHandler::handleCommand(SerialCommandManager* sender, const Str
     }
     else if (cmd == SensorHumidity)
     {
-        IntStateUpdate update = { static_cast<int16_t>(val.toInt()) };
+        UInt16Update update = { static_cast<int16_t>(val.toInt()) };
         notifyCurrentPage(static_cast<uint8_t>(PageUpdateType::Humidity), &update);
     }
     else if (cmd == SensorBearing)
@@ -54,7 +54,7 @@ bool SensorCommandHandler::handleCommand(SerialCommandManager* sender, const Str
     }
     else if (cmd == SensorSpeed)
     {
-        IntStateUpdate update = { static_cast<int16_t>(val.toInt()) };
+        UInt16Update update = { static_cast<int16_t>(val.toInt()) };
         notifyCurrentPage(static_cast<uint8_t>(PageUpdateType::Speed), &update);
     }
     else if (cmd == SensorCompassTemp)
@@ -64,7 +64,7 @@ bool SensorCommandHandler::handleCommand(SerialCommandManager* sender, const Str
     }
     else if (cmd == SensorWaterLevel)
     {
-        IntStateUpdate update = { static_cast<int16_t>(val.toInt()) };
+        UInt16Update update = { static_cast<int16_t>(val.toInt()) };
         notifyCurrentPage(static_cast<uint8_t>(PageUpdateType::WaterLevel), &update);
     }
     else if (cmd == SensorWaterPumpActive)
