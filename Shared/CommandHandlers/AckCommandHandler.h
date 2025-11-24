@@ -41,6 +41,7 @@ public:
 private:
 #ifdef BOAT_CONTROL_PANEL
     bool processHeartbeatAck(SerialCommandManager* sender, const String& key, const String& value);
+    bool processWarningsListAck(SerialCommandManager* sender, const String& key, const String& value, const StringKeyValue params[], int paramCount);
 #endif
 };
 

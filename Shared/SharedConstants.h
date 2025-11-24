@@ -6,6 +6,7 @@ constexpr uint8_t DefaultValue = 0xFF;
 constexpr char SystemHeartbeatCommand[] = "F0";
 constexpr char SystemInitialized[] = "F1";
 constexpr char SystemFreeMemory[] = "F2";
+constexpr char SystemCpuUsage[] = "F3";
 
 constexpr char RelayTurnAllOff[] = "R0";
 constexpr char RelayTurnAllOn[] = "R1";
@@ -63,3 +64,12 @@ constexpr char ValueParamName[] = "v";
 
 constexpr unsigned long HeartbeatIntervalMs = 1000;
 constexpr unsigned long HeartbeatTimeoutMs = 3000;
+
+
+constexpr uint8_t MaxUint8Value = 0xFF;
+constexpr uint16_t MaxUint16Value = 0xFFFF;
+
+
+constexpr char PercentSuffix[] = "%";
+constexpr char NoValueText[] = "--";
+constexpr char HexPrefix[] = "0x";

@@ -1,3 +1,4 @@
+#include "SystemPage.h"
 #include "WarningType.h"
 #include <Arduino.h>
 #include <SerialCommandManager.h>
@@ -11,6 +12,7 @@
 #include "SensorCommandHandler.h"
 #include "WarningCommandHandler.h"
 #include "SystemCommandHandler.h"
+#include "SystemCpuMonitor.h"
 
 #include "HomePage.h"
 #include "WarningPage.h"
@@ -64,9 +66,10 @@ SoundFogPage soundFogPage(&NEXTION_SERIAL, &warningManager, &commandMgrLink, &co
 SoundManeuveringPage soundManeuveringPage(&NEXTION_SERIAL, &warningManager, &commandMgrLink, &commandMgrComputer);
 SoundEmergencyPage soundEmergencyPage(&NEXTION_SERIAL, &warningManager, &commandMgrLink, &commandMgrComputer);
 SoundOtherPage soundOtherPage(&NEXTION_SERIAL, &warningManager, &commandMgrLink, &commandMgrComputer);
+SystemPage systemPage(&NEXTION_SERIAL, &warningManager, &commandMgrLink, &commandMgrComputer);
 
 BaseDisplayPage* displayPages[] = { &homePage, &warningPage, &relayPage, &soundSignalsPage, &soundOvertakingPage,
-    &soundFogPage, &soundManeuveringPage, &soundEmergencyPage, &soundOtherPage };
+    &soundFogPage, &soundManeuveringPage, &soundEmergencyPage, &soundOtherPage, &systemPage };
 NextionControl nextion(&NEXTION_SERIAL, displayPages, sizeof(displayPages) / sizeof(displayPages[0]));
 
 // link command handlers
@@ -106,7 +109,7 @@ void setup()
 
     if (!ConfigManager::load())
     {
-        warningManager.raiseWarning(WarningType::DefaultConfiguration);
+        warningManager.raiseWarning(WarningType::DefaultConfigurationControlPanel);
     }
 
     Config* config = ConfigManager::getConfigPtr();
@@ -134,16 +137,29 @@ void loop()
 {
     unsigned long now = millis();
 
+    SystemCpuMonitor::startTask();
     commandMgrComputer.readCommands();
     commandMgrLink.readCommands();
+    SystemCpuMonitor::endTask();
 
+    SystemCpuMonitor::startTask();
     nextion.update(now);
-	warningManager.update(now);
-	broadcastManager.update(now);
+    SystemCpuMonitor::endTask();
 
+    SystemCpuMonitor::startTask();
+    warningManager.update(now);
+    SystemCpuMonitor::endTask();
+
+    SystemCpuMonitor::startTask();
+    broadcastManager.update(now);
+    SystemCpuMonitor::endTask();
+
+    SystemCpuMonitor::startTask();
     if (now - lastUpdate >= UpdateIntervalMs)
     {
         lastUpdate = now;
+
+        commandMgrLink.sendCommand(WarningsList, "");
 
         if (!warningManager.isWarningActive(WarningType::CompassFailure))
         {
@@ -162,6 +178,9 @@ void loop()
             }
         }
     }
+
+    SystemCpuMonitor::endTask();
+    SystemCpuMonitor::update();
 }
 
 void onLinkCommandReceived(SerialCommandManager* mgr)

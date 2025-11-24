@@ -2,6 +2,8 @@
 #include <stdint.h>
 #include <SerialCommandManager.h>
 
+#include "SystemCpuMonitor.h"
+
 #include "SmartFuseBoxConstants.h"
 #include "Config.h"
 #include "ConfigManager.h"
@@ -58,7 +60,7 @@ SystemCommandHandler systemCommandHandler(&broadcastManager);
 
 // Sensors
 WaterSensorHandler waterSensorHandler(&commandMgrLink, &commandMgrComputer, WaterSensorPin, WaterSensorActivePin);
-Dht11SensorHandler dht11SensorHandler(&commandMgrLink, &commandMgrComputer, Dht11SensorPin);
+Dht11SensorHandler dht11SensorHandler(&commandMgrLink, &commandMgrComputer, &warningManager, Dht11SensorPin);
 
 BaseSensorHandler* sensorHandlers[] = {
 	&waterSensorHandler, &dht11SensorHandler
@@ -68,11 +70,11 @@ SensorManager sensorManager(sensorHandlers, sizeof(sensorHandlers) / sizeof(sens
 
 void setup()
 {
-	ISerialCommandHandler* linkHandlers[] = { &relayHandler, &soundHandler, &configHandler, &ackHandler, &systemCommandHandler } ;
+	ISerialCommandHandler* linkHandlers[] = { &relayHandler, &soundHandler, &configHandler, &ackHandler, &systemCommandHandler, &warningCommandHandler, &sensorCommandHandler } ;
 	size_t linkHandlerCount = sizeof(linkHandlers) / sizeof(linkHandlers[0]);
 	commandMgrLink.registerHandlers(linkHandlers, linkHandlerCount);
 
-	ISerialCommandHandler* computerHandlers[] = { &relayHandler, &soundHandler, &configHandler, &ackHandler, &systemCommandHandler };
+	ISerialCommandHandler* computerHandlers[] = { &relayHandler, &soundHandler, &configHandler, &ackHandler, &systemCommandHandler, &warningCommandHandler, &sensorCommandHandler };
 	size_t computerHandlerCount = sizeof(computerHandlers) / sizeof(computerHandlers[0]);
 	commandMgrComputer.registerHandlers(computerHandlers, computerHandlerCount);
 
@@ -82,7 +84,17 @@ void setup()
 	sensorManager.setup();
 	relayHandler.setup();
 
-	soundManager.configUpdated(ConfigManager::getConfigPtr());
+	// retrieve config settings
+	ConfigManager::begin();
+
+	if (!ConfigManager::load())
+	{
+		warningManager.raiseWarning(WarningType::DefaultConfigurationFuseBox);
+	}
+
+	Config* config = ConfigManager::getConfigPtr();
+
+	soundManager.configUpdated(config);
 
 	commandMgrComputer.sendCommand(SystemInitialized, "");
 }
@@ -90,11 +102,21 @@ void setup()
 void loop() 
 {
 	unsigned long now = millis();
+
+	SystemCpuMonitor::startTask();
 	commandMgrComputer.readCommands();
 	commandMgrLink.readCommands();
-	soundManager.update();
-	sensorManager.update(now);
+	SystemCpuMonitor::endTask();
 
+	SystemCpuMonitor::startTask();
+	soundManager.update();
+	SystemCpuMonitor::endTask();
+
+	SystemCpuMonitor::startTask();
+	sensorManager.update(now);
+	SystemCpuMonitor::endTask();
+
+	SystemCpuMonitor::update();
 	delay(DefaultDelay);
 }
 

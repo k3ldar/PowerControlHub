@@ -5,6 +5,7 @@
 #include <SerialCommandManager.h>
 #include <dht11.h>
 #include "SharedConstants.h"
+#include "WarningManager.h"
 #include "WarningType.h"
 
 constexpr unsigned long TempHumidityCheckMs = 2500;
@@ -20,6 +21,7 @@ class Dht11SensorHandler : public BaseSensorHandler
 private:
 	SerialCommandManager* _commandMgrLink;
 	SerialCommandManager* _commandMgrComputer;
+	WarningManager* _warningManager;
 	dht11 _dht11Sensor;
 	const uint8_t _sensorPin;
 
@@ -37,9 +39,9 @@ protected:
 		{
 			if (_commandMgrComputer)
 			{
-				if (_commandMgrLink)
+				if (_warningManager && !_warningManager->isWarningActive(WarningType::TemperatureSensorFailure))
 				{
-					_commandMgrLink->sendCommand(WarningsAdd, String(getWarningString(WarningType::TemperatureSensorFailure)) + F("=1"), "");
+					_warningManager->raiseWarning(WarningType::TemperatureSensorFailure);
 				}
 
 				_commandMgrComputer->sendDebug(String(result), F("DHT11 Error"));
@@ -54,9 +56,9 @@ protected:
 			_commandMgrComputer->sendDebug(String(_dht11Sensor.temperature, 1), F("Temperature"));
 		}
 
-		if (_commandMgrLink)
+		if (_warningManager && _warningManager->isWarningActive(WarningType::TemperatureSensorFailure))
 		{
-			_commandMgrLink->sendCommand(WarningsAdd, String(getWarningString(WarningType::TemperatureSensorFailure)) + F("=0"), "");
+			_warningManager->clearWarning(WarningType::TemperatureSensorFailure);
 		}
 
 		float humidity = _dht11Sensor.humidity;
@@ -73,9 +75,9 @@ protected:
 		return TempHumidityCheckMs;
 	};
 public:
-	Dht11SensorHandler(SerialCommandManager* commandManagerLink, SerialCommandManager* commandManagerComputer,
-		uint8_t sensorPin)
-		: _commandMgrLink(commandManagerLink), _commandMgrComputer(commandManagerComputer), _dht11Sensor(), _sensorPin(sensorPin)
+	Dht11SensorHandler(SerialCommandManager* commandManagerLink, SerialCommandManager* commandManagerComputer, 
+		WarningManager* warningManager, uint8_t sensorPin)
+		: _commandMgrLink(commandManagerLink), _commandMgrComputer(commandManagerComputer), _warningManager(warningManager), _dht11Sensor(), _sensorPin(sensorPin)
 	{
 	};
 };

@@ -124,6 +124,12 @@
     <ClCompile Include="SharedFunctions.cpp">
       <Filter>Source Files\SharedCode</Filter>
     </ClCompile>
+    <ClCompile Include="SystemCpuMonitor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SystemPage.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="__vm\.BoatControlPanel.vsarduino.h">
@@ -201,14 +207,17 @@
     <ClInclude Include="AckCommandHandler.h">
       <Filter>Header Files\SharedCode\CommandHandlers</Filter>
     </ClInclude>
-    <ClInclude Include="SharedBaseCommandHandler.h">
-      <Filter>Header Files\SharedCode\CommandHandlers</Filter>
-    </ClInclude>
     <ClInclude Include="SharedConstants.h">
       <Filter>Header Files\SharedCode</Filter>
     </ClInclude>
     <ClInclude Include="SharedFunctions.h">
       <Filter>Header Files\SharedCode</Filter>
+    </ClInclude>
+    <ClInclude Include="SystemCpuMonitor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SystemPage.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

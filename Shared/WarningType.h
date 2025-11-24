@@ -15,63 +15,64 @@
  * - 20-31: Sensor warnings
  */
 enum class WarningType : uint32_t {
-    None = 0x00,                                // No warning
+    None = 0x00,                                      // No warning
 
     // System warnings (bits 0-19)
-    DefaultConfiguration = 1UL << 0,           // 0x01 - Using default config
-    ConnectionLost = 1UL << 1,                 // 0x02 - Link heartbeat lost
-    HighCompassTemperature = 1UL << 2,         // 0x04 - Compass temperature threshold exceeded
-    LowBattery = 1UL << 3,                     // 0x08 - Battery voltage low
+    DefaultConfigurationFuseBox = 1UL << 0,           // 0x00000001 - Using default config
+    DefaultConfigurationControlPanel = 1UL << 1,      // 0x00000002 - Using default config
+    ConnectionLost = 1UL << 2,                        // 0x00000004 - Link heartbeat lost
+    HighCompassTemperature = 1UL << 3,                // 0x00000008 - Compass temperature threshold exceeded
+    LowBattery = 1UL << 4,                            // 0x00000010 - Battery voltage low
 
     // Sensor warnings (bits 20+)
-    SensorFailure = 1UL << 20,                 // Sensor communication failure
-    TemperatureSensorFailure = 1UL << 21,      // Temperature sensor failure
-    CompassFailure = 1UL << 22,                // Compass failed to initialize
+    SensorFailure = 1UL << 20,                        // 0x00100000 - Sensor communication failure
+    TemperatureSensorFailure = 1UL << 21,             // 0x00200000 - Temperature sensor failure
+    CompassFailure = 1UL << 22,                       // 0x00400000 - Compass failed to initialize
 };
 
 // Warning type display strings - keep in sync with WarningType enum
 // Index corresponds to bit position (0-31)
 constexpr const char* WARNING_TYPE_STRINGS[32] = {
-    "Using Default Configuration",      // Bit 0 - DefaultConfiguration
-    "Connection Lost To Fuse Box",      // Bit 1 - ConnectionLost
-    "High Compass Temperature",         // Bit 2 - HighCompassTemperature
-    "Low Battery",                      // Bit 3 - LowBattery
-    nullptr,                            // Bit 4 - Unused
-    nullptr,                            // Bit 5 - Unused
-    nullptr,                            // Bit 6 - Unused
-    nullptr,                            // Bit 7 - Unused
-    nullptr,                            // Bit 8 - Unused
-    nullptr,                            // Bit 9 - Unused
-    nullptr,                            // Bit 10 - Unused
-    nullptr,                            // Bit 11 - Unused
-    nullptr,                            // Bit 12 - Unused
-    nullptr,                            // Bit 13 - Unused
-    nullptr,                            // Bit 14 - Unused
-    nullptr,                            // Bit 15 - Unused
-    nullptr,                            // Bit 16 - Unused
-    nullptr,                            // Bit 17 - Unused
-    nullptr,                            // Bit 18 - Unused
-    nullptr,                            // Bit 19 - Unused
-    "Sensor Failure",                   // Bit 20 - SensorFailure
-    "Temperature Sensor Failure",       // Bit 21 - TemperatureSensorFailure
-    "Compass Failure",                  // Bit 22 - CompassFailure
-    nullptr,                            // Bit 23 - Unused
-    nullptr,                            // Bit 24 - Unused
-    nullptr,                            // Bit 25 - Unused
-    nullptr,                            // Bit 26 - Unused
-    nullptr,                            // Bit 27 - Unused
-    nullptr,                            // Bit 28 - Unused
-    nullptr,                            // Bit 29 - Unused
-    nullptr,                            // Bit 30 - Unused
-    nullptr                             // Bit 31 - Unused
+    "Fuse box Default Configuration",           // Bit 0 - DefaultConfigurationFuseBox
+    "Control Panel Default Configuration",      // Bit 1 - DefaultConfigurationControlPanel
+    "Connection Lost To Fuse Box",              // Bit 2 - ConnectionLost
+    "High Compass Temperature",                 // Bit 3 - HighCompassTemperature
+    "Low Battery",                              // Bit 4 - LowBattery
+    "",                                         // Bit 5 - Unused
+    "",                                         // Bit 6 - Unused
+    "",                                         // Bit 7 - Unused
+    "",                                         // Bit 8 - Unused
+    "",                                         // Bit 9 - Unused
+    "",                                         // Bit 10 - Unused
+    "",                                         // Bit 11 - Unused
+    "",                                         // Bit 12 - Unused
+    "",                                         // Bit 13 - Unused
+    "",                                         // Bit 14 - Unused
+    "",                                         // Bit 15 - Unused
+    "",                                         // Bit 16 - Unused
+    "",                                         // Bit 17 - Unused
+    "",                                         // Bit 18 - Unused
+    "",                                         // Bit 19 - Unused
+    "Sensor Failure",                           // Bit 20 - SensorFailure
+    "Temperature Sensor Failure",               // Bit 21 - TemperatureSensorFailure
+    "Compass Failure",                          // Bit 22 - CompassFailure
+    "",                                         // Bit 23 - Unused
+    "",                                         // Bit 24 - Unused
+    "",                                         // Bit 25 - Unused
+    "",                                         // Bit 26 - Unused
+    "",                                         // Bit 27 - Unused
+    "",                                         // Bit 28 - Unused
+    "",                                         // Bit 29 - Unused
+    "",                                         // Bit 30 - Unused
+    ""                                          // Bit 31 - Unused
 };
 
 // Helper function to get warning string from bit position
 inline const char* getWarningString(uint8_t bitPosition) {
-    if (bitPosition < 32 && WARNING_TYPE_STRINGS[bitPosition] != nullptr) {
-        return WARNING_TYPE_STRINGS[bitPosition];
+    if (bitPosition < 32) {
+        return WARNING_TYPE_STRINGS[bitPosition];  // Return directly (may be "")
     }
-    return "Unknown Warning";
+    return "";  // Out of range returns empty string
 }
 
 // Helper function to get warning string from WarningType

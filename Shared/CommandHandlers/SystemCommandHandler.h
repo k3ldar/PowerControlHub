@@ -16,7 +16,4 @@ public:
     bool handleCommand(SerialCommandManager* sender, const String command, const StringKeyValue params[], int paramCount) override;
 
     const String* supportedCommands(size_t& count) const override;
-    
-private:
-    uint16_t freeRam();
 };

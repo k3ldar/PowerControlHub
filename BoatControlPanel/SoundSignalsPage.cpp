@@ -77,7 +77,7 @@ void SoundSignalsPage::handleTouch(uint8_t compId, uint8_t eventType)
         break;
 
     case ButtonNext:
-        setPage(PageHome);
+        setPage(PageSystem);
         return;
 
     case ButtonPrevious:

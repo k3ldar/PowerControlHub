@@ -5,7 +5,8 @@ constexpr uint32_t SENSOR_WARNING_MASK = 0xFFF00000U; // Bits 20-31 set
 
 WarningManager::WarningManager(SerialCommandManager* commandMgr, unsigned long heartbeatInterval, unsigned long heartbeatTimeout)
     : _commandMgr(commandMgr),
-      _activeWarnings(0),
+      _localWarnings(0),
+      _remoteWarnings(0),
       _heartbeatInterval(heartbeatInterval),
       _heartbeatTimeout(heartbeatTimeout),
       _lastHeartbeatSent(0),
@@ -36,11 +37,11 @@ void WarningManager::raiseWarning(WarningType type)
         return;
     
     uint32_t warningBit = static_cast<uint32_t>(type);
-    _activeWarnings |= warningBit;
+    _localWarnings |= warningBit;
     
     // Auto-raise SensorFailure for any sensor-related warning (bit 20+)
     if (warningBit & SENSOR_WARNING_MASK) {
-        _activeWarnings |= static_cast<uint32_t>(WarningType::SensorFailure);
+        _localWarnings |= static_cast<uint32_t>(WarningType::SensorFailure);
     }
 }
 
@@ -50,26 +51,27 @@ void WarningManager::clearWarning(WarningType type)
         return;
     
     uint32_t warningBit = static_cast<uint32_t>(type);
-    _activeWarnings &= ~warningBit;
+    _localWarnings &= ~warningBit;
     
     // Auto-clear SensorFailure only if no sensor warnings remain (check bits 20+)
     if (warningBit & SENSOR_WARNING_MASK) {
         // Check if any other sensor warnings are still active (excluding SensorFailure itself)
-        uint64_t otherSensorWarnings = _activeWarnings & SENSOR_WARNING_MASK & ~static_cast<uint64_t>(WarningType::SensorFailure);
+        uint32_t otherSensorWarnings = _localWarnings & SENSOR_WARNING_MASK & ~static_cast<uint32_t>(WarningType::SensorFailure);
         if (otherSensorWarnings == 0) {
-            _activeWarnings &= ~static_cast<uint32_t>(WarningType::SensorFailure);
+            _localWarnings &= ~static_cast<uint32_t>(WarningType::SensorFailure);
         }
     }
 }
 
 void WarningManager::clearAllWarnings()
 {
-    _activeWarnings = 0;
+    _localWarnings = 0;
+    _remoteWarnings = 0;
 }
 
 bool WarningManager::hasWarnings() const
 {
-    return _activeWarnings != 0;
+    return (_localWarnings | _remoteWarnings) != 0;
 }
 
 bool WarningManager::isWarningActive(WarningType type) const
@@ -78,7 +80,8 @@ bool WarningManager::isWarningActive(WarningType type) const
         return false;
     
     uint32_t warningBit = static_cast<uint32_t>(type);
-    return (_activeWarnings & warningBit) != 0;
+    // Warning is active if it's in EITHER local or remote
+    return ((_localWarnings | _remoteWarnings) & warningBit) != 0;
 }
 
 void WarningManager::sendHeartbeat()
@@ -112,11 +115,28 @@ void WarningManager::updateConnection(unsigned long now)
         else
         {
             raiseWarning(WarningType::ConnectionLost);
+			_remoteWarnings = 0; // Clear remote warnings on connection loss
         }
     }
 }
 
 uint32_t WarningManager::getActiveWarningsMask() const
 {
-    return _activeWarnings;
+    // Return combined view of local and remote warnings
+    return _localWarnings | _remoteWarnings;
+}
+
+uint32_t WarningManager::getLocalWarningsMask() const
+{
+    return _localWarnings;
+}
+
+uint32_t WarningManager::getRemoteWarningsMask() const
+{
+    return _remoteWarnings;
+}
+
+void WarningManager::updateRemoteWarnings(uint32_t remoteWarningMask)
+{
+    _remoteWarnings = remoteWarningMask;
 }

@@ -56,9 +56,6 @@
       <Filter>Source Files\SharedCode\CommandHandlers</Filter>
     </ClCompile>
     <ClCompile Include="SystemCommandHandler.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SystemCommandHandler.cpp">
       <Filter>Source Files\SharedCode</Filter>
     </ClCompile>
     <ClCompile Include="ConfigManager.cpp">
@@ -82,11 +79,17 @@
     <ClCompile Include="WarningManager.cpp">
       <Filter>Source Files\SharedCode</Filter>
     </ClCompile>
-    <ClCompile Include="..\Shared\CommandHandlers\SystemCommandHandler.cpp">
+    <ClCompile Include="SharedFunctions.cpp">
+      <Filter>Source Files\SharedCode</Filter>
+    </ClCompile>
+    <ClCompile Include="SystemCommandHandler.cpp">
       <Filter>Source Files\SharedCode\CommandHandlers</Filter>
     </ClCompile>
-    <ClCompile Include="..\Shared\CommandHandlers\WarningCommandHandler.cpp">
+    <ClCompile Include="WarningCommandHandler.cpp">
       <Filter>Source Files\SharedCode\CommandHandlers</Filter>
+    </ClCompile>
+    <ClCompile Include="SystemCpuMonitor.cpp">
+      <Filter>Source Files\SharedCode</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -129,12 +132,6 @@
     <ClInclude Include="SystemCommandHandler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="SystemCommandHandler.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="SystemCommandHandler.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="ConfigManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -150,8 +147,17 @@
     <ClInclude Include="SensorCommandHandler.h">
       <Filter>Header Files\SharedCode\CommandHandlers</Filter>
     </ClInclude>
-    <ClInclude Include="..\Shared\CommandHandlers\WarningCommandHandler.h">
-      <Filter>Header Files\SharedCode\CommandHandlers</Filter>
+    <ClInclude Include="SharedFunctions.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="WarningCommandHandler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SystemCpuMonitor.h">
+      <Filter>Header Files\SharedCode</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Shared\CommandHandlers\SystemCommandHandler.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

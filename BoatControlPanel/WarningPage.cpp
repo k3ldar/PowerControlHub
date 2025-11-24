@@ -1,5 +1,6 @@
 #include "WarningPage.h"
 #include <NextionControl.h>
+#include <string.h>
 
 // Nextion Names/Ids on Warning Page
 constexpr uint8_t ButtonPrevious = 2;
@@ -15,32 +16,37 @@ WarningPage::WarningPage(Stream* serialPort,
     _lastActiveWarnings(0),
     _lastUpdateTime(0)
 {
-
+    // Initialize cached text as empty
+    _lastWarningText[0] = '\0';
 }
 
 void WarningPage::begin()
 {
     _lastActiveWarnings = 0;
     _lastUpdateTime = 0;
+    _lastWarningText[0] = '\0';
 }
 
 void WarningPage::onEnterPage()
 {
-    // Force update when entering the page
+    // Force update when entering the page by clearing cache
     _lastActiveWarnings = 0;
     _lastUpdateTime = 0;
+    _lastWarningText[0] = '\0';
     updateWarningDisplay();
 }
 
-void WarningPage::updateWarningDisplay()
+bool WarningPage::buildWarningText(char* buffer, size_t bufferSize)
 {
-    sendText(WarningHeader, F("System Warnings"));
     WarningManager* warningMgr = getWarningManager();
-
     if (!warningMgr)
-        return;
+    {
+        strncpy(buffer, "No Active Warnings", bufferSize - 1);
+        buffer[bufferSize - 1] = '\0';
+        return false;
+    }
 
-    String warningText;
+    size_t bytesWritten = 0;
     bool firstWarning = true;
 
     // Iterate through all 32 possible bit positions in uint32_t
@@ -50,25 +56,73 @@ void WarningPage::updateWarningDisplay()
 
         if (warningMgr->isWarningActive(type))
         {
+            // Get the warning string once
+            const char* warningString = getWarningString(bit);
+            
+            // Skip empty/undefined warnings
+            if (warningString[0] == '\0')
+            {
+                continue;
+            }
+            
             // Add separator before subsequent warnings
             if (!firstWarning)
             {
-                warningText += "\r\n";
+                // Check if we have room for "\r\n"
+                if (bytesWritten + 2 >= bufferSize - 1)
+                    break;  // Buffer full
+                
+                buffer[bytesWritten++] = '\r';
+                buffer[bytesWritten++] = '\n';
             }
             
-            warningText += getWarningString(bit);
+            // Copy warning string
+            size_t warningLen = strlen(warningString);
+            size_t remainingSpace = bufferSize - bytesWritten - 1;
+            
+            if (warningLen > remainingSpace)
+                warningLen = remainingSpace;  // Truncate if needed
+            
+            strncpy(&buffer[bytesWritten], warningString, warningLen);
+            bytesWritten += warningLen;
+            
+            if (bytesWritten >= bufferSize - 1)
+                break;  // Buffer full
+            
             firstWarning = false;
         }
     }
 
+    // Null-terminate
+    buffer[bytesWritten] = '\0';
+
     // If no warnings are active, display a message
-    if (warningText.length() == 0)
+    if (bytesWritten == 0)
     {
-        warningText = F("No Active Warnings");
+        strncpy(buffer, "No Active Warnings", bufferSize - 1);
+        buffer[bufferSize - 1] = '\0';
     }
 
-    // Send the formatted warning list to the Nextion control
-    sendText(WarningListComponentName, warningText);
+    return true;
+}
+
+void WarningPage::updateWarningDisplay()
+{
+    sendText(WarningHeader, F("System Warnings"));
+
+    // Build warning text into a temporary buffer
+    char newWarningText[MaxWarningTextLength];
+    buildWarningText(newWarningText, MaxWarningTextLength);
+
+    // Only send to Nextion if the text has changed
+    if (strcmp(newWarningText, _lastWarningText) != 0)
+    {
+        sendText(WarningListComponentName, newWarningText);
+        
+        // Update cache
+        strncpy(_lastWarningText, newWarningText, MaxWarningTextLength - 1);
+        _lastWarningText[MaxWarningTextLength - 1] = '\0';
+    }
 }
 
 void WarningPage::refresh(unsigned long now)
