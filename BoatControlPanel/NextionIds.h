@@ -11,6 +11,7 @@ constexpr uint8_t PageSoundOvertaking = 7;
 constexpr uint8_t PageSoundEmergency = 8;
 constexpr uint8_t PageSoundOther = 9;
 constexpr uint8_t PageSystem = 10;
+constexpr uint8_t PageAbout = 17;
 
 constexpr uint8_t InvalidButtonIndex = 0xFF;
 

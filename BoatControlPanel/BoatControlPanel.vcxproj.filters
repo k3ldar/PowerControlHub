@@ -130,6 +130,9 @@
     <ClCompile Include="SystemPage.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="AboutPage.cpp">
+      <Filter>Source Files\Pages</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="__vm\.BoatControlPanel.vsarduino.h">
@@ -220,6 +223,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="SplashPage.h">
+      <Filter>Header Files\Pages</Filter>
+    </ClInclude>
+    <ClInclude Include="AboutPage.h">
       <Filter>Header Files\Pages</Filter>
     </ClInclude>
   </ItemGroup>

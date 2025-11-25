@@ -74,6 +74,7 @@
     <ProjectCapability Include="VisualMicroLinux" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="AboutPage.cpp" />
     <ClCompile Include="SystemCpuMonitor.cpp" />
     <ClCompile Include="SharedFunctions.cpp" />
     <ClCompile Include="SystemCommandHandler.cpp" />
@@ -115,6 +116,7 @@
       <FileType>CppCode</FileType>
       <DeploymentContent>true</DeploymentContent>
     </ClCompile>
+    <ClInclude Include="AboutPage.h" />
     <ClInclude Include="SplashPage.h" />
     <ClInclude Include="SystemCpuMonitor.h" />
     <ClInclude Include="SharedFunctions.h" />

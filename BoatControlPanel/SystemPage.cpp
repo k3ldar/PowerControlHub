@@ -88,7 +88,7 @@ void SystemPage::handleTouch(uint8_t compId, uint8_t eventType)
         break;
 
     case ButtonNext:
-        setPage(PageHome);
+        setPage(PageAbout);
         return;
 
     default:
