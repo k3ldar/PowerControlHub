@@ -1,8 +1,8 @@
 #pragma once
 
 #include <Arduino.h>
+#include <NextionControl.h>
 #include "SharedBaseCommandHandler.h"
-#include "NextionControl.h"
 #include "WarningManager.h"
 
 /**

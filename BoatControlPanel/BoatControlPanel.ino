@@ -1,5 +1,3 @@
-#include "SystemPage.h"
-#include "WarningType.h"
 #include <Arduino.h>
 #include <SerialCommandManager.h>
 #include <NextionControl.h>
@@ -14,8 +12,11 @@
 #include "SystemCommandHandler.h"
 #include "SystemCpuMonitor.h"
 
+#include "SplashPage.h"
 #include "HomePage.h"
+#include "WarningType.h"
 #include "WarningPage.h"
+#include "SystemPage.h"
 #include "RelayPage.h"
 #include "SoundSignalsPage.h"
 #include "SoundOvertakingPage.h"
@@ -57,6 +58,7 @@ BroadcastManager broadcastManager(&commandMgrComputer, &commandMgrLink);
 WarningManager warningManager(&commandMgrLink, HeartbeatIntervalMs, HeartbeatTimeoutMs);
 
 // Nextion display setup
+SplashPage splashPage(&NEXTION_SERIAL);
 HomePage homePage(&NEXTION_SERIAL, &warningManager, &commandMgrLink, &commandMgrComputer);
 WarningPage warningPage(&NEXTION_SERIAL, &warningManager, &commandMgrLink, &commandMgrComputer);
 RelayPage relayPage(&NEXTION_SERIAL, &warningManager, &commandMgrLink, &commandMgrComputer);
@@ -68,8 +70,9 @@ SoundEmergencyPage soundEmergencyPage(&NEXTION_SERIAL, &warningManager, &command
 SoundOtherPage soundOtherPage(&NEXTION_SERIAL, &warningManager, &commandMgrLink, &commandMgrComputer);
 SystemPage systemPage(&NEXTION_SERIAL, &warningManager, &commandMgrLink, &commandMgrComputer);
 
-BaseDisplayPage* displayPages[] = { &homePage, &warningPage, &relayPage, &soundSignalsPage, &soundOvertakingPage,
-    &soundFogPage, &soundManeuveringPage, &soundEmergencyPage, &soundOtherPage, &systemPage };
+BaseDisplayPage* displayPages[] = { &splashPage, &homePage, &warningPage, &relayPage, &soundSignalsPage, 
+    &soundOvertakingPage, &soundFogPage, &soundManeuveringPage, &soundEmergencyPage, &soundOtherPage,
+    &systemPage };
 NextionControl nextion(&NEXTION_SERIAL, displayPages, sizeof(displayPages) / sizeof(displayPages[0]));
 
 // link command handlers
@@ -90,7 +93,7 @@ uint8_t speed = 0;
 
 void setup()
 {
-    ISerialCommandHandler* linkHandlers[] = { &interceptDebugHandler, &ackHandler, &sensorCommandHandler, 
+    ISerialCommandHandler* linkHandlers[] = { &interceptDebugHandler, &ackHandler, &sensorCommandHandler,
         &warningCommandHandler, &systemCommandHandler };
     size_t linkHandlerCount = sizeof(linkHandlers) / sizeof(linkHandlers[0]);
     commandMgrLink.registerHandlers(linkHandlers, linkHandlerCount);
@@ -103,6 +106,12 @@ void setup()
     InitializeSerial(COMPUTER_SERIAL, 115200, true);
     InitializeSerial(NEXTION_SERIAL, 19200);
     InitializeSerial(LINK_SERIAL, 9600, false);
+
+#ifdef NEXTION_DEBUG
+    nextion.setDebugCallback([](const String& msg) {
+        commandMgrComputer.sendCommand(msg, F("NEXTION"));
+        });
+#endif
 
     // retrieve config settings
     ConfigManager::begin();

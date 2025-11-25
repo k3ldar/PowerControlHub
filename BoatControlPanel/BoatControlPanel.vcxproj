@@ -115,6 +115,7 @@
       <FileType>CppCode</FileType>
       <DeploymentContent>true</DeploymentContent>
     </ClCompile>
+    <ClInclude Include="SplashPage.h" />
     <ClInclude Include="SystemCpuMonitor.h" />
     <ClInclude Include="SharedFunctions.h" />
     <ClInclude Include="BroadcastManager.h" />
