@@ -17,6 +17,8 @@ constexpr uint8_t ButtonIdOffset = 4; // Offset to map button IDs to array indic
 constexpr char ButtonOn[] = "1";
 constexpr char ButtonOff[] = "0";
 
+constexpr char RelayButtonPrefix[] = "bRelay";
+
 constexpr unsigned long RefreshIntervalMs = 10000;
 
 
@@ -43,8 +45,8 @@ void RelayPage::begin()
 
     for (uint8_t i = 0; i < ConfigRelayCount; ++i)
     {
-        setPicture(ButtonPrefix + String(i + 1), ImageButtonColorGrey + ImageButtonColorOffset);
-        setPicture2(ButtonPrefix + String(i + 1), ImageButtonColorGrey + ImageButtonColorOffset);
+        setPicture(RelayButtonPrefix + String(i + 1), ImageButtonColorGrey + ImageButtonColorOffset);
+        setPicture2(RelayButtonPrefix + String(i + 1), ImageButtonColorGrey + ImageButtonColorOffset);
 	}
 }
 
@@ -190,7 +192,7 @@ void RelayPage::handleExternalUpdate(uint8_t updateType, const void* data)
                 _buttonImage[buttonIndex] = newColor;
 
                 // Update the button appearance on display
-                String buttonName = ButtonPrefix + String(buttonIndex + 1);
+                String buttonName = RelayButtonPrefix + String(buttonIndex + 1);
                 setPicture(buttonName, newColor);
                 setPicture2(buttonName, newColor);
 
@@ -229,10 +231,10 @@ void RelayPage::configUpdated()
         _buttonOn[button] = false;
         _buttonImage[button] = ImageButtonColorGrey + ImageButtonColorOffset;
 
-        setPicture(ButtonPrefix + String(button), ImageButtonColorGrey + ImageButtonColorOffset);
-        setPicture2(ButtonPrefix + String(button), ImageButtonColorGrey + ImageButtonColorOffset);
+        setPicture(RelayButtonPrefix + String(button), ImageButtonColorGrey + ImageButtonColorOffset);
+        setPicture2(RelayButtonPrefix + String(button), ImageButtonColorGrey + ImageButtonColorOffset);
 
         String longName = String(config->relayLongNames[button]);
-        sendText(ButtonPrefix + String(button), longName);
+        sendText(RelayButtonPrefix + String(button), longName);
     }
 }

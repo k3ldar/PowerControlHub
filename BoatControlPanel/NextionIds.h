@@ -34,6 +34,3 @@ constexpr uint8_t ImageNextButton = 13;
 // page
 constexpr char PageOne[] = "page 1";
 
-// general
-constexpr char ButtonPrefix[] = "b";
-

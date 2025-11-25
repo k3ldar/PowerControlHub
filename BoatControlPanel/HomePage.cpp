@@ -8,8 +8,8 @@ constexpr char ControlTemperature[] = "t2";
 constexpr char ControlBearingText[] = "t6";
 constexpr char ControlBearingDirection[] = "t4";
 constexpr char ControlSpeed[] = "t5";
-constexpr char ControlBoatName[] = "t0";
-constexpr char ControlWarning[] = "p2";
+constexpr char ControlBoatName[] = "tBoatName";
+constexpr char ControlWarning[] = "pHomeWarning";
 constexpr char SpeedUnitKnots[] = "%d kn";
 constexpr char BearingFormat[] = "%d°";
 constexpr char CelsiusSuffix[] = "C";
@@ -26,6 +26,7 @@ constexpr uint8_t ButtonWarning = 13;
 constexpr uint8_t ButtonIdOffset = 1; // Offset to map button IDs to array indices
 
 constexpr unsigned long RefreshUpdateIntervalMs = 10000;
+constexpr char HomeButtonPrefix[] = "b";
 
 
 HomePage::HomePage(Stream* serialPort,
@@ -47,7 +48,7 @@ void HomePage::begin()
 
     for (uint8_t i = 1; i <= ConfigHomeButtons; ++i)
     {
-        setPicture(ButtonPrefix + String(i), ImageButtonColorGrey);
+        setPicture(HomeButtonPrefix + String(i), ImageButtonColorGrey);
 	}
     _compassTempAboveNorm = 0;
 }
@@ -189,8 +190,8 @@ void HomePage::handleTouch(uint8_t compId, uint8_t eventType)
         _buttonImage[buttonIndex] = newColor;
 
         // Update the button appearance
-        setPicture(ButtonPrefix + String(buttonIndex + 1), newColor);
-        setPicture2(ButtonPrefix + String(buttonIndex + 1), newColor);
+        setPicture(HomeButtonPrefix + String(buttonIndex + 1), newColor);
+        setPicture2(HomeButtonPrefix + String(buttonIndex + 1), newColor);
 
         // Send relay command
         String cmd = String(relayIndex) + (_buttonOn[buttonIndex] ? ButtonOn : ButtonOff);
@@ -227,7 +228,7 @@ void HomePage::handleExternalUpdate(uint8_t updateType, const void* data)
                 _buttonImage[buttonIndex] = newColor;
 
                 // Update the button appearance on display
-                String buttonName = ButtonPrefix + String(buttonIndex + 1);
+                String buttonName = HomeButtonPrefix + String(buttonIndex + 1);
                 setPicture(buttonName, newColor);
                 setPicture2(buttonName, newColor);
 
@@ -412,19 +413,19 @@ void HomePage::configUpdated()
             _slotToRelay[button] = relayIndex;
 
             // set picture control (button image) - control names in your Nextion might differ
-            setPicture(ButtonPrefix + String(button + 1), _buttonImage[button]);
+            setPicture(HomeButtonPrefix + String(button + 1), _buttonImage[button]);
 
             // Use short name for home page display
             String shortName = String(config->relayShortNames[relayIndex]);
-            sendText(String(ButtonPrefix) + String(button + 1), shortName);
+            sendText(String(HomeButtonPrefix) + String(button + 1), shortName);
         }
         else
         {
             _slotToRelay[button] = 0xFF;
             _buttonOn[button] = false;
             _buttonImage[button] = ImageButtonColorGrey;
-            setPicture(ButtonPrefix + String(button + 1), _buttonImage[button]);
-            sendText(String(ButtonPrefix) + String(button + 1), "");
+            setPicture(HomeButtonPrefix + String(button + 1), _buttonImage[button]);
+            sendText(String(HomeButtonPrefix) + String(button + 1), "");
         }
     }
 
