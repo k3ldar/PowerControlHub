@@ -6,6 +6,7 @@
 #include "ConfigManager.h"
 
 #ifdef BOAT_CONTROL_PANEL
+#include <NextionControl.h>
 #include "BoatControlPanelConstants.h"
 #include "HomePage.h"
 #include "BaseBoatCommandHandler.h"

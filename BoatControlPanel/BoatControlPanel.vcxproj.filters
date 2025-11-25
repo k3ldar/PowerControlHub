@@ -219,5 +219,8 @@
     <ClInclude Include="SystemPage.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="SplashPage.h">
+      <Filter>Header Files\Pages</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

@@ -25,7 +25,7 @@ enum class VesselType : uint8_t {
 //
 // Keep struct packed and stable. Increase 'VERSION' when you change layout.
 // Packed POD for persistent configuration.
-constexpr uint8_t ConfigVersion = 3;
+constexpr uint8_t ConfigVersion = 0;
 constexpr uint8_t ConfigRelayCount = 8;
 constexpr uint8_t ConfigHomeButtons = 4;
 constexpr uint8_t ConfigMaxBoatNameLength = 31; // max characters (inc null)
