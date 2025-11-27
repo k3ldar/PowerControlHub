@@ -24,6 +24,10 @@
 #include "Dht11SensorHandler.h"
 #include "SensorManager.h"
 
+#include "BluetoothManager.h"
+#include "BluetoothSystemService.h"
+#include "BluetoothSensorService.h"
+
 
 #define COMPUTER_SERIAL Serial
 #define LINK_SERIAL Serial1
@@ -59,14 +63,22 @@ AckCommandHandler ackHandler(&broadcastManager, &warningManager);
 SystemCommandHandler systemCommandHandler(&broadcastManager);
 
 // Sensors
-WaterSensorHandler waterSensorHandler(&commandMgrLink, &commandMgrComputer, WaterSensorPin, WaterSensorActivePin);
-Dht11SensorHandler dht11SensorHandler(&commandMgrLink, &commandMgrComputer, &warningManager, Dht11SensorPin);
+WaterSensorHandler waterSensorHandler(&commandMgrLink, &commandMgrComputer, &sensorCommandHandler, WaterSensorPin, WaterSensorActivePin);
+Dht11SensorHandler dht11SensorHandler(&commandMgrLink, &commandMgrComputer, &sensorCommandHandler, &warningManager, Dht11SensorPin);
 
 BaseSensorHandler* sensorHandlers[] = {
 	&waterSensorHandler, &dht11SensorHandler
 };
 SensorManager sensorManager(sensorHandlers, sizeof(sensorHandlers) / sizeof(sensorHandlers[0]));
 
+// configure bluetooth support
+BluetoothSystemService bluetoothSystemService(&systemCommandHandler);
+BluetoothSensorService bluetoothSensorService(&sensorCommandHandler);
+
+BluetoothServiceBase* bluetoothServices[] = {
+	&bluetoothSystemService, &bluetoothSensorService
+};
+BluetoothManager bluetoothManager(bluetoothServices, sizeof(bluetoothServices) / sizeof(bluetoothServices[0]));
 
 void setup()
 {
@@ -96,6 +108,16 @@ void setup()
 
 	soundManager.configUpdated(config);
 
+	// initialize bluetooth
+	if (!bluetoothManager.begin("Smart Fuse Box"))
+	{
+		warningManager.raiseWarning(WarningType::BluetoothInitFailed);
+	}
+	else
+	{
+		bluetoothSystemService.notifyInitialized();
+	}
+
 	commandMgrComputer.sendCommand(SystemInitialized, "");
 }
 
@@ -114,6 +136,10 @@ void loop()
 
 	SystemCpuMonitor::startTask();
 	sensorManager.update(now);
+	SystemCpuMonitor::endTask();
+
+	SystemCpuMonitor::startTask();
+	bluetoothManager.loop();
 	SystemCpuMonitor::endTask();
 
 	SystemCpuMonitor::update();

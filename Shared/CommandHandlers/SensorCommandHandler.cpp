@@ -32,17 +32,20 @@ bool SensorCommandHandler::handleCommand(SerialCommandManager* sender, const Str
 #if defined(BOAT_CONTROL_PANEL)
     if (cmd == SensorTemperature)
     {
-        FloatStateUpdate update = { val.toFloat() };
+		_lastTemperature = val.toFloat();
+        FloatStateUpdate update = { _lastTemperature };
         notifyCurrentPage(static_cast<uint8_t>(PageUpdateType::Temperature), &update);
     }
     else if (cmd == SensorHumidity)
     {
-        UInt16Update update = { static_cast<int16_t>(val.toInt()) };
+		_lastHumidity = static_cast<int16_t>(val.toFloat());
+        UInt16Update update = { _lastHumidity };
         notifyCurrentPage(static_cast<uint8_t>(PageUpdateType::Humidity), &update);
     }
     else if (cmd == SensorBearing)
     {
-        FloatStateUpdate update = { val.toFloat() };
+		_lastBearing = val.toFloat();
+        FloatStateUpdate update = { _lastBearing };
         notifyCurrentPage(static_cast<uint8_t>(PageUpdateType::Bearing), &update);
     }
     else if (cmd == SensorDirection)
@@ -54,11 +57,13 @@ bool SensorCommandHandler::handleCommand(SerialCommandManager* sender, const Str
     }
     else if (cmd == SensorSpeed)
     {
-        UInt16Update update = { static_cast<int16_t>(val.toInt()) };
+		_lastSpeed = static_cast<int16_t>(val.toInt());
+        UInt16Update update = { _lastSpeed };
         notifyCurrentPage(static_cast<uint8_t>(PageUpdateType::Speed), &update);
     }
     else if (cmd == SensorCompassTemp)
     {
+		_lastCompassTemp = static_cast<int16_t>(val.toInt());
         FloatStateUpdate update = { val.toFloat() };
         notifyCurrentPage(static_cast<uint8_t>(PageUpdateType::CompassTemp), &update);
     }

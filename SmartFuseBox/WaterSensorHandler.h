@@ -22,6 +22,7 @@ class WaterSensorHandler : public BaseSensorHandler
 private:
 	SerialCommandManager* _commandMgrLink;
 	SerialCommandManager* _commandMgrComputer;
+	SensorCommandHandler* _sensorCommandHandler;
 	const uint8_t _sensorPin;
 	const uint8_t _activePin;
 	Queue _waterPumpQueue;
@@ -60,6 +61,11 @@ protected:
 			};
 
 			_commandMgrLink->sendCommand(SensorWaterLevel, "", "", params, 2);
+
+			if (_sensorCommandHandler)
+			{
+				_sensorCommandHandler->setWaterLevel(static_cast<uint16_t>(_waterPumpQueue.average()));
+			}
 		}
 
 		if (_commandMgrComputer)
@@ -72,9 +78,9 @@ protected:
 	};
 public:
 	WaterSensorHandler(SerialCommandManager* commandManagerLink, SerialCommandManager* commandManagerComputer, 
-		uint8_t sensorPin, uint8_t activePin)
-		: _commandMgrLink(commandManagerLink), _commandMgrComputer(commandManagerComputer), _sensorPin(sensorPin), _activePin(activePin),
-			_waterPumpQueue(15), _waitingForStabilization(false)
+		SensorCommandHandler* sensorCommandHandler, uint8_t sensorPin, uint8_t activePin)
+		: _commandMgrLink(commandManagerLink), _commandMgrComputer(commandManagerComputer), _sensorCommandHandler(sensorCommandHandler),
+			_sensorPin(sensorPin), _activePin(activePin), _waterPumpQueue(15), _waitingForStabilization(false)
 	{
 		pinMode(sensorPin, INPUT);
 		digitalWrite(_activePin, LOW);

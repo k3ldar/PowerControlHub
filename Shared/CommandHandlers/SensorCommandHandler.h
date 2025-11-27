@@ -35,6 +35,31 @@ public:
 
     bool handleCommand(SerialCommandManager* sender, const String command, const StringKeyValue params[], int paramCount) override;
     const String* supportedCommands(size_t& count) const override;
+
+	float getTemperature() const { return _lastTemperature; }
+	uint8_t getHumidity() const { return _lastHumidity; }
+	float getBearing() const { return _lastBearing; }
+	uint8_t getCompassTemperature() const { return _lastCompassTemp; }
+	uint8_t getSpeed() const { return _lastSpeed; }
+	uint16_t getWaterLevel() const { return _lastWaterLevel; }
+	bool getWaterPumpActive() const { return _lastWaterPumpActive; }
+	
+
+	void setTemperature(float value) { _lastTemperature = value; }
+	void setHumidity(uint8_t value) { _lastHumidity = value; }
+	void setBearing(float value) { _lastBearing = value; }
+	void setCompassTemperature(uint8_t value) { _lastCompassTemp = value; }
+	void setSpeed(uint8_t value) { _lastSpeed = value; }
+	void setWaterLevel(uint16_t value) { _lastWaterLevel = value; }
+	void setWaterPumpActive(bool value) { _lastWaterPumpActive = value; }
+private:
+	float _lastTemperature = NAN;
+	uint8_t _lastHumidity = NAN;
+	float _lastBearing = NAN;
+	uint8_t _lastCompassTemp = 0;
+	uint8_t _lastSpeed = 0;
+	uint16_t _lastWaterLevel = 0;
+	bool _lastWaterPumpActive = -1;
 };
 
 #undef SENSOR_BASE_CLASS

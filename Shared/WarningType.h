@@ -23,6 +23,7 @@ enum class WarningType : uint32_t {
     ConnectionLost = 1UL << 2,                        // 0x00000004 - Link heartbeat lost
     HighCompassTemperature = 1UL << 3,                // 0x00000008 - Compass temperature threshold exceeded
     LowBattery = 1UL << 4,                            // 0x00000010 - Battery voltage low
+	BluetoothInitFailed = 1UL << 5,                   // 0x00000020 - Bluetooth initialization failed
 
     // Sensor warnings (bits 20+)
     SensorFailure = 1UL << 20,                        // 0x00100000 - Sensor communication failure

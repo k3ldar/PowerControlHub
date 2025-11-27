@@ -21,6 +21,7 @@ class Dht11SensorHandler : public BaseSensorHandler
 private:
 	SerialCommandManager* _commandMgrLink;
 	SerialCommandManager* _commandMgrComputer;
+	SensorCommandHandler* _sensorCommandHandler;
 	WarningManager* _warningManager;
 	dht11 _dht11Sensor;
 	const uint8_t _sensorPin;
@@ -72,12 +73,19 @@ protected:
 			_commandMgrLink->sendCommand(SensorHumidity, "", "", params, 1);
 		}
 
+		if (_sensorCommandHandler)
+		{
+			_sensorCommandHandler->setTemperature(tempCelsius);
+			_sensorCommandHandler->setHumidity(static_cast<uint8_t>(humidity));
+		}
+
 		return TempHumidityCheckMs;
 	};
 public:
-	Dht11SensorHandler(SerialCommandManager* commandManagerLink, SerialCommandManager* commandManagerComputer, 
+	Dht11SensorHandler(SerialCommandManager* commandManagerLink, SerialCommandManager* commandManagerComputer, SensorCommandHandler* sensorCommandHandler,
 		WarningManager* warningManager, uint8_t sensorPin)
-		: _commandMgrLink(commandManagerLink), _commandMgrComputer(commandManagerComputer), _warningManager(warningManager), _dht11Sensor(), _sensorPin(sensorPin)
+		: _commandMgrLink(commandManagerLink), _commandMgrComputer(commandManagerComputer), _sensorCommandHandler(sensorCommandHandler), 
+			_warningManager(warningManager), _dht11Sensor(), _sensorPin(sensorPin)
 	{
 	};
 };
