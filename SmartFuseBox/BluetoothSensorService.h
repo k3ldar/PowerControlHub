@@ -6,10 +6,11 @@
 #include "SystemCommandHandler.h"
 #include "SensorCommandHandler.h"
 
+
 class BluetoothSensorService : public BluetoothServiceBase
 {
 public:
-    static constexpr const char* SensorUuid = "4fafc201-1fb5-459e-1fcc-c5c9c331914b";
+    static constexpr const char* SensorServiceUuid = "4fafc201-1fb5-459e-1fcc-c5c9c331914b";
 
     static constexpr const char* TemperatureUsageUuid = "beb5483e-36e1-4688-a7f5-ea07361b26a0";
     static constexpr const char* HumidityUsageUuid = "beb5483e-36e1-4688-a7f5-ea07361b26a1";

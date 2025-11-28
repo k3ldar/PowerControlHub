@@ -40,7 +40,7 @@ bool BluetoothSensorService::begin()
     }
 
     // Create the service
-    _service = new BLEService(SensorUuid);
+    _service = new BLEService(SensorServiceUuid);
 
     if (!_service)
     {
@@ -76,7 +76,7 @@ bool BluetoothSensorService::begin()
 
 const char* BluetoothSensorService::getServiceUUID() const
 {
-    return SensorUuid;
+    return SensorServiceUuid;
 }
 
 const char* BluetoothSensorService::getServiceName() const

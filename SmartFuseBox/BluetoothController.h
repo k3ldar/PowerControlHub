@@ -5,7 +5,9 @@
 #include "BluetoothManager.h"
 #include "BluetoothSystemService.h"
 #include "BluetoothSensorService.h"
+#include "BluetoothRelayService.h"
 #include "WarningType.h"
+#include "RelayCommandHandler.h"
 
 class WarningManager;
 class SystemCommandHandler;
@@ -16,10 +18,12 @@ class BluetoothController
 public:
     BluetoothController(SystemCommandHandler* systemHandler,
                         SensorCommandHandler* sensorHandler,
+		                RelayCommandHandler* relayHandler,
                         WarningManager* warningManager,
                         SerialCommandManager* commandMgrComputer)
         : _systemHandler(systemHandler),
           _sensorHandler(sensorHandler),
+		  _relayHandler(relayHandler),
           _warningManager(warningManager),
 		  _commandMgrComputer(commandMgrComputer),
           _manager(nullptr),
@@ -65,6 +69,7 @@ public:
 private:
     SystemCommandHandler* _systemHandler;
     SensorCommandHandler* _sensorHandler;
+    RelayCommandHandler* _relayHandler;
     WarningManager* _warningManager;
 	SerialCommandManager* _commandMgrComputer;
 
@@ -74,6 +79,7 @@ private:
 
     BluetoothSystemService* _systemService;
     BluetoothSensorService* _sensorService;
+	BluetoothRelayService* _relayService;
 
     bool _enabled;
 
@@ -89,11 +95,13 @@ private:
         // Create services
         _systemService = new BluetoothSystemService(_systemHandler);
         _sensorService = new BluetoothSensorService(_sensorHandler);
+		_relayService = new BluetoothRelayService(_relayHandler);
 
-        _serviceCount = 2U;
+        _serviceCount = 3U;
         _services = new BluetoothServiceBase*[_serviceCount];
         _services[0] = _systemService;
         _services[1] = _sensorService;
+        _services[2] = _relayService;
 
         // Create manager
         _manager = new BluetoothManager(_commandMgrComputer, _warningManager, _services, _serviceCount);
@@ -136,10 +144,17 @@ private:
             delete _sensorService;
             _sensorService = nullptr;
         }
+
         if (_systemService)
         {
             delete _systemService;
             _systemService = nullptr;
+        }
+
+        if (_relayService)
+        {
+            delete _relayService;
+            _relayService = nullptr;
         }
 
         _enabled = false;
