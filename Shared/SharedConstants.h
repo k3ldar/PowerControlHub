@@ -7,6 +7,7 @@ constexpr char SystemHeartbeatCommand[] = "F0";
 constexpr char SystemInitialized[] = "F1";
 constexpr char SystemFreeMemory[] = "F2";
 constexpr char SystemCpuUsage[] = "F3";
+constexpr char SystemBluetoothStatus[] = "F4";
 
 constexpr char RelayTurnAllOff[] = "R0";
 constexpr char RelayTurnAllOn[] = "R1";
@@ -39,7 +40,7 @@ constexpr char ConfigSetButtonColor[] = "C6";
 constexpr char ConfigBoatType[] = "C7";
 constexpr char ConfigSoundRelayId[] = "C8";
 constexpr char ConfigSoundStartDelay[] = "C9";
-
+constexpr char ConfigBluetoothEnable[] = "C10";
 
 constexpr char WarningsActive[] = "W0";
 constexpr char WarningsList[] = "W1";

@@ -42,5 +42,6 @@ struct Config {
     VesselType vesselType;
 	uint8_t hornRelayIndex; // 0..7 or 0xFF = none
 	uint16_t soundStartDelayMs; // 500ms default
+	bool bluetoothEnabled;
     uint16_t checksum;
 } __attribute__((packed));

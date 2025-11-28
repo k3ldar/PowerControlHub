@@ -9,9 +9,10 @@ class SystemCommandHandler : public BaseCommandHandler
 {
 private:
     BroadcastManager* _broadcaster;
-    
+
 public:
     SystemCommandHandler(BroadcastManager* broadcaster);
+
     ~SystemCommandHandler();
     bool handleCommand(SerialCommandManager* sender, const String command, const StringKeyValue params[], int paramCount) override;
 

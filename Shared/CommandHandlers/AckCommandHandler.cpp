@@ -112,6 +112,7 @@ bool AckCommandHandler::processWarningsListAck(SerialCommandManager* sender, con
 
 bool AckCommandHandler::handleCommand(SerialCommandManager* sender, const String command, const StringKeyValue params[], int paramCount)
 {
+    (void)sender;
     sendDebugMessage("Processing ACK: " + command + " (" + String(paramCount) + " params)", AckCommand);
     
     String cmd = command;

@@ -1,3 +1,4 @@
+#include <ArduinoBLE.h>
 #include <Arduino.h>
 #include <stdint.h>
 #include <SerialCommandManager.h>
@@ -23,6 +24,11 @@
 #include "WaterSensorHandler.h"
 #include "Dht11SensorHandler.h"
 #include "SensorManager.h"
+
+#include "BluetoothManager.h"
+#include "BluetoothSystemService.h"
+#include "BluetoothSensorService.h"
+#include "BluetoothController.h"
 
 
 #define COMPUTER_SERIAL Serial
@@ -51,22 +57,24 @@ InterceptDebugHandler interceptDebugHandler(&broadcastManager);
 SensorCommandHandler sensorCommandHandler(&broadcastManager, &warningManager);
 WarningCommandHandler warningCommandHandler(&broadcastManager, &warningManager);
 
-// computer command handlers
-ConfigCommandHandler configHandler(&soundManager);
-
 // shared command handlers
 AckCommandHandler ackHandler(&broadcastManager, &warningManager);
 SystemCommandHandler systemCommandHandler(&broadcastManager);
 
 // Sensors
-WaterSensorHandler waterSensorHandler(&commandMgrLink, &commandMgrComputer, WaterSensorPin, WaterSensorActivePin);
-Dht11SensorHandler dht11SensorHandler(&commandMgrLink, &commandMgrComputer, &warningManager, Dht11SensorPin);
+WaterSensorHandler waterSensorHandler(&commandMgrLink, &commandMgrComputer, &sensorCommandHandler, WaterSensorPin, WaterSensorActivePin);
+Dht11SensorHandler dht11SensorHandler(&commandMgrLink, &commandMgrComputer, &sensorCommandHandler, &warningManager, Dht11SensorPin);
 
 BaseSensorHandler* sensorHandlers[] = {
 	&waterSensorHandler, &dht11SensorHandler
 };
 SensorManager sensorManager(sensorHandlers, sizeof(sensorHandlers) / sizeof(sensorHandlers[0]));
 
+// configure bluetooth support
+BluetoothController bluetoothController(&systemCommandHandler, &sensorCommandHandler, &relayHandler, &warningManager, &commandMgrComputer);
+
+// computer command handlers
+ConfigCommandHandler configHandler(&soundManager, &bluetoothController);
 
 void setup()
 {
@@ -93,6 +101,7 @@ void setup()
 	}
 
 	Config* config = ConfigManager::getConfigPtr();
+	bluetoothController.applyConfig(config);
 
 	soundManager.configUpdated(config);
 
@@ -114,6 +123,10 @@ void loop()
 
 	SystemCpuMonitor::startTask();
 	sensorManager.update(now);
+	SystemCpuMonitor::endTask();
+
+	SystemCpuMonitor::startTask();
+	bluetoothController.loop();
 	SystemCpuMonitor::endTask();
 
 	SystemCpuMonitor::update();

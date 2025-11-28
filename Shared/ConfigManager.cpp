@@ -110,6 +110,7 @@ void ConfigManager::resetToDefaults()
 	_cfg.vesselType = VesselType::Motor;
 	_cfg.hornRelayIndex = 0xFF; // none
 	_cfg.soundStartDelayMs = 500; // 500ms
+	_cfg.bluetoothEnabled = true;
 
     // compute checksum
     _cfg.checksum = 0;

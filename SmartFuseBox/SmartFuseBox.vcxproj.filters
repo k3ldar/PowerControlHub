@@ -34,6 +34,12 @@
     <Filter Include="Source Files\SharedCode\CommandHandlers">
       <UniqueIdentifier>{83156138-a987-43b1-a64d-b3cb5c3ce530}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Bluetooth">
+      <UniqueIdentifier>{5acd69d0-acce-44d6-a78e-47664e8e5636}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Bluetooth">
+      <UniqueIdentifier>{be3c0dfc-ca08-4b9c-96eb-f395e93dc72e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="SmartFuseBox.ino" />
@@ -91,6 +97,18 @@
     <ClCompile Include="SystemCpuMonitor.cpp">
       <Filter>Source Files\SharedCode</Filter>
     </ClCompile>
+    <ClCompile Include="BluetoothManager.cpp">
+      <Filter>Source Files\Bluetooth</Filter>
+    </ClCompile>
+    <ClCompile Include="BluetoothSystemService.cpp">
+      <Filter>Source Files\Bluetooth</Filter>
+    </ClCompile>
+    <ClCompile Include="BluetoothSensorService.cpp">
+      <Filter>Source Files\Bluetooth</Filter>
+    </ClCompile>
+    <ClCompile Include="BluetoothRelayService.cpp">
+      <Filter>Source Files\Bluetooth</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="__vm\.SmartFuseBox.vsarduino.h">
@@ -129,15 +147,6 @@
     <ClInclude Include="WarningType.h">
       <Filter>Header Files\SharedCode</Filter>
     </ClInclude>
-    <ClInclude Include="SystemCommandHandler.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ConfigManager.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="SystemCommandHandler.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="WarningManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -158,6 +167,27 @@
     </ClInclude>
     <ClInclude Include="..\Shared\CommandHandlers\SystemCommandHandler.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BluetoothSystemService.h">
+      <Filter>Header Files\Bluetooth</Filter>
+    </ClInclude>
+    <ClInclude Include="BluetoothManager.h">
+      <Filter>Header Files\Bluetooth</Filter>
+    </ClInclude>
+    <ClInclude Include="BluetoothServiceBase.h">
+      <Filter>Header Files\Bluetooth</Filter>
+    </ClInclude>
+    <ClInclude Include="BluetoothSensorService.h">
+      <Filter>Header Files\Bluetooth</Filter>
+    </ClInclude>
+    <ClInclude Include="ConfigManager.h">
+      <Filter>Header Files\SharedCode</Filter>
+    </ClInclude>
+    <ClInclude Include="BluetoothController.h">
+      <Filter>Header Files\Bluetooth</Filter>
+    </ClInclude>
+    <ClInclude Include="BluetoothRelayService.h">
+      <Filter>Header Files\Bluetooth</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

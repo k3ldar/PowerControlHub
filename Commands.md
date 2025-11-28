@@ -10,6 +10,7 @@ These are commands used to configure the system settings and can only be sent fr
 | `F1` — System Initialized | `F1` | Sent by the system when initialization is complete to signal readiness. No params. Used to notify connected devices or software that the control panel is ready for operation. |
 | `F2` — Free Memory | `F2` | When received will return the amount of free memory. |
 | `F3` — Cpu Usage | `F3` | When received will return the current CPU usage. No params. |
+| `F4` — Bluetooth Enabled | `F4` | When received will return the current enabled state of bluetooth 0 off 1 on. No params. |
 
 ## Configuration Commands
 These are commands used to configure the system settings and can only be sent from a computer, they are not used for internal communication.
@@ -19,13 +20,14 @@ These are commands used to configure the system settings and can only be sent fr
 | `C0` — Save settings | `C0` | Persist current in-memory config to EEPROM. Responds `SAVED` on success; error `EEPROM commit failed` on failure. No params. |
 | `C1` — Get settings | `C1` | Request full config. Device replies with multiple commands: `C3 <boatName>`, `C4 <idx>:<shortName|longName>` for each relay, `C5 <slot>:<relay>` for each home-slot mapping, then `OK`. No params. |
 | `C2` — Reset settings | `C2` | Request full reset of all config settings. No params. |
-| `C3` — Rename boat | `C3:Sea Wolf` or `C3:name=SeaWolf` | Set the boat name. Accepts a single token or a `<key>:<value>` pair (value is used if present). Empty name → error. Name is truncated to configured max length. |
-| `C4` — Rename relay | `C4:2=Bilge` or `C4:2=Bilge\|Bilge Pump` | Rename a relay. Param format: `<idx>=<shortName>` or `<idx>=<shortName|longName>`. `idx` must be 0..7 (`RELAY_COUNT`). If no pipe character or long name provided, the short name is used for both. Short name is truncated to 5 chars (used on home page), long name is truncated to 20 chars (used on buttons page). Missing name → error. |
-| `C5` — Map home button | `C5:1=3` (map) — `C5:1=255` (unmap) | Map a home-page slot to a relay. Param format: `<slot>:<relay>`. `button` must be 0..3 (`HOME_BUTTONS`). `relay` must be 0..7 or `255` to clear/unmap. |
-| `C6` — Map home button color | `C6:0=4` (map button 1 to Red when activated) — `C6:1=255` (unmap colors) | Map a home-page button to a color when activated (on). Param format: `<slot>:<relay>`. `slot` must be 0..3 (`ConfigManager::HOME_SLOTS`). `relay` must be 0..7 or `255` to clear/unmap. |
+| `C3` — Rename boat (BCP) | `C3:Sea Wolf` or `C3:name=SeaWolf` | Set the boat name. Accepts a single token or a `<key>:<value>` pair (value is used if present). Empty name → error. Name is truncated to configured max length. |
+| `C4` — Rename relay (BCP) | `C4:2=Bilge` or `C4:2=Bilge\|Bilge Pump` | Rename a relay. Param format: `<idx>=<shortName>` or `<idx>=<shortName|longName>`. `idx` must be 0..7 (`RELAY_COUNT`). If no pipe character or long name provided, the short name is used for both. Short name is truncated to 5 chars (used on home page), long name is truncated to 20 chars (used on buttons page). Missing name → error. |
+| `C5` — Map home button (BCP) | `C5:1=3` (map) — `C5:1=255` (unmap) | Map a home-page slot to a relay. Param format: `<slot>:<relay>`. `button` must be 0..3 (`HOME_BUTTONS`). `relay` must be 0..7 or `255` to clear/unmap. |
+| `C6` — Map home button color (BCP) | `C6:0=4` (map button 1 to Red when activated) — `C6:1=255` (unmap colors) | Map a home-page button to a color when activated (on). Param format: `<slot>:<relay>`. `slot` must be 0..3 (`ConfigManager::HOME_SLOTS`). `relay` must be 0..7 or `255` to clear/unmap. |
 | `C7` — Set vessel type | `C7:v=1` | Set the vessel type. Param format: `v=<type>`. Possible values for `<type>` are: 0 (Motor), 1 (Sail), 2 (Fishing), 3 (Yacht). Uses enum values as defined in `Config.h`. Invalid or missing value → error. |
 | `C8` — Sound relay button | `C8:v=3` (map) — `C8:v=255` (unmap) | Map the sound system (horn) to a relay. Param format: `<value>:<relay>`. `button` must be 0..7 (`RELAY_COUNT`). `relay` must be 0..7 or `255` to clear/unmap. |
 | `C9` — Sound delay Start | `C9:v=0xFF` | Sets the delay before the sound is started in milliseconds, allows other processing to continue so as sounds are not cut off. Invalid or missing value → error. |
+| `C10` — Bluetooth Enabled (SFB) | `C10:v=1` | Sets the enabled state of bluetooth, 0 disabled, 1 enabled, if disabling then a restart is required. Invalid or missing value → error. |
 
 Common error responses you may see: `Missing param`, `Missing params`, `Missing name`, `Empty name`, `Index out of range`, `Slot out of range`, `Relay out of range (or 255 to clear)`, `EEPROM commit failed`, `Unknown config command`.
 
@@ -38,7 +40,7 @@ These commands are used in response to receiving a command.
 | `ACK` — Acknowledgement | `ACK:C4=Index out of range` | Indicates that the C4 command was processed and the index specified was out of range. |
 | `ACK` — Acknowledgement | `ACK:C4=ok` | Indicates that the C4 command was processed successfully. |
 
-## Relay Control Commands
+## Relay Control Commands (SFB)
 These commands are used to control the relays on the Boat Control Panel. Commands can be sent from a computer or generated internally by the Boat Control Panel.
 
 | Command | Example | Purpose |
@@ -75,7 +77,7 @@ These commands are used to send warning data from the control panel to link/comp
 | `W4` — Warning Set Status | `W4:0x06=1` | Adds or removes a warning to the list of warnings. Param format: `<WarningType>=<bool>`. |
 
 
-## Sound Signal Commands (Fog Horn)
+## Sound Signal Commands (Fog Horn) (SFB)
 These commands are used to activate, query or deactivate signal sounds (Fog Horn Sounds).
 
 | Command | Example | Purpose |
@@ -93,3 +95,10 @@ These commands are used to activate, query or deactivate signal sounds (Fog Horn
 | `H10` — Overtake Consent | `H10` | Activates overtake astern sound. Param format: No Parameters. |
 | `H11` — Overtake Danger | `H11` | Activates overtake danger sound. Param format: No Parameters. |
 | `H12` — Test | `H12` | Tests the signal sound. Param format: No Parameters. |
+
+
+## Please Note
+- All commands and parameters are case-sensitive.
+- Commands must be sent in the exact format as specified, including any required delimiters.
+- Commands specific to Boat Control Panel have (BCP) indicated next to them.
+- Commands specific to Smart Fuse Box have (SFB) indicated next to them.
