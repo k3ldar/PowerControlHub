@@ -16,10 +16,12 @@ class BluetoothController
 public:
     BluetoothController(SystemCommandHandler* systemHandler,
                         SensorCommandHandler* sensorHandler,
-                        WarningManager* warningManager)
+                        WarningManager* warningManager,
+                        SerialCommandManager* commandMgrComputer)
         : _systemHandler(systemHandler),
           _sensorHandler(sensorHandler),
           _warningManager(warningManager),
+		  _commandMgrComputer(commandMgrComputer),
           _manager(nullptr),
           _services(nullptr),
           _serviceCount(0),
@@ -64,6 +66,7 @@ private:
     SystemCommandHandler* _systemHandler;
     SensorCommandHandler* _sensorHandler;
     WarningManager* _warningManager;
+	SerialCommandManager* _commandMgrComputer;
 
     BluetoothManager* _manager;
     BluetoothServiceBase** _services;
@@ -93,7 +96,7 @@ private:
         _services[1] = _sensorService;
 
         // Create manager
-        _manager = new BluetoothManager(_services, _serviceCount);
+        _manager = new BluetoothManager(_commandMgrComputer, _warningManager, _services, _serviceCount);
 
         if (!_manager->begin("Smart Fuse Box"))
         {

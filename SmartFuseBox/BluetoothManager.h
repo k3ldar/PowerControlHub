@@ -1,7 +1,9 @@
 #pragma once
 
 #include <Arduino.h>
+#include <SerialCommandManager.h>
 #include "BluetoothServiceBase.h"
+#include "WarningManager.h"
 
 /**
  * @brief Central coordinator for Bluetooth BLE communication.
@@ -38,8 +40,10 @@ public:
      * 
      * @param services Array of pointers to BluetoothServiceBase instances
      * @param serviceCount Number of services in the array
+	 * @param commandMgrComputer Pointer to SerialCommandManager for computer commands
+	 * @param warningManager Pointer to WarningManager for warning coordination
      */
-    BluetoothManager(BluetoothServiceBase** services, uint8_t serviceCount);
+    BluetoothManager(SerialCommandManager* commandMgrComputer, WarningManager* warningManager, BluetoothServiceBase** services, uint8_t serviceCount);
 
     /**
      * @brief Destructor.
@@ -107,7 +111,14 @@ public:
      */
     void stopAdvertising();
 
+    /**
+     * @determines whether the device is currently advertising or not.
+     */
+    bool isAdvertising();
+
 private:
+    SerialCommandManager* _commandMgrComputer;
+    WarningManager* _warningManager;
     BluetoothServiceBase** _services;
     uint8_t _serviceCount;
     void* _server;  // BLEServer* (void* to avoid exposing BLE library headers)

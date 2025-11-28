@@ -71,7 +71,7 @@ BaseSensorHandler* sensorHandlers[] = {
 SensorManager sensorManager(sensorHandlers, sizeof(sensorHandlers) / sizeof(sensorHandlers[0]));
 
 // configure bluetooth support
-BluetoothController bluetoothController(&systemCommandHandler, &sensorCommandHandler, &warningManager);
+BluetoothController bluetoothController(&systemCommandHandler, &sensorCommandHandler, &warningManager, &commandMgrComputer);
 
 // computer command handlers
 ConfigCommandHandler configHandler(&soundManager, &bluetoothController);

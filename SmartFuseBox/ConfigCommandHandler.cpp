@@ -129,11 +129,16 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const Str
             bool enable = (params[0].value == "1");
             config->bluetoothEnabled = enable;
 
-            // Apply live without restart
-            if (_bluetoothController && !_bluetoothController->setEnabled(enable))
+			// do not apply live, only on next restart, otherwise too many enabled/disable cycles will 
+            // eventually force the board to run out of memory, the only exception to this is if 
+			// it starts disabled and is being enabled now, i.e. once on it needs rebooting to turn off again
+            if (_bluetoothController && !_bluetoothController->isEnabled())
             {
-                sendAckErr(sender, cmd, F("Bluetooth init failed"), &params[0]);
-                return true;
+                if (!_bluetoothController->setEnabled(enable))
+                {
+                    sendAckErr(sender, cmd, F("Bluetooth init failed"), &params[0]);
+                    return true;
+                }
             }
 
             sendAckOk(sender, cmd, &params[0]);

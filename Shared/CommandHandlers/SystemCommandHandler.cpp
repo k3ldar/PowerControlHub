@@ -13,7 +13,8 @@ SystemCommandHandler::~SystemCommandHandler()
 
 const String* SystemCommandHandler::supportedCommands(size_t& count) const
 {
-    static const String cmds[] = { SystemHeartbeatCommand, SystemInitialized, SystemFreeMemory, SystemCpuUsage };
+    static const String cmds[] = { SystemHeartbeatCommand, SystemInitialized, SystemFreeMemory, SystemCpuUsage,
+        SystemBluetoothStatus };
     count = sizeof(cmds) / sizeof(cmds[0]);
     return cmds;
 }

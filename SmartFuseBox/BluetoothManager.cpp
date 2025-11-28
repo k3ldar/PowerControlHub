@@ -1,14 +1,16 @@
-#include "BluetoothManager.h"
 #include <ArduinoBLE.h>
+#include "BluetoothManager.h"
 
-BluetoothManager::BluetoothManager(BluetoothServiceBase** services, uint8_t serviceCount)
-    : _services(services),
-      _serviceCount(serviceCount),
-      _server(nullptr),
-      _isAdvertising(false),
-      _deviceConnected(false),
-      _lastLoopTime(0),
-      _deviceName(nullptr)
+BluetoothManager::BluetoothManager(SerialCommandManager* commandMgrComputer, WarningManager* warningManager, BluetoothServiceBase** services, uint8_t serviceCount)
+	: _commandMgrComputer(commandMgrComputer),
+	_warningManager(warningManager),
+    _services(services),
+    _serviceCount(serviceCount),
+    _server(nullptr),
+    _isAdvertising(false),
+    _deviceConnected(false),
+    _lastLoopTime(0),
+    _deviceName(nullptr)
 {
 }
 
@@ -22,7 +24,16 @@ bool BluetoothManager::begin(const char* deviceName)
 {
     if (!deviceName || deviceName[0] == '\0')
     {
-        Serial.println(F("[BluetoothManager] Error: Device name is required"));
+        if (_commandMgrComputer)
+        {
+            _commandMgrComputer->sendError(F("Bluetooth device name is required"), F("BluetoothManager"));
+		}
+
+		if (_warningManager)
+        {
+            _warningManager->raiseWarning(WarningType::BluetoothInitFailed);
+        }
+
         return false;
     }
 
@@ -31,7 +42,16 @@ bool BluetoothManager::begin(const char* deviceName)
     // Initialize BLE
     if (!BLE.begin())
     {
-        Serial.println(F("[BluetoothManager] Error: Failed to initialize BLE"));
+        if (_commandMgrComputer)
+        {
+            _commandMgrComputer->sendError(F("Failed to initialize BLE"), F("BluetoothManager"));
+        }
+
+        if (_warningManager)
+        {
+            _warningManager->raiseWarning(WarningType::BluetoothInitFailed);
+        }
+
         return false;
     }
 
@@ -42,7 +62,16 @@ bool BluetoothManager::begin(const char* deviceName)
     // Initialize all services
     if (!initializeServices())
     {
-        Serial.println(F("[BluetoothManager] Error: Service initialization failed"));
+        if (_commandMgrComputer)
+        {
+            _commandMgrComputer->sendError(F("Service initialization failed"), F("BluetoothManager"));
+        }
+
+        if (_warningManager)
+        {
+            _warningManager->raiseWarning(WarningType::BluetoothInitFailed);
+        }
+
         return false;
     }
 
@@ -60,9 +89,10 @@ bool BluetoothManager::begin(const char* deviceName)
     // Start advertising
     startAdvertising();
 
-    Serial.print(F("[BluetoothManager] Initialized with "));
-    Serial.print(_serviceCount);
-    Serial.println(F(" services"));
+    if (_commandMgrComputer)
+    {
+        _commandMgrComputer->sendDebug("Initialized with " + String(_serviceCount) + " services", F("BluetoothManager"));
+    }
 
     return true;
 }
@@ -75,29 +105,13 @@ bool BluetoothManager::initializeServices()
 
         if (!service)
         {
-            Serial.print(F("[BluetoothManager] Error: Service at index "));
-            Serial.print(i);
-            Serial.println(F(" is null"));
             return false;
         }
-
-        Serial.print(F("[BluetoothManager] Initializing service: "));
-        Serial.println(service->getServiceName());
 
         if (!service->begin())
         {
-            Serial.print(F("[BluetoothManager] Error: Failed to initialize service: "));
-            Serial.println(service->getServiceName());
             return false;
         }
-
-        Serial.print(F("[BluetoothManager] Service registered: "));
-        Serial.print(service->getServiceName());
-        Serial.print(F(" (UUID: "));
-        Serial.print(service->getServiceUUID());
-        Serial.print(F(", "));
-        Serial.print(service->getCharacteristicCount());
-        Serial.println(F(" characteristics)"));
     }
 
     return true;
@@ -118,13 +132,16 @@ void BluetoothManager::loop()
     {
         _deviceConnected = connected;
 
-        if (_deviceConnected)
+        if (_deviceConnected && _commandMgrComputer)
         {
-            Serial.println(F("[BluetoothManager] Client connected"));
+            _commandMgrComputer->sendDebug(F("Client connected"), F("BluetoothManager"));
         }
         else
         {
-            Serial.println(F("[BluetoothManager] Client disconnected"));
+            if (_commandMgrComputer)
+            {
+                _commandMgrComputer->sendDebug(F("Client disconnected"), F("BluetoothManager"));
+            }
 
             // Restart advertising after disconnect
             startAdvertising();
@@ -184,9 +201,10 @@ void BluetoothManager::startAdvertising()
 
     _isAdvertising = true;
 
-    Serial.print(F("[BluetoothManager] Advertising as '"));
-    Serial.print(_deviceName);
-    Serial.println(F("'"));
+    if (_commandMgrComputer)
+    {
+        _commandMgrComputer->sendDebug("Client advertising as " + String(_deviceName), F("BluetoothManager"));
+    }
 }
 
 void BluetoothManager::stopAdvertising()
@@ -199,5 +217,13 @@ void BluetoothManager::stopAdvertising()
     BLE.stopAdvertise();
     _isAdvertising = false;
 
-    Serial.println(F("[BluetoothManager] Advertising stopped"));
+    if (_commandMgrComputer)
+    {
+        _commandMgrComputer->sendDebug(F("Advertising stopped"), F("BluetoothManager"));
+    }
+}
+
+bool BluetoothManager::isAdvertising()
+{
+	return _isAdvertising;
 }
