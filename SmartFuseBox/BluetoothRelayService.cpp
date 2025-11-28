@@ -134,7 +134,7 @@ void BluetoothRelayService::notifyAll()
 
     uint8_t buf[8] = {};
     loadStates(buf);
-    _statesChar->writeValue(buf, _relayCount); // BLENotify triggers notify
+    _statesChar->writeValue(buf, _relayCount);
 }
 
 void BluetoothRelayService::onWriteSet()
