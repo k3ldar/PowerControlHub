@@ -109,6 +109,9 @@
     <ClCompile Include="BluetoothRelayService.cpp">
       <Filter>Source Files\Bluetooth</Filter>
     </ClCompile>
+    <ClCompile Include="Queue.cpp">
+      <Filter>Source Files\SharedCode</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="__vm\.SmartFuseBox.vsarduino.h">
@@ -190,6 +193,9 @@
       <Filter>Header Files\Bluetooth</Filter>
     </ClInclude>
     <ClInclude Include="LoggingSupport.h">
+      <Filter>Header Files\SharedCode</Filter>
+    </ClInclude>
+    <ClInclude Include="Queue.h">
       <Filter>Header Files\SharedCode</Filter>
     </ClInclude>
   </ItemGroup>

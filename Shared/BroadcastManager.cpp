@@ -42,7 +42,7 @@ void BroadcastManager::sendCommand(const String& command, const String& params, 
     sendCommand(command.c_str(), params.c_str(), linkOnly);
 }
 
-void BroadcastManager::sendCommand(const char* command, char* message, char* identifier, StringKeyValue* params, uint8_t argLength)
+void BroadcastManager::sendCommand(const char* command, const char* message, const char* identifier, StringKeyValue* params, uint8_t argLength)
 {
     if (_computerSerial)
     {

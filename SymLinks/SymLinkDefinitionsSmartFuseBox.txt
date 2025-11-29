@@ -22,3 +22,5 @@ SensorCommandHandler.h|..\Shared\CommandHandlers\SensorCommandHandler.h
 SensorCommandHandler.cpp|..\Shared\CommandHandlers\SensorCommandHandler.cpp
 InterceptDebugCommandHandler.h|..\Shared\CommandHandlers\InterceptDebugCommandHandler.h
 LoggingSupport.h|..\Shared\Logging\LoggingSupport.h
+Queue.h|..\Shared\Queue.h
+Queue.cpp|..\Shared\Queue.cpp
