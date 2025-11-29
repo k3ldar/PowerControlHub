@@ -1,4 +1,5 @@
 #include "SharedFunctions.h"
+#include "SharedConstants.h"
 
 extern "C" char* sbrk(int incr);
 
@@ -21,4 +22,20 @@ uint16_t SharedFunctions::freeMemory()
 #else
 #error "You must define 'ARDUINO_MEGA2560' or 'ARDUINO_UNO_R4'"
 #endif
+}
+
+void SharedFunctions::initializeSerial(HardwareSerial& serialPort, unsigned long baudRate, bool waitForConnection)
+{
+	serialPort.begin(baudRate);
+
+	if (waitForConnection)
+	{
+		unsigned long leave = millis() + SerialInitTimeoutMs;
+
+		while (!serialPort && millis() < leave)
+			delay(10);
+
+		if (serialPort)
+			delay(100);
+	}
 }

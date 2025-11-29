@@ -31,8 +31,6 @@ constexpr uint8_t Relays[TotalRelays] = { Relay1, Relay2, Relay3, Relay4, Relay5
 
 
 
-constexpr unsigned long SerialInitTimeoutMs = 300;
-
 constexpr uint16_t DefaultSoundStartDelayMs = 500;
 
 // COLREGS Sound Signal Durations

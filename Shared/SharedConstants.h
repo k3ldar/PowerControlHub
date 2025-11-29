@@ -74,3 +74,6 @@ constexpr uint16_t MaxUint16Value = 0xFFFF;
 constexpr char PercentSuffix[] = "%";
 constexpr char NoValueText[] = "--";
 constexpr char HexPrefix[] = "0x";
+
+
+constexpr unsigned long SerialInitTimeoutMs = 300;

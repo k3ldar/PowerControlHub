@@ -38,19 +38,17 @@
 
 
 constexpr unsigned long UpdateIntervalMs = 600;
-constexpr unsigned long SerialInitTimeoutMs = 300;
 
 // forward declares
-void InitializeSerial(HardwareSerial& serialPort, unsigned long baudRate, bool waitForConnection = false);
 void onLinkCommandReceived(SerialCommandManager* mgr);
 void onComputerCommandReceived(SerialCommandManager* mgr);
-
-// Compass with smoothing filter size 15
-TLVCompass compass(15);
 
 // Serial managers
 SerialCommandManager commandMgrComputer(&COMPUTER_SERIAL, onComputerCommandReceived, '\n', ':', '=', 500, 64);
 SerialCommandManager commandMgrLink(&LINK_SERIAL, onLinkCommandReceived, '\n', ':', '=', 500, 64);
+
+// Compass with smoothing filter size 15
+TLVCompass compass(&commandMgrComputer, 15);
 
 // Broadcast manager for coordinated messaging
 BroadcastManager broadcastManager(&commandMgrComputer, &commandMgrLink);
@@ -105,9 +103,9 @@ void setup()
     size_t computerHandlerCount = sizeof(computerHandlers) / sizeof(computerHandlers[0]);
     commandMgrComputer.registerHandlers(computerHandlers, computerHandlerCount);
 
-    InitializeSerial(COMPUTER_SERIAL, 115200, true);
-    InitializeSerial(NEXTION_SERIAL, 19200);
-    InitializeSerial(LINK_SERIAL, 9600, false);
+    SharedFunctions::initializeSerial(COMPUTER_SERIAL, 115200, true);
+    SharedFunctions::initializeSerial(NEXTION_SERIAL, 19200, false);
+    SharedFunctions::initializeSerial(LINK_SERIAL, 9600, false);
 
 #ifdef NEXTION_DEBUG
     nextion.setDebugCallback([](const String& msg) {
@@ -204,20 +202,4 @@ void onComputerCommandReceived(SerialCommandManager* mgr)
 {
     String cmd = mgr->getCommand();
     commandMgrComputer.sendError(String(F("Unknown command: ")) + cmd, F("PCHANDLER"));
-}
-
-void InitializeSerial(HardwareSerial& serialPort, unsigned long baudRate, bool waitForConnection)
-{
-    serialPort.begin(baudRate);
-
-    if (waitForConnection)
-    {
-        unsigned long leave = millis() + SerialInitTimeoutMs;
-
-        while (!serialPort && millis() < leave)
-            delay(10);
-
-        if (serialPort)
-            delay(100);
-    }
 }

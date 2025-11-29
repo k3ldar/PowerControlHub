@@ -165,7 +165,7 @@
     <ClInclude Include="SystemCpuMonitor.h">
       <Filter>Header Files\SharedCode</Filter>
     </ClInclude>
-    <ClInclude Include="..\Shared\CommandHandlers\SystemCommandHandler.h">
+    <ClInclude Include="SystemCommandHandler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="BluetoothSystemService.h">
@@ -188,6 +188,9 @@
     </ClInclude>
     <ClInclude Include="BluetoothRelayService.h">
       <Filter>Header Files\Bluetooth</Filter>
+    </ClInclude>
+    <ClInclude Include="LoggingSupport.h">
+      <Filter>Header Files\SharedCode</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

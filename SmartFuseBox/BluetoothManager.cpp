@@ -2,7 +2,7 @@
 #include "BluetoothManager.h"
 
 BluetoothManager::BluetoothManager(SerialCommandManager* commandMgrComputer, WarningManager* warningManager, BluetoothServiceBase** services, uint8_t serviceCount)
-	: _commandMgrComputer(commandMgrComputer),
+	: SingleLoggerSupport(commandMgrComputer),
 	_warningManager(warningManager),
     _services(services),
     _serviceCount(serviceCount),
@@ -24,10 +24,7 @@ bool BluetoothManager::begin(const char* deviceName)
 {
     if (!deviceName || deviceName[0] == '\0')
     {
-        if (_commandMgrComputer)
-        {
-            _commandMgrComputer->sendError(F("Bluetooth device name is required"), F("BluetoothManager"));
-		}
+        sendError(F("Bluetooth device name is required"), F("BluetoothManager"));
 
 		if (_warningManager)
         {
@@ -42,10 +39,7 @@ bool BluetoothManager::begin(const char* deviceName)
     // Initialize BLE
     if (!BLE.begin())
     {
-        if (_commandMgrComputer)
-        {
-            _commandMgrComputer->sendError(F("Failed to initialize BLE"), F("BluetoothManager"));
-        }
+        sendError(F("Failed to initialize BLE"), F("BluetoothManager"));
 
         if (_warningManager)
         {
@@ -62,10 +56,7 @@ bool BluetoothManager::begin(const char* deviceName)
     // Initialize all services
     if (!initializeServices())
     {
-        if (_commandMgrComputer)
-        {
-            _commandMgrComputer->sendError(F("Service initialization failed"), F("BluetoothManager"));
-        }
+        sendError(F("Service initialization failed"), F("BluetoothManager"));
 
         if (_warningManager)
         {
@@ -89,10 +80,7 @@ bool BluetoothManager::begin(const char* deviceName)
     // Start advertising
     startAdvertising();
 
-    if (_commandMgrComputer)
-    {
-        _commandMgrComputer->sendDebug("Initialized with " + String(_serviceCount) + " services", F("BluetoothManager"));
-    }
+    sendDebug("Initialized with " + String(_serviceCount) + " services", F("BluetoothManager"));
 
     return true;
 }
@@ -132,16 +120,13 @@ void BluetoothManager::loop()
     {
         _deviceConnected = connected;
 
-        if (_deviceConnected && _commandMgrComputer)
+        if (_deviceConnected)
         {
-            _commandMgrComputer->sendDebug(F("Client connected"), F("BluetoothManager"));
+            sendDebug(F("Client connected"), F("BluetoothManager"));
         }
         else
         {
-            if (_commandMgrComputer)
-            {
-                _commandMgrComputer->sendDebug(F("Client disconnected"), F("BluetoothManager"));
-            }
+            sendDebug(F("Client disconnected"), F("BluetoothManager"));
 
             // Restart advertising after disconnect
             startAdvertising();
@@ -201,10 +186,7 @@ void BluetoothManager::startAdvertising()
 
     _isAdvertising = true;
 
-    if (_commandMgrComputer)
-    {
-        _commandMgrComputer->sendDebug("Client advertising as " + String(_deviceName), F("BluetoothManager"));
-    }
+    sendDebug("Client advertising as " + String(_deviceName), F("BluetoothManager"));
 }
 
 void BluetoothManager::stopAdvertising()
@@ -217,10 +199,7 @@ void BluetoothManager::stopAdvertising()
     BLE.stopAdvertise();
     _isAdvertising = false;
 
-    if (_commandMgrComputer)
-    {
-        _commandMgrComputer->sendDebug(F("Advertising stopped"), F("BluetoothManager"));
-    }
+    sendDebug(F("Advertising stopped"), F("BluetoothManager"));
 }
 
 bool BluetoothManager::isAdvertising()

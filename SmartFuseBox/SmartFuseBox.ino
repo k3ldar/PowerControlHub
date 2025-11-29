@@ -35,7 +35,6 @@
 #define LINK_SERIAL Serial1
 
 // forward declares
-void InitializeSerial(HardwareSerial& serialPort, unsigned long baudRate, bool waitForConnection = false);
 void onComputerCommandReceived(SerialCommandManager* mgr);
 void onLinkCommandReceived(SerialCommandManager* mgr);
 
@@ -62,8 +61,8 @@ AckCommandHandler ackHandler(&broadcastManager, &warningManager);
 SystemCommandHandler systemCommandHandler(&broadcastManager);
 
 // Sensors
-WaterSensorHandler waterSensorHandler(&commandMgrLink, &commandMgrComputer, &sensorCommandHandler, WaterSensorPin, WaterSensorActivePin);
-Dht11SensorHandler dht11SensorHandler(&commandMgrLink, &commandMgrComputer, &sensorCommandHandler, &warningManager, Dht11SensorPin);
+WaterSensorHandler waterSensorHandler(&broadcastManager, &sensorCommandHandler, WaterSensorPin, WaterSensorActivePin);
+Dht11SensorHandler dht11SensorHandler(&broadcastManager, &sensorCommandHandler, &warningManager, Dht11SensorPin);
 
 BaseSensorHandler* sensorHandlers[] = {
 	&waterSensorHandler, &dht11SensorHandler
@@ -94,18 +93,16 @@ void setup()
 	size_t computerHandlerCount = sizeof(computerHandlers) / sizeof(computerHandlers[0]);
 	commandMgrComputer.registerHandlers(computerHandlers, computerHandlerCount);
 
-	InitializeSerial(COMPUTER_SERIAL, 115200, true);
-	InitializeSerial(LINK_SERIAL, 9600, true);
+	SharedFunctions::initializeSerial(COMPUTER_SERIAL, 115200, true);
+	SharedFunctions::initializeSerial(LINK_SERIAL, 9600, true);
 
 	Config* config = ConfigManager::getConfigPtr();
 	bluetoothController.applyConfig(config);
-
-	sensorManager.setup();
 	relayHandler.setup();
 
 	soundManager.configUpdated(config);
 	relayHandler.configUpdated(config);
-
+	sensorManager.setup();
 	commandMgrComputer.sendCommand(SystemInitialized, "");
 }
 
@@ -142,20 +139,4 @@ void onComputerCommandReceived(SerialCommandManager* mgr)
 void onLinkCommandReceived(SerialCommandManager* mgr)
 {
 	commandMgrComputer.sendError(mgr->getRawMessage(), F("STATLNK"));
-}
-
-void InitializeSerial(HardwareSerial& serialPort, unsigned long baudRate, bool waitForConnection)
-{
-	serialPort.begin(baudRate);
-
-	if (waitForConnection)
-	{
-		unsigned long leave = millis() + SerialInitTimeoutMs;
-
-		while (!serialPort && millis() < leave)
-			delay(10);
-
-		if (serialPort)
-			delay(100);
-	}
 }

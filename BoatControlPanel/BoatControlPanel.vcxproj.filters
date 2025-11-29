@@ -228,5 +228,8 @@
     <ClInclude Include="AboutPage.h">
       <Filter>Header Files\Pages</Filter>
     </ClInclude>
+    <ClInclude Include="LoggingSupport.h">
+      <Filter>Header Files\SharedCode</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
