@@ -70,10 +70,10 @@
     <ClCompile Include="BaseBoatCommandHandler.cpp">
       <Filter>Source Files\CommandHandlers</Filter>
     </ClCompile>
-    <ClCompile Include="TLVCompass.cpp">
+    <ClCompile Include="TLVCompassHandler.cpp">
       <Filter>Source Files\Sensors</Filter>
     </ClCompile>
-    <ClCompile Include="TLVCompass.h">
+    <ClCompile Include="TLVCompassHandler.h">
       <Filter>Header Files\Sensors</Filter>
     </ClCompile>
     <ClCompile Include="WarningCommandHandler.cpp">

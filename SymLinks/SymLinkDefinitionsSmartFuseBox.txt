@@ -22,3 +22,6 @@ SensorCommandHandler.h|..\Shared\CommandHandlers\SensorCommandHandler.h
 SensorCommandHandler.cpp|..\Shared\CommandHandlers\SensorCommandHandler.cpp
 InterceptDebugCommandHandler.h|..\Shared\CommandHandlers\InterceptDebugCommandHandler.h
 LoggingSupport.h|..\Shared\Logging\LoggingSupport.h
+Queue.h|..\Shared\Queue.h
+Dht11SensorHandler.h|..\Shared\Sensors\Dht11SensorHandler.h
+WaterSensorHandler.h|..\Shared\Sensors\WaterSensorHandler.h

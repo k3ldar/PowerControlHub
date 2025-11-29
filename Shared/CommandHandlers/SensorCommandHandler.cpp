@@ -69,7 +69,7 @@ bool SensorCommandHandler::handleCommand(SerialCommandManager* sender, const Str
     }
     else if (cmd == SensorWaterLevel)
     {
-        UInt16Update update = { static_cast<int16_t>(val.toInt()) };
+        UInt16Update update = { static_cast<uint16_t>(val.toInt()) };
         notifyCurrentPage(static_cast<uint8_t>(PageUpdateType::WaterLevel), &update);
     }
     else if (cmd == SensorWaterPumpActive)

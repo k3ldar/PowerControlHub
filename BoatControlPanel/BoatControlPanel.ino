@@ -29,7 +29,7 @@
 #include "Config.h"
 #include "ConfigManager.h"
 #include "WarningManager.h"
-#include "TLVCompass.h"
+#include "TLVCompassHandler.h"
 
 
 #define COMPUTER_SERIAL Serial
@@ -48,7 +48,7 @@ SerialCommandManager commandMgrComputer(&COMPUTER_SERIAL, onComputerCommandRecei
 SerialCommandManager commandMgrLink(&LINK_SERIAL, onLinkCommandReceived, '\n', ':', '=', 500, 64);
 
 // Compass with smoothing filter size 15
-TLVCompass compass(&commandMgrComputer, 15);
+TLVCompassHandler compass(&commandMgrComputer, 15);
 
 // Broadcast manager for coordinated messaging
 BroadcastManager broadcastManager(&commandMgrComputer, &commandMgrLink);

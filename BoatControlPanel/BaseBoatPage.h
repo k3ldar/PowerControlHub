@@ -42,7 +42,7 @@ struct UInt8Update {
 };
 
 struct UInt16Update {
-    int16_t value;
+    uint16_t value;
 };
 
 struct BoolStateUpdate {

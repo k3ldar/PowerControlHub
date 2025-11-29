@@ -99,7 +99,7 @@
     <ClCompile Include="SoundOvertakingPage.cpp" />
     <ClCompile Include="SoundSignalsPage.cpp" />
     <ClCompile Include="SystemPage.cpp" />
-    <ClCompile Include="TLVCompass.cpp">
+    <ClCompile Include="TLVCompassHandler.cpp">
       <DeploymentContent>true</DeploymentContent>
     </ClCompile>
     <ClCompile Include="ConfigManager.cpp" />
@@ -112,7 +112,7 @@
       <FileType>CppCode</FileType>
       <DeploymentContent>true</DeploymentContent>
     </ClCompile>
-    <ClCompile Include="TLVCompass.h">
+    <ClCompile Include="TLVCompassHandler.h">
       <FileType>CppCode</FileType>
       <DeploymentContent>true</DeploymentContent>
     </ClCompile>

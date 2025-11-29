@@ -1,13 +1,13 @@
-#include "TLVCompass.h"
+#include "TLVCompassHandler.h"
 #include <Arduino.h>
 
 // Directions array
-const char* TLVCompass::directions[16] = {
+const char* TLVCompassHandler::directions[16] = {
     "N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE",
     "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"
 };
 
-TLVCompass::TLVCompass(SerialCommandManager* commandMgrComputer, int filterSize)
+TLVCompassHandler::TLVCompassHandler(SerialCommandManager* commandMgrComputer, int filterSize)
 	: SingleLoggerSupport(commandMgrComputer),
       sensor(Wire, TLx493D_IIC_ADDR_A0_e),
       filterSize(filterSize > 32 ? 32 : filterSize),
@@ -23,7 +23,7 @@ TLVCompass::TLVCompass(SerialCommandManager* commandMgrComputer, int filterSize)
     for (int i = 0; i < 32; i++) headingBuffer[i] = 0;
 }
 
-bool TLVCompass::begin()
+bool TLVCompassHandler::begin()
 {
     Wire.begin();
     Wire.setClock(100000);
@@ -53,7 +53,7 @@ bool TLVCompass::begin()
     return true;
 }
 
-bool TLVCompass::update(unsigned long now)
+bool TLVCompassHandler::update(unsigned long now)
 {
     double dt = (now - lastUpdate) / 1000.0;
     lastUpdate = now;
@@ -191,7 +191,7 @@ bool TLVCompass::update(unsigned long now)
     return true;
 }
 
-void TLVCompass::smooth(double newBx, double newBy)
+void TLVCompassHandler::smooth(double newBx, double newBy)
 {
     bxSum -= bxFiltered;
     bySum -= byFiltered;
@@ -208,7 +208,7 @@ void TLVCompass::smooth(double newBx, double newBy)
     byFiltered = bySum / filterSize;
 }
 
-void TLVCompass::smoothHeading(double newHeading)
+void TLVCompassHandler::smoothHeading(double newHeading)
 {
     headingSum -= headingBuffer[headingIndex];
     headingBuffer[headingIndex] = newHeading;
@@ -220,17 +220,17 @@ void TLVCompass::smoothHeading(double newHeading)
 }
 
 // Getters
-double TLVCompass::getHeading() const { return heading; }
+double TLVCompassHandler::getHeading() const { return heading; }
 
-const char* TLVCompass::getDirection() const {
+const char* TLVCompassHandler::getDirection() const {
     int index = (int)((getHeading() + 11.25) / 22.5) % 16;
     return directions[index];
 }
 
-double TLVCompass::getTemperature() const { return temp; }
-double TLVCompass::getBx() const { return bxFiltered; }
-double TLVCompass::getBy() const { return byFiltered; }
-double TLVCompass::getBz() const { return bz; }
-double TLVCompass::getAx() const { return ax; }
-double TLVCompass::getAy() const { return ay; }
-double TLVCompass::getAz() const { return az; }
+double TLVCompassHandler::getTemperature() const { return temp; }
+double TLVCompassHandler::getBx() const { return bxFiltered; }
+double TLVCompassHandler::getBy() const { return byFiltered; }
+double TLVCompassHandler::getBz() const { return bz; }
+double TLVCompassHandler::getAx() const { return ax; }
+double TLVCompassHandler::getAy() const { return ay; }
+double TLVCompassHandler::getAz() const { return az; }

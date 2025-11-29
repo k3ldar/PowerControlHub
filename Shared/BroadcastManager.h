@@ -59,7 +59,7 @@ public:
 	 * @param params Optional array of key/value parameters (default: nullptr)
 	 * @param argLength Number of parameters in the params array (default: 0)
      */
-    void sendCommand(const char* command, char* message, char* identifier, StringKeyValue* params = nullptr, uint8_t argLength = 0);
+    void sendCommand(const char* command, const char* message, const char* identifier, StringKeyValue* params = nullptr, uint8_t argLength = 0);
 
     /**
      * @brief Send a command to all registered serial managers.

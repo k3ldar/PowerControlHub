@@ -192,5 +192,8 @@
     <ClInclude Include="LoggingSupport.h">
       <Filter>Header Files\SharedCode</Filter>
     </ClInclude>
+    <ClInclude Include="Queue.h">
+      <Filter>Header Files\SharedCode</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

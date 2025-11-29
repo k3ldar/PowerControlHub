@@ -18,10 +18,10 @@
 using namespace ifx::tlx493d;
 
 
-class TLVCompass : public SingleLoggerSupport
+class TLVCompassHandler : public SingleLoggerSupport
 {
 public:
-    TLVCompass(SerialCommandManager* commandMgrComputer, int filterSize = 5);
+    TLVCompassHandler(SerialCommandManager* commandMgrComputer, int filterSize = 5);
 
     bool begin();
     bool update(unsigned long now);
