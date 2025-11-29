@@ -33,7 +33,7 @@
  * }
  * @endcode
  */
-class BluetoothManager : SingleLoggerSupport
+class BluetoothManager : public SingleLoggerSupport
 {
 public:
     /**
