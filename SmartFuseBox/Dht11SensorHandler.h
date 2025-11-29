@@ -2,11 +2,11 @@
 
 
 #include <SensorManager.h>
-#include <SerialCommandManager.h>
 #include <dht11.h>
 #include "SharedConstants.h"
 #include "WarningManager.h"
 #include "WarningType.h"
+#include "LoggingSupport.h"
 
 constexpr unsigned long TempHumidityCheckMs = 2500;
 
@@ -16,11 +16,9 @@ constexpr unsigned long TempHumidityCheckMs = 2500;
  * Reads temperature and humidity sensor values, 
  * and reports readings to both link and computer serial connections.
  */
-class Dht11SensorHandler : public BaseSensorHandler
+class Dht11SensorHandler : public BaseSensorHandler, public BroadcastLoggerSupport
 {
 private:
-	SerialCommandManager* _commandMgrLink;
-	SerialCommandManager* _commandMgrComputer;
 	SensorCommandHandler* _sensorCommandHandler;
 	WarningManager* _warningManager;
 	dht11 _dht11Sensor;
@@ -38,24 +36,18 @@ protected:
 
 		if (result != DHTLIB_OK)
 		{
-			if (_commandMgrComputer)
+			if (_warningManager && !_warningManager->isWarningActive(WarningType::TemperatureSensorFailure))
 			{
-				if (_warningManager && !_warningManager->isWarningActive(WarningType::TemperatureSensorFailure))
-				{
-					_warningManager->raiseWarning(WarningType::TemperatureSensorFailure);
-				}
-
-				_commandMgrComputer->sendDebug(String(result), F("DHT11 Error"));
+				_warningManager->raiseWarning(WarningType::TemperatureSensorFailure);
 			}
+				
+			sendError(String(result), F("DHT11 Error"));
 
 			return TempHumidityCheckMs;
 		}
 
-		if (_commandMgrComputer)
-		{
-			_commandMgrComputer->sendDebug(String(_dht11Sensor.humidity, 1), F("Humidity"));
-			_commandMgrComputer->sendDebug(String(_dht11Sensor.temperature, 1), F("Temperature"));
-		}
+		sendDebug(String(_dht11Sensor.humidity, 1), F("Humidity"));
+		sendDebug(String(_dht11Sensor.temperature, 1), F("Temperature"));
 
 		if (_warningManager && _warningManager->isWarningActive(WarningType::TemperatureSensorFailure))
 		{
@@ -65,13 +57,10 @@ protected:
 		float humidity = _dht11Sensor.humidity;
 		float tempCelsius = _dht11Sensor.temperature;
 
-		if (_commandMgrLink)
-		{
-			StringKeyValue params[] = { { "v", String(tempCelsius, 1) } };
-			_commandMgrLink->sendCommand(SensorTemperature, "", "", params, 1);
-			params->value = String(humidity, 0);
-			_commandMgrLink->sendCommand(SensorHumidity, "", "", params, 1);
-		}
+		StringKeyValue params[] = { { "v", String(tempCelsius, 1) } };
+		sendCommand(SensorTemperature, params, 1);
+		params->value = String(humidity, 0);
+		sendCommand(SensorHumidity, params, 1);
 
 		if (_sensorCommandHandler)
 		{
@@ -82,9 +71,9 @@ protected:
 		return TempHumidityCheckMs;
 	};
 public:
-	Dht11SensorHandler(SerialCommandManager* commandManagerLink, SerialCommandManager* commandManagerComputer, SensorCommandHandler* sensorCommandHandler,
+	Dht11SensorHandler(BroadcastManager* broadcastManager, SensorCommandHandler* sensorCommandHandler,
 		WarningManager* warningManager, uint8_t sensorPin)
-		: _commandMgrLink(commandManagerLink), _commandMgrComputer(commandManagerComputer), _sensorCommandHandler(sensorCommandHandler), 
+		: BroadcastLoggerSupport(broadcastManager), _sensorCommandHandler(sensorCommandHandler),
 			_warningManager(warningManager), _dht11Sensor(), _sensorPin(sensorPin)
 	{
 	};

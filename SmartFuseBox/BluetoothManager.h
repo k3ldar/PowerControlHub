@@ -4,6 +4,7 @@
 #include <SerialCommandManager.h>
 #include "BluetoothServiceBase.h"
 #include "WarningManager.h"
+#include "LoggingSupport.h"
 
 /**
  * @brief Central coordinator for Bluetooth BLE communication.
@@ -32,7 +33,7 @@
  * }
  * @endcode
  */
-class BluetoothManager
+class BluetoothManager : SingleLoggerSupport
 {
 public:
     /**
@@ -117,7 +118,6 @@ public:
     bool isAdvertising();
 
 private:
-    SerialCommandManager* _commandMgrComputer;
     WarningManager* _warningManager;
     BluetoothServiceBase** _services;
     uint8_t _serviceCount;

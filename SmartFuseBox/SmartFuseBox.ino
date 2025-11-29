@@ -62,8 +62,8 @@ AckCommandHandler ackHandler(&broadcastManager, &warningManager);
 SystemCommandHandler systemCommandHandler(&broadcastManager);
 
 // Sensors
-WaterSensorHandler waterSensorHandler(&commandMgrLink, &commandMgrComputer, &sensorCommandHandler, WaterSensorPin, WaterSensorActivePin);
-Dht11SensorHandler dht11SensorHandler(&commandMgrLink, &commandMgrComputer, &sensorCommandHandler, &warningManager, Dht11SensorPin);
+WaterSensorHandler waterSensorHandler(&broadcastManager, &sensorCommandHandler, WaterSensorPin, WaterSensorActivePin);
+Dht11SensorHandler dht11SensorHandler(&broadcastManager, &sensorCommandHandler, &warningManager, Dht11SensorPin);
 
 BaseSensorHandler* sensorHandlers[] = {
 	&waterSensorHandler, &dht11SensorHandler
@@ -100,13 +100,16 @@ void setup()
 	Config* config = ConfigManager::getConfigPtr();
 	bluetoothController.applyConfig(config);
 
-	sensorManager.setup();
 	relayHandler.setup();
 
 	soundManager.configUpdated(config);
 	relayHandler.configUpdated(config);
 
 	commandMgrComputer.sendCommand(SystemInitialized, "");
+
+    Serial.begin(115200);
+    
+    Serial.print(F("Active sensors: "));
 }
 
 void loop() 

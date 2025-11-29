@@ -7,17 +7,18 @@ const char* TLVCompass::directions[16] = {
     "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"
 };
 
-TLVCompass::TLVCompass(int filterSize)
-: sensor(Wire, TLx493D_IIC_ADDR_A0_e),
-  filterSize(filterSize > 32 ? 32 : filterSize),
-  filterIndex(0), bxSum(0), bySum(0),
-  bxFiltered(0), byFiltered(0),
-  heading(0), headingSum(0), headingIndex(0),
-  pitch(0), roll(0),
-  temp(0), bx(0), by(0), bz(0),
-  ax(0), ay(0), az(0),
-  bxMin(0), bxMax(0), byMin(0), byMax(0), bzMin(0), bzMax(0),
-  firstUpdate(true)
+TLVCompass::TLVCompass(SerialCommandManager* commandMgrComputer, int filterSize)
+	: SingleLoggerSupport(commandMgrComputer),
+      sensor(Wire, TLx493D_IIC_ADDR_A0_e),
+      filterSize(filterSize > 32 ? 32 : filterSize),
+      filterIndex(0), bxSum(0), bySum(0),
+      bxFiltered(0), byFiltered(0),
+      heading(0), headingSum(0), headingIndex(0),
+      pitch(0), roll(0),
+      temp(0), bx(0), by(0), bz(0),
+      ax(0), ay(0), az(0),
+      bxMin(0), bxMax(0), byMin(0), byMax(0), bzMin(0), bzMax(0),
+      firstUpdate(true)
 {
     for (int i = 0; i < 32; i++) headingBuffer[i] = 0;
 }
@@ -126,7 +127,7 @@ bool TLVCompass::update(unsigned long now)
             accelBiasY = accelCalSumY / accelCalCount;
             accelBiasZ = accelCalSumZ / accelCalCount;
             accelCalibrated = true;
-            Serial.println("Accel calibration complete.");
+            sendDebug(F("Accel calibration complete."));
         }
         return true;
     }

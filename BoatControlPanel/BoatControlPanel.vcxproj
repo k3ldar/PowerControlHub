@@ -116,6 +116,7 @@
       <FileType>CppCode</FileType>
       <DeploymentContent>true</DeploymentContent>
     </ClCompile>
+    <ClInclude Include="LoggingSupport.h" />
     <ClInclude Include="AboutPage.h" />
     <ClInclude Include="SplashPage.h" />
     <ClInclude Include="SystemCpuMonitor.h" />

@@ -21,3 +21,4 @@ WarningCommandHandler.cpp|..\Shared\CommandHandlers\WarningCommandHandler.cpp
 SensorCommandHandler.h|..\Shared\CommandHandlers\SensorCommandHandler.h
 SensorCommandHandler.cpp|..\Shared\CommandHandlers\SensorCommandHandler.cpp
 InterceptDebugCommandHandler.h|..\Shared\CommandHandlers\InterceptDebugCommandHandler.h
+LoggingSupport.h|..\Shared\Logging\LoggingSupport.h

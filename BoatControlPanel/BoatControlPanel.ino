@@ -45,12 +45,12 @@ void InitializeSerial(HardwareSerial& serialPort, unsigned long baudRate, bool w
 void onLinkCommandReceived(SerialCommandManager* mgr);
 void onComputerCommandReceived(SerialCommandManager* mgr);
 
-// Compass with smoothing filter size 15
-TLVCompass compass(15);
-
 // Serial managers
 SerialCommandManager commandMgrComputer(&COMPUTER_SERIAL, onComputerCommandReceived, '\n', ':', '=', 500, 64);
 SerialCommandManager commandMgrLink(&LINK_SERIAL, onLinkCommandReceived, '\n', ':', '=', 500, 64);
+
+// Compass with smoothing filter size 15
+TLVCompass compass(&commandMgrComputer, 15);
 
 // Broadcast manager for coordinated messaging
 BroadcastManager broadcastManager(&commandMgrComputer, &commandMgrLink);

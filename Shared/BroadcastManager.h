@@ -51,6 +51,26 @@ public:
     void sendCommand(const String& command, const String& params = "", bool linkOnly = false);
 
     /**
+     * @brief Send a command to all registered serial managers.
+     *
+	 * @param command The command
+	 * @param message The command message (default: empty string)
+	 * @param identifier Optional identifier (default: empty string)
+	 * @param params Optional array of key/value parameters (default: nullptr)
+	 * @param argLength Number of parameters in the params array (default: 0)
+     */
+    void sendCommand(const char* command, char* message, char* identifier, StringKeyValue* params = nullptr, uint8_t argLength = 0);
+
+    /**
+     * @brief Send a command to all registered serial managers.
+     *
+     * @param command The command
+     * @param params Optional array of key/value parameters
+     * @param argLength Number of parameters in the params array
+     */
+    void sendCommand(const char* command, StringKeyValue* params, uint8_t argLength);
+
+    /**
      * @brief Send a debug message to all registered serial managers.
      *
      * @param message The debug message

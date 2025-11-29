@@ -2,6 +2,9 @@
 
 #define _Mcu_Module
 
+#include <SerialCommandManager.h>
+
+#include "LoggingSupport.h"
 #include <Wire.h>
 #include <math.h>
 
@@ -15,12 +18,13 @@
 using namespace ifx::tlx493d;
 
 
-class TLVCompass {
+class TLVCompass : public SingleLoggerSupport
+{
 public:
-    TLVCompass(int filterSize = 5);
+    TLVCompass(SerialCommandManager* commandMgrComputer, int filterSize = 5);
 
-    bool begin();                       // Initialize sensors
-    bool update(unsigned long now);     // Read sensors & update state
+    bool begin();
+    bool update(unsigned long now);
 
     double getHeading() const;          // Tilt-compensated heading in degrees
     const char* getDirection() const;   // N, NNE, NE, etc.
