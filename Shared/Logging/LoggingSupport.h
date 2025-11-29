@@ -41,7 +41,8 @@ protected:
         }
     }
     
-    static void sendError(SerialCommandManager* mgr, const String& message, const String& source = ""){
+    static void sendError(SerialCommandManager* mgr, const String& message, const String& source = "")
+    {
         if (mgr)
         {
             mgr->sendError(message, source);
