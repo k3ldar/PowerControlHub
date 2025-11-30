@@ -1,3 +1,4 @@
+#include "WifiServer.h"
 #include <ArduinoBLE.h>
 #include <Arduino.h>
 #include <stdint.h>
