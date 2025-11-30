@@ -1,4 +1,3 @@
-#include "WifiServer.h"
 #include <ArduinoBLE.h>
 #include <Arduino.h>
 #include <stdint.h>
@@ -30,6 +29,7 @@
 #include "BluetoothSystemService.h"
 #include "BluetoothSensorService.h"
 #include "BluetoothController.h"
+#include "WifiController.h"
 
 
 #define COMPUTER_SERIAL Serial
@@ -76,6 +76,9 @@ BluetoothController bluetoothController(&systemCommandHandler, &sensorCommandHan
 // computer command handlers
 ConfigCommandHandler configHandler(&soundManager, &bluetoothController, &relayHandler);
 
+// configure wifi support
+WifiController wifiController(&commandMgrComputer, &warningManager);
+
 void setup()
 {
 	// retrieve config settings
@@ -99,6 +102,7 @@ void setup()
 
 	Config* config = ConfigManager::getConfigPtr();
 	bluetoothController.applyConfig(config);
+	wifiController.applyConfig(config);
 	relayHandler.setup();
 
 	soundManager.configUpdated(config);
@@ -126,6 +130,10 @@ void loop()
 
 	SystemCpuMonitor::startTask();
 	bluetoothController.loop();
+	SystemCpuMonitor::endTask();
+
+	SystemCpuMonitor::startTask();
+	wifiController.update();
 	SystemCpuMonitor::endTask();
 
 	SystemCpuMonitor::update();

@@ -24,6 +24,8 @@ enum class WarningType : uint32_t {
     HighCompassTemperature = 1UL << 3,                // 0x00000008 - Compass temperature threshold exceeded
     LowBattery = 1UL << 4,                            // 0x00000010 - Battery voltage low
 	BluetoothInitFailed = 1UL << 5,                   // 0x00000020 - Bluetooth initialization failed
+	WifiInitFailed = 1UL << 6,                        // 0x00000040 - WiFi initialization failed
+	WifiInvalidConfig = 1UL << 7,                     // 0x00000080 - WiFi configuration invalid
 
     // Sensor warnings (bits 20+)
     SensorFailure = 1UL << 20,                        // 0x00100000 - Sensor communication failure

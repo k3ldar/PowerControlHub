@@ -201,5 +201,8 @@
     <ClInclude Include="WifiServer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="WifiController.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

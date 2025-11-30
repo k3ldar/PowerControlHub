@@ -110,7 +110,15 @@ void ConfigManager::resetToDefaults()
 	_cfg.vesselType = VesselType::Motor;
 	_cfg.hornRelayIndex = 0xFF; // none
 	_cfg.soundStartDelayMs = 500; // 500ms
-	_cfg.bluetoothEnabled = true;
+	
+#if defined(ARDUINO_UNO_R4)
+    _cfg.bluetoothEnabled = true;
+    _cfg.wifiEnabled = true;
+    _cfg.accessMode = 0; // 0 = AP, 1 = Client
+    _cfg._apSSID[0] = '\0';
+    _cfg._apPassword[0] = '\0';
+	_cfg.port = 80;
+#endif
 
     // compute checksum
     _cfg.checksum = 0;

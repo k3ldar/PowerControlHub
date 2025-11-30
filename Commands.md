@@ -28,6 +28,12 @@ These are commands used to configure the system settings and can only be sent fr
 | `C8` — Sound relay button | `C8:v=3` (map) — `C8:v=255` (unmap) | Map the sound system (horn) to a relay. Param format: `<value>:<relay>`. `button` must be 0..7 (`RELAY_COUNT`). `relay` must be 0..7 or `255` to clear/unmap. |
 | `C9` — Sound delay Start | `C9:v=0xFF` | Sets the delay before the sound is started in milliseconds, allows other processing to continue so as sounds are not cut off. Invalid or missing value → error. |
 | `C10` — Bluetooth Enabled (SFB) | `C10:v=1` | Sets the enabled state of bluetooth, 0 disabled, 1 enabled, if disabling then a restart is required. Invalid or missing value → error. |
+| `C11` — Wifi Enabled (SFB) | `C11:v=1` | Sets the enabled state of wifi, 0 disabled, 1 enabled, if disabling then a restart is required. Invalid or missing value → error. |
+| `C12` — Wifi Access Mode (SFB) | `C12:v=1` | Sets access mode, 0 is AP and 1 is client |
+| `C13` — Wifi SSID (SFB) | `C13:v=RouterName` | Set's the wifi SSID, only available if access mode is client |
+| `C14` — Wifi Password (SFB) | `C14:v=Password123` | Set's the wifi password, only available if access mode is client |
+| `C15` — Wifi Port (SFB) | `C15:v=80` | Set's the wifi port, this is the port used to listen on, default value is 80 |
+
 
 Common error responses you may see: `Missing param`, `Missing params`, `Missing name`, `Empty name`, `Index out of range`, `Slot out of range`, `Relay out of range (or 255 to clear)`, `EEPROM commit failed`, `Unknown config command`.
 

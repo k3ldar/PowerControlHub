@@ -3,6 +3,7 @@
 #include <WiFiS3.h>
 #include <SerialCommandManager.h>
 #include "LoggingSupport.h"
+#include "SharedConstants.h"
 
 enum class WifiMode : uint8_t
 {
@@ -21,19 +22,16 @@ enum class WifiConnectionState : uint8_t
 class WifiServer : public SingleLoggerSupport
 {
 private:
-    WiFiServer* _server;
+    bool _serverActive;
+    WiFiServer _server;
     WifiMode _mode;
     WifiConnectionState _connectionState;
     uint16_t _port;
     bool _initialized;
     
     // AP mode settings
-    char _apSSID[33];
-    char _apPassword[65];
-    
-    // Client mode settings
-    char _clientSSID[33];
-    char _clientPassword[65];
+    char _ssid[MaxSSIDLength];
+    char _password[MaxWiFiPasswordLength];
     
     // Connection tracking
     unsigned long _lastConnectionAttempt;

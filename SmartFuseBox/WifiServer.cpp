@@ -1,8 +1,9 @@
 #include "WifiServer.h"
 
 WifiServer::WifiServer(SerialCommandManager* commandMgrComputer, uint16_t port)
-    : SingleLoggerSupport(commandMgrComputer), 
-        _server(nullptr),
+    : SingleLoggerSupport(commandMgrComputer),
+        _server(port),  // Initialize with port
+        _serverActive(false),
         _mode(WifiMode::AccessPoint),
         _connectionState(WifiConnectionState::Disconnected),
         _port(port),
@@ -10,10 +11,8 @@ WifiServer::WifiServer(SerialCommandManager* commandMgrComputer, uint16_t port)
         _lastConnectionAttempt(0),
         _connectionStartTime(0)
 {
-    _apSSID[0] = '\0';
-    _apPassword[0] = '\0';
-    _clientSSID[0] = '\0';
-    _clientPassword[0] = '\0';
+    _ssid[0] = '\0';
+    _password[0] = '\0';
 }
 
 WifiServer::~WifiServer()
@@ -24,27 +23,27 @@ WifiServer::~WifiServer()
 void WifiServer::setAccessPointMode(const char* ssid, const char* password)
 {
     _mode = WifiMode::AccessPoint;
-    strncpy(_apSSID, ssid, sizeof(_apSSID) - 1);
-    _apSSID[sizeof(_apSSID) - 1] = '\0';
+    strncpy(_ssid, ssid, sizeof(_ssid) - 1);
+    _ssid[sizeof(_ssid) - 1] = '\0';
     
     if (password != nullptr)
     {
-        strncpy(_apPassword, password, sizeof(_apPassword) - 1);
-        _apPassword[sizeof(_apPassword) - 1] = '\0';
+        strncpy(_password, password, sizeof(_password) - 1);
+        _password[sizeof(_password) - 1] = '\0';
     }
     else
     {
-        _apPassword[0] = '\0';
+        _password[0] = '\0';
     }
 }
 
 void WifiServer::setClientMode(const char* ssid, const char* password)
 {
     _mode = WifiMode::Client;
-    strncpy(_clientSSID, ssid, sizeof(_clientSSID) - 1);
-    _clientSSID[sizeof(_clientSSID) - 1] = '\0';
-    strncpy(_clientPassword, password, sizeof(_clientPassword) - 1);
-    _clientPassword[sizeof(_clientPassword) - 1] = '\0';
+    strncpy(_ssid, ssid, sizeof(_ssid) - 1);
+    _ssid[sizeof(_ssid) - 1] = '\0';
+    strncpy(_password, password, sizeof(_password) - 1);
+    _password[sizeof(_password) - 1] = '\0';
 }
 
 bool WifiServer::begin()
@@ -58,15 +57,15 @@ bool WifiServer::begin()
     
     if (_mode == WifiMode::AccessPoint)
     {
-        sendDebug(String(F("Initializing in Access Point mode: ")) + String(_apSSID), F("WifiServer"));
+        sendDebug(String(F("Initializing in Access Point mode: ")) + String(_ssid), F("WifiServer"));
         
-        if (strlen(_apPassword) > 0)
+        if (strlen(_password) > 0)
         {
-            success = WiFi.beginAP(_apSSID, _apPassword);
+            success = WiFi.beginAP(_ssid, _password);
         }
         else
         {
-            success = WiFi.beginAP(_apSSID);
+            success = WiFi.beginAP(_ssid);
         }
         
         if (success)
@@ -83,9 +82,9 @@ bool WifiServer::begin()
     }
     else // Client mode - non-blocking initialization
     {
-        sendDebug(String(F("Starting WiFi client connection to: ")) + String(_clientSSID), F("WifiServer"));
+        sendDebug(String(F("Starting WiFi client connection to: ")) + String(_ssid), F("WifiServer"));
         
-        WiFi.begin(_clientSSID, _clientPassword);
+        WiFi.begin(_ssid, _password);
         _connectionState = WifiConnectionState::Connecting;
         _connectionStartTime = millis();
         _lastConnectionAttempt = _connectionStartTime;
@@ -100,10 +99,10 @@ bool WifiServer::begin()
 
 void WifiServer::startServer()
 {
-    if (_server == nullptr)
+    if (!_serverActive)
     {
-        _server = new WiFiServer(_port);
-        _server->begin();
+        _server.begin();
+        _serverActive = true;
         _initialized = true;
         
         sendDebug(String(F("HTTP server started on port ")) + String(_port), F("WifiServer"));
@@ -112,11 +111,10 @@ void WifiServer::startServer()
 
 void WifiServer::end()
 {
-    if (_server != nullptr)
+    if (_serverActive)
     {
-        _server->end();
-        delete _server;
-        _server = nullptr;
+        _server.end();
+        _serverActive = false;
     }
     
     if (_initialized)
@@ -141,9 +139,9 @@ void WifiServer::update()
     }
     
     // Only handle HTTP clients if we're connected and server is running
-    if (_server != nullptr && isConnected())
+    if (_serverActive && isConnected())
     {
-        WiFiClient client = _server->available();
+        WiFiClient client = _server.available();
         if (client)
         {
             handleClient(client);
@@ -198,7 +196,7 @@ void WifiServer::updateClientConnection()
             if (now - _lastConnectionAttempt >= ConnectionRetryIntervalMs)
             {
                 sendDebug(F("Attempting WiFi reconnection..."), F("WifiServer"));
-                WiFi.begin(_clientSSID, _clientPassword);
+                WiFi.begin(_ssid, _password);
                 _connectionState = WifiConnectionState::Connecting;
                 _connectionStartTime = now;
                 _lastConnectionAttempt = now;
@@ -305,8 +303,7 @@ void WifiServer::handleDataRoute(WiFiClient& client)
     String json = "{";
     json += "\"uptime\":";
     json += millis();
-    json += ",\"freeMemory\":";
-    json += SharedFunctions::freeMemory();
+    json += ",\"freeMemory\": 0";
     json += ",\"wifi\":{";
     json += "\"mode\":\"";
     json += (_mode == WifiMode::AccessPoint) ? "AP" : "Client";
@@ -430,14 +427,7 @@ String WifiServer::getIPAddress() const
 
 String WifiServer::getSSID() const
 {
-    if (_mode == WifiMode::AccessPoint)
-    {
-        return String(_apSSID);
-    }
-    else
-    {
-        return String(_clientSSID);
-    }
+    return String(_ssid);
 }
 
 int WifiServer::getSignalStrength() const

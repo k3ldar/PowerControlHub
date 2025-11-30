@@ -8,7 +8,7 @@ struct QItem
 	T data;
 	QItem* next;
 	
-	QItem(T d) : data(d), next(NULL) {}
+	QItem(T d) : data(d), next(nullptr) {}
 };
 
 template<typename T>
@@ -33,8 +33,8 @@ public:
 template<typename T>
 Queue<T>::Queue(uint8_t capacity, T defaultValue)
 {
-	_front = NULL;
-	_rear = NULL;
+	_front = nullptr;
+	_rear = nullptr;
     _capacity = capacity;
 	_size = 0;
 	_defaultValue = defaultValue;
@@ -61,7 +61,7 @@ void Queue<T>::enqueue(T item)
    _size++;
 	QItem<T>* temp = new QItem<T>(item);
 	
-	if (_rear == NULL)
+	if (_rear == nullptr)
 	{
 		_front = _rear = temp;
 		return;
@@ -81,8 +81,8 @@ T Queue<T>::dequeue()
 	_front = _front->next;
     _size--;
 	
-	if (_front == NULL)
-		_rear = NULL;
+	if (_front == nullptr)
+		_rear = nullptr;
 	
 	T value = temp->data;
 	delete(temp);
@@ -93,7 +93,7 @@ T Queue<T>::dequeue()
 template<typename T>
 T Queue<T>::average()
 {
-    if (isEmpty() || _front == NULL)
+    if (isEmpty() || _front == nullptr)
 	{
         return _defaultValue;
 	}
@@ -101,7 +101,7 @@ T Queue<T>::average()
     T sum = T(); // Zero-initialized
 	QItem<T>* temp = _front;
 	
-	while (temp != NULL)
+	while (temp != nullptr)
 	{
 		sum += temp->data;
 		temp = temp->next;

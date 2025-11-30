@@ -3,6 +3,7 @@
 #include <stdint.h>
 
 #include "SharedConstants.h"
+#include "Local.h"
 
 enum class VesselType : uint8_t {
     Motor = 0x00,                   // Power boat
@@ -42,6 +43,15 @@ struct Config {
     VesselType vesselType;
 	uint8_t hornRelayIndex; // 0..7 or 0xFF = none
 	uint16_t soundStartDelayMs; // 500ms default
-	bool bluetoothEnabled;
+
+#if defined(ARDUINO_UNO_R4)
+    bool bluetoothEnabled;
+	bool wifiEnabled;
+	uint8_t accessMode; // 0 = AP, 1 = Client
+    char _apSSID[MaxSSIDLength];
+    char _apPassword[MaxWiFiPasswordLength];
+    uint16_t port;
+#endif
+
     uint16_t checksum;
 } __attribute__((packed));

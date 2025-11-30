@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Local.h"
 
 constexpr uint8_t DefaultValue = 0xFF;
 
@@ -77,3 +78,9 @@ constexpr char HexPrefix[] = "0x";
 
 
 constexpr unsigned long SerialInitTimeoutMs = 300;
+
+
+#if defined(ARDUINO_UNO_R4)
+constexpr uint8_t MaxSSIDLength = 33; // 32 chars + null
+constexpr uint8_t MaxWiFiPasswordLength = 65; // 64 chars + null
+#endif
