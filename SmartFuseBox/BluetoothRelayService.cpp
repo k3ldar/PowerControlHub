@@ -2,16 +2,16 @@
 
 BluetoothRelayService* BluetoothRelayService::_serviceInstance = nullptr;
 
-BluetoothRelayService::BluetoothRelayService(RelayCommandHandler* relayHandler)
-    : _relayHandler(relayHandler),
+BluetoothRelayService::BluetoothRelayService(RelayController* relayController)
+    : _relayController(relayController),
       _relayCount(0),
       _service(nullptr),
       _statesChar(nullptr),
       _setChar(nullptr)
 {
-    if (_relayHandler)
+    if (_relayController)
     {
-        _relayCount = _relayHandler->getRelayCount();
+        _relayCount = _relayController->getRelayCount();
 	}
 }
 
@@ -44,7 +44,7 @@ BluetoothRelayService::~BluetoothRelayService()
 
 bool BluetoothRelayService::begin()
 {
-    if (!_relayHandler || _relayCount == 0)
+    if (!_relayController || _relayCount == 0)
     {
         return false;
     }
@@ -121,7 +121,8 @@ void BluetoothRelayService::loadStates(uint8_t* buffer)
 {
     for (uint8_t i = 0; i < _relayCount; i++)
     {
-        buffer[i] = _relayHandler->getRelayStatus(i);
+        CommandResult result = _relayController->getRelayStatus(i);
+		buffer[i] = (result.status > 0) ? 1 : 0;
     }
 }
 
@@ -139,7 +140,7 @@ void BluetoothRelayService::notifyAll()
 
 void BluetoothRelayService::onWriteSet()
 {
-    if (!_setChar || !_relayHandler)
+    if (!_setChar || !_relayController)
     {
         return;
     }
@@ -161,8 +162,10 @@ void BluetoothRelayService::onWriteSet()
     }
 
     // Enforce reserved horn relay and bounds inside handler
-    RelayResult result = _relayHandler->setRelayStatus(idx, state > 0);
-    if (result == RelayResult::Success)
+    CommandResult result = _relayController->setRelayState(idx, state > 0);
+
+	RelayResult relayResult = static_cast<RelayResult>(result.status);
+    if (relayResult == RelayResult::Success)
     {
         notifyAll();
     }

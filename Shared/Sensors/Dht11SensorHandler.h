@@ -39,9 +39,8 @@ protected:
 			if (_warningManager && !_warningManager->isWarningActive(WarningType::TemperatureSensorFailure))
 			{
 				_warningManager->raiseWarning(WarningType::TemperatureSensorFailure);
+				sendError(String(result), F("DHT11 Error"));
 			}
-				
-			sendError(String(result), F("DHT11 Error"));
 
 			return TempHumidityCheckMs;
 		}

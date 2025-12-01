@@ -3,14 +3,15 @@
 
 
 ConfigCommandHandler::ConfigCommandHandler(SoundManager* soundManager, BluetoothController* bluetoothController,
-    RelayCommandHandler* relayCommandHandler)
+    WifiController* wifiController, RelayCommandHandler* relayCommandHandler)
     : _soundManager(soundManager),
       _bluetoothController(bluetoothController),
+	  _wifiController(wifiController),
       _relayCommandHandler(relayCommandHandler)
 {
 }
 
-bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const String command, const StringKeyValue params[], int paramCount)
+bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const String command, const StringKeyValue params[], uint8_t paramCount)
 {
     // Access the in-memory config
     Config* config = ConfigManager::getConfigPtr();
@@ -51,8 +52,25 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const Str
         // C9 Sound start delay
         sender->sendCommand(ConfigSoundStartDelay, "v=" + String(config->soundStartDelayMs));
 
+#if defined(ARDUINO_UNO_R4)
 		// C10 Bluetooth enable
 		sender->sendCommand(ConfigBluetoothEnable, "v=" + String(config->bluetoothEnabled ? "1" : "0"));
+
+		// C11 WiFi enable
+		sender->sendCommand(ConfigWifiEnable, "v=" + String(config->wifiEnabled ? "1" : "0"));
+
+		// C12 WiFi mode
+		sender->sendCommand(ConfigWifiMode, "v=" + String(config->accessMode));
+
+		// C13 WiFi SSID
+		sender->sendCommand(ConfigWifiSSID, "v=" + String(config->_apSSID));
+
+		// C14 WiFi Password
+		sender->sendCommand(ConfigWifiPassword, "v=" + String(config->_apPassword));
+
+		// C15 WiFi Port
+		sender->sendCommand(ConfigWifiPort, "v=" + String(config->wifiPort));
+#endif
 
         sendAckOk(sender, cmd);
     }
@@ -131,7 +149,7 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const Str
     }
 	else if (cmd == ConfigBluetoothEnable)
     {
-        // Expect "C10:enable=<0|1>"
+        // Expect "C10:v=<0|1>"
         if (paramCount >= 1)
         {
             bool enable = (params[0].value == "1");
@@ -157,6 +175,107 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const Str
             return true;
         }
     }
+#if defined(ARDUINO_UNO_R4)
+    else if (cmd == ConfigWifiEnable)
+    {
+        // Expect "C11:v=<0|1>"
+        if (paramCount >= 1)
+        {
+            bool enable = (params[0].value == "1");
+            config->wifiEnabled = enable;
+            // do not apply live, only on next restart, otherwise too many enabled/disable cycles will 
+            // eventually force the board to run out of memory, the only exception to this is if 
+            // it starts disabled and is being enabled now, i.e. once on it needs rebooting to turn off again
+            if (_wifiController && !_wifiController->isEnabled())
+            {
+                if (!_wifiController->setEnabled(enable))
+                {
+                    sendAckErr(sender, cmd, F("WiFi init failed"), &params[0]);
+                    return true;
+                }
+            }
+            sendAckOk(sender, cmd, &params[0]);
+        }
+        else
+        {
+            sendAckErr(sender, cmd, F("Missing param"));
+            return true;
+        }
+    }
+    else if (cmd == ConfigWifiMode)
+    {
+        // Expect "C12:v=<0|1>"
+        if (paramCount >= 1)
+        {
+            uint8_t mode = params[0].value.toInt();
+            if (mode > 1)
+            {
+                sendAckErr(sender, cmd, F("Invalid WiFi mode"), &params[0]);
+                return true;
+            }
+            config->accessMode = mode;
+            sendAckOk(sender, cmd, &params[0]);
+        }
+        else
+        {
+            sendAckErr(sender, cmd, F("Missing param"));
+            return true;
+        }
+	}
+	else if (cmd == ConfigWifiSSID)
+    {
+        // Expect "C13:v=<value>"
+        if (paramCount >= 1)
+        {
+            String ssid = params[0].value;
+            ssid.trim();
+            ssid.toCharArray(config->_apSSID, sizeof(config->_apSSID));
+            sendAckOk(sender, cmd, &params[0]);
+        }
+        else
+        {
+            sendAckErr(sender, cmd, F("Missing param"));
+            return true;
+        }
+    }
+    else if (cmd == ConfigWifiPassword)
+    {
+        // Expect "C14:v=<value>"
+        if (paramCount >= 1)
+        {
+            String password = params[0].value;
+            password.trim();
+            password.toCharArray(config->_apPassword, sizeof(config->_apPassword));
+            sendAckOk(sender, cmd, &params[0]);
+        }
+        else
+        {
+            sendAckErr(sender, cmd, F("Missing param"));
+            return true;
+        }
+    }
+    else if (cmd == ConfigWifiPort)
+    {
+        // Expect "C15:v=<value>"
+        if (paramCount >= 1)
+        {
+            uint16_t port = params[0].value.toInt();
+            if (port == 0)
+            {
+                sendAckErr(sender, cmd, F("Invalid port"), &params[0]);
+                return true;
+            }
+            config->wifiPort = port;
+            sendAckOk(sender, cmd, &params[0]);
+        }
+        else
+        {
+            sendAckErr(sender, cmd, F("Missing param"));
+            return true;
+        }
+	}
+#endif
+
     else
     {
         sendAckErr(sender, cmd, F("Unknown config command"));
@@ -169,7 +288,8 @@ const String* ConfigCommandHandler::supportedCommands(size_t& count) const
 {
     static const String cmds[] = { ConfigSaveSettings, ConfigGetSettings, 
         ConfigResetSettings, ConfigBoatType, ConfigSoundRelayId, ConfigSoundStartDelay,
-        ConfigBluetoothEnable};
+        ConfigBluetoothEnable, ConfigWifiEnable, ConfigWifiMode, ConfigWifiSSID, 
+        ConfigWifiPassword, ConfigWifiPort };
     count = sizeof(cmds) / sizeof(cmds[0]);
     return cmds;
 }

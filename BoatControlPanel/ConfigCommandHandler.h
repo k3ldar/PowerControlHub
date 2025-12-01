@@ -12,7 +12,7 @@ public:
     // Constructor: pass the HomePage pointer so we can notify UI when saved/updated
     explicit ConfigCommandHandler(BroadcastManager* broadcastManager, HomePage* homePage);
 
-    bool handleCommand(SerialCommandManager* sender, const String command, const StringKeyValue params[], int paramCount) override;
+    bool handleCommand(SerialCommandManager* sender, const String command, const StringKeyValue params[], uint8_t paramCount) override;
     const String* supportedCommands(size_t& count) const override;
 
 private:

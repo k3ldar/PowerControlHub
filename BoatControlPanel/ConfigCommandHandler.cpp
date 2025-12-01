@@ -6,7 +6,7 @@ ConfigCommandHandler::ConfigCommandHandler(BroadcastManager* broadcastManager, H
 {
 }
 
-bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const String command, const StringKeyValue params[], int paramCount)
+bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const String command, const StringKeyValue params[], uint8_t paramCount)
 {
     // Access the in-memory config
     Config* cfg = ConfigManager::getConfigPtr();

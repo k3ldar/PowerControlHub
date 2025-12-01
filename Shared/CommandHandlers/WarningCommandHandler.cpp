@@ -12,7 +12,7 @@ WarningCommandHandler::WarningCommandHandler(BroadcastManager* broadcastManager,
 {
 }
 
-bool WarningCommandHandler::handleCommand(SerialCommandManager* sender, const String command, const StringKeyValue params[], int paramCount)
+bool WarningCommandHandler::handleCommand(SerialCommandManager* sender, const String command, const StringKeyValue params[], uint8_t paramCount)
 {
     String cmd = command;
     cmd.trim();
