@@ -1,9 +1,10 @@
 #include "WifiServer.h"
 
-WifiServer::WifiServer(SerialCommandManager* commandMgrComputer, uint16_t port)
-    : SingleLoggerSupport(commandMgrComputer),
-        _server(port),  // Initialize with port
+WifiServer::WifiServer(SerialCommandManager* commandMgrComputer, uint16_t port, INetworkCommandHandler** handlers, size_t handlerCount)
+	:   SingleLoggerSupport(commandMgrComputer), 
+        _handlers(handlers), _handlerCount(handlerCount),
         _serverActive(false),
+        _server(port),  // Initialize with port
         _mode(WifiMode::AccessPoint),
         _connectionState(WifiConnectionState::Disconnected),
         _port(port),
@@ -258,14 +259,25 @@ void WifiServer::handleClient(WiFiClient& client)
         query = fullPath.substring(queryIndex + 1);
     }
     
-    sendDebug(String(F("Request: ")) + fullPath, F("WifiServer"));
-    
-    // Route the request
-    if (path.startsWith("/command"))
+    sendDebug(String(F("Request: ")) + method + String(F(" ")) + path, F("WifiServer"));
+
+    // Route the request - try handlers first, then built-in routes
+    if (_handlers && _handlerCount > 0)
     {
-        handleCommandRoute(client, path, query);
+        // Loop through handlers and find matching route
+        for (size_t i = 0; i < _handlerCount; i++)
+        {
+            if (_handlers[i] && path.startsWith(_handlers[i]->getRoute()))
+            {
+                dispatchToHandler(client, path, method, query);
+                client.stop();
+                sendDebug(F("Client disconnected"), F("WifiServer"));
+                return;
+            }
+        }
     }
-    else if (path.startsWith("/data"))
+
+    if (path.startsWith("/data"))
     {
         handleDataRoute(client);
     }
@@ -329,7 +341,7 @@ void WifiServer::handleDataRoute(WiFiClient& client)
     json += "\",\"ssid\":\"";
     json += getSSID();
     json += "\",\"ip\":\"";
-    json += getIPAddress();
+    json += getIpAddress();
     json += "\"";
     
     if (_mode == WifiMode::Client && isConnected())
@@ -414,7 +426,7 @@ bool WifiServer::isConnected() const
     return _connectionState == WifiConnectionState::Connected;
 }
 
-String WifiServer::getIPAddress() const
+String WifiServer::getIpAddress() const
 {
     if (!_initialized)
     {
@@ -440,4 +452,51 @@ int WifiServer::getSignalStrength() const
     return WiFi.RSSI();
 }
 
+void WifiServer::dispatchToHandler(WiFiClient& client, const String& path, const String& method, const String& query)
+{
+    // Find the matching handler
+    INetworkCommandHandler* handler = nullptr;
 
+    for (size_t i = 0; i < _handlerCount; i++)
+    {
+        if (_handlers[i] && path.startsWith(_handlers[i]->getRoute()))
+        {
+            handler = _handlers[i];
+            break;
+        }
+    }
+
+    if (!handler)
+    {
+        send404(client);
+        return;
+    }
+
+    // Prepare response buffer
+    char responseBuffer[512];
+    responseBuffer[0] = '\0';
+
+    // Call handler
+    CommandResult result = handler->handleRequest(method, query, responseBuffer, sizeof(responseBuffer));
+
+    // Send response based on result
+    if (result.success)
+    {
+        sendResponse(client, 200, "application/json", String(responseBuffer));
+        sendDebug(String(F("Handler success: ")) + String(handler->getRoute()), F("WifiServer"));
+    }
+    else
+    {
+        // Check if buffer has error message
+        if (responseBuffer[0] != '\0')
+        {
+            sendResponse(client, 400, "application/json", String(responseBuffer));
+        }
+        else
+        {
+            send404(client);
+        }
+
+        sendDebug(String(F("Handler error: ")) + String(handler->getRoute()), F("WifiServer"));
+    }
+}

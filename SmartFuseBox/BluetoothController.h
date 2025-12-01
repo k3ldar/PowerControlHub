@@ -7,7 +7,7 @@
 #include "BluetoothSensorService.h"
 #include "BluetoothRelayService.h"
 #include "WarningType.h"
-#include "RelayCommandHandler.h"
+#include "RelayController.h"
 
 class WarningManager;
 class SystemCommandHandler;
@@ -18,12 +18,12 @@ class BluetoothController
 public:
     BluetoothController(SystemCommandHandler* systemHandler,
                         SensorCommandHandler* sensorHandler,
-		                RelayCommandHandler* relayHandler,
+		                RelayController* relayController,
                         WarningManager* warningManager,
                         SerialCommandManager* commandMgrComputer)
         : _systemHandler(systemHandler),
           _sensorHandler(sensorHandler),
-		  _relayHandler(relayHandler),
+		  _relayController(relayController),
           _warningManager(warningManager),
 		  _commandMgrComputer(commandMgrComputer),
           _manager(nullptr),
@@ -69,7 +69,7 @@ public:
 private:
     SystemCommandHandler* _systemHandler;
     SensorCommandHandler* _sensorHandler;
-    RelayCommandHandler* _relayHandler;
+    RelayController* _relayController;
     WarningManager* _warningManager;
 	SerialCommandManager* _commandMgrComputer;
 
@@ -95,7 +95,7 @@ private:
         // Create services
         _systemService = new BluetoothSystemService(_systemHandler);
         _sensorService = new BluetoothSensorService(_sensorHandler);
-		_relayService = new BluetoothRelayService(_relayHandler);
+		_relayService = new BluetoothRelayService(_relayController);
 
         _serviceCount = 3U;
         _services = new BluetoothServiceBase*[_serviceCount];

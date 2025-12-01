@@ -13,12 +13,6 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="Header Files\CommandHandlers">
-      <UniqueIdentifier>{0f51ff6d-4f20-4083-819f-fc82bf203688}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\CommandHandlers">
-      <UniqueIdentifier>{116e7f36-ca32-4d49-9f14-c2cadc47a1be}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\Sensors">
       <UniqueIdentifier>{b2560382-112e-4051-8e71-7cbe1f03a4f2}</UniqueIdentifier>
     </Filter>
@@ -28,38 +22,53 @@
     <Filter Include="Header Files\SharedCode">
       <UniqueIdentifier>{2c5c1b61-1f57-461e-9bb6-4da6def3c316}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\SharedCode\CommandHandlers">
-      <UniqueIdentifier>{c1b264e0-e00a-461f-bdac-3792ee219b47}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\SharedCode\CommandHandlers">
-      <UniqueIdentifier>{83156138-a987-43b1-a64d-b3cb5c3ce530}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\Bluetooth">
       <UniqueIdentifier>{5acd69d0-acce-44d6-a78e-47664e8e5636}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\Bluetooth">
       <UniqueIdentifier>{be3c0dfc-ca08-4b9c-96eb-f395e93dc72e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\SerialCommandHandlers">
+      <UniqueIdentifier>{0f51ff6d-4f20-4083-819f-fc82bf203688}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\SerialCommandHandlers">
+      <UniqueIdentifier>{116e7f36-ca32-4d49-9f14-c2cadc47a1be}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\SharedCode\SerialCommandHandlers">
+      <UniqueIdentifier>{83156138-a987-43b1-a64d-b3cb5c3ce530}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\SharedCode\SerialCommandHandlers">
+      <UniqueIdentifier>{c1b264e0-e00a-461f-bdac-3792ee219b47}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\BusinessLogic">
+      <UniqueIdentifier>{9f596ba8-b476-499a-b358-f705bee60d84}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\NetworkCommandHandlers">
+      <UniqueIdentifier>{709bf93c-ce84-4056-b2d5-8beffb18f024}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\NetworkCommandHandlers">
+      <UniqueIdentifier>{65b4b309-7c84-4a92-a16f-ca5115f39376}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="SmartFuseBox.ino" />
     <ClCompile Include="RelayCommandHandler.h">
-      <Filter>Header Files\CommandHandlers</Filter>
+      <Filter>Header Files\SerialCommandHandlers</Filter>
     </ClCompile>
     <ClCompile Include="RelayCommandHandler.cpp">
-      <Filter>Source Files\CommandHandlers</Filter>
+      <Filter>Source Files\SerialCommandHandlers</Filter>
     </ClCompile>
     <ClCompile Include="SoundCommandHandler.cpp">
-      <Filter>Source Files\CommandHandlers</Filter>
+      <Filter>Source Files\SerialCommandHandlers</Filter>
     </ClCompile>
     <ClCompile Include="SoundManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ConfigCommandHandler.cpp">
-      <Filter>Source Files\CommandHandlers</Filter>
+      <Filter>Source Files\SerialCommandHandlers</Filter>
     </ClCompile>
     <ClCompile Include="AckCommandHandler.cpp">
-      <Filter>Source Files\SharedCode\CommandHandlers</Filter>
+      <Filter>Source Files\SharedCode\SerialCommandHandlers</Filter>
     </ClCompile>
     <ClCompile Include="BroadcastManager.cpp">
       <Filter>Source Files\SharedCode</Filter>
@@ -70,11 +79,8 @@
     <ClCompile Include="SystemCommandHandler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="SystemCommandHandler.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="SensorCommandHandler.cpp">
-      <Filter>Source Files\SharedCode\CommandHandlers</Filter>
+      <Filter>Source Files\SharedCode\SerialCommandHandlers</Filter>
     </ClCompile>
     <ClCompile Include="WarningManager.cpp">
       <Filter>Source Files\SharedCode</Filter>
@@ -86,7 +92,7 @@
       <Filter>Source Files\SharedCode\CommandHandlers</Filter>
     </ClCompile>
     <ClCompile Include="WarningCommandHandler.cpp">
-      <Filter>Source Files\SharedCode\CommandHandlers</Filter>
+      <Filter>Source Files\SharedCode\SerialCommandHandlers</Filter>
     </ClCompile>
     <ClCompile Include="SystemCpuMonitor.cpp">
       <Filter>Source Files\SharedCode</Filter>
@@ -112,13 +118,19 @@
     <ClCompile Include="ConfigManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="SystemCommandHandler.cpp">
+      <Filter>Source Files\SharedCode\SerialCommandHandlers</Filter>
+    </ClCompile>
+    <ClCompile Include="RelayNetworkHandler.cpp">
+      <Filter>Source Files\NetworkCommandHandlers</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="__vm\.SmartFuseBox.vsarduino.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="SoundCommandHandler.h">
-      <Filter>Header Files\CommandHandlers</Filter>
+      <Filter>Header Files\SerialCommandHandlers</Filter>
     </ClInclude>
     <ClInclude Include="SoundManager.h">
       <Filter>Header Files</Filter>
@@ -136,13 +148,13 @@
       <Filter>Header Files\SharedCode</Filter>
     </ClInclude>
     <ClInclude Include="AckCommandHandler.h">
-      <Filter>Header Files\SharedCode\CommandHandlers</Filter>
+      <Filter>Header Files\SharedCode\SerialCommandHandlers</Filter>
     </ClInclude>
     <ClInclude Include="BroadcastManager.h">
       <Filter>Header Files\SharedCode</Filter>
     </ClInclude>
     <ClInclude Include="SharedBaseCommandHandler.h">
-      <Filter>Header Files\SharedCode\CommandHandlers</Filter>
+      <Filter>Header Files\SharedCode\SerialCommandHandlers</Filter>
     </ClInclude>
     <ClInclude Include="SharedConstants.h">
       <Filter>Header Files\SharedCode</Filter>
@@ -154,22 +166,13 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ConfigCommandHandler.h">
-      <Filter>Header Files\SharedCode\CommandHandlers</Filter>
+      <Filter>Header Files\SharedCode\SerialCommandHandlers</Filter>
     </ClInclude>
     <ClInclude Include="SensorCommandHandler.h">
-      <Filter>Header Files\SharedCode\CommandHandlers</Filter>
-    </ClInclude>
-    <ClInclude Include="SharedFunctions.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="WarningCommandHandler.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\SharedCode\SerialCommandHandlers</Filter>
     </ClInclude>
     <ClInclude Include="SystemCpuMonitor.h">
       <Filter>Header Files\SharedCode</Filter>
-    </ClInclude>
-    <ClInclude Include="SystemCommandHandler.h">
-      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="BluetoothSystemService.h">
       <Filter>Header Files\Bluetooth</Filter>
@@ -203,6 +206,24 @@
     </ClInclude>
     <ClInclude Include="WifiController.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SystemCommandHandler.h">
+      <Filter>Header Files\SharedCode\SerialCommandHandlers</Filter>
+    </ClInclude>
+    <ClInclude Include="WarningCommandHandler.h">
+      <Filter>Header Files\SharedCode\SerialCommandHandlers</Filter>
+    </ClInclude>
+    <ClInclude Include="RelayController.h">
+      <Filter>Header Files\BusinessLogic</Filter>
+    </ClInclude>
+    <ClInclude Include="RelayNetworkHandler.h">
+      <Filter>Header Files\NetworkCommandHandlers</Filter>
+    </ClInclude>
+    <ClInclude Include="INetworkCommandHandler.h">
+      <Filter>Header Files\NetworkCommandHandlers</Filter>
+    </ClInclude>
+    <ClInclude Include="SharedFunctions.h">
+      <Filter>Header Files\SharedCode</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

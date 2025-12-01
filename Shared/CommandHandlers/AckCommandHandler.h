@@ -36,13 +36,13 @@ public:
 #endif
     
 
-    bool handleCommand(SerialCommandManager* sender, const String command, const StringKeyValue params[], int paramCount) override;
+    bool handleCommand(SerialCommandManager* sender, const String command, const StringKeyValue params[], uint8_t paramCount) override;
     const String* supportedCommands(size_t& count) const override;
 
 private:
 #ifdef BOAT_CONTROL_PANEL
     bool processHeartbeatAck(SerialCommandManager* sender, const String& key, const String& value);
-    bool processWarningsListAck(SerialCommandManager* sender, const String& key, const String& value, const StringKeyValue params[], int paramCount);
+    bool processWarningsListAck(SerialCommandManager* sender, const String& key, const String& value, const StringKeyValue params[], uint8_t paramCount);
 #endif
 };
 

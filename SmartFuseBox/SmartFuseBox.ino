@@ -29,7 +29,11 @@
 #include "BluetoothSystemService.h"
 #include "BluetoothSensorService.h"
 #include "BluetoothController.h"
+
 #include "WifiController.h"
+#include "RelayNetworkHandler.h"
+
+#include "RelayController.h"
 
 
 #define COMPUTER_SERIAL Serial
@@ -38,6 +42,9 @@
 // forward declares
 void onComputerCommandReceived(SerialCommandManager* mgr);
 void onLinkCommandReceived(SerialCommandManager* mgr);
+
+// controllers
+RelayController relayController(Relays, TotalRelays);
 
 SerialCommandManager commandMgrComputer(&COMPUTER_SERIAL, onComputerCommandReceived, '\n', ':', '=', 500, 64);
 SerialCommandManager commandMgrLink(&LINK_SERIAL, onLinkCommandReceived, '\n', ':', '=', 500, 64);
@@ -51,7 +58,7 @@ WarningManager warningManager(&commandMgrLink, HeartbeatIntervalMs, HeartbeatTim
 SoundManager soundManager;
 
 // link command handlers
-RelayCommandHandler relayHandler(&commandMgrComputer, &commandMgrLink, Relays, TotalRelays);
+RelayCommandHandler relayHandler(&commandMgrComputer, &commandMgrLink, &relayController);
 SoundCommandHandler soundHandler(&commandMgrComputer, &commandMgrLink, &soundManager);
 InterceptDebugHandler interceptDebugHandler(&broadcastManager);
 SensorCommandHandler sensorCommandHandler(&broadcastManager, &warningManager);
@@ -59,7 +66,7 @@ WarningCommandHandler warningCommandHandler(&broadcastManager, &warningManager);
 
 // shared command handlers
 AckCommandHandler ackHandler(&broadcastManager, &warningManager);
-SystemCommandHandler systemCommandHandler(&broadcastManager);
+SystemCommandHandler systemCommandHandler(&broadcastManager, &warningManager);
 
 // Sensors
 WaterSensorHandler waterSensorHandler(&broadcastManager, &sensorCommandHandler, WaterSensorPin, WaterSensorActivePin);
@@ -71,9 +78,11 @@ BaseSensorHandler* sensorHandlers[] = {
 SensorManager sensorManager(sensorHandlers, sizeof(sensorHandlers) / sizeof(sensorHandlers[0]));
 
 // configure bluetooth support
-BluetoothController bluetoothController(&systemCommandHandler, &sensorCommandHandler, &relayHandler, &warningManager, &commandMgrComputer);
+BluetoothController bluetoothController(&systemCommandHandler, &sensorCommandHandler, &relayController, &warningManager, &commandMgrComputer);
 
 // configure wifi support
+RelayNetworkHandler relayNetworkHandler(&relayController);
+
 WifiController wifiController(&commandMgrComputer, &warningManager);
 
 // computer command handlers
@@ -89,6 +98,10 @@ void setup()
 		warningManager.raiseWarning(WarningType::DefaultConfigurationFuseBox);
 	}
 
+	// middleware
+	relayHandler.setup();
+
+	// serial command handlers
 	ISerialCommandHandler* linkHandlers[] = { &relayHandler, &soundHandler, &configHandler, &ackHandler, &systemCommandHandler, &warningCommandHandler, &sensorCommandHandler } ;
 	size_t linkHandlerCount = sizeof(linkHandlers) / sizeof(linkHandlers[0]);
 	commandMgrLink.registerHandlers(linkHandlers, linkHandlerCount);
@@ -97,13 +110,22 @@ void setup()
 	size_t computerHandlerCount = sizeof(computerHandlers) / sizeof(computerHandlers[0]);
 	commandMgrComputer.registerHandlers(computerHandlers, computerHandlerCount);
 
+	// network command handlers
+	INetworkCommandHandler* networkHandlers[] = { &relayNetworkHandler };
+	size_t networkHandlerCount = sizeof(networkHandlers) / sizeof(networkHandlers[0]);
+	wifiController.registerHandlers(networkHandlers, networkHandlerCount);
+
 	SharedFunctions::initializeSerial(COMPUTER_SERIAL, 115200, true);
 	SharedFunctions::initializeSerial(LINK_SERIAL, 9600, true);
 
 	Config* config = ConfigManager::getConfigPtr();
+
+	// bluetooth
 	bluetoothController.applyConfig(config);
+
+	//wifi 
 	wifiController.applyConfig(config);
-	relayHandler.setup();
+	systemCommandHandler.setWifiController(&wifiController);
 
 	soundManager.configUpdated(config);
 	relayHandler.configUpdated(config);

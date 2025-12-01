@@ -85,7 +85,7 @@ ConfigCommandHandler configHandler(&broadcastManager, &homePage);
 
 // shared command handlers
 AckCommandHandler ackHandler(&broadcastManager, &nextion, &warningManager);
-SystemCommandHandler systemCommandHandler(&broadcastManager);
+SystemCommandHandler systemCommandHandler(&broadcastManager, &warningManager);
 
 // Timers
 unsigned long lastUpdate = 0;

@@ -4,6 +4,7 @@
 #include <SerialCommandManager.h>
 #include "LoggingSupport.h"
 #include "SharedConstants.h"
+#include "INetworkCommandHandler.h"
 
 enum class WifiMode : uint8_t
 {
@@ -32,7 +33,11 @@ private:
     // AP mode settings
     char _ssid[MaxSSIDLength];
     char _password[MaxWiFiPasswordLength];
-    
+
+    // Network command handlers
+    INetworkCommandHandler** _handlers;
+    size_t _handlerCount;
+
     // Connection tracking
     unsigned long _lastConnectionAttempt;
     unsigned long _connectionStartTime;
@@ -48,9 +53,10 @@ private:
     String parseQueryParameter(const String& query, const String& paramName);
     void updateClientConnection();
     void startServer();
+    void dispatchToHandler(WiFiClient& client, const String& path, const String& method, const String& query);
     
 public:
-    WifiServer(SerialCommandManager* commandMgrComputer, uint16_t port = 80);
+    WifiServer(SerialCommandManager* commandMgrComputer, uint16_t port, INetworkCommandHandler** handlers, size_t handlerCount);
     ~WifiServer();
     
     // Configuration methods
@@ -67,7 +73,7 @@ public:
     bool isInitialized() const { return _initialized; }
     WifiConnectionState getConnectionState() const { return _connectionState; }
     WifiMode getMode() const { return _mode; }
-    String getIPAddress() const;
+    String getIpAddress() const;
     String getSSID() const;
     int getSignalStrength() const;
 };

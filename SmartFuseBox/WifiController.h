@@ -1,6 +1,9 @@
 #pragma once
 
 #include <Arduino.h>
+#include <SerialCommandManager.h>
+
+#include "INetworkCommandHandler.h"
 #include "WifiServer.h"
 #include "Config.h"
 #include "WarningManager.h"
@@ -10,9 +13,11 @@ class WifiController
 public:
     WifiController(SerialCommandManager* commandMgrComputer, WarningManager* warningManager)
         : _commandMgrComputer(commandMgrComputer),
-          _warningManager(warningManager),
           _wifiServer(nullptr),
-          _enabled(false)
+          _enabled(false),
+		_handlerObjects(nullptr),
+		_handlerCount(0),
+		_port(80)
     {
     }
 
@@ -90,6 +95,24 @@ public:
         }
     }
 
+    void registerHandlers(INetworkCommandHandler** handlers, size_t handlerCount)
+    {
+        if (_handlerObjects)
+        {
+            delete[] _handlerObjects;
+            _handlerObjects = nullptr;
+            _handlerCount = 0;
+        }
+
+        _handlerCount = handlerCount;
+        _handlerObjects = new INetworkCommandHandler * [_handlerCount];
+
+        for (size_t i = 0; i < _handlerCount; i++)
+        {
+            _handlerObjects[i] = handlers[i];
+        }
+    }
+
     WifiServer* getServer()
     {
         return _wifiServer;
@@ -100,6 +123,9 @@ private:
     WarningManager* _warningManager;
     WifiServer* _wifiServer;
     bool _enabled;
+    INetworkCommandHandler** _handlerObjects;
+    size_t _handlerCount = 0;
+	uint16_t _port = 80;
 
     bool isConfigValid(const Config* cfg) const
     {
@@ -134,7 +160,7 @@ private:
             return true; // Already enabled
         }
 
-        _wifiServer = new WifiServer(_commandMgrComputer);
+        _wifiServer = new WifiServer(_commandMgrComputer, _port, _handlerObjects, _handlerCount);
         
         if (_wifiServer == nullptr)
         {

@@ -13,7 +13,7 @@ public:
     static constexpr const char* RelayStatesCharUuid  = "9b9f0002-3c4a-4d9a-a6c1-11aa22bb33cc";
     static constexpr const char* RelaySetCharUuid     = "9b9f0003-3c4a-4d9a-a6c1-11aa22bb33cc";
 
-    explicit BluetoothRelayService(RelayCommandHandler* relayHandler);
+    explicit BluetoothRelayService(RelayController* relayController);
     ~BluetoothRelayService() override;
 
     // BluetoothServiceBase overrides
@@ -29,7 +29,7 @@ public:
 
 private:
     // Dependencies
-    RelayCommandHandler* _relayHandler;
+    RelayController* _relayController;
     uint8_t _relayCount;
 
     // BLE objects (manually managed)

@@ -78,6 +78,7 @@
     <ClCompile Include="BluetoothRelayService.cpp" />
     <ClCompile Include="BluetoothSensorService.cpp" />
     <ClCompile Include="BluetoothSystemService.cpp" />
+    <ClCompile Include="RelayNetworkHandler.cpp" />
     <ClCompile Include="SystemCpuMonitor.cpp" />
     <ClCompile Include="SharedFunctions.cpp" />
     <ClCompile Include="SystemCommandHandler.cpp" />
@@ -104,7 +105,10 @@
       <FileType>CppCode</FileType>
       <DeploymentContent>true</DeploymentContent>
     </ClCompile>
+    <ClInclude Include="INetworkCommandHandler.h" />
     <ClInclude Include="Queue.h" />
+    <ClInclude Include="RelayController.h" />
+    <ClInclude Include="RelayNetworkHandler.h" />
     <ClInclude Include="SystemCommandHandler.h" />
     <ClInclude Include="LoggingSupport.h" />
     <ClInclude Include="BluetoothController.h" />

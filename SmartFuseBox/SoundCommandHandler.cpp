@@ -36,7 +36,7 @@ const String* SoundCommandHandler::supportedCommands(size_t& count) const
     return cmds;
 }
 
-bool SoundCommandHandler::handleCommand(SerialCommandManager* sender, const String command, const StringKeyValue params[], int paramCount)
+bool SoundCommandHandler::handleCommand(SerialCommandManager* sender, const String command, const StringKeyValue params[], uint8_t paramCount)
 {
 	(void)params;
 

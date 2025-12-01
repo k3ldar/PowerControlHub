@@ -11,6 +11,7 @@ These are commands used to configure the system settings and can only be sent fr
 | `F2` — Free Memory | `F2` | When received will return the amount of free memory. |
 | `F3` — Cpu Usage | `F3` | When received will return the current CPU usage. No params. |
 | `F4` — Bluetooth Enabled | `F4` | When received will return the current enabled state of bluetooth 0 off 1 on. No params. |
+| `F5` — Wifi Enabled | `F5` | When received will return the current enabled state of wifi 0 off 1 on. No params. |
 
 ## Configuration Commands
 These are commands used to configure the system settings and can only be sent from a computer, they are not used for internal communication.

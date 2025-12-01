@@ -36,7 +36,7 @@ bool AckCommandHandler::processHeartbeatAck(SerialCommandManager* sender, const 
     return true;
 }
 
-bool AckCommandHandler::processWarningsListAck(SerialCommandManager* sender, const String& key, const String& value, const StringKeyValue params[], int paramCount)
+bool AckCommandHandler::processWarningsListAck(SerialCommandManager* sender, const String& key, const String& value, const StringKeyValue params[], uint8_t paramCount)
 {
     // Check for warnings list acknowledgement (W1=ok)
     if (key != WarningsList || !value.equalsIgnoreCase(AckSuccess))
@@ -110,7 +110,7 @@ bool AckCommandHandler::processWarningsListAck(SerialCommandManager* sender, con
 }
 #endif
 
-bool AckCommandHandler::handleCommand(SerialCommandManager* sender, const String command, const StringKeyValue params[], int paramCount)
+bool AckCommandHandler::handleCommand(SerialCommandManager* sender, const String command, const StringKeyValue params[], uint8_t paramCount)
 {
     (void)sender;
     sendDebugMessage("Processing ACK: " + command + " (" + String(paramCount) + " params)", AckCommand);
