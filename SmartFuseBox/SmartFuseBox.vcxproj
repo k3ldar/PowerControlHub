@@ -93,7 +93,7 @@
       <DeploymentContent>true</DeploymentContent>
     </ClCompile>
     <ClCompile Include="SoundCommandHandler.cpp" />
-    <ClCompile Include="SoundManager.cpp" />
+    <ClCompile Include="SoundController.cpp" />
     <ClCompile Include="SmartFuseBox.ino">
       <FileType>CppCode</FileType>
       <DeploymentContent>true</DeploymentContent>
@@ -133,7 +133,7 @@
     <ClInclude Include="Config.h" />
     <ClInclude Include="ConfigCommandHandler.h" />
     <ClInclude Include="SoundCommandHandler.h" />
-    <ClInclude Include="SoundManager.h" />
+    <ClInclude Include="SoundController.h" />
     <ClInclude Include="WaterSensorHandler.h" />
     <ClInclude Include="WifiController.h" />
     <ClInclude Include="WifiServer.h" />

@@ -20,8 +20,8 @@ constexpr char SoundOvertakeDanger[] = "H11";
 constexpr char SoundTest[] = "H12";
 
 SoundCommandHandler::SoundCommandHandler(SerialCommandManager* commandMgrComputer, SerialCommandManager* commandMgrLink, 
-    SoundManager* soundManager)
-	: _commandMgrComputer(commandMgrComputer), _commandMgrLink(commandMgrLink), _soundManager(soundManager)
+    SoundController* soundController)
+	: _commandMgrComputer(commandMgrComputer), _commandMgrLink(commandMgrLink), _soundController(soundController)
 {
 
 }
@@ -40,7 +40,7 @@ bool SoundCommandHandler::handleCommand(SerialCommandManager* sender, const Stri
 {
 	(void)params;
 
-    if (_soundManager == nullptr)
+    if (_soundController == nullptr)
     {
         sendAckErr(sender, command, "Sound manager not initialized");
 		return true;
@@ -58,67 +58,67 @@ bool SoundCommandHandler::handleCommand(SerialCommandManager* sender, const Stri
 
     if (cmd == SoundCancellAll)
     {
-        _soundManager->playSound(SoundType::None);
+        _soundController->playSound(SoundType::None);
         sendAckOk(sender, cmd);
     }
     else if (cmd == SoundIsActive)
     {
-        StringKeyValue param = { String(static_cast<uint8_t>(_soundManager->getCurrentSoundType())), String(static_cast<uint8_t>(_soundManager->getCurrentSoundState())) };
+        StringKeyValue param = { String(static_cast<uint8_t>(_soundController->getCurrentSoundType())), String(static_cast<uint8_t>(_soundController->getCurrentSoundState())) };
         sendAckOk(sender, cmd, &param);
     }
     else if (cmd == SoundDangerSos)
     {
-        _soundManager->playSound(SoundType::Sos);
+        _soundController->playSound(SoundType::Sos);
         sendAckOk(sender, cmd);
     }
     else if (cmd == SoundFog)
     {
-        _soundManager->playSound(SoundType::Fog);
+        _soundController->playSound(SoundType::Fog);
         sendAckOk(sender, cmd);
     }
     else if (cmd == SoundManeuverAstern)
     {
-        _soundManager->playSound(SoundType::MoveAstern);
+        _soundController->playSound(SoundType::MoveAstern);
         sendAckOk(sender, cmd);
     }
     else if (cmd == SoundManeuverPort)
     {
-        _soundManager->playSound(SoundType::MovePort);
+        _soundController->playSound(SoundType::MovePort);
         sendAckOk(sender, cmd);
     }
     else if (cmd == SoundManeuverStarboard)
     {
-        _soundManager->playSound(SoundType::MoveStarboard);
+        _soundController->playSound(SoundType::MoveStarboard);
         sendAckOk(sender, cmd);
     }
     else if (cmd == SoundManeuverDanger)
     {
-        _soundManager->playSound(SoundType::MoveDanger);
+        _soundController->playSound(SoundType::MoveDanger);
         sendAckOk(sender, cmd);
     }
     else if (cmd == SoundOvertakeConsent)
     {
-        _soundManager->playSound(SoundType::OvertakeConsent);
+        _soundController->playSound(SoundType::OvertakeConsent);
         sendAckOk(sender, cmd);
     }
     else if (cmd == SoundOvertakeDanger)
     {
-        _soundManager->playSound(SoundType::OvertakeDanger);
+        _soundController->playSound(SoundType::OvertakeDanger);
         sendAckOk(sender, cmd);
     }
     else if (cmd == SoundOvertakePort)
     {
-        _soundManager->playSound(SoundType::OvertakePort);
+        _soundController->playSound(SoundType::OvertakePort);
         sendAckOk(sender, cmd);
     }
     else if (cmd == SoundOvertakeStarboard)
     {
-        _soundManager->playSound(SoundType::OvertakeStarboard);
+        _soundController->playSound(SoundType::OvertakeStarboard);
         sendAckOk(sender, cmd);
     }
     else if (cmd == SoundTest)
     {
-        _soundManager->playSound(SoundType::Test);
+        _soundController->playSound(SoundType::Test);
         sendAckOk(sender, cmd);
     }
     else

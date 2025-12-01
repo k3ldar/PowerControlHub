@@ -9,7 +9,7 @@
 #include "Config.h"
 #include "ConfigManager.h"
 #include "ConfigCommandHandler.h"
-#include "SoundManager.h"
+#include "SoundController.h"
 #include "WarningManager.h"
 
 #include "SystemCommandHandler.h"
@@ -45,6 +45,7 @@ void onLinkCommandReceived(SerialCommandManager* mgr);
 
 // controllers
 RelayController relayController(Relays, TotalRelays);
+SoundController soundController;
 
 SerialCommandManager commandMgrComputer(&COMPUTER_SERIAL, onComputerCommandReceived, '\n', ':', '=', 500, 64);
 SerialCommandManager commandMgrLink(&LINK_SERIAL, onLinkCommandReceived, '\n', ':', '=', 500, 64);
@@ -55,11 +56,9 @@ BroadcastManager broadcastManager(&commandMgrComputer, &commandMgrLink);
 // Warning manager with heartbeat monitoring
 WarningManager warningManager(&commandMgrLink, HeartbeatIntervalMs, HeartbeatTimeoutMs);
 
-SoundManager soundManager;
-
 // link command handlers
 RelayCommandHandler relayHandler(&commandMgrComputer, &commandMgrLink, &relayController);
-SoundCommandHandler soundHandler(&commandMgrComputer, &commandMgrLink, &soundManager);
+SoundCommandHandler soundHandler(&commandMgrComputer, &commandMgrLink, &soundController);
 InterceptDebugHandler interceptDebugHandler(&broadcastManager);
 SensorCommandHandler sensorCommandHandler(&broadcastManager, &warningManager);
 WarningCommandHandler warningCommandHandler(&broadcastManager, &warningManager);
@@ -86,7 +85,7 @@ RelayNetworkHandler relayNetworkHandler(&relayController);
 WifiController wifiController(&commandMgrComputer, &warningManager);
 
 // computer command handlers
-ConfigCommandHandler configHandler(&soundManager, &bluetoothController, &wifiController, &relayHandler);
+ConfigCommandHandler configHandler(&soundController, &bluetoothController, &wifiController, &relayHandler);
 
 void setup()
 {
@@ -127,7 +126,7 @@ void setup()
 	wifiController.applyConfig(config);
 	systemCommandHandler.setWifiController(&wifiController);
 
-	soundManager.configUpdated(config);
+	soundController.configUpdated(config);
 	relayHandler.configUpdated(config);
 	sensorManager.setup();
 	commandMgrComputer.sendCommand(SystemInitialized, "");
@@ -143,7 +142,7 @@ void loop()
 	SystemCpuMonitor::endTask();
 
 	SystemCpuMonitor::startTask();
-	soundManager.update();
+	soundController.update();
 	SystemCpuMonitor::endTask();
 
 	SystemCpuMonitor::startTask();

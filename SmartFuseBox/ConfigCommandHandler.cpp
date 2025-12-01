@@ -2,9 +2,9 @@
 #include "BluetoothController.h"
 
 
-ConfigCommandHandler::ConfigCommandHandler(SoundManager* soundManager, BluetoothController* bluetoothController,
+ConfigCommandHandler::ConfigCommandHandler(SoundController* soundController, BluetoothController* bluetoothController,
     WifiController* wifiController, RelayCommandHandler* relayCommandHandler)
-    : _soundManager(soundManager),
+    : _soundController(soundController),
       _bluetoothController(bluetoothController),
 	  _wifiController(wifiController),
       _relayCommandHandler(relayCommandHandler)
@@ -94,7 +94,7 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const Str
 
             config->vesselType = static_cast<VesselType>(type);
 
-            updateSoundManagerConfig(config);
+            updateSoundControllerConfig(config);
             
             sendAckOk(sender, cmd, &params[0]);
         }
@@ -138,7 +138,7 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const Str
             uint16_t soundStartDelay = params[0].value.toInt();
             config->soundStartDelayMs = soundStartDelay;
 
-            updateSoundManagerConfig(config);
+            updateSoundControllerConfig(config);
 
             sendAckOk(sender, cmd, &params[0]);
         }
@@ -294,10 +294,10 @@ const String* ConfigCommandHandler::supportedCommands(size_t& count) const
     return cmds;
 }
 
-void ConfigCommandHandler::updateSoundManagerConfig(Config* config)
+void ConfigCommandHandler::updateSoundControllerConfig(Config* config)
 {
-    if (_soundManager != nullptr && config != nullptr)
+    if (_soundController != nullptr && config != nullptr)
     {
-        _soundManager->configUpdated(config);
+        _soundController->configUpdated(config);
     }
 }
