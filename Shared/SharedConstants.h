@@ -50,6 +50,7 @@ constexpr char ConfigWifiMode[] = "C12";
 constexpr char ConfigWifiSSID[] = "C13";
 constexpr char ConfigWifiPassword[] = "C14";
 constexpr char ConfigWifiPort[] = "C15";
+constexpr char ConfigWifiState[] = "C16";
 #endif
 
 constexpr char WarningsActive[] = "W0";
@@ -89,16 +90,22 @@ constexpr char HexPrefix[] = "0x";
 constexpr unsigned long SerialInitTimeoutMs = 300;
 
 constexpr uint8_t RelayControllerNotInitialised = 1;
+constexpr uint8_t SoundControllerNotInitialised = 2;
+constexpr uint8_t InvalidCommandParameters = 3;
 
 
 #if defined(ARDUINO_UNO_R4)
 constexpr uint8_t MaxSSIDLength = 33; // 32 chars + null
 constexpr uint8_t MaxWiFiPasswordLength = 65; // 64 chars + null
+
+// WiFi Connection Quality Thresholds
+constexpr int8_t MinimumAcceptableRSSI = -80;  // dBm - reconnect below this
+constexpr int8_t WeakSignalWarningRSSI = -70;  // dBm - warn user
 #endif
 
 struct CommandResult {
     bool success;
-    uint8_t status;  // Can be: error code, single value, OR bitmask (8 relays)
+    uint8_t status;
 
     // Bit manipulation helpers (only use when status is bitmask)
     bool isRelayOn(uint8_t index) const {

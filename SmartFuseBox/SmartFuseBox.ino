@@ -9,7 +9,7 @@
 #include "Config.h"
 #include "ConfigManager.h"
 #include "ConfigCommandHandler.h"
-#include "SoundManager.h"
+#include "SoundController.h"
 #include "WarningManager.h"
 
 #include "SystemCommandHandler.h"
@@ -32,6 +32,7 @@
 
 #include "WifiController.h"
 #include "RelayNetworkHandler.h"
+#include "SoundNetworkHandler.h"
 
 #include "RelayController.h"
 
@@ -45,6 +46,7 @@ void onLinkCommandReceived(SerialCommandManager* mgr);
 
 // controllers
 RelayController relayController(Relays, TotalRelays);
+SoundController soundController;
 
 SerialCommandManager commandMgrComputer(&COMPUTER_SERIAL, onComputerCommandReceived, '\n', ':', '=', 500, 64);
 SerialCommandManager commandMgrLink(&LINK_SERIAL, onLinkCommandReceived, '\n', ':', '=', 500, 64);
@@ -55,11 +57,9 @@ BroadcastManager broadcastManager(&commandMgrComputer, &commandMgrLink);
 // Warning manager with heartbeat monitoring
 WarningManager warningManager(&commandMgrLink, HeartbeatIntervalMs, HeartbeatTimeoutMs);
 
-SoundManager soundManager;
-
 // link command handlers
 RelayCommandHandler relayHandler(&commandMgrComputer, &commandMgrLink, &relayController);
-SoundCommandHandler soundHandler(&commandMgrComputer, &commandMgrLink, &soundManager);
+SoundCommandHandler soundHandler(&commandMgrComputer, &commandMgrLink, &soundController);
 InterceptDebugHandler interceptDebugHandler(&broadcastManager);
 SensorCommandHandler sensorCommandHandler(&broadcastManager, &warningManager);
 WarningCommandHandler warningCommandHandler(&broadcastManager, &warningManager);
@@ -82,11 +82,12 @@ BluetoothController bluetoothController(&systemCommandHandler, &sensorCommandHan
 
 // configure wifi support
 RelayNetworkHandler relayNetworkHandler(&relayController);
+SoundNetworkHandler soundNetworkHandler(&soundController);
 
 WifiController wifiController(&commandMgrComputer, &warningManager);
 
 // computer command handlers
-ConfigCommandHandler configHandler(&soundManager, &bluetoothController, &wifiController, &relayHandler);
+ConfigCommandHandler configHandler(&soundController, &bluetoothController, &wifiController, &relayHandler);
 
 void setup()
 {
@@ -97,6 +98,8 @@ void setup()
 	{
 		warningManager.raiseWarning(WarningType::DefaultConfigurationFuseBox);
 	}
+
+	relayController.setup();
 
 	// middleware
 	relayHandler.setup();
@@ -111,7 +114,7 @@ void setup()
 	commandMgrComputer.registerHandlers(computerHandlers, computerHandlerCount);
 
 	// network command handlers
-	INetworkCommandHandler* networkHandlers[] = { &relayNetworkHandler };
+	INetworkCommandHandler* networkHandlers[] = { &relayNetworkHandler, &soundNetworkHandler };
 	size_t networkHandlerCount = sizeof(networkHandlers) / sizeof(networkHandlers[0]);
 	wifiController.registerHandlers(networkHandlers, networkHandlerCount);
 
@@ -127,7 +130,7 @@ void setup()
 	wifiController.applyConfig(config);
 	systemCommandHandler.setWifiController(&wifiController);
 
-	soundManager.configUpdated(config);
+	soundController.configUpdated(config);
 	relayHandler.configUpdated(config);
 	sensorManager.setup();
 	commandMgrComputer.sendCommand(SystemInitialized, "");
@@ -143,7 +146,7 @@ void loop()
 	SystemCpuMonitor::endTask();
 
 	SystemCpuMonitor::startTask();
-	soundManager.update();
+	soundController.update();
 	SystemCpuMonitor::endTask();
 
 	SystemCpuMonitor::startTask();

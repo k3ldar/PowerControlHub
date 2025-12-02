@@ -13,6 +13,13 @@ These are commands used to configure the system settings and can only be sent fr
 | `F4` — Bluetooth Enabled | `F4` | When received will return the current enabled state of bluetooth 0 off 1 on. No params. |
 | `F5` — Wifi Enabled | `F5` | When received will return the current enabled state of wifi 0 off 1 on. No params. |
 
+### Wifi System Commands (SFB)
+Route: /api/system/{command}
+Example: Return free memory = /api/system/F2 
+
+------
+
+
 ## Configuration Commands
 These are commands used to configure the system settings and can only be sent from a computer, they are not used for internal communication.
 
@@ -34,9 +41,18 @@ These are commands used to configure the system settings and can only be sent fr
 | `C13` — Wifi SSID (SFB) | `C13:v=RouterName` | Set's the wifi SSID, only available if access mode is client |
 | `C14` — Wifi Password (SFB) | `C14:v=Password123` | Set's the wifi password, only available if access mode is client |
 | `C15` — Wifi Port (SFB) | `C15:v=80` | Set's the wifi port, this is the port used to listen on, default value is 80 |
+| `C16` — Wifi connection state (SFB) | `C16` | Wifi connection state, no params, returns WifiConnectionState value |
 
 
 Common error responses you may see: `Missing param`, `Missing params`, `Missing name`, `Empty name`, `Index out of range`, `Slot out of range`, `Relay out of range (or 255 to clear)`, `EEPROM commit failed`, `Unknown config command`.
+
+
+### Wifi Configuration Commands (SFB)
+Route: /api/config/{command}
+Example: Specify sound relay button = /api/config/F8?v=3 
+
+
+------
 
 
 ## Acknowledgement Commands
@@ -46,6 +62,12 @@ These commands are used in response to receiving a command.
 |---|---|---|
 | `ACK` — Acknowledgement | `ACK:C4=Index out of range` | Indicates that the C4 command was processed and the index specified was out of range. |
 | `ACK` — Acknowledgement | `ACK:C4=ok` | Indicates that the C4 command was processed successfully. |
+
+### Wifi Acknowledgement Commands 
+Not supported
+
+------
+
 
 ## Relay Control Commands (SFB)
 These commands are used to control the relays on the Boat Control Panel. Commands can be sent from a computer or generated internally by the Boat Control Panel.
@@ -57,6 +79,15 @@ These commands are used to control the relays on the Boat Control Panel. Command
 | `R2` — Retrieve States | `R2` | Retrieve the state of all relays. |
 | `R3` — Relay State Set | `R3:3=1` (turn on relay 3) — `R3:5=0` (turn off relay 5) | Set the state of a specific relay. Param format: `<idx>=<state>`. `idx` must be 0..7 (`RELAY_COUNT`). `state` must be `0` (off) or `1` (on). |
 | `R4` — Relay State Get | `R4:3` (retrieves status of relay 3) — `R4:5` (returns status of relay 5). Param format: `<idx>`. `idx` must be 0..7 (`RELAY_COUNT`). |
+
+
+### Wifi Relay Commands (SFB)
+Route: /api/relay/{command}
+Example: Set relay state to on = /api/relay/R3?3=1
+Returns JSON formatted response with all relay states.
+
+------
+
 
 ## Sensor Commands
 These commands are used to send sensor data from the Boat Control Panel to a computer.
@@ -72,6 +103,13 @@ These commands are used to send sensor data from the Boat Control Panel to a com
 | `S6` — Water Level | `S6:v=3.4` | Send water level sensor data. Param format: `<sensor>=<value>`. |
 | `S7` — Water Pump Active  | `S7:v=1` | Send water pump active status. Param format: `<sensor>=<value>`, 0 = off, 1 = on. |
 
+
+### Wifi Sensor Commands (SFB)
+Route: /api/sensor/
+Example: Get all sensor values = /api/sensor/
+
+------
+
 ## Warning Commands
 These commands are used to send warning data from the control panel to link/computer. WarningType corresponds to the enum in WarningManager.h.
 
@@ -82,6 +120,13 @@ These commands are used to send warning data from the control panel to link/comp
 | `W2` — Warning Status | `W2:0x05=1` | Sends warning status for each warning. Param format: `<WarningType>=<bool>`. |
 | `W3` — Clear Warnings | `W3` | Clears all warning data. Param format: No Parameters. |
 | `W4` — Warning Set Status | `W4:0x06=1` | Adds or removes a warning to the list of warnings. Param format: `<WarningType>=<bool>`. |
+
+
+### Wifi Warning Commands (SFB)
+Route: /api/warning/{command}
+Example: Get all active warnings = /api/warning/W1
+
+------
 
 
 ## Sound Signal Commands (Fog Horn) (SFB)
@@ -99,9 +144,17 @@ These commands are used to activate, query or deactivate signal sounds (Fog Horn
 | `H7` — Maneuver Danger | `H7` | Activates maneuver danger sound. Param format: No Parameters. |
 | `H8` — Overtake Starboard | `H8` | Activates overtake starboard sound. Param format: No Parameters. |
 | `H9` — Overtake Port | `H9` | Activates overtake port sound. Param format: No Parameters. |
-| `H10` — Overtake Consent | `H10` | Activates overtake astern sound. Param format: No Parameters. |
+| `H10` — Overtake Consent | `H10` | Activates overtake consent sound. Param format: No Parameters. |
 | `H11` — Overtake Danger | `H11` | Activates overtake danger sound. Param format: No Parameters. |
 | `H12` — Test | `H12` | Tests the signal sound. Param format: No Parameters. |
+
+
+### Wifi Sound Signal Commands (SFB)
+Route: /api/sound/{command}
+Example: Overtake danger = /api/sound/H11
+Returns JSON formatted response with sound status and active sound if any.
+
+------
 
 
 ## Please Note
@@ -109,3 +162,4 @@ These commands are used to activate, query or deactivate signal sounds (Fog Horn
 - Commands must be sent in the exact format as specified, including any required delimiters.
 - Commands specific to Boat Control Panel have (BCP) indicated next to them.
 - Commands specific to Smart Fuse Box have (SFB) indicated next to them.
+- All wifi commands return JSON formatted responses.

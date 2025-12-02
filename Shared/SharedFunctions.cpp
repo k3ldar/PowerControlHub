@@ -39,3 +39,24 @@ void SharedFunctions::initializeSerial(HardwareSerial& serialPort, unsigned long
 			delay(100);
 	}
 }
+
+bool SharedFunctions::parseBooleanValue(const String& value)
+{
+    return (value == F("1") ||
+        value.equalsIgnoreCase(F("on")) ||
+        value.equalsIgnoreCase(F("true")));
+}
+
+bool SharedFunctions::isAllDigits(const String& s)
+{
+    if (s.length() == 0)
+        return false;
+
+    for (size_t i = 0; i < s.length(); ++i)
+    {
+        if (!isDigit(s[i]))
+            return false;
+    }
+
+    return true;
+}

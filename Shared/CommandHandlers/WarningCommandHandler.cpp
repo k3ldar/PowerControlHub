@@ -92,7 +92,7 @@ bool WarningCommandHandler::handleCommand(SerialCommandManager* sender, const St
             return true;
         }
 
-        bool isActive = parseBooleanValue(val);
+        bool isActive = SharedFunctions::parseBooleanValue(val);
 
         if (isActive)
             warningManager->raiseWarning(warningType);
@@ -119,7 +119,7 @@ bool WarningCommandHandler::convertWarningTypeFromString(const String& str, Warn
         // Parse hexadecimal (skip the "0x" prefix)
         warningTypeInt = strtoul(str.c_str() + 2, nullptr, 16);
     }
-    else if (isAllDigits(str))
+    else if (SharedFunctions::isAllDigits(str))
     {
         // Parse decimal
         warningTypeInt = str.toInt();

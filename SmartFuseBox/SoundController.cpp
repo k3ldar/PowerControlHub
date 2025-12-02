@@ -1,4 +1,4 @@
-#include "SoundManager.h"
+#include "SoundController.h"
 #include "SmartFuseBoxConstants.h"
 
 // Define sound patterns according to COLREGS
@@ -40,7 +40,7 @@ const SoundPattern SoundPatterns[] = {
 	{PatternTest, 1, NoRepeat, SoundBlastGapMs}                 // Test
 };
 
-SoundManager::SoundManager()
+SoundController::SoundController()
 	: _isPlaying(false), _soundType(SoundType::None), _state(SoundState::Idle), _soundStartDelay(0),
 	_soundRelayIndex(DefaultValue), _currentBlastIndex(0), _stateStartTime(0), _currentPattern(nullptr)
 {
@@ -52,7 +52,7 @@ SoundManager::SoundManager()
 	}
 }
 
-void SoundManager::playSound(const SoundType soundType)
+void SoundController::playSound(const SoundType soundType)
 {
 	// Stop current pattern if any
 	if (_isPlaying)
@@ -75,7 +75,7 @@ void SoundManager::playSound(const SoundType soundType)
 	}
 }
 
-void SoundManager::update()
+void SoundController::update()
 {
 	if (!_isPlaying || !_currentPattern)
 		return;
@@ -164,7 +164,7 @@ void SoundManager::update()
 	}
 }
 
-void SoundManager::startPattern(const SoundPattern* pattern)
+void SoundController::startPattern(const SoundPattern* pattern)
 {
 	_currentPattern = pattern;
 	_currentBlastIndex = 0;
@@ -173,7 +173,7 @@ void SoundManager::startPattern(const SoundPattern* pattern)
 	_isPlaying = true;
 }
 
-void SoundManager::stopPattern()
+void SoundController::stopPattern()
 {
 	stopSound();
 	
@@ -185,7 +185,7 @@ void SoundManager::stopPattern()
 	_soundType = SoundType::None;
 }
 
-void SoundManager::startSound()
+void SoundController::startSound()
 {
 	if (_soundRelayIndex != DefaultValue && _soundRelayIndex < TotalRelays)
 	{
@@ -194,7 +194,7 @@ void SoundManager::startSound()
 	}
 }
 
-void SoundManager::stopSound()
+void SoundController::stopSound()
 {
 	if (_soundRelayIndex != DefaultValue && _soundRelayIndex < TotalRelays)
 	{
@@ -203,7 +203,7 @@ void SoundManager::stopSound()
 	}
 }
 
-const SoundPattern* SoundManager::getPattern(SoundType soundType) const
+const SoundPattern* SoundController::getPattern(SoundType soundType) const
 {
 	uint8_t index = static_cast<uint8_t>(soundType);
 	if (index < sizeof(SoundPatterns) / sizeof(SoundPatterns[0]))
@@ -213,7 +213,7 @@ const SoundPattern* SoundManager::getPattern(SoundType soundType) const
 	return nullptr;
 }
 
-void SoundManager::configUpdated(Config* config)
+void SoundController::configUpdated(Config* config)
 {
 	if (config != nullptr)
 	{

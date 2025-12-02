@@ -26,6 +26,7 @@ enum class WarningType : uint32_t {
 	BluetoothInitFailed = 1UL << 5,                   // 0x00000020 - Bluetooth initialization failed
 	WifiInitFailed = 1UL << 6,                        // 0x00000040 - WiFi initialization failed
 	WifiInvalidConfig = 1UL << 7,                     // 0x00000080 - WiFi configuration invalid
+	WeakWifiSignal = 1UL << 8,                        // 0x00000100 - WiFi signal weak
 
     // Sensor warnings (bits 20+)
     SensorFailure = 1UL << 20,                        // 0x00100000 - Sensor communication failure

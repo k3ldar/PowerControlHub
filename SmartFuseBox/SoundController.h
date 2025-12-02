@@ -35,7 +35,7 @@ enum class SoundType : uint8_t
 	Test = 0x0B
 };
 
-class SoundManager
+class SoundController
 {
 private:
 	bool _isPlaying;
@@ -56,7 +56,7 @@ private:
 	void stopSound();
 
 public:
-	SoundManager();
+	SoundController();
 	void playSound(const SoundType soundType);
 	bool isPlaying() const { return _isPlaying; }
 	void update();

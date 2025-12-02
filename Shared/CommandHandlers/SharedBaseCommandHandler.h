@@ -93,41 +93,4 @@ protected:
             _broadcaster->sendError(message, identifier);
         }
     }
-    /**
-     * @brief Parse a string value as a boolean.
-     *
-     * Accepts multiple formats:
-     * - "1" or "0"
-     * - "on" or "off" (case-insensitive)
-     * - "true" or "false" (case-insensitive)
-     *
-     * @param value String to parse
-     * @return true if the value represents a truthy value, false otherwise
-     */
-    bool parseBooleanValue(const String& value) const
-    {
-        return (value == F("1") ||
-            value.equalsIgnoreCase(F("on")) ||
-            value.equalsIgnoreCase(F("true")));
-    }
-
-    /**
-     * @brief Check if a string contains only digits.
-     *
-     * @param s String to check
-     * @return true if the string is non-empty and contains only digits (0-9)
-     */
-    bool isAllDigits(const String& s) const
-    {
-        if (s.length() == 0)
-            return false;
-
-        for (size_t i = 0; i < s.length(); ++i)
-        {
-            if (!isDigit(s[i]))
-                return false;
-        }
-
-        return true;
-    }
 };

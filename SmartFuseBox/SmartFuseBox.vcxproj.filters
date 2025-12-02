@@ -49,6 +49,9 @@
     <Filter Include="Header Files\NetworkCommandHandlers">
       <UniqueIdentifier>{65b4b309-7c84-4a92-a16f-ca5115f39376}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\BusinessLogic">
+      <UniqueIdentifier>{0936f4f8-0dcf-4bae-b691-92dcc0d450a7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="SmartFuseBox.ino" />
@@ -60,9 +63,6 @@
     </ClCompile>
     <ClCompile Include="SoundCommandHandler.cpp">
       <Filter>Source Files\SerialCommandHandlers</Filter>
-    </ClCompile>
-    <ClCompile Include="SoundManager.cpp">
-      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ConfigCommandHandler.cpp">
       <Filter>Source Files\SerialCommandHandlers</Filter>
@@ -124,6 +124,12 @@
     <ClCompile Include="RelayNetworkHandler.cpp">
       <Filter>Source Files\NetworkCommandHandlers</Filter>
     </ClCompile>
+    <ClCompile Include="SoundController.cpp">
+      <Filter>Source Files\BusinessLogic</Filter>
+    </ClCompile>
+    <ClCompile Include="SoundNetworkHandler.cpp">
+      <Filter>Source Files\NetworkCommandHandlers</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="__vm\.SmartFuseBox.vsarduino.h">
@@ -131,9 +137,6 @@
     </ClInclude>
     <ClInclude Include="SoundCommandHandler.h">
       <Filter>Header Files\SerialCommandHandlers</Filter>
-    </ClInclude>
-    <ClInclude Include="SoundManager.h">
-      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="WaterSensorHandler.h">
       <Filter>Header Files\Sensors</Filter>
@@ -224,6 +227,12 @@
     </ClInclude>
     <ClInclude Include="SharedFunctions.h">
       <Filter>Header Files\SharedCode</Filter>
+    </ClInclude>
+    <ClInclude Include="SoundController.h">
+      <Filter>Header Files\BusinessLogic</Filter>
+    </ClInclude>
+    <ClInclude Include="SoundNetworkHandler.h">
+      <Filter>Header Files\NetworkCommandHandlers</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

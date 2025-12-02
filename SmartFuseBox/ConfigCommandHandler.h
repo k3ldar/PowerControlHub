@@ -4,7 +4,7 @@
 #include "Config.h"
 #include "ConfigManager.h"
 #include "BaseCommandHandler.h"
-#include "SoundManager.h"
+#include "SoundController.h"
 #include "RelayCommandHandler.h"
 #include "WifiController.h"
 
@@ -13,14 +13,14 @@ class BluetoothController;
 class ConfigCommandHandler : public BaseCommandHandler
 {
 private:
-    SoundManager* _soundManager;
+    SoundController* _soundController;
     BluetoothController* _bluetoothController;
 	WifiController* _wifiController;
 	RelayCommandHandler* _relayCommandHandler;
 
-    void updateSoundManagerConfig(Config* config);
+    void updateSoundControllerConfig(Config* config);
 public:
-    explicit ConfigCommandHandler(SoundManager* soundManager, BluetoothController* bluetoothController, 
+    explicit ConfigCommandHandler(SoundController* soundController, BluetoothController* bluetoothController,
 		WifiController* wifiController, RelayCommandHandler* relayCommandHandler);
 
     bool handleCommand(SerialCommandManager* sender, const String command, const StringKeyValue params[], uint8_t paramCount) override;
