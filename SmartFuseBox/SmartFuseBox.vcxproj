@@ -79,6 +79,7 @@
     <ClCompile Include="BluetoothSensorService.cpp" />
     <ClCompile Include="BluetoothSystemService.cpp" />
     <ClCompile Include="RelayNetworkHandler.cpp" />
+    <ClCompile Include="SoundNetworkHandler.cpp" />
     <ClCompile Include="SystemCpuMonitor.cpp" />
     <ClCompile Include="SharedFunctions.cpp" />
     <ClCompile Include="SystemCommandHandler.cpp" />
@@ -109,6 +110,7 @@
     <ClInclude Include="Queue.h" />
     <ClInclude Include="RelayController.h" />
     <ClInclude Include="RelayNetworkHandler.h" />
+    <ClInclude Include="SoundNetworkHandler.h" />
     <ClInclude Include="SystemCommandHandler.h" />
     <ClInclude Include="LoggingSupport.h" />
     <ClInclude Include="BluetoothController.h" />

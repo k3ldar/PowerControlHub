@@ -70,6 +70,12 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const Str
 
 		// C15 WiFi Port
 		sender->sendCommand(ConfigWifiPort, "v=" + String(config->wifiPort));
+
+		// C16 WiFi State
+        if (_wifiController && _wifiController->getServer())
+        {
+            sender->sendCommand(ConfigWifiState, "v=" + String(static_cast<int32_t>(_wifiController->getServer()->getConnectionState())));
+        }
 #endif
 
         sendAckOk(sender, cmd);
@@ -274,6 +280,17 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const Str
             return true;
         }
 	}
+    else if (cmd == ConfigWifiState)
+    {
+        // C16 WiFi State
+        uint8_t state = static_cast<uint8_t>(WifiConnectionState::Disconnected);
+        if (_wifiController)
+        {
+            state = static_cast<uint8_t>(_wifiController->getServer()->getConnectionState());
+        }
+        sender->sendCommand(ConfigWifiState, "v=" + String(state));
+        sendAckOk(sender, cmd);
+	}
 #endif
 
     else
@@ -289,7 +306,7 @@ const String* ConfigCommandHandler::supportedCommands(size_t& count) const
     static const String cmds[] = { ConfigSaveSettings, ConfigGetSettings, 
         ConfigResetSettings, ConfigBoatType, ConfigSoundRelayId, ConfigSoundStartDelay,
         ConfigBluetoothEnable, ConfigWifiEnable, ConfigWifiMode, ConfigWifiSSID, 
-        ConfigWifiPassword, ConfigWifiPort };
+        ConfigWifiPassword, ConfigWifiPort, ConfigWifiState };
     count = sizeof(cmds) / sizeof(cmds[0]);
     return cmds;
 }

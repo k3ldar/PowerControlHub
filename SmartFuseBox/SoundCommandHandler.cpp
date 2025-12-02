@@ -5,19 +5,6 @@
 #include "SoundCommandHandler.h"
 
 
-constexpr char SoundCancellAll[] = "H0";
-constexpr char SoundIsActive[] = "H1";
-constexpr char SoundDangerSos[] = "H2";
-constexpr char SoundFog[] = "H3";
-constexpr char SoundManeuverStarboard[] = "H4";
-constexpr char SoundManeuverPort[] = "H5";
-constexpr char SoundManeuverAstern[] = "H6";
-constexpr char SoundManeuverDanger[] = "H7";
-constexpr char SoundOvertakeStarboard[] = "H8";
-constexpr char SoundOvertakePort[] = "H9";
-constexpr char SoundOvertakeConsent[] = "H10";
-constexpr char SoundOvertakeDanger[] = "H11";
-constexpr char SoundTest[] = "H12";
 
 SoundCommandHandler::SoundCommandHandler(SerialCommandManager* commandMgrComputer, SerialCommandManager* commandMgrLink, 
     SoundController* soundController)
@@ -28,10 +15,10 @@ SoundCommandHandler::SoundCommandHandler(SerialCommandManager* commandMgrCompute
 
 const String* SoundCommandHandler::supportedCommands(size_t& count) const
 {
-    static const String cmds[] = { SoundCancellAll, SoundIsActive, SoundDangerSos, SoundFog,
-        SoundManeuverAstern, SoundManeuverDanger, SoundManeuverPort, SoundManeuverStarboard, 
-        SoundOvertakeConsent, SoundOvertakeDanger, SoundOvertakePort, SoundOvertakeStarboard, 
-        SoundTest };
+    static const String cmds[] = { SoundSignalCancel, SoundSignalActive, SoundSignalSoS, 
+        SoundSignalFog, SoundSignalMoveStarboard, SoundSignalMovePort, SoundSignalMoveAstern, 
+        SoundSignalMoveDanger, SoundSignalOvertakeStarboard, SoundSignalOvertakePort, 
+        SoundSignalOvertakeConsent, SoundSignalOvertakeDanger, SoundSignalTest };
     count = sizeof(cmds) / sizeof(cmds[0]);
     return cmds;
 }
@@ -56,67 +43,67 @@ bool SoundCommandHandler::handleCommand(SerialCommandManager* sender, const Stri
         return true;
     }
 
-    if (cmd == SoundCancellAll)
+    if (cmd == SoundSignalCancel)
     {
         _soundController->playSound(SoundType::None);
         sendAckOk(sender, cmd);
     }
-    else if (cmd == SoundIsActive)
+    else if (cmd == SoundSignalActive)
     {
         StringKeyValue param = { String(static_cast<uint8_t>(_soundController->getCurrentSoundType())), String(static_cast<uint8_t>(_soundController->getCurrentSoundState())) };
         sendAckOk(sender, cmd, &param);
     }
-    else if (cmd == SoundDangerSos)
+    else if (cmd == SoundSignalSoS)
     {
         _soundController->playSound(SoundType::Sos);
         sendAckOk(sender, cmd);
     }
-    else if (cmd == SoundFog)
+    else if (cmd == SoundSignalFog)
     {
         _soundController->playSound(SoundType::Fog);
         sendAckOk(sender, cmd);
     }
-    else if (cmd == SoundManeuverAstern)
+    else if (cmd == SoundSignalMoveAstern)
     {
         _soundController->playSound(SoundType::MoveAstern);
         sendAckOk(sender, cmd);
     }
-    else if (cmd == SoundManeuverPort)
+    else if (cmd == SoundSignalMovePort)
     {
         _soundController->playSound(SoundType::MovePort);
         sendAckOk(sender, cmd);
     }
-    else if (cmd == SoundManeuverStarboard)
+    else if (cmd == SoundSignalMoveStarboard)
     {
         _soundController->playSound(SoundType::MoveStarboard);
         sendAckOk(sender, cmd);
     }
-    else if (cmd == SoundManeuverDanger)
+    else if (cmd == SoundSignalMoveDanger)
     {
         _soundController->playSound(SoundType::MoveDanger);
         sendAckOk(sender, cmd);
     }
-    else if (cmd == SoundOvertakeConsent)
+    else if (cmd == SoundSignalOvertakeConsent)
     {
         _soundController->playSound(SoundType::OvertakeConsent);
         sendAckOk(sender, cmd);
     }
-    else if (cmd == SoundOvertakeDanger)
+    else if (cmd == SoundSignalOvertakeDanger)
     {
         _soundController->playSound(SoundType::OvertakeDanger);
         sendAckOk(sender, cmd);
     }
-    else if (cmd == SoundOvertakePort)
+    else if (cmd == SoundSignalOvertakePort)
     {
         _soundController->playSound(SoundType::OvertakePort);
         sendAckOk(sender, cmd);
     }
-    else if (cmd == SoundOvertakeStarboard)
+    else if (cmd == SoundSignalOvertakeStarboard)
     {
         _soundController->playSound(SoundType::OvertakeStarboard);
         sendAckOk(sender, cmd);
     }
-    else if (cmd == SoundTest)
+    else if (cmd == SoundSignalTest)
     {
         _soundController->playSound(SoundType::Test);
         sendAckOk(sender, cmd);

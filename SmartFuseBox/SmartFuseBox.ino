@@ -32,6 +32,7 @@
 
 #include "WifiController.h"
 #include "RelayNetworkHandler.h"
+#include "SoundNetworkHandler.h"
 
 #include "RelayController.h"
 
@@ -81,6 +82,7 @@ BluetoothController bluetoothController(&systemCommandHandler, &sensorCommandHan
 
 // configure wifi support
 RelayNetworkHandler relayNetworkHandler(&relayController);
+SoundNetworkHandler soundNetworkHandler(&soundController);
 
 WifiController wifiController(&commandMgrComputer, &warningManager);
 

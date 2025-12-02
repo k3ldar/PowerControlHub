@@ -1,66 +1,93 @@
 #include "RelayNetworkHandler.h"
 
 RelayNetworkHandler::RelayNetworkHandler(RelayController* relayController)
-    : _relayController(relayController)
+	: _relayController(relayController)
 {
 }
 
-CommandResult RelayNetworkHandler::handleRequest(const String& method, 
-    const String& body, char* responseBuffer, size_t bufferSize)
+CommandResult RelayNetworkHandler::handleRequest(const String& method,
+    const String& command, StringKeyValue* params, uint8_t paramCount,
+    char* responseBuffer, size_t bufferSize)
 {
     if (!_relayController)
     {
         formatJsonResponse(responseBuffer, bufferSize, false, "Controller not initialized");
         return CommandResult::error(RelayControllerNotInitialised);
     }
-    
-    // GET /api/relay - Get all relay states
-    if (method == "GET" && body.length() == 0)
+
+    String cmd = command;
+    cmd.trim();
+
+    if (cmd == RelayTurnAllOff)
     {
+        _relayController->turnAllRelaysOff();
         formatRelayStatesJson(responseBuffer, bufferSize);
+		return CommandResult::ok();
+    }
+    else if (cmd == RelayTurnAllOn)
+    {
+        _relayController->turnAllRelaysOn();
+		formatRelayStatesJson(responseBuffer, bufferSize);
+		return CommandResult::ok();
+    }
+    else if (cmd == RelayRetrieveStates)
+    {
+		formatRelayStatesJson(responseBuffer, bufferSize);
         return CommandResult::ok();
     }
-    
-    // POST /api/relay/all?state=0|1 - Turn all on/off
-    if (method == "POST" && body.startsWith("state="))
+    else if (cmd == RelaySetState)
     {
-        bool state = body.substring(6).toInt() > 0;
-        
-        if (state)
-            _relayController->turnAllRelaysOn();
-        else
-            _relayController->turnAllRelaysOff();
-            
-        formatRelayStatesJson(responseBuffer, bufferSize);
-        return CommandResult::ok();
-    }
-    
-    // PUT /api/relay/:id body: {"state": 0|1}
-    if (method == "PUT" && body.length() > 0)
-    {
-        // Parse body: "id=3&state=1"
-        int idStart = body.indexOf("id=");
-        int stateStart = body.indexOf("state=");
-        
-        if (idStart >= 0 && stateStart >= 0)
+        if (paramCount == 1)
         {
-            uint8_t relayId = body.substring(idStart + 3, body.indexOf('&', idStart)).toInt();
-            bool state = body.substring(stateStart + 6).toInt() > 0;
-            
-            CommandResult result = _relayController->setRelayState(relayId, state);
-            
-            if (result.success)
+            uint8_t relayIndex = params[0].key.toInt();
+            uint8_t state = params[0].value.toInt();
+
+            if (relayIndex >= _relayController->getRelayCount())
             {
-                formatRelayStatesJson(responseBuffer, bufferSize);
-                return CommandResult::ok();
+                return CommandResult::error(InvalidCommandParameters);
             }
-            else
+
+            CommandResult result = _relayController->setRelayState(relayIndex, state > 0);
+            RelayResult status = static_cast<RelayResult>(result.status);
+
+            if (status == RelayResult::InvalidIndex)
             {
-                RelayResult err = static_cast<RelayResult>(result.status);
-                const char* msg = (err == RelayResult::InvalidIndex) ? "Invalid index" : "Reserved relay";
-                formatJsonResponse(responseBuffer, bufferSize, false, msg);
-                return result;
+                return CommandResult::error(InvalidCommandParameters);
             }
+            else if (status == RelayResult::Reserved)
+            {
+                return CommandResult::error(InvalidCommandParameters);
+            }
+
+            formatRelayStatesJson(responseBuffer, bufferSize);
+            return CommandResult::ok();
+        }
+        else
+        {
+			return CommandResult::error(InvalidCommandParameters);
+        }
+    }
+    else if (cmd == RelayStatusGet)
+    {
+        if (paramCount == 1)
+        {
+            uint8_t relayIndex = params[0].key.toInt();
+
+            if (relayIndex >= _relayController->getRelayCount())
+            {
+                return CommandResult::error(InvalidCommandParameters);
+            }
+
+            CommandResult result = _relayController->getRelayStatus(relayIndex);
+            uint8_t status = result.status;
+            StringKeyValue param = { String(relayIndex), String(status) };
+
+            formatRelayStatesJson(responseBuffer, bufferSize);
+            return CommandResult::ok();
+        }
+        else
+        {
+            return CommandResult::error(InvalidCommandParameters);
         }
     }
     

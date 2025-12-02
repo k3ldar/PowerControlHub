@@ -2,13 +2,14 @@
 
 WifiServer::WifiServer(SerialCommandManager* commandMgrComputer, uint16_t port, INetworkCommandHandler** handlers, size_t handlerCount)
 	:   SingleLoggerSupport(commandMgrComputer), 
-        _handlers(handlers), _handlerCount(handlerCount),
         _serverActive(false),
         _server(port),  // Initialize with port
         _mode(WifiMode::AccessPoint),
         _connectionState(WifiConnectionState::Disconnected),
         _port(port),
         _initialized(false),
+        _handlers(handlers),
+        _handlerCount(handlerCount),
         _lastConnectionAttempt(0),
         _connectionStartTime(0)
 {
@@ -247,6 +248,15 @@ void WifiServer::handleClient(WiFiClient& client)
     }
     
     String method = request.substring(0, firstSpace);
+
+	// Only support GET for now
+	if (method != "GET")
+    {
+        send404(client);
+        client.stop();
+        return;
+    }
+
     String fullPath = request.substring(firstSpace + 1, secondSpace);
     
     // Split path and query string
@@ -260,8 +270,8 @@ void WifiServer::handleClient(WiFiClient& client)
     }
     
     sendDebug(String(F("Request: ")) + method + String(F(" ")) + path, F("WifiServer"));
+	bool handled = false;
 
-    // Route the request - try handlers first, then built-in routes
     if (_handlers && _handlerCount > 0)
     {
         // Loop through handlers and find matching route
@@ -269,91 +279,26 @@ void WifiServer::handleClient(WiFiClient& client)
         {
             if (_handlers[i] && path.startsWith(_handlers[i]->getRoute()))
             {
-                dispatchToHandler(client, path, method, query);
-                client.stop();
+                handled = dispatchToHandler(client, _handlers[i], path, method, query);
                 sendDebug(F("Client disconnected"), F("WifiServer"));
-                return;
+                break;
             }
         }
     }
 
-    if (path.startsWith("/data"))
-    {
-        handleDataRoute(client);
-    }
-    else
+    if (!handled)
     {
         send404(client);
     }
-    
+
     client.stop();
     sendDebug(F("Client disconnected"), F("WifiServer"));
 }
 
-void WifiServer::handleCommandRoute(WiFiClient& client, const String& path, const String& query)
+void WifiServer::send400(WiFiClient& client)
 {
-    // Future work: integrate with command handlers
-    // For now, return a placeholder response
-    
-    String cmd = parseQueryParameter(query, "cmd");
-    String value = parseQueryParameter(query, "v");
-    
-    String response = "{\"status\":\"pending\",\"message\":\"Command handler integration not yet implemented\",\"command\":\"";
-    response += cmd;
-    response += "\",\"value\":\"";
-    response += value;
-    response += "\"}";
-    
-    sendResponse(client, 200, "application/json", response);
-}
-
-void WifiServer::handleDataRoute(WiFiClient& client)
-{
-    // Future work: collect data from sensors and system state
-    // For now, return basic system information
-    
-    String json = "{";
-    json += "\"uptime\":";
-    json += millis();
-    json += ",\"freeMemory\": 0";
-    json += ",\"wifi\":{";
-    json += "\"mode\":\"";
-    json += (_mode == WifiMode::AccessPoint) ? "AP" : "Client";
-    json += "\",\"state\":\"";
-    
-    // Add connection state
-    switch (_connectionState)
-    {
-        case WifiConnectionState::Disconnected:
-            json += "Disconnected";
-            break;
-        case WifiConnectionState::Connecting:
-            json += "Connecting";
-            break;
-        case WifiConnectionState::Connected:
-            json += "Connected";
-            break;
-        case WifiConnectionState::Failed:
-            json += "Failed";
-            break;
-    }
-    
-    json += "\",\"ssid\":\"";
-    json += getSSID();
-    json += "\",\"ip\":\"";
-    json += getIpAddress();
-    json += "\"";
-    
-    if (_mode == WifiMode::Client && isConnected())
-    {
-        json += ",\"rssi\":";
-        json += WiFi.RSSI();
-    }
-    
-    json += "}";
-    json += "}";
-    
-    sendResponse(client, 200, "application/json", json);
+    String response = "{\"error\":\"Bad Request\",\"message\":\"The request will not process due to client error\"}";
+    sendResponse(client, 400, "application/json", response);
 }
 
 void WifiServer::send404(WiFiClient& client)
@@ -452,38 +397,77 @@ int WifiServer::getSignalStrength() const
     return WiFi.RSSI();
 }
 
-void WifiServer::dispatchToHandler(WiFiClient& client, const String& path, const String& method, const String& query)
+bool WifiServer::dispatchToHandler(WiFiClient& client, INetworkCommandHandler* handler, const String& path, const String& method, const String& query)
 {
-    // Find the matching handler
-    INetworkCommandHandler* handler = nullptr;
-
-    for (size_t i = 0; i < _handlerCount; i++)
+    if (!handler)
     {
-        if (_handlers[i] && path.startsWith(_handlers[i]->getRoute()))
+        return false;
+    }
+
+    // Extract command from path: /api/{handler}/{command}
+    // For example: /api/sound/H10 -> command = H10
+    //              /api/config/C8 -> command = C8
+    String command = "";
+    String handlerRoute = String(handler->getRoute());
+    
+    if (path.length() > handlerRoute.length())
+    {
+        // Extract everything after the handler route
+        command = path.substring(handlerRoute.length());
+        
+        // Remove leading slash if present
+        if (command.startsWith("/"))
         {
-            handler = _handlers[i];
-            break;
+            command = command.substring(1);
         }
     }
 
-    if (!handler)
+    // Parse query string into parameter array (max 6 parameters)
+    StringKeyValue params[MaximumParameterCount];
+    uint8_t paramCount = 0;
+
+    if (query.length() > 0)
     {
-        send404(client);
-        return;
+        uint8_t startIdx = 0;
+
+        while (paramCount < MaximumParameterCount && startIdx < query.length())
+        {
+            // Find the next '&' or end of string
+            int ampIdx = query.indexOf('&', startIdx);
+            if (ampIdx == -1)
+            {
+                ampIdx = query.length();
+            }
+
+            // Extract this parameter
+            String param = query.substring(startIdx, ampIdx);
+
+            // Split on '='
+            int equalsIdx = param.indexOf('=');
+            if (equalsIdx != -1)
+            {
+                params[paramCount].key = param.substring(0, equalsIdx);
+                params[paramCount].value = param.substring(equalsIdx + 1);
+                paramCount++;
+            }
+
+            startIdx = ampIdx + 1;
+        }
     }
 
     // Prepare response buffer
     char responseBuffer[512];
     responseBuffer[0] = '\0';
 
-    // Call handler
-    CommandResult result = handler->handleRequest(method, query, responseBuffer, sizeof(responseBuffer));
+    // Call handler with modified body containing command and parameters
+    CommandResult result = handler->handleRequest(method, command, params, paramCount, responseBuffer, sizeof(responseBuffer));
 
     // Send response based on result
     if (result.success)
     {
         sendResponse(client, 200, "application/json", String(responseBuffer));
-        sendDebug(String(F("Handler success: ")) + String(handler->getRoute()), F("WifiServer"));
+        sendDebug(String(F("Handler success: ")) + String(handler->getRoute()) + String(F("/")) + command, F("WifiServer"));
+		return true;
     }
     else
     {
@@ -491,12 +475,11 @@ void WifiServer::dispatchToHandler(WiFiClient& client, const String& path, const
         if (responseBuffer[0] != '\0')
         {
             sendResponse(client, 400, "application/json", String(responseBuffer));
-        }
-        else
-        {
-            send404(client);
+			return true;
         }
 
-        sendDebug(String(F("Handler error: ")) + String(handler->getRoute()), F("WifiServer"));
+        sendDebug(String(F("Handler error: ")) + String(handler->getRoute()) + String(F("/")) + command, F("WifiServer"));
     }
+
+    return false;
 }

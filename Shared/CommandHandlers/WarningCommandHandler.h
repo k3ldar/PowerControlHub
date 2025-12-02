@@ -3,6 +3,7 @@
 #include <Arduino.h>
 #include "ConfigManager.h"
 #include "Local.h"
+#include "SharedFunctions.h"
 
 #ifdef FUSE_BOX_CONTROLLER
 #include "SharedBaseCommandHandler.h"
