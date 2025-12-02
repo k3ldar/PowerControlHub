@@ -41,6 +41,7 @@ These are commands used to configure the system settings and can only be sent fr
 | `C13` — Wifi SSID (SFB) | `C13:v=RouterName` | Set's the wifi SSID, only available if access mode is client |
 | `C14` — Wifi Password (SFB) | `C14:v=Password123` | Set's the wifi password, only available if access mode is client |
 | `C15` — Wifi Port (SFB) | `C15:v=80` | Set's the wifi port, this is the port used to listen on, default value is 80 |
+| `C16` — Wifi connection state (SFB) | `C16` | Wifi connection state, no params, returns WifiConnectionState value |
 
 
 Common error responses you may see: `Missing param`, `Missing params`, `Missing name`, `Empty name`, `Index out of range`, `Slot out of range`, `Relay out of range (or 255 to clear)`, `EEPROM commit failed`, `Unknown config command`.
@@ -83,6 +84,7 @@ These commands are used to control the relays on the Boat Control Panel. Command
 ### Wifi Relay Commands (SFB)
 Route: /api/relay/{command}
 Example: Set relay state to on = /api/relay/R3?3=1
+Returns JSON formatted response with all relay states.
 
 ------
 
@@ -150,6 +152,7 @@ These commands are used to activate, query or deactivate signal sounds (Fog Horn
 ### Wifi Sound Signal Commands (SFB)
 Route: /api/sound/{command}
 Example: Overtake danger = /api/sound/H11
+Returns JSON formatted response with sound status and active sound if any.
 
 ------
 
