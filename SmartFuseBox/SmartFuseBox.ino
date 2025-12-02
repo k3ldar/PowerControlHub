@@ -99,6 +99,8 @@ void setup()
 		warningManager.raiseWarning(WarningType::DefaultConfigurationFuseBox);
 	}
 
+	relayController.setup();
+
 	// middleware
 	relayHandler.setup();
 

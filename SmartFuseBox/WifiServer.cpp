@@ -3,7 +3,7 @@
 WifiServer::WifiServer(SerialCommandManager* commandMgrComputer, uint16_t port, INetworkCommandHandler** handlers, size_t handlerCount)
 	:   SingleLoggerSupport(commandMgrComputer), 
         _serverActive(false),
-        _server(port),  // Initialize with port
+        _server(port),
         _mode(WifiMode::AccessPoint),
         _connectionState(WifiConnectionState::Disconnected),
         _port(port),
@@ -15,6 +15,7 @@ WifiServer::WifiServer(SerialCommandManager* commandMgrComputer, uint16_t port, 
 {
     _ssid[0] = '\0';
     _password[0] = '\0';
+    _activeClient.state = ClientHandlingState::Idle;
 }
 
 WifiServer::~WifiServer()
@@ -143,121 +144,105 @@ void WifiServer::update()
     // Only handle HTTP clients if we're connected and server is running
     if (_serverActive && isConnected())
     {
-        WiFiClient client = _server.available();
-        if (client)
-        {
-            handleClient(client);
-        }
+        updateClientHandling();
     }
 }
 
-void WifiServer::updateClientConnection()
+void WifiServer::updateClientHandling()
 {
-    wl_status_t status = static_cast<wl_status_t>(WiFi.status());
     unsigned long now = millis();
     
-    switch (_connectionState)
+    switch (_activeClient.state)
     {
-        case WifiConnectionState::Connecting:
-            // Check connection status periodically
-            if (now - _lastConnectionAttempt >= ConnectionCheckIntervalMs)
+        case ClientHandlingState::Idle:
+        {
+            // Check for new client connection
+            WiFiClient client = _server.available();
+            if (client)
             {
-                _lastConnectionAttempt = now;
+                sendDebug(F("New client connected"), F("WifiServer"));
+                _activeClient.client = client;
+                _activeClient.request = "";
+                _activeClient.startTime = now;
+                _activeClient.state = ClientHandlingState::ReadingRequest;
+            }
+            break;
+        }
+        
+        case ClientHandlingState::ReadingRequest:
+        {
+            // Check for timeout
+            if (now - _activeClient.startTime >= ClientReadTimeoutMs)
+            {
+                sendDebug(F("Client read timeout"), F("WifiServer"));
+                _activeClient.client.stop();
+                _activeClient.state = ClientHandlingState::Idle;
+                break;
+            }
+            
+            // Check if client is still connected
+            if (!_activeClient.client.connected())
+            {
+                sendDebug(F("Client disconnected during read"), F("WifiServer"));
+                _activeClient.client.stop();
+                _activeClient.state = ClientHandlingState::Idle;
+                break;
+            }
+            
+            // Read available data (non-blocking)
+            while (_activeClient.client.available())
+            {
+                char c = _activeClient.client.read();
+                _activeClient.request += c;
                 
-                if (status == WL_CONNECTED)
+                // Check for end of HTTP headers
+                if (_activeClient.request.endsWith("\r\n\r\n"))
                 {
-                    _connectionState = WifiConnectionState::Connected;
-                    sendDebug(String(F("WiFi connected! IP: ")) + WiFi.localIP().toString() + 
-                             String(F(" RSSI: ")) + String(WiFi.RSSI()) + String(F(" dBm")), 
-                             F("WifiServer"));
-                    
-                    // Start the HTTP server now that we're connected
-                    startServer();
-                }
-                else if (now - _connectionStartTime >= ConnectionTimeoutMs)
-                {
-                    // Connection timeout
-                    _connectionState = WifiConnectionState::Failed;
-                    sendError(String(F("WiFi connection timeout. Status: ")) + String(status), F("WifiServer"));
+                    _activeClient.state = ClientHandlingState::ProcessingRequest;
+                    break;
                 }
             }
             break;
-            
-        case WifiConnectionState::Connected:
-            // Monitor for disconnection
-            if (status != WL_CONNECTED)
-            {
-                _connectionState = WifiConnectionState::Disconnected;
-                sendDebug(F("WiFi connection lost"), F("WifiServer"));
-            }
+        }
+        
+        case ClientHandlingState::ProcessingRequest:
+        {
+            processClientRequest();
+            _activeClient.client.stop();
+            sendDebug(F("Client disconnected"), F("WifiServer"));
+            _activeClient.state = ClientHandlingState::Idle;
             break;
-            
-        case WifiConnectionState::Disconnected:
-        case WifiConnectionState::Failed:
-            // Attempt reconnection after retry interval
-            if (now - _lastConnectionAttempt >= ConnectionRetryIntervalMs)
-            {
-                sendDebug(F("Attempting WiFi reconnection..."), F("WifiServer"));
-                WiFi.begin(_ssid, _password);
-                _connectionState = WifiConnectionState::Connecting;
-                _connectionStartTime = now;
-                _lastConnectionAttempt = now;
-            }
-            break;
+        }
     }
 }
 
-void WifiServer::handleClient(WiFiClient& client)
+void WifiServer::processClientRequest()
 {
-    sendDebug(F("New client connected"), F("WifiServer"));
-    
-    String request = "";
-    unsigned long timeout = millis() + 5000;
-    
-    // Read the HTTP request
-    while (client.connected() && millis() < timeout)
+    if (_activeClient.request.length() == 0)
     {
-        if (client.available())
-        {
-            char c = client.read();
-            request += c;
-            
-            // Check for end of HTTP headers
-            if (request.endsWith("\r\n\r\n"))
-            {
-                break;
-            }
-        }
-    }
-    
-    if (request.length() == 0)
-    {
-        client.stop();
         return;
     }
     
     // Parse the request line (GET /path?query HTTP/1.1)
-    int firstSpace = request.indexOf(' ');
-    int secondSpace = request.indexOf(' ', firstSpace + 1);
+    int firstSpace = _activeClient.request.indexOf(' ');
+    int secondSpace = _activeClient.request.indexOf(' ', firstSpace + 1);
     
     if (firstSpace == -1 || secondSpace == -1)
     {
-        send404(client);
-        client.stop();
+        send404(_activeClient.client);
         return;
     }
     
-    String method = request.substring(0, firstSpace);
+    String method = _activeClient.request.substring(0, firstSpace);
 
-	// Only support GET for now
-	if (method != "GET")
+    // Only support GET for now
+    if (method != "GET")
     {
-        send404(client);
-        client.stop();
+        send404(_activeClient.client);
         return;
     }
 
-    String fullPath = request.substring(firstSpace + 1, secondSpace);
+    String fullPath = _activeClient.request.substring(firstSpace + 1, secondSpace);
     
     // Split path and query string
     String path = fullPath;
@@ -270,7 +255,7 @@ void WifiServer::handleClient(WiFiClient& client)
     }
     
     sendDebug(String(F("Request: ")) + method + String(F(" ")) + path, F("WifiServer"));
-	bool handled = false;
+    bool handled = false;
 
     if (_handlers && _handlerCount > 0)
     {
@@ -279,8 +264,7 @@ void WifiServer::handleClient(WiFiClient& client)
         {
             if (_handlers[i] && path.startsWith(_handlers[i]->getRoute()))
             {
-                handled = dispatchToHandler(client, _handlers[i], path, method, query);
-                sendDebug(F("Client disconnected"), F("WifiServer"));
+                handled = dispatchToHandler(_activeClient.client, _handlers[i], path, method, query);
                 break;
             }
         }
@@ -288,11 +272,8 @@ void WifiServer::handleClient(WiFiClient& client)
 
     if (!handled)
     {
-        send404(client);
+        send404(_activeClient.client);
     }
-
-    client.stop();
-    sendDebug(F("Client disconnected"), F("WifiServer"));
 }
 
 void WifiServer::send400(WiFiClient& client)
@@ -482,4 +463,60 @@ bool WifiServer::dispatchToHandler(WiFiClient& client, INetworkCommandHandler* h
     }
 
     return false;
+}
+
+void WifiServer::updateClientConnection()
+{
+    wl_status_t status = static_cast<wl_status_t>(WiFi.status());
+    unsigned long now = millis();
+    
+    switch (_connectionState)
+    {
+        case WifiConnectionState::Connecting:
+            // Check connection status periodically
+            if (now - _lastConnectionAttempt >= ConnectionCheckIntervalMs)
+            {
+                _lastConnectionAttempt = now;
+                
+                if (status == WL_CONNECTED)
+                {
+                    _connectionState = WifiConnectionState::Connected;
+                    sendDebug(String(F("WiFi connected! IP: ")) + WiFi.localIP().toString() + 
+                             String(F(" RSSI: ")) + String(WiFi.RSSI()) + String(F(" dBm")), 
+                             F("WifiServer"));
+                    
+                    // Start the HTTP server now that we're connected
+                    startServer();
+                }
+                else if (now - _connectionStartTime >= ConnectionTimeoutMs)
+                {
+                    // Connection timeout
+                    _connectionState = WifiConnectionState::Failed;
+                    sendError(String(F("WiFi connection timeout. Status: ")) + String(status), F("WifiServer"));
+                }
+            }
+            break;
+            
+        case WifiConnectionState::Connected:
+            // Monitor for disconnection
+            if (status != WL_CONNECTED)
+            {
+                _connectionState = WifiConnectionState::Disconnected;
+                sendDebug(F("WiFi connection lost"), F("WifiServer"));
+            }
+            break;
+            
+        case WifiConnectionState::Disconnected:
+        case WifiConnectionState::Failed:
+            // Attempt reconnection after retry interval
+            if (now - _lastConnectionAttempt >= ConnectionRetryIntervalMs)
+            {
+                sendDebug(F("Attempting WiFi reconnection..."), F("WifiServer"));
+                WiFi.begin(_ssid, _password);
+                _connectionState = WifiConnectionState::Connecting;
+                _connectionStartTime = now;
+                _lastConnectionAttempt = now;
+            }
+            break;
+    }
 }

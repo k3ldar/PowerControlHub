@@ -19,6 +19,13 @@ enum class WifiConnectionState : uint8_t
     Failed = 3
 };
 
+enum class ClientHandlingState : uint8_t
+{
+    Idle,
+    ReadingRequest,
+    ProcessingRequest
+};
+
 class WifiServer : public SingleLoggerSupport
 {
 private:
@@ -43,13 +50,23 @@ private:
     static constexpr unsigned long ConnectionRetryIntervalMs = 10000;
     static constexpr unsigned long ConnectionTimeoutMs = 10000;
     static constexpr unsigned long ConnectionCheckIntervalMs = 500;
+    static constexpr unsigned long ClientReadTimeoutMs = 5000;
+
+    struct ActiveClient
+    {
+        WiFiClient client;
+        String request;
+        unsigned long startTime;
+        ClientHandlingState state;
+    } _activeClient;
     
-    void handleClient(WiFiClient& client);
     void sendResponse(WiFiClient& client, int statusCode, const char* contentType, const String& body);
     void send400(WiFiClient& client);
     void send404(WiFiClient& client);
     String parseQueryParameter(const String& query, const String& paramName);
     void updateClientConnection();
+    void updateClientHandling();
+    void processClientRequest();
     void startServer();
     bool dispatchToHandler(WiFiClient& client, INetworkCommandHandler* handler, const String& path, const String& method, const String& query);
     
