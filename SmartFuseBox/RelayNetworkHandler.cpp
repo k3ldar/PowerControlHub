@@ -80,10 +80,6 @@ CommandResult RelayNetworkHandler::handleRequest(const String& method,
 				return CommandResult::error(InvalidCommandParameters);
 			}
 
-			CommandResult result = _relayController->getRelayStatus(relayIndex);
-			uint8_t status = result.status;
-			StringKeyValue param = { String(relayIndex), String(status) };
-
 			formatRelayStatesJson(responseBuffer, bufferSize);
 			return CommandResult::ok();
 		}

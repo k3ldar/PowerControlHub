@@ -4,6 +4,7 @@
 #include "LoggingSupport.h"
 #include "SharedConstants.h"
 #include "INetworkCommandHandler.h"
+#include "WarningManager.h"
 
 enum class WifiMode : uint8_t
 {
@@ -35,6 +36,7 @@ private:
 	WifiConnectionState _connectionState;
 	uint16_t _port;
 	bool _initialized;
+	WarningManager* _warningManager;
 	
 	// AP mode settings
 	char _ssid[MaxSSIDLength];
@@ -47,10 +49,16 @@ private:
 	// Connection tracking
 	unsigned long _lastConnectionAttempt;
 	unsigned long _connectionStartTime;
+	uint8_t _consecutiveFailures;
+	int8_t _lastRSSI;
 	static constexpr unsigned long ConnectionRetryIntervalMs = 10000;
 	static constexpr unsigned long ConnectionTimeoutMs = 10000;
 	static constexpr unsigned long ConnectionCheckIntervalMs = 500;
 	static constexpr unsigned long ClientReadTimeoutMs = 5000;
+	static constexpr unsigned long RSSICheckIntervalMs = 5000;
+	static constexpr unsigned long BackoffIntervalMs = 60000;
+	static constexpr uint8_t MaxConsecutiveFailures = 3;
+	unsigned long _lastRSSICheck;
 
 	struct ActiveClient
 	{
@@ -68,10 +76,11 @@ private:
 	void updateClientHandling();
 	void processClientRequest();
 	void startServer();
+	void stopServer();
 	bool dispatchToHandler(WiFiClient& client, INetworkCommandHandler* handler, const String& path, const String& method, const String& query);
 	
 public:
-	WifiServer(SerialCommandManager* commandMgrComputer, uint16_t port, INetworkCommandHandler** handlers, size_t handlerCount);
+	WifiServer(SerialCommandManager* commandMgrComputer, WarningManager* warningManager, uint16_t port, INetworkCommandHandler** handlers, size_t handlerCount);
 	~WifiServer();
 	
 	// Configuration methods

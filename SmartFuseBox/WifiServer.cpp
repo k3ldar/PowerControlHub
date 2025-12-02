@@ -2,7 +2,7 @@
 
 constexpr uint16_t MaximumResponseBufferSize = 512;
 
-WifiServer::WifiServer(SerialCommandManager* commandMgrComputer, uint16_t port, INetworkCommandHandler** handlers, size_t handlerCount)
+WifiServer::WifiServer(SerialCommandManager* commandMgrComputer, WarningManager* warningManager, uint16_t port, INetworkCommandHandler** handlers, size_t handlerCount)
 	:   SingleLoggerSupport(commandMgrComputer), 
 		_serverActive(false),
 		_server(port),
@@ -10,10 +10,14 @@ WifiServer::WifiServer(SerialCommandManager* commandMgrComputer, uint16_t port, 
 		_connectionState(WifiConnectionState::Disconnected),
 		_port(port),
 		_initialized(false),
+		_warningManager(warningManager),
 		_handlers(handlers),
 		_handlerCount(handlerCount),
 		_lastConnectionAttempt(0),
-		_connectionStartTime(0)
+		_connectionStartTime(0),
+		_consecutiveFailures(0),
+		_lastRSSI(0),
+		_lastRSSICheck(0)
 {
 	_ssid[0] = '\0';
 	_password[0] = '\0';
@@ -114,13 +118,19 @@ void WifiServer::startServer()
 	}
 }
 
-void WifiServer::end()
+void WifiServer::stopServer()
 {
 	if (_serverActive)
 	{
 		_server.end();
 		_serverActive = false;
+		sendDebug(F("HTTP server stopped"), F("WifiServer"));
 	}
+}
+
+void WifiServer::end()
+{
+	stopServer();
 	
 	if (_initialized)
 	{
@@ -483,8 +493,10 @@ void WifiServer::updateClientConnection()
 				if (status == WL_CONNECTED)
 				{
 					_connectionState = WifiConnectionState::Connected;
+					_consecutiveFailures = 0;
+					_lastRSSI = WiFi.RSSI();
 					sendDebug(String(F("WiFi connected! IP: ")) + WiFi.localIP().toString() + 
-							 String(F(" RSSI: ")) + String(WiFi.RSSI()) + String(F(" dBm")), 
+							 String(F(" RSSI: ")) + String(_lastRSSI) + String(F(" dBm")), 
 							 F("WifiServer"));
 					
 					// Start the HTTP server now that we're connected
@@ -494,31 +506,98 @@ void WifiServer::updateClientConnection()
 				{
 					// Connection timeout
 					_connectionState = WifiConnectionState::Failed;
-					sendError(String(F("WiFi connection timeout. Status: ")) + String(status), F("WifiServer"));
+					_consecutiveFailures++;
+					sendError(String(F("WiFi connection timeout (#")) + String(_consecutiveFailures) + 
+							 String(F("). Status: ")) + String(status), F("WifiServer"));
 				}
 			}
 			break;
 			
 		case WifiConnectionState::Connected:
+		{
 			// Monitor for disconnection
 			if (status != WL_CONNECTED)
 			{
 				_connectionState = WifiConnectionState::Disconnected;
 				sendDebug(F("WiFi connection lost"), F("WifiServer"));
+				stopServer();  // Stop server to clean up TCP state
+				break;
 			}
+			
+			// Check RSSI periodically to detect weak signal before disconnection
+			if (now - _lastRSSICheck >= RSSICheckIntervalMs)
+			{
+				_lastRSSICheck = now;
+				_lastRSSI = WiFi.RSSI();
+				
+				if (_lastRSSI < MinimumAcceptableRSSI)
+				{
+					sendError(String(F("WiFi signal critically weak (")) + String(_lastRSSI) + 
+							 String(F(" dBm). Reconnecting...")), F("WifiServer"));
+					
+					if (_warningManager && !_warningManager->isWarningActive(WarningType::WeakWifiSignal))
+					{
+						_warningManager->raiseWarning(WarningType::WeakWifiSignal);
+					}
+
+					// Proactively disconnect and reconnect
+					WiFi.disconnect();
+					_connectionState = WifiConnectionState::Disconnected;
+					stopServer();
+				}
+				else if (_lastRSSI < WeakSignalWarningRSSI)
+				{
+					if (_warningManager && !_warningManager->isWarningActive(WarningType::WeakWifiSignal))
+					{
+						_warningManager->raiseWarning(WarningType::WeakWifiSignal);
+					}
+
+					sendDebug(String(F("WiFi signal weak (")) + String(_lastRSSI) + String(F(" dBm)")), F("WifiServer"));
+				}
+				else if (_warningManager && _warningManager->isWarningActive(WarningType::WeakWifiSignal))
+				{
+					_warningManager->clearWarning(WarningType::WeakWifiSignal);
+				}
+			}
+
 			break;
+		}
 			
 		case WifiConnectionState::Disconnected:
 		case WifiConnectionState::Failed:
-			// Attempt reconnection after retry interval
-			if (now - _lastConnectionAttempt >= ConnectionRetryIntervalMs)
+		{
+			// Use exponential backoff after multiple failures
+			unsigned long retryInterval = ConnectionRetryIntervalMs;
+			if (_consecutiveFailures >= MaxConsecutiveFailures)
 			{
-				sendDebug(F("Attempting WiFi reconnection..."), F("WifiServer"));
+				retryInterval = BackoffIntervalMs;
+			}
+			
+			// Attempt reconnection after retry interval
+			if (now - _lastConnectionAttempt >= retryInterval)
+			{
+				if (_consecutiveFailures >= MaxConsecutiveFailures)
+				{
+					sendDebug(String(F("WiFi reconnection attempt (")) + 
+							 String(_consecutiveFailures) + String(F(" failures, using ")) + 
+							 String(BackoffIntervalMs / 1000) + String(F("s backoff)...")), 
+							 F("WifiServer"));
+				}
+				else
+				{
+					sendDebug(F("Attempting WiFi reconnection..."), F("WifiServer"));
+				}
+				
+				// Ensure clean state before reconnection
+				WiFi.disconnect();
+				delay(100);  // Brief delay for hardware reset
+				
 				WiFi.begin(_ssid, _password);
 				_connectionState = WifiConnectionState::Connecting;
 				_connectionStartTime = now;
 				_lastConnectionAttempt = now;
 			}
 			break;
+		}
 	}
 }
