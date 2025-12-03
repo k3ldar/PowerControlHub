@@ -130,6 +130,9 @@
     <ClCompile Include="SoundNetworkHandler.cpp">
       <Filter>Source Files\NetworkCommandHandlers</Filter>
     </ClCompile>
+    <ClCompile Include="WarningNetworkHandler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="__vm\.SmartFuseBox.vsarduino.h">
@@ -233,6 +236,9 @@
     </ClInclude>
     <ClInclude Include="SoundNetworkHandler.h">
       <Filter>Header Files\NetworkCommandHandlers</Filter>
+    </ClInclude>
+    <ClInclude Include="WarningNetworkHandler.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

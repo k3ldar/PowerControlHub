@@ -33,6 +33,7 @@
 #include "WifiController.h"
 #include "RelayNetworkHandler.h"
 #include "SoundNetworkHandler.h"
+#include "WarningNetworkHandler.h"
 
 #include "RelayController.h"
 
@@ -83,6 +84,7 @@ BluetoothController bluetoothController(&systemCommandHandler, &sensorCommandHan
 // configure wifi support
 RelayNetworkHandler relayNetworkHandler(&relayController);
 SoundNetworkHandler soundNetworkHandler(&soundController);
+WarningNetworkHandler warningNetworkHandler(&warningManager);
 
 WifiController wifiController(&commandMgrComputer, &warningManager);
 
@@ -114,7 +116,7 @@ void setup()
 	commandMgrComputer.registerHandlers(computerHandlers, computerHandlerCount);
 
 	// network command handlers
-	INetworkCommandHandler* networkHandlers[] = { &relayNetworkHandler, &soundNetworkHandler };
+	INetworkCommandHandler* networkHandlers[] = { &relayNetworkHandler, &soundNetworkHandler, &warningNetworkHandler };
 	size_t networkHandlerCount = sizeof(networkHandlers) / sizeof(networkHandlers[0]);
 	wifiController.registerHandlers(networkHandlers, networkHandlerCount);
 

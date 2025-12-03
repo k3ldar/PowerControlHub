@@ -91,7 +91,8 @@ constexpr unsigned long SerialInitTimeoutMs = 300;
 
 constexpr uint8_t RelayControllerNotInitialised = 1;
 constexpr uint8_t SoundControllerNotInitialised = 2;
-constexpr uint8_t InvalidCommandParameters = 3;
+constexpr uint8_t WarningControllerNotInitialised = 3;
+constexpr uint8_t InvalidCommandParameters = 100;
 
 
 #if defined(ARDUINO_UNO_R4)
@@ -99,8 +100,7 @@ constexpr uint8_t MaxSSIDLength = 33; // 32 chars + null
 constexpr uint8_t MaxWiFiPasswordLength = 65; // 64 chars + null
 
 // WiFi Connection Quality Thresholds
-constexpr int8_t MinimumAcceptableRSSI = -80;  // dBm - reconnect below this
-constexpr int8_t WeakSignalWarningRSSI = -70;  // dBm - warn user
+constexpr int8_t WeakSignalWarningRSSI = -80;  // dBm - warn user
 #endif
 
 struct CommandResult {

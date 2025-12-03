@@ -99,6 +99,7 @@
       <FileType>CppCode</FileType>
       <DeploymentContent>true</DeploymentContent>
     </ClCompile>
+    <ClCompile Include="WarningNetworkHandler.cpp" />
     <ClCompile Include="WifiServer.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -128,6 +129,7 @@
     <ClInclude Include="BroadcastManager.h" />
     <ClInclude Include="ConfigManager.h" />
     <ClInclude Include="SharedConstants.h" />
+    <ClInclude Include="WarningNetworkHandler.h" />
     <ClInclude Include="WarningType.h" />
     <ClInclude Include="AckCommandHandler.h" />
     <ClInclude Include="Dht11SensorHandler.h" />

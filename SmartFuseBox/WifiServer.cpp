@@ -530,29 +530,12 @@ void WifiServer::updateClientConnection()
 				_lastRSSICheck = now;
 				_lastRSSI = WiFi.RSSI();
 				
-				if (_lastRSSI < MinimumAcceptableRSSI)
-				{
-					sendError(String(F("WiFi signal critically weak (")) + String(_lastRSSI) + 
-							 String(F(" dBm). Reconnecting...")), F("WifiServer"));
-					
-					if (_warningManager && !_warningManager->isWarningActive(WarningType::WeakWifiSignal))
-					{
-						_warningManager->raiseWarning(WarningType::WeakWifiSignal);
-					}
-
-					// Proactively disconnect and reconnect
-					WiFi.disconnect();
-					_connectionState = WifiConnectionState::Disconnected;
-					stopServer();
-				}
-				else if (_lastRSSI < WeakSignalWarningRSSI)
+				if (_lastRSSI < WeakSignalWarningRSSI)
 				{
 					if (_warningManager && !_warningManager->isWarningActive(WarningType::WeakWifiSignal))
 					{
 						_warningManager->raiseWarning(WarningType::WeakWifiSignal);
 					}
-
-					sendDebug(String(F("WiFi signal weak (")) + String(_lastRSSI) + String(F(" dBm)")), F("WifiServer"));
 				}
 				else if (_warningManager && _warningManager->isWarningActive(WarningType::WeakWifiSignal))
 				{

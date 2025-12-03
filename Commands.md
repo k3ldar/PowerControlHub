@@ -123,8 +123,10 @@ These commands are used to send warning data from the control panel to link/comp
 
 
 ### Wifi Warning Commands (SFB)
+Only W1 is supported via wifi.
 Route: /api/warning/{command}
 Example: Get all active warnings = /api/warning/W1
+Returns JSON formatted response with warning status and active warnings if any.
 
 ------
 
