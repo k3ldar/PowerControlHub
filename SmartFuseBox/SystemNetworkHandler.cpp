@@ -60,7 +60,7 @@ void SystemNetworkHandler::formatStatusJson(char* buffer, size_t size)
 
 	// Enhanced JSON formatting with WiFi runtime details
 	snprintf(buffer, size,
-		"{\"system\":{\"mem\":%d,\"cpu\":%d,\"bluetooth\":%d,\"wifi\":%d,\"ip\":\"%s\",\"ssid\":\"%s\",\"rssi\":%d,\"time\":\"%s\"}}",
+		"\"system\":{\"mem\":%d,\"cpu\":%d,\"bluetooth\":%d,\"wifi\":%d,\"ip\":\"%s\",\"ssid\":\"%s\",\"rssi\":%d,\"time\":\"%s\"}",
 		SharedFunctions::freeMemory(),
 		SystemCpuMonitor::getCpuUsage(),
 		bluetoothEnabled,

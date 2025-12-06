@@ -96,6 +96,11 @@ SystemNetworkHandler systemNetworkHandler(&wifiController);
 
 void setup()
 {
+	// Serial initialization is performed first to ensure that any logging or error messages
+	// from DateTimeManager or ConfigManager during initialization are properly output.
+	SharedFunctions::initializeSerial(COMPUTER_SERIAL, 115200, true);
+	SharedFunctions::initializeSerial(LINK_SERIAL, 9600, true);
+
 	DateTimeManager::setDateTime();
 	// retrieve config settings
 	ConfigManager::begin();
@@ -124,10 +129,18 @@ void setup()
 	size_t networkHandlerCount = sizeof(networkHandlers) / sizeof(networkHandlers[0]);
 	wifiController.registerHandlers(networkHandlers, networkHandlerCount);
 
-	SharedFunctions::initializeSerial(COMPUTER_SERIAL, 115200, true);
-	SharedFunctions::initializeSerial(LINK_SERIAL, 9600, true);
-
 	Config* config = ConfigManager::getConfigPtr();
+	// json status visitors for wifi
+	JsonVisitor* jsonVisitors[] = {
+		&relayNetworkHandler,
+		&soundNetworkHandler,
+		&warningNetworkHandler,
+		&systemNetworkHandler,
+		&waterSensorHandler,
+		&dht11SensorHandler
+	};
+	uint8_t jsonVisitorCount = sizeof(jsonVisitors) / sizeof(jsonVisitors[0]);
+	wifiController.registerJsonVisitors(jsonVisitors, jsonVisitorCount);
 
 	// bluetooth
 	bluetoothController.applyConfig(config);

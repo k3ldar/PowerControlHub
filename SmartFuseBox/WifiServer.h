@@ -44,7 +44,11 @@ private:
 
 	// Network command handlers
 	INetworkCommandHandler** _handlers;
-	size_t _handlerCount;
+	uint8_t _handlerCount;
+
+	// json visitors
+	JsonVisitor** _jsonVisitors;
+	uint8_t _jsonVisitorCount;
 
 	// Connection tracking
 	unsigned long _lastConnectionAttempt;
@@ -77,10 +81,14 @@ private:
 	void processClientRequest();
 	void startServer();
 	void stopServer();
+	bool handleIndex(WiFiClient& client, const String& path);
 	bool dispatchToHandler(WiFiClient& client, INetworkCommandHandler* handler, const String& path, const String& method, const String& query);
+	void registerJsonVisitors(JsonVisitor** jsonVisitors, uint8_t jsonVisitorCount);
 	
 public:
-	WifiServer(SerialCommandManager* commandMgrComputer, WarningManager* warningManager, uint16_t port, INetworkCommandHandler** handlers, size_t handlerCount);
+	WifiServer(SerialCommandManager* commandMgrComputer, WarningManager* warningManager, uint16_t port,
+		INetworkCommandHandler** handlers, uint8_t handlerCount,
+		JsonVisitor** jsonVisitors, uint8_t jsonVisitorCount);
 	~WifiServer();
 	
 	// Configuration methods

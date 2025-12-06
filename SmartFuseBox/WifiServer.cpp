@@ -2,8 +2,10 @@
 #include "SharedFunctions.h"
 
 constexpr uint16_t MaximumResponseBufferSize = 512;
+constexpr uint16_t MaximumRequestSize = 1024;
 
-WifiServer::WifiServer(SerialCommandManager* commandMgrComputer, WarningManager* warningManager, uint16_t port, INetworkCommandHandler** handlers, size_t handlerCount)
+WifiServer::WifiServer(SerialCommandManager* commandMgrComputer, WarningManager* warningManager, uint16_t port,
+	INetworkCommandHandler** handlers, uint8_t handlerCount, JsonVisitor** jsonVisitors, uint8_t jsonVisitorCount)
 	:   SingleLoggerSupport(commandMgrComputer), 
 		_serverActive(false),
 		_server(port),
@@ -14,6 +16,8 @@ WifiServer::WifiServer(SerialCommandManager* commandMgrComputer, WarningManager*
 		_warningManager(warningManager),
 		_handlers(handlers),
 		_handlerCount(handlerCount),
+		_jsonVisitors(nullptr),
+		_jsonVisitorCount(0),
 		_lastConnectionAttempt(0),
 		_connectionStartTime(0),
 		_consecutiveFailures(0),
@@ -23,6 +27,7 @@ WifiServer::WifiServer(SerialCommandManager* commandMgrComputer, WarningManager*
 	_ssid[0] = '\0';
 	_password[0] = '\0';
 	_activeClient.state = ClientHandlingState::Idle;
+	registerJsonVisitors(jsonVisitors, jsonVisitorCount);
 }
 
 WifiServer::~WifiServer()
@@ -109,6 +114,13 @@ bool WifiServer::begin()
 
 void WifiServer::startServer()
 {
+	if (WiFi.status() == WL_NO_MODULE)
+	{
+		sendError(F("WiFi module not detected"), F("WifiServer"));
+		_connectionState = WifiConnectionState::Failed;
+		return;
+	}
+
 	if (!_serverActive)
 	{
 		_server.begin();
@@ -215,6 +227,16 @@ void WifiServer::updateClientHandling()
 					break;
 				}
 			}
+			
+			// Add safety check in ReadingRequest state
+			if (_activeClient.request.length() > MaximumRequestSize)
+			{
+				sendDebug(F("Request too large"), F("WifiServer"));
+				send400(_activeClient.client);
+				_activeClient.client.stop();
+				_activeClient.state = ClientHandlingState::Idle;
+				break;
+			}
 			break;
 		}
 		
@@ -270,7 +292,13 @@ void WifiServer::processClientRequest()
 	sendDebug(String(F("Request: ")) + method + String(F(" ")) + path, F("WifiServer"));
 	bool handled = false;
 
-	if (_handlers && _handlerCount > 0)
+	if (path.startsWith(F("/api/index")))
+	{
+		handleIndex(_activeClient.client, path);
+		handled = true;
+	}
+
+	if (!handled && _handlers && _handlerCount > 0)
 	{
 		// Loop through handlers and find matching route
 		for (size_t i = 0; i < _handlerCount; i++)
@@ -291,13 +319,13 @@ void WifiServer::processClientRequest()
 
 void WifiServer::send400(WiFiClient& client)
 {
-	String response = "{\"error\":\"Bad Request\",\"message\":\"The request will not process due to client error\"}";
+	String response = "\"error\":\"Bad Request\",\"message\":\"The request will not process due to client error\"";
 	sendResponse(client, 400, "application/json", response);
 }
 
 void WifiServer::send404(WiFiClient& client)
 {
-	String response = "{\"error\":\"Not Found\",\"message\":\"The requested resource was not found\"}";
+	String response = "\"error\":\"Not Found\",\"message\":\"The requested resource was not found\"";
 	sendResponse(client, 404, "application/json", response);
 }
 
@@ -311,6 +339,9 @@ void WifiServer::sendResponse(WiFiClient& client, int statusCode, const char* co
 	{
 		case 200:
 			client.println(F("OK"));
+			break;
+		case 400:
+			client.println(F("Bad Request"));
 			break;
 		case 404:
 			client.println(F("Not Found"));
@@ -326,7 +357,9 @@ void WifiServer::sendResponse(WiFiClient& client, int statusCode, const char* co
 	client.print(F("Content-Length: "));
 	client.println(body.length());
 	client.println();
+	client.println(F("{"));
 	client.print(body);
+	client.println(F("}"));
 }
 
 String WifiServer::parseQueryParameter(const String& query, const String& paramName)
@@ -361,7 +394,7 @@ bool WifiServer::isConnected() const
 	{
 		return true; // AP is always "connected" once initialized
 	}
-	
+
 	return _connectionState == WifiConnectionState::Connected;
 }
 
@@ -391,6 +424,49 @@ int WifiServer::getSignalStrength() const
 	return WiFi.RSSI();
 }
 
+bool WifiServer::handleIndex(WiFiClient& client, const String& path)
+{
+	sendDebug(String(F("HandleIndex: ")) + path, F("WifiServer"));
+
+	// Send HTTP headers first
+	_activeClient.client.print(F("HTTP/1.1 200 OK\r\n"));
+	_activeClient.client.print(F("Content-Type: application/json\r\n"));
+	_activeClient.client.print(F("Connection: close\r\n"));
+	_activeClient.client.print(F("\r\n"));
+
+	// Stream JSON response
+	_activeClient.client.print(F("{"));
+
+	bool firstEntry = true;  // Track if we've written any content yet
+
+	for (uint8_t i = 0; i < _jsonVisitorCount; i++)
+	{
+		if (_jsonVisitors[i])
+		{
+			char buffer[MaximumResponseBufferSize];
+			buffer[0] = '\0';
+
+			_jsonVisitors[i]->formatStatusJson(buffer, MaximumResponseBufferSize);
+
+			if (buffer[0] != '\0')
+			{
+				// Add comma before this entry (but not before the first entry)
+				if (!firstEntry)
+				{
+					_activeClient.client.print(F(","));
+				}
+
+				_activeClient.client.print(buffer);
+				firstEntry = false;
+			}
+		}
+	}
+
+	_activeClient.client.print(F("}"));
+
+	return true;
+}
+
 bool WifiServer::dispatchToHandler(WiFiClient& client, INetworkCommandHandler* handler, const String& path, const String& method, const String& query)
 {
 	if (!handler)
@@ -398,6 +474,8 @@ bool WifiServer::dispatchToHandler(WiFiClient& client, INetworkCommandHandler* h
 		return false;
 	}
 
+	sendDebug(String(F("dispatchToHandler: ")) + path, F("WifiServer"));
+	
 	// Extract command from path: /api/{handler}/{command}
 	// For example: /api/sound/H10 -> command = H10
 	//              /api/config/C8 -> command = C8
@@ -583,5 +661,23 @@ void WifiServer::updateClientConnection()
 			}
 			break;
 		}
+	}
+}
+
+void WifiServer::registerJsonVisitors(JsonVisitor** jsonVisitors, uint8_t jsonVisitorCount)
+{
+	if (_jsonVisitors)
+	{
+		delete[] _jsonVisitors;
+		_jsonVisitors = nullptr;
+		_jsonVisitorCount = 0;
+	}
+
+	_jsonVisitorCount = jsonVisitorCount;
+	_jsonVisitors = new JsonVisitor * [_jsonVisitorCount];
+
+	for (uint8_t i = 0; i < _jsonVisitorCount; i++)
+	{
+		_jsonVisitors[i] = jsonVisitors[i];
 	}
 }

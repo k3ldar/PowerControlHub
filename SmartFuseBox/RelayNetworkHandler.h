@@ -12,18 +12,18 @@
  * - GET  /api/relay/:id   Get specific relay state
  * - PUT  /api/relay/:id   Set specific relay state
  */
-class RelayNetworkHandler : public INetworkCommandHandler {
+class RelayNetworkHandler : public INetworkCommandHandler
+{
 private:
     RelayController* _relayController;
-    
-    // Helper to format JSON response
-    void formatStatusJson(char* buffer, size_t size);
     
 public:
     explicit RelayNetworkHandler(RelayController* relayController);
     
     const char* getRoute() const override { return "/api/relay"; }
     
+    void formatStatusJson(char* buffer, size_t size) override;
+
     CommandResult handleRequest(const String& method,
         const String& command,
         StringKeyValue* params,

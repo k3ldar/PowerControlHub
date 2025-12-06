@@ -17,7 +17,9 @@ public:
           _enabled(false),
 		_handlerObjects(nullptr),
 		_handlerCount(0),
-		_port(80)
+		_port(80),
+        _jsonVisitors(nullptr),
+        _jsonVisitorCount(0)
     {
     }
 
@@ -118,14 +120,23 @@ public:
         return _wifiServer;
     }
 
+    void registerJsonVisitors(JsonVisitor** jsonVisitors, uint8_t jsonVisitorCount)
+    {
+        // owned by caller so no need to clean up
+        _jsonVisitorCount = jsonVisitorCount;
+        _jsonVisitors = jsonVisitors;
+    }
+
 private:
     SerialCommandManager* _commandMgrComputer;
     WarningManager* _warningManager;
     WifiServer* _wifiServer;
     bool _enabled;
     INetworkCommandHandler** _handlerObjects;
-    size_t _handlerCount = 0;
+    uint8_t _handlerCount = 0;
 	uint16_t _port = 80;
+    JsonVisitor** _jsonVisitors;
+    uint8_t _jsonVisitorCount;
 
     bool isConfigValid(const Config* cfg) const
     {
@@ -160,7 +171,7 @@ private:
             return true; // Already enabled
         }
 
-        _wifiServer = new WifiServer(_commandMgrComputer, _warningManager, _port, _handlerObjects, _handlerCount);
+        _wifiServer = new WifiServer(_commandMgrComputer, _warningManager, _port, _handlerObjects, _handlerCount, _jsonVisitors, _jsonVisitorCount);
         
         if (_wifiServer == nullptr)
         {

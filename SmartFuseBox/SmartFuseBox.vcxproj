@@ -111,6 +111,7 @@
     </ClCompile>
     <ClInclude Include="DateTimeManager.h" />
     <ClInclude Include="INetworkCommandHandler.h" />
+    <ClInclude Include="JsonVisitor.h" />
     <ClInclude Include="Queue.h" />
     <ClInclude Include="RelayController.h" />
     <ClInclude Include="RelayNetworkHandler.h" />
