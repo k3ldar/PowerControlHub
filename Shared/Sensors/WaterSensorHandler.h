@@ -6,6 +6,7 @@
 #include "SmartFuseBoxConstants.h"
 #include "WarningType.h"
 #include "LoggingSupport.h"
+#include "JsonVisitor.h"
 
 
 constexpr unsigned long WaterSensorCheckIntervalMs = 5000;
@@ -17,13 +18,14 @@ constexpr unsigned long WaterSensorStabilizeMs = 10;
  * Reads analog water sensor values, maintains a rolling average using a queue,
  * and reports readings to both link and computer serial connections.
  */
-class WaterSensorHandler : public BaseSensorHandler, public BroadcastLoggerSupport
+class WaterSensorHandler : public BaseSensorHandler, public BroadcastLoggerSupport, public JsonVisitor
 {
 private:
 	SensorCommandHandler* _sensorCommandHandler;
 	const uint8_t _sensorPin;
 	const uint8_t _activePin;
-	Queue<int> _waterPumpQueue;
+	Queue<uint16_t> _waterPumpQueue;
+	uint16_t _latestWaterLevel;
 	bool _waitingForStabilization;
 
 protected:
@@ -47,7 +49,8 @@ protected:
 
 		_waitingForStabilization = false;
 		int sensorValue = analogRead(_sensorPin);
-		_waterPumpQueue.enqueue(sensorValue);
+		_latestWaterLevel = static_cast<uint16_t>(sensorValue);
+		_waterPumpQueue.enqueue(_latestWaterLevel);
 
 		digitalWrite(WaterSensorActivePin, LOW);
 
@@ -67,14 +70,21 @@ protected:
 		sendDebug(String(_waterPumpQueue.average()), F("WTRAVG"));
 
 		return WaterSensorCheckIntervalMs;
-	};
+	}
 public:
 	WaterSensorHandler(BroadcastManager* broadcastManager,
 		SensorCommandHandler* sensorCommandHandler, uint8_t sensorPin, uint8_t activePin)
 		: BroadcastLoggerSupport(broadcastManager), _sensorCommandHandler(sensorCommandHandler),
-			_sensorPin(sensorPin), _activePin(activePin), _waterPumpQueue(15, 0), _waitingForStabilization(false)
+			_sensorPin(sensorPin), _activePin(activePin), _waterPumpQueue(15, 0),
+		_latestWaterLevel(0), _waitingForStabilization(false)
 	{
 		pinMode(sensorPin, INPUT);
 		digitalWrite(_activePin, LOW);
-	};
+	}
+
+	void formatStatusJson(char* buffer, size_t size) override
+	{
+		snprintf(buffer, size, "\"waterLevel\":%d,\"average\":%d",
+			_latestWaterLevel, _waterPumpQueue.average());
+	}
 };

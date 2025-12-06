@@ -10,12 +10,13 @@ class SoundNetworkHandler : public INetworkCommandHandler
 private:
 	SoundController* _soundController;
 
-	// Helper to format JSON response
-	void formatStatusJson(char* buffer, size_t size) override;
-
 public:
 	explicit SoundNetworkHandler(SoundController* soundController);
+
 	const char* getRoute() const override { return "/api/sound"; }
+
+	void formatStatusJson(char* buffer, size_t size) override;
+
 	CommandResult handleRequest(const String& method,
 		const String& cmd,
 		StringKeyValue* params,

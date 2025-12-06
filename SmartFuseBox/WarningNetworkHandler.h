@@ -11,12 +11,13 @@ class WarningNetworkHandler : public INetworkCommandHandler
 private:
 	WarningManager* _warningManager;
 
-	// Helper to format JSON response
-	void formatStatusJson(char* buffer, size_t size) override;
-
 public:
 	explicit WarningNetworkHandler(WarningManager* warningManager);
+
 	const char* getRoute() const override { return "/api/warning"; }
+
+	void formatStatusJson(char* buffer, size_t size) override;
+
 	CommandResult handleRequest(const String& method,
 		const String& cmd,
 		StringKeyValue* params,

@@ -2,6 +2,8 @@
 #include <SerialCommandManager.h>
 #include <Arduino.h>
 #include "SharedConstants.h"
+#include "JsonVisitor.h"
+
 
 
 /**
@@ -9,7 +11,8 @@
  * 
  * Handlers implement this to expose REST-style endpoints for HTTP/WebSocket access.
  */
-class INetworkCommandHandler {
+class INetworkCommandHandler : public JsonVisitor
+{
 public:
     /**
      * @brief Get the HTTP route pattern (e.g., "/api/relay")
@@ -35,8 +38,6 @@ public:
         size_t bufferSize) = 0;
     
     virtual ~INetworkCommandHandler() = default;
-
-    virtual void formatStatusJson(char* buffer, size_t size) = 0;
 
     void formatJsonResponse(char* buffer, size_t size, bool success, const char* message = nullptr)
     {

@@ -95,6 +95,6 @@ CommandResult SoundNetworkHandler::handleRequest(const String& method,
 
 void SoundNetworkHandler::formatStatusJson(char* buffer, size_t size)
 {
-	snprintf(buffer, size, "{\"sound\":{\"active\": %d,\"type\": %d}}", 
+	snprintf(buffer, size, "\"sound\":{\"active\": %d,\"type\": %d}", 
 		_soundController->isPlaying(), static_cast<int>(_soundController->getCurrentSoundType()));
 }

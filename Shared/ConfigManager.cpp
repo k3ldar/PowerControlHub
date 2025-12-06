@@ -112,12 +112,14 @@ void ConfigManager::resetToDefaults()
 	_cfg.soundStartDelayMs = 500; // 500ms
 	
 #if defined(ARDUINO_UNO_R4)
-    _cfg.bluetoothEnabled = true;
-    _cfg.wifiEnabled = true;
+    _cfg.bluetoothEnabled = false;
+    _cfg.wifiEnabled = false;
     _cfg.accessMode = 0; // 0 = AP, 1 = Client
-    _cfg._apSSID[0] = '\0';
-    _cfg._apPassword[0] = '\0';
-	_cfg.wifiPort = 80;
+    strncpy(_cfg._apSSID, "SmartFuseBox", sizeof(_cfg._apSSID) - 1);
+    _cfg._apSSID[sizeof(_cfg._apSSID) - 1] = '\0';
+    strncpy(_cfg._apPassword, "12345678", sizeof(_cfg._apPassword) - 1);
+    _cfg._apPassword[sizeof(_cfg._apPassword) - 1] = '\0';
+    _cfg.wifiPort = 80; 
 #endif
 
     // compute checksum

@@ -96,6 +96,9 @@ SystemNetworkHandler systemNetworkHandler(&wifiController);
 
 void setup()
 {
+	SharedFunctions::initializeSerial(COMPUTER_SERIAL, 115200, true);
+	SharedFunctions::initializeSerial(LINK_SERIAL, 9600, true);
+
 	DateTimeManager::setDateTime();
 	// retrieve config settings
 	ConfigManager::begin();
@@ -123,9 +126,6 @@ void setup()
 	INetworkCommandHandler* networkHandlers[] = { &relayNetworkHandler, &soundNetworkHandler, &warningNetworkHandler, &systemNetworkHandler };
 	size_t networkHandlerCount = sizeof(networkHandlers) / sizeof(networkHandlers[0]);
 	wifiController.registerHandlers(networkHandlers, networkHandlerCount);
-
-	SharedFunctions::initializeSerial(COMPUTER_SERIAL, 115200, true);
-	SharedFunctions::initializeSerial(LINK_SERIAL, 9600, true);
 
 	Config* config = ConfigManager::getConfigPtr();
 
