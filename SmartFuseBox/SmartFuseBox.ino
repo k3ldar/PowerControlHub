@@ -128,6 +128,17 @@ void setup()
 	wifiController.registerHandlers(networkHandlers, networkHandlerCount);
 
 	Config* config = ConfigManager::getConfigPtr();
+	// json status visitors for wifi
+	JsonVisitor* jsonVisitors[] = {
+		&relayNetworkHandler,
+		&soundNetworkHandler,
+		&warningNetworkHandler,
+		&systemNetworkHandler,
+		&waterSensorHandler,
+		&dht11SensorHandler
+	};
+	uint8_t jsonVisitorCount = sizeof(jsonVisitors) / sizeof(jsonVisitors[0]);
+	wifiController.registerJsonVisitors(jsonVisitors, jsonVisitorCount);
 
 	// bluetooth
 	bluetoothController.applyConfig(config);

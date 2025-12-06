@@ -85,9 +85,6 @@
     <ClCompile Include="SharedFunctions.cpp">
       <Filter>Source Files\SharedCode</Filter>
     </ClCompile>
-    <ClCompile Include="SystemCommandHandler.cpp">
-      <Filter>Source Files\SharedCode\CommandHandlers</Filter>
-    </ClCompile>
     <ClCompile Include="WarningCommandHandler.cpp">
       <Filter>Source Files\SharedCode\SerialCommandHandlers</Filter>
     </ClCompile>
@@ -138,6 +135,9 @@
     </ClCompile>
     <ClCompile Include="SystemCommandHandler.cpp">
       <Filter>Source Files\SerialCommandHandlers</Filter>
+    </ClCompile>
+    <ClCompile Include="SystemCommandHandler.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -250,6 +250,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="SystemNetworkHandler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="JsonVisitor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
