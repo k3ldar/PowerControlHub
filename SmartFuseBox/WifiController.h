@@ -163,10 +163,13 @@ private:
 
         if (cfg->accessMode == 0) // Access Point
         {
-            IPAddress testIp;
-            if (!testIp.fromString(cfg->apIpAddress))
-            {
-                return false;
+            // If apIpAddress is empty, allow using default IP (considered valid)
+            if (cfg->apIpAddress[0] != '\0') {
+                IPAddress testIp;
+                if (!testIp.fromString(cfg->apIpAddress))
+                {
+                    return false;
+                }
             }
         }
 
