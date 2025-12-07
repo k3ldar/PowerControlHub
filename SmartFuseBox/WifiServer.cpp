@@ -42,8 +42,15 @@ void WifiServer::setAccessPointMode(const char* ssid, const char* password, cons
 	_mode = WifiMode::AccessPoint;
 	strncpy(_ssid, ssid, sizeof(_ssid) - 1);
 	_ssid[sizeof(_ssid) - 1] = '\0';
-	strncpy(_ipAddress, ipAddress, sizeof(_ipAddress) -1);
-	_ipAddress[sizeof(_ipAddress) - 1] = '\0';
+	if (ipAddress != nullptr)
+	{
+		strncpy(_ipAddress, ipAddress, sizeof(_ipAddress) - 1);
+		_ipAddress[sizeof(_ipAddress) - 1] = '\0';
+	}
+	else
+	{
+		_ipAddress[0] = '\0';
+	}
 	
 	if (password != nullptr)
 	{
