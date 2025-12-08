@@ -1,4 +1,5 @@
 #include "AckCommandHandler.h"
+#include "SharedFunctions.h"
 
 const char AckCommand[] = "ACK";
 
@@ -68,7 +69,7 @@ bool AckCommandHandler::processWarningsListAck(SerialCommandManager* sender, con
                 // Parse hexadecimal (skip the "0x" prefix)
                 remoteWarningMask = strtoul(warningValue.c_str() + 2, nullptr, 16);
             }
-            else if (isAllDigits(warningValue))
+            else if (SharedFunctions::isAllDigits(warningValue))
             {
                 // Parse decimal
                 remoteWarningMask = warningValue.toInt();
@@ -172,13 +173,13 @@ bool AckCommandHandler::handleCommand(SerialCommandManager* sender, const String
         if (paramCount >= 2)
         {
             // Format: ACK:R2=ok:0=0 (with relay index and state)
-            if (!isAllDigits(params[1].key) || !isAllDigits(params[1].value))
+            if (!SharedFunctions::isAllDigits(params[1].key) || !SharedFunctions::isAllDigits(params[1].value))
             {
                 return true;
             }
 
             uint8_t relayIndex = params[1].key.toInt();
-            bool isOn = parseBooleanValue(params[1].value);
+            bool isOn = SharedFunctions::parseBooleanValue(params[1].value);
             
             RelayStateUpdate update = { relayIndex, isOn };
             notifyCurrentPage(static_cast<uint8_t>(PageUpdateType::RelayState), &update);
@@ -189,7 +190,7 @@ bool AckCommandHandler::handleCommand(SerialCommandManager* sender, const String
         if (paramCount >= 2)
         {
             uint8_t relayIndex = params[1].key.toInt();
-            bool isOn = parseBooleanValue(params[1].value);
+            bool isOn = SharedFunctions::parseBooleanValue(params[1].value);
 
             RelayStateUpdate update = { relayIndex, isOn };
             notifyCurrentPage(static_cast<uint8_t>(PageUpdateType::RelayState), &update);
@@ -203,7 +204,7 @@ bool AckCommandHandler::handleCommand(SerialCommandManager* sender, const String
     {
         if (paramCount >= 2)
         {
-            bool isOn = parseBooleanValue(params[1].value);
+            bool isOn = SharedFunctions::parseBooleanValue(params[1].value);
 
             BoolStateUpdate update = { isOn };
             notifyCurrentPage(static_cast<uint8_t>(PageUpdateType::SoundSignal), &update);

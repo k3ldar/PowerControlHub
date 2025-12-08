@@ -1,12 +1,12 @@
 #pragma once
 
 
-#include <SensorManager.h>
 #include <dht11.h>
-#include "SharedConstants.h"
+
+#include "SystemDefinitions.h"
 #include "WarningManager.h"
 #include "WarningType.h"
-#include "LoggingSupport.h"
+#include "BaseSensor.h"
 
 constexpr unsigned long TempHumidityCheckMs = 2500;
 
@@ -16,7 +16,7 @@ constexpr unsigned long TempHumidityCheckMs = 2500;
  * Reads temperature and humidity sensor values, 
  * and reports readings to both link and computer serial connections.
  */
-class Dht11SensorHandler : public BaseSensorHandler, public BroadcastLoggerSupport, public JsonVisitor
+class Dht11SensorHandler : public BaseSensor, public BroadcastLoggerSupport
 {
 private:
 	SensorCommandHandler* _sensorCommandHandler;
@@ -87,5 +87,20 @@ public:
 		dtostrf(_humidity, 6, 1, humidity);
 		snprintf(buffer, size, "\"temperature\":%s,\"humidity\":%s",
 			celsius, humidity);
+	}
+
+	SensorIdList getSensorId() const override
+	{
+		return SensorIdList::Dht11Sensor;
+	}
+
+	SensorType getSensorType() const override
+	{
+		return SensorType::Local;
+	}
+
+	const char* getSensorCommandId() const override
+	{
+		return SensorTemperature;
 	}
 };

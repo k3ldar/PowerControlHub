@@ -18,6 +18,7 @@ CommandResult WarningNetworkHandler::handleRequest(const String& method,
 	size_t bufferSize)
 {
 	(void)method;
+	(void)params;
 
 	if (_warningManager == nullptr)
 	{
@@ -48,5 +49,5 @@ CommandResult WarningNetworkHandler::handleRequest(const String& method,
 void WarningNetworkHandler::formatStatusJson(char* buffer, size_t size)
 {
 	snprintf(buffer, size, "\"warning\":{\"active\": \"0x%X\"}",
-		static_cast<int32_t>(_warningManager->getActiveWarningsMask()));
+		static_cast<unsigned int>(_warningManager->getActiveWarningsMask()));
 }

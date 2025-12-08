@@ -81,6 +81,8 @@ void SystemPage::updateAllDisplayItems()
 // Handle touch events for buttons
 void SystemPage::handleTouch(uint8_t compId, uint8_t eventType)
 {
+    (void)eventType;
+    
     switch (compId)
     {
     case ButtonPrevious:

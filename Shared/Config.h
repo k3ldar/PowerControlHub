@@ -2,7 +2,7 @@
 #include <Arduino.h>
 #include <stdint.h>
 
-#include "SharedConstants.h"
+#include "SystemDefinitions.h"
 #include "Local.h"
 
 

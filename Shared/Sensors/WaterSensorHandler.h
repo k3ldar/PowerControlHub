@@ -1,13 +1,12 @@
 #pragma once
 
 
-#include <SensorManager.h>
 #include "Queue.h"
 #include "SmartFuseBoxConstants.h"
 #include "WarningType.h"
 #include "LoggingSupport.h"
 #include "JsonVisitor.h"
-
+#include "BaseSensor.h"
 
 constexpr unsigned long WaterSensorCheckIntervalMs = 5000;
 constexpr unsigned long WaterSensorStabilizeMs = 10;
@@ -18,7 +17,7 @@ constexpr unsigned long WaterSensorStabilizeMs = 10;
  * Reads analog water sensor values, maintains a rolling average using a queue,
  * and reports readings to both link and computer serial connections.
  */
-class WaterSensorHandler : public BaseSensorHandler, public BroadcastLoggerSupport, public JsonVisitor
+class WaterSensorHandler : public BaseSensor, public BroadcastLoggerSupport
 {
 private:
 	SensorCommandHandler* _sensorCommandHandler;
@@ -86,5 +85,20 @@ public:
 	{
 		snprintf(buffer, size, "\"waterLevel\":%d,\"average\":%d",
 			_latestWaterLevel, _waterPumpQueue.average());
+	}
+
+	SensorIdList getSensorId() const override
+	{
+		return SensorIdList::WaterSensor;
+	}
+
+	SensorType getSensorType() const override
+	{
+		return SensorType::Local;
+	}
+
+	const char* getSensorCommandId() const override
+	{
+		return SensorWaterLevel;
 	}
 };

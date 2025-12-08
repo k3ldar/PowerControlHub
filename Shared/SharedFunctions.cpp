@@ -1,7 +1,10 @@
 #include "SharedFunctions.h"
-#include "SharedConstants.h"
+#include "SystemDefinitions.h"
+#include "Local.h"
 
+#if defined(ARDUINO_UNO_R4)
 extern "C" char* sbrk(int incr);
+#endif
 
 uint16_t SharedFunctions::stackAvailable()
 {

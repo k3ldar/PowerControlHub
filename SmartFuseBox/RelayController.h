@@ -1,6 +1,6 @@
 #pragma once
 
-#include "SharedConstants.h"
+#include "SystemDefinitions.h"
 
 enum class RelayResult : uint8_t
 {

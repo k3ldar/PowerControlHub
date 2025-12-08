@@ -2,7 +2,7 @@
 
 #include <WiFiS3.h>
 #include "LoggingSupport.h"
-#include "SharedConstants.h"
+#include "SystemDefinitions.h"
 #include "INetworkCommandHandler.h"
 #include "WarningManager.h"
 
@@ -87,7 +87,7 @@ private:
 	void processClientRequest();
 	void startServer();
 	void stopServer();
-	bool handleIndex(WiFiClient& client, const String& path);
+	bool handleIndex(WiFiClient& client, bool isPersistent, const String& path);
 	bool dispatchToHandler(WiFiClient& client, INetworkCommandHandler* handler, const String& path, const String& method, const String& query);
 	void registerJsonVisitors(JsonVisitor** jsonVisitors, uint8_t jsonVisitorCount);
 	

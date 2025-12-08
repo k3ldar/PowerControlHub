@@ -1,7 +1,7 @@
 #pragma once
 
 #include "INetworkCommandHandler.h"
-#include "SharedConstants.h"
+#include "SystemDefinitions.h"
 #include "WifiController.h"
 
 

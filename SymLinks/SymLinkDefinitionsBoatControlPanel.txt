@@ -1,6 +1,6 @@
 WarningType.h|..\Shared\WarningType.h
 Config.h|..\Shared\Config.h
-SharedConstants.h|..\Shared\SharedConstants.h
+SystemDefinitions.h|..\Shared\SystemDefinitions.h
 ConfigManager.h|..\Shared\ConfigManager.h
 ConfigManager.cpp|..\Shared\ConfigManager.cpp
 BroadcastManager.h|..\Shared\BroadcastManager.h
@@ -18,9 +18,12 @@ SystemCommandHandler.h|..\Shared\CommandHandlers\SystemCommandHandler.h
 SystemCommandHandler.cpp|..\Shared\CommandHandlers\SystemCommandHandler.cpp
 WarningCommandHandler.h|..\Shared\CommandHandlers\WarningCommandHandler.h
 WarningCommandHandler.cpp|..\Shared\CommandHandlers\WarningCommandHandler.cpp
+BaseSensor.h|..\Shared\Sensors\BaseSensor.h
 SensorCommandHandler.h|..\Shared\CommandHandlers\SensorCommandHandler.h
 SensorCommandHandler.cpp|..\Shared\CommandHandlers\SensorCommandHandler.cpp
 InterceptDebugCommandHandler.h|..\Shared\CommandHandlers\InterceptDebugCommandHandler.h
 LoggingSupport.h|..\Shared\Logging\LoggingSupport.h
 TLVCompassHandler.h|..\Shared\Sensors\TLVCompassHandler.h
 TLVCompassHandler.cpp|..\Shared\Sensors\TLVCompassHandler.cpp
+DateTimeManager.h|..\Shared\DateTimeManager.h
+DateTimeManager.cpp|..\Shared\DateTimeManager.cpp

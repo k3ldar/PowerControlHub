@@ -2,7 +2,7 @@
 
 #include "INetworkCommandHandler.h"
 #include "SoundController.h"
-#include "SharedConstants.h"
+#include "SystemDefinitions.h"
 
 
 class SoundNetworkHandler : public INetworkCommandHandler

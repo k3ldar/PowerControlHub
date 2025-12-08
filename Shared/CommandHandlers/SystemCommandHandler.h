@@ -2,7 +2,7 @@
 
 #include "SharedBaseCommandHandler.h"
 #include "BroadcastManager.h"
-#include "SharedConstants.h"
+#include "SystemDefinitions.h"
 #include "SharedFunctions.h"
 #include "WarningManager.h"
 #include "Local.h"

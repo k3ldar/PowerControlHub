@@ -2,7 +2,7 @@
 #include <Arduino.h>
 #include <SerialCommandManager.h>
 #include "ConfigManager.h"
-#include "SharedConstants.h"
+#include "SystemDefinitions.h"
 
 /**
  * @brief Centralized manager for broadcasting commands to multiple serial ports.

@@ -1,6 +1,5 @@
 #pragma once
 #include <Arduino.h>
-#include "Local.h"
 
 class SharedFunctions {
 public:

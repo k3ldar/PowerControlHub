@@ -3,7 +3,7 @@
 
 #include "INetworkCommandHandler.h"
 #include "WarningManager.h"
-#include "SharedConstants.h"
+#include "SystemDefinitions.h"
 
 
 class WarningNetworkHandler : public INetworkCommandHandler

@@ -1,7 +1,6 @@
 #include "WifiServer.h"
 #include "SharedFunctions.h"
 
-constexpr uint16_t MaximumResponseBufferSize = 512;
 constexpr uint16_t MaximumRequestSize = 1024;
 
 WifiServer::WifiServer(SerialCommandManager* commandMgrComputer, WarningManager* warningManager, uint16_t port,
@@ -424,7 +423,7 @@ void WifiServer::processClientRequest()
 
 	if (path.startsWith(F("/api/index")))
 	{
-		handleIndex(_activeClient.client, path);
+		handleIndex(_activeClient.client, _activeClient.isPersistent, path);
 		handled = true;
 	}
 
@@ -581,30 +580,30 @@ int WifiServer::getSignalStrength() const
 	return WiFi.RSSI();
 }
 
-bool WifiServer::handleIndex(WiFiClient& client, const String& path)
+bool WifiServer::handleIndex(WiFiClient& client, bool isPersistent, const String& path)
 {
 	sendDebug(String(F("HandleIndex: ")) + path, F("WifiServer"));
 
 	// Send HTTP headers first
-	_activeClient.client.print(F("HTTP/1.1 200 OK\r\n"));
-	_activeClient.client.print(F("Content-Type: application/json\r\n"));
+	client.print(F("HTTP/1.1 200 OK\r\n"));
+	client.print(F("Content-Type: application/json\r\n"));
 
-	if (_activeClient.isPersistent)
+	if (isPersistent)
 	{
-		_activeClient.client.print(F("Connection: keep-alive\r\n"));
-		_activeClient.client.print(F("Keep-Alive: timeout="));
-		_activeClient.client.print(PersistentTimeoutMs / 1000);  // Send timeout in seconds
-		_activeClient.client.print(F("\r\n"));
+		client.print(F("Connection: keep-alive\r\n"));
+		client.print(F("Keep-Alive: timeout="));
+		client.print(PersistentTimeoutMs / 1000);  // Send timeout in seconds
+		client.print(F("\r\n"));
 	}
 	else
 	{
-		_activeClient.client.print(F("Connection: close\r\n"));
+		client.print(F("Connection: close\r\n"));
 	}
 
-	_activeClient.client.print(F("\r\n"));
+	client.print(F("\r\n"));
 
 	// Stream JSON response
-	_activeClient.client.print(F("{"));
+	client.print(F("{"));
 
 	bool firstEntry = true;  // Track if we've written any content yet
 
@@ -612,26 +611,26 @@ bool WifiServer::handleIndex(WiFiClient& client, const String& path)
 	{
 		if (_jsonVisitors[i])
 		{
-			char buffer[MaximumResponseBufferSize];
+			char buffer[MaximumJsonResponseBufferSize];
 			buffer[0] = '\0';
 
-			_jsonVisitors[i]->formatStatusJson(buffer, MaximumResponseBufferSize);
+			_jsonVisitors[i]->formatStatusJson(buffer, MaximumJsonResponseBufferSize);
 
 			if (buffer[0] != '\0')
 			{
 				// Add comma before this entry (but not before the first entry)
 				if (!firstEntry)
 				{
-					_activeClient.client.print(F(","));
+					client.print(F(","));
 				}
 
-				_activeClient.client.print(buffer);
+				client.print(buffer);
 				firstEntry = false;
 			}
 		}
 	}
 
-	_activeClient.client.print(F("}"));
+	client.print(F("}"));
 
 	return true;
 }
@@ -697,7 +696,7 @@ bool WifiServer::dispatchToHandler(WiFiClient& client, INetworkCommandHandler* h
 	}
 
 	// Prepare response buffer
-	char responseBuffer[MaximumResponseBufferSize];
+	char responseBuffer[MaximumJsonResponseBufferSize];
 	responseBuffer[0] = '\0';
 
 	// Call handler with modified body containing command and parameters

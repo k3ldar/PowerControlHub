@@ -13,8 +13,9 @@ class WifiController
 public:
     WifiController(SerialCommandManager* commandMgrComputer, WarningManager* warningManager)
         : _commandMgrComputer(commandMgrComputer),
-          _wifiServer(nullptr),
-          _enabled(false),
+		_warningManager(warningManager),
+        _wifiServer(nullptr),
+        _enabled(false),
 		_handlerObjects(nullptr),
 		_handlerCount(0),
 		_port(80),

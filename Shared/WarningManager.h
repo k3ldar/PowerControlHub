@@ -3,7 +3,7 @@
 #include <Arduino.h>
 #include <SerialCommandManager.h>
 #include <stdint.h>
-#include "SharedConstants.h"
+#include "SystemDefinitions.h"
 #include "WarningType.h"
 
 

@@ -81,6 +81,7 @@ constexpr unsigned long HeartbeatIntervalMs = 1000;
 constexpr unsigned long HeartbeatTimeoutMs = 3000;
 
 
+
 constexpr uint8_t MaxUint8Value = 0xFF;
 constexpr uint16_t MaxUint16Value = 0xFFFF;
 
@@ -107,7 +108,23 @@ constexpr char DefaultApIpAddress[MaxIpAddressLength] = "192.168.4.1";
 
 // WiFi Connection Quality Thresholds
 constexpr int8_t WeakSignalWarningRSSI = -80;  // dBm - warn user
+
+
 #endif
+
+constexpr uint16_t MaximumJsonResponseBufferSize = 512;
+
+/*
+* Unique IDs for different sensor types in the system.
+* 
+* These IDs are used to identify and manage various sensors, each sensor must have a unique ID.
+* So for instance you could have two water sensors, but they would require a different WaterSensor ID.
+*/
+enum class SensorIdList : uint8_t
+{
+    WaterSensor = 0x0,
+    Dht11Sensor = 0x1,
+};
 
 struct CommandResult {
     bool success;
@@ -120,7 +137,7 @@ struct CommandResult {
 
     static CommandResult ok()
     {
-        return CommandResult{ true };
+        return CommandResult{ true, 0 };
     }
 
     static CommandResult okStatus(uint8_t statusValue) {

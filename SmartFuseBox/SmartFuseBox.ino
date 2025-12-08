@@ -10,7 +10,6 @@
 #include "Config.h"
 #include "ConfigManager.h"
 #include "ConfigCommandHandler.h"
-#include "SoundController.h"
 #include "WarningManager.h"
 
 #include "SystemCommandHandler.h"
@@ -36,8 +35,11 @@
 #include "SoundNetworkHandler.h"
 #include "WarningNetworkHandler.h"
 #include "SystemNetworkHandler.h"
+#include "SensorNetworkHandler.h"
 
 #include "RelayController.h"
+#include "SensorController.h"
+#include "SoundController.h"
 
 
 #define COMPUTER_SERIAL Serial
@@ -80,7 +82,8 @@ Dht11SensorHandler dht11SensorHandler(&broadcastManager, &sensorCommandHandler, 
 BaseSensorHandler* sensorHandlers[] = {
 	&waterSensorHandler, &dht11SensorHandler
 };
-SensorManager sensorManager(sensorHandlers, sizeof(sensorHandlers) / sizeof(sensorHandlers[0]));
+uint8_t sensorHandlerCount = sizeof(sensorHandlers) / sizeof(sensorHandlers[0]);
+SensorManager sensorManager(sensorHandlers, sensorHandlerCount);
 
 // configure bluetooth support
 BluetoothController bluetoothController(&systemCommandHandler, &sensorCommandHandler, &relayController, &warningManager, &commandMgrComputer);
@@ -90,11 +93,20 @@ WifiController wifiController(&commandMgrComputer, &warningManager);
 // computer command handlers
 ConfigCommandHandler configHandler(&soundController, &bluetoothController, &wifiController, &relayHandler);
 
+// middleware
+BaseSensor* baseSensors[] = {
+	&waterSensorHandler, &dht11SensorHandler
+};
+uint8_t baseSensorCount = sizeof(baseSensors) / sizeof(baseSensors[0]);
+SensorController sensorController(baseSensors, sensorHandlerCount);
+
+
 // configure wifi support
 RelayNetworkHandler relayNetworkHandler(&relayController);
 SoundNetworkHandler soundNetworkHandler(&soundController);
 WarningNetworkHandler warningNetworkHandler(&warningManager);
 SystemNetworkHandler systemNetworkHandler(&wifiController);
+SensorNetworkHandler sensorNetworkHandler(&sensorController);
 
 void setup()
 {
@@ -181,7 +193,8 @@ void onLinkCommandReceived(SerialCommandManager* mgr)
 void configureWifiSupport(Config* config)
 {
 	// network command handlers
-	INetworkCommandHandler* networkHandlers[] = { &relayNetworkHandler, &soundNetworkHandler, &warningNetworkHandler, &systemNetworkHandler };
+	INetworkCommandHandler* networkHandlers[] = { &relayNetworkHandler, &soundNetworkHandler, &warningNetworkHandler,
+		&systemNetworkHandler, &sensorNetworkHandler };
 	size_t networkHandlerCount = sizeof(networkHandlers) / sizeof(networkHandlers[0]);
 	wifiController.registerHandlers(networkHandlers, networkHandlerCount);
 
@@ -192,6 +205,7 @@ void configureWifiSupport(Config* config)
 		&soundNetworkHandler,
 		&warningNetworkHandler,
 		&systemNetworkHandler,
+		&sensorNetworkHandler,
 		&waterSensorHandler,
 		&dht11SensorHandler
 	};

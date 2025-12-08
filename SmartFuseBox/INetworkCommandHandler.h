@@ -1,7 +1,7 @@
 #pragma once
 #include <SerialCommandManager.h>
 #include <Arduino.h>
-#include "SharedConstants.h"
+#include "SystemDefinitions.h"
 #include "JsonVisitor.h"
 
 
