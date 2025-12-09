@@ -4,6 +4,10 @@
 
 constexpr uint8_t DefaultValue = 0xFF;
 
+constexpr uint8_t BufferSuccess = 0x00;
+constexpr uint8_t BufferInvalid = 0x01;
+constexpr uint8_t BufferOverflow = 0x02;
+
 constexpr char SystemHeartbeatCommand[] = "F0";
 constexpr char SystemInitialized[] = "F1";
 constexpr char SystemFreeMemory[] = "F2";

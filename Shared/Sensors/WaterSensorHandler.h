@@ -83,7 +83,7 @@ public:
 
 	void formatStatusJson(char* buffer, size_t size) override
 	{
-		snprintf(buffer, size, "\"waterLevel\":%d,\"average\":%d",
+		snprintf(buffer, size, "\"level\":%d,\"average\":%d",
 			_latestWaterLevel, _waterPumpQueue.average());
 	}
 
@@ -100,5 +100,10 @@ public:
 	const char* getSensorCommandId() const override
 	{
 		return SensorWaterLevel;
+	}
+
+	const char* getSensorName() const override
+	{
+		return "waterLevel";
 	}
 };

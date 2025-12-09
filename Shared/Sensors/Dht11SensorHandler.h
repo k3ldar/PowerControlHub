@@ -103,4 +103,9 @@ public:
 	{
 		return SensorTemperature;
 	}
+
+	const char* getSensorName() const override
+	{
+		return "dht11";
+	}
 };

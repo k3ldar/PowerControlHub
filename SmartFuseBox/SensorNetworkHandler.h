@@ -14,7 +14,9 @@ public:
 
     const char* getRoute() const override { return "/api/sensor"; }
 
-    void formatStatusJson(char* buffer, size_t size) override;
+    void formatWifiStatusJson(WiFiClient* client) override;
+
+    void formatStatusJson(char* buffer, size_t size);
 
     CommandResult handleRequest(const String& method,
         const String& command,

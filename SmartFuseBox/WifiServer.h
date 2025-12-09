@@ -50,7 +50,7 @@ private:
 	uint8_t _handlerCount;
 
 	// json visitors
-	JsonVisitor** _jsonVisitors;
+	NetworkJsonVisitor** _jsonVisitors;
 	uint8_t _jsonVisitorCount;
 
 	// Connection tracking
@@ -89,12 +89,12 @@ private:
 	void stopServer();
 	bool handleIndex(WiFiClient& client, bool isPersistent, const String& path);
 	bool dispatchToHandler(WiFiClient& client, INetworkCommandHandler* handler, const String& path, const String& method, const String& query);
-	void registerJsonVisitors(JsonVisitor** jsonVisitors, uint8_t jsonVisitorCount);
+	void registerJsonVisitors(NetworkJsonVisitor** jsonVisitors, uint8_t jsonVisitorCount);
 	
 public:
 	WifiServer(SerialCommandManager* commandMgrComputer, WarningManager* warningManager, uint16_t port,
 		INetworkCommandHandler** handlers, uint8_t handlerCount,
-		JsonVisitor** jsonVisitors, uint8_t jsonVisitorCount);
+		NetworkJsonVisitor** jsonVisitors, uint8_t jsonVisitorCount);
 	~WifiServer();
 	
 	// Configuration methods

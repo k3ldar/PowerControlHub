@@ -121,7 +121,7 @@ public:
         return _wifiServer;
     }
 
-    void registerJsonVisitors(JsonVisitor** jsonVisitors, uint8_t jsonVisitorCount)
+    void registerJsonVisitors(NetworkJsonVisitor** jsonVisitors, uint8_t jsonVisitorCount)
     {
         // owned by caller so no need to clean up
         _jsonVisitorCount = jsonVisitorCount;
@@ -136,7 +136,7 @@ private:
     INetworkCommandHandler** _handlerObjects;
     uint8_t _handlerCount = 0;
 	uint16_t _port = 80;
-    JsonVisitor** _jsonVisitors;
+    NetworkJsonVisitor** _jsonVisitors;
     uint8_t _jsonVisitorCount;
 
     bool isConfigValid(const Config* cfg) const

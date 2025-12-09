@@ -4,7 +4,7 @@
 constexpr uint16_t MaximumRequestSize = 1024;
 
 WifiServer::WifiServer(SerialCommandManager* commandMgrComputer, WarningManager* warningManager, uint16_t port,
-	INetworkCommandHandler** handlers, uint8_t handlerCount, JsonVisitor** jsonVisitors, uint8_t jsonVisitorCount)
+	INetworkCommandHandler** handlers, uint8_t handlerCount, NetworkJsonVisitor** jsonVisitors, uint8_t jsonVisitorCount)
 	:   SingleLoggerSupport(commandMgrComputer), 
 		_serverActive(false),
 		_server(port),
@@ -605,28 +605,21 @@ bool WifiServer::handleIndex(WiFiClient& client, bool isPersistent, const String
 	// Stream JSON response
 	client.print(F("{"));
 
-	bool firstEntry = true;  // Track if we've written any content yet
+
+	bool firstEntry = true;
 
 	for (uint8_t i = 0; i < _jsonVisitorCount; i++)
 	{
 		if (_jsonVisitors[i])
 		{
-			char buffer[MaximumJsonResponseBufferSize];
-			buffer[0] = '\0';
-
-			_jsonVisitors[i]->formatStatusJson(buffer, MaximumJsonResponseBufferSize);
-
-			if (buffer[0] != '\0')
+			// Add comma separator (except before first entry)
+			if (!firstEntry)
 			{
-				// Add comma before this entry (but not before the first entry)
-				if (!firstEntry)
-				{
-					client.print(F(","));
-				}
-
-				client.print(buffer);
-				firstEntry = false;
+				client.print(F(","));
 			}
+
+			_jsonVisitors[i]->formatWifiStatusJson(&client);
+			firstEntry = false;
 		}
 	}
 
@@ -832,7 +825,7 @@ void WifiServer::updateClientConnection()
 	}
 }
 
-void WifiServer::registerJsonVisitors(JsonVisitor** jsonVisitors, uint8_t jsonVisitorCount)
+void WifiServer::registerJsonVisitors(NetworkJsonVisitor** jsonVisitors, uint8_t jsonVisitorCount)
 {
 	if (_jsonVisitors)
 	{
@@ -842,7 +835,7 @@ void WifiServer::registerJsonVisitors(JsonVisitor** jsonVisitors, uint8_t jsonVi
 	}
 
 	_jsonVisitorCount = jsonVisitorCount;
-	_jsonVisitors = new JsonVisitor * [_jsonVisitorCount];
+	_jsonVisitors = new NetworkJsonVisitor * [_jsonVisitorCount];
 
 	for (uint8_t i = 0; i < _jsonVisitorCount; i++)
 	{

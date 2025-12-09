@@ -112,6 +112,7 @@
       <DeploymentContent>true</DeploymentContent>
     </ClCompile>
     <ClInclude Include="BaseSensor.h" />
+    <ClInclude Include="NetworkJsonVisitor.h" />
     <ClInclude Include="SystemDefinitions.h" />
     <ClInclude Include="DateTimeManager.h" />
     <ClInclude Include="INetworkCommandHandler.h" />

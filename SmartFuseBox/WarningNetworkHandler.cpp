@@ -51,3 +51,12 @@ void WarningNetworkHandler::formatStatusJson(char* buffer, size_t size)
 	snprintf(buffer, size, "\"warning\":{\"active\": \"0x%X\"}",
 		static_cast<unsigned int>(_warningManager->getActiveWarningsMask()));
 }
+
+void WarningNetworkHandler::formatWifiStatusJson(WiFiClient* client)
+{
+	char buffer[MaximumJsonResponseBufferSize];
+	buffer[0] = '\0';
+
+	formatStatusJson(buffer, sizeof(buffer));
+	client->print(buffer);
+}

@@ -98,3 +98,12 @@ void SoundNetworkHandler::formatStatusJson(char* buffer, size_t size)
 	snprintf(buffer, size, "\"sound\":{\"active\": %d,\"type\": %d}", 
 		_soundController->isPlaying(), static_cast<int>(_soundController->getCurrentSoundType()));
 }
+
+void SoundNetworkHandler::formatWifiStatusJson(WiFiClient* client)
+{
+	char buffer[MaximumJsonResponseBufferSize];
+	buffer[0] = '\0';
+
+	formatStatusJson(buffer, sizeof(buffer));
+	client->print(buffer);
+}

@@ -139,6 +139,12 @@
     <ClCompile Include="ConfigManager.cpp">
       <Filter>Source Files\SharedCode</Filter>
     </ClCompile>
+    <ClCompile Include="SensorController.h">
+      <Filter>Header Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SensorNetworkHandler.cpp">
+      <Filter>Source Files\NetworkCommandHandlers</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="__vm\.SmartFuseBox.vsarduino.h">
@@ -167,9 +173,6 @@
     </ClInclude>
     <ClInclude Include="SharedBaseCommandHandler.h">
       <Filter>Header Files\SharedCode\SerialCommandHandlers</Filter>
-    </ClInclude>
-    <ClInclude Include="SharedConstants.h">
-      <Filter>Header Files\SharedCode</Filter>
     </ClInclude>
     <ClInclude Include="WarningType.h">
       <Filter>Header Files\SharedCode</Filter>
@@ -249,11 +252,23 @@
     <ClInclude Include="DateTimeManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="SystemNetworkHandler.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="JsonVisitor.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BaseSensor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SystemDefinitions.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SensorNetworkHandler.h">
+      <Filter>Header Files\NetworkCommandHandlers</Filter>
+    </ClInclude>
+    <ClInclude Include="NetworkJsonVisitor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SystemNetworkHandler.h">
+      <Filter>Header Files\NetworkCommandHandlers</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -70,3 +70,12 @@ void SystemNetworkHandler::formatStatusJson(char* buffer, size_t size)
 		rssi,
 		DateTimeManager::formatDateTime().c_str());
 }
+
+void SystemNetworkHandler::formatWifiStatusJson(WiFiClient* client)
+{
+	char buffer[MaximumJsonResponseBufferSize];
+	buffer[0] = '\0';
+
+	formatStatusJson(buffer, sizeof(buffer));
+	client->print(buffer);
+}

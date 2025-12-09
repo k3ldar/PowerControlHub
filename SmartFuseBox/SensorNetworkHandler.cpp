@@ -1,5 +1,3 @@
-
-
 #include "SensorNetworkHandler.h"
 #include "SystemDefinitions.h"
 
@@ -31,29 +29,76 @@ CommandResult SensorNetworkHandler::handleRequest(const String& method,
 
 void SensorNetworkHandler::formatStatusJson(char* buffer, size_t size)
 {
-	int written = snprintf(buffer, size, "\"sensor\":[");
+    if (!buffer || size == 0)
+    {
+        return;
+    }
 
-	for (uint8_t i = 0; i < _sensorController->sensorCount(); i++)
-	{
-		BaseSensor* sensor = _sensorController->sensorGet(i);
+    int written = snprintf(buffer, size, "\"sensors\":{");
+    if (written < 0 || written >= static_cast<int>(size))
+    {
+        buffer[size - 1] = '\0';
+        return; // Buffer too small for even the opening
+    }
 
-		if (sensor == nullptr)
-			continue;
+    bool firstSensor = true;
+    for (uint8_t i = 0; i < _sensorController->sensorCount(); i++)
+    {
+        BaseSensor* sensor = _sensorController->sensorGet(i);
 
-		char sensorBuffer[MaximumJsonResponseBufferSize];
-		sensorBuffer[0] = '\0';
+        if (sensor == nullptr)
+            continue;
 
-		sensor->formatStatusJson(sensorBuffer, sizeof(sensorBuffer));
+        char sensorBuffer[MaximumJsonResponseBufferSize];
+        sensorBuffer[0] = '\0';
 
-		// Add comma separator if not the first element
-		if (i > 0 && written < (int)size)
-		{
-			written += snprintf(buffer + written, size - written, ",");
-		}
+        sensor->formatStatusJson(sensorBuffer, sizeof(sensorBuffer));
 
-		written += snprintf(buffer + written, size - written,
-			"%s", sensorBuffer);
-	}
+        if (sensorBuffer[0] == '\0')
+            continue;
 
-	snprintf(buffer + written, size - written, "]");
+        // Add comma separator if not the first element
+        if (!firstSensor)
+        {
+            int n = snprintf(buffer + written, size - written, ",");
+            if (n < 0 || written + n >= static_cast<int>(size))
+            {
+                buffer[size - 1] = '\0';
+                return; // Out of space
+            }
+            written += n;
+        }
+
+        // Write sensor entry (removed duplicate and fixed format)
+        int n = snprintf(buffer + written, size - written, 
+            "\"%s\":{\"id\":%d,\"type\":%d,%s}",
+            sensor->getSensorName(), 
+            static_cast<uint8_t>(sensor->getSensorId()), 
+            static_cast<uint8_t>(sensor->getSensorType()), 
+            sensorBuffer);
+
+        if (n < 0 || written + n >= static_cast<int>(size))
+        {
+            buffer[size - 1] = '\0';
+            return; // Out of space
+        }
+        written += n;
+        firstSensor = false;
+    }
+
+    // Close JSON object
+    int n = snprintf(buffer + written, size - written, "}");
+    if (n < 0 || written + n >= static_cast<int>(size))
+    {
+        buffer[size - 1] = '\0';
+    }
+}
+
+void SensorNetworkHandler::formatWifiStatusJson(WiFiClient* client)
+{
+    char buffer[MaximumJsonResponseBufferSize];
+    buffer[0] = '\0';
+
+    formatStatusJson(buffer, sizeof(buffer));
+    client->print(buffer);
 }

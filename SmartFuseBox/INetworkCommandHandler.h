@@ -2,7 +2,7 @@
 #include <SerialCommandManager.h>
 #include <Arduino.h>
 #include "SystemDefinitions.h"
-#include "JsonVisitor.h"
+#include "NetworkJsonVisitor.h"
 
 
 
@@ -11,7 +11,7 @@
  * 
  * Handlers implement this to expose REST-style endpoints for HTTP/WebSocket access.
  */
-class INetworkCommandHandler : public JsonVisitor
+class INetworkCommandHandler : public NetworkJsonVisitor
 {
 public:
     /**
@@ -39,17 +39,33 @@ public:
     
     virtual ~INetworkCommandHandler() = default;
 
-    void formatJsonResponse(char* buffer, size_t size, bool success, const char* message = nullptr)
+    uint8_t formatJsonResponse(char* buffer, size_t size, bool success, const char* message = nullptr)
     {
+        if (!buffer || size == 0)
+        {            
+            return BufferInvalid;
+        }
+
+        int written;
         if (message)
         {
-            snprintf(buffer, size, "{\"success\":%s,\"message\":\"%s\"}",
+            written = snprintf(buffer, size, "\"success\":%s,\"message\":\"%s\"",
                 success ? "true" : "false", message);
         }
         else
         {
-            snprintf(buffer, size, "{\"success\":%s}", success ? "true" : "false");
+            written = snprintf(buffer, size, "\"success\":%s", success ? "true" : "false");
         }
-    }
 
+        // Check if buffer was too small
+        if (written < 0 || written >= static_cast<int>(size))
+        {
+            // Buffer overflow occurred - truncate gracefully
+            buffer[size - 1] = '\0'; // Ensure null termination
+
+            return BufferOverflow;
+        }
+
+        return BufferSuccess;
+    }
 };

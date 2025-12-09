@@ -200,14 +200,12 @@ void configureWifiSupport(Config* config)
 
 
 	// json status visitors for wifi
-	JsonVisitor* jsonVisitors[] = {
+	NetworkJsonVisitor* jsonVisitors[] = {
 		&relayNetworkHandler,
 		&soundNetworkHandler,
 		&warningNetworkHandler,
 		&systemNetworkHandler,
 		&sensorNetworkHandler,
-		&waterSensorHandler,
-		&dht11SensorHandler
 	};
 	uint8_t jsonVisitorCount = sizeof(jsonVisitors) / sizeof(jsonVisitors[0]);
 	wifiController.registerJsonVisitors(jsonVisitors, jsonVisitorCount);

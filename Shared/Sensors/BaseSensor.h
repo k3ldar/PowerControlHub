@@ -2,6 +2,7 @@
 
 #include <SensorManager.h>
 #include "LoggingSupport.h"
+#include "JsonVisitor.h"
 
 enum class SensorType : uint8_t
 {
@@ -17,4 +18,6 @@ public:
 	virtual SensorType getSensorType() const = 0;
 
 	virtual const char* getSensorCommandId() const = 0;
+
+	virtual const char* getSensorName() const = 0;
 };
