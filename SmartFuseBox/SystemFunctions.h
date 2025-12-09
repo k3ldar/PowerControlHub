@@ -7,9 +7,18 @@ public:
     static uint16_t stackAvailable();
     static void initializeSerial(HardwareSerial& serialPort, unsigned long baudRate, bool waitForConnection);
 
-	static uint8_t GenerateDefaultPassword(char* buffer, size_t bufferSize);
-
     /**
+     * @brief Generate a default password and write it to the provided buffer.
+     *
+     * Generates a default password string and stores it in the given buffer.
+     * The buffer must be large enough to hold the password and the null terminator.
+     *
+     * @param buffer Pointer to the character buffer where the password will be written.
+     * @param bufferSize Size of the buffer in bytes.
+     * @return BufferSuccess (0) if the password was generated and written successfully,
+     *         BufferInvalid (nonzero) if the buffer is invalid or too small.
+     */
+    static uint8_t GenerateDefaultPassword(char* buffer, size_t bufferSize);
      * @brief Parse a string value as a boolean.
      *
      * Accepts multiple formats:
