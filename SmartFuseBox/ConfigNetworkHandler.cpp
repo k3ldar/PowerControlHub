@@ -41,7 +41,7 @@ void ConfigNetworkHandler::formatStatusJson(char* buffer, size_t size)
 		port = config->wifiPort;
 		accessMode = config->accessMode;
 		snprintf(ssid, sizeof(ssid), config->apSSID);
-		snprintf(ipAddress, sizeof(ipAddress), config->apIpAddress);
+		snprintf(ipAddress, sizeof(ipAddress), "%s", config->apIpAddress);
 	}
 
 	// Get runtime WiFi status if available
