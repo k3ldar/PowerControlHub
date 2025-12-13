@@ -30,8 +30,8 @@ public:
      * @param bufferSize Size of response buffer
      * @return CommandResult with success/status
      */
-    virtual CommandResult handleRequest(const String& method, 
-		const String& command,
+    virtual CommandResult handleRequest(const char* method,
+		const char* command,
         StringKeyValue* params,
 		uint8_t paramCount,
         char* responseBuffer,
