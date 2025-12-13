@@ -80,7 +80,9 @@ bool BluetoothManager::begin(const char* deviceName)
     // Start advertising
     startAdvertising();
 
-    sendDebug("Initialized with " + String(_serviceCount) + " services", F("BluetoothManager"));
+    char debugMsg[64];
+    snprintf(debugMsg, sizeof(debugMsg), "Initialized with %d services", _serviceCount);
+    sendDebug(debugMsg, F("BluetoothManager"));
 
     return true;
 }
@@ -185,8 +187,9 @@ void BluetoothManager::startAdvertising()
     BLE.advertise();
 
     _isAdvertising = true;
-
-    sendDebug("Client advertising as " + String(_deviceName), F("BluetoothManager"));
+	char debugMsg[64];
+	snprintf(debugMsg, sizeof(debugMsg), "Advertising started as '%s'", _deviceName);
+    sendDebug(debugMsg, F("BluetoothManager"));
 }
 
 void BluetoothManager::stopAdvertising()

@@ -33,8 +33,8 @@ public:
 	explicit SensorCommandHandler(BroadcastManager* broadcastManager, WarningManager* warningManager);
 #endif
 
-    bool handleCommand(SerialCommandManager* sender, const String command, const StringKeyValue params[], uint8_t paramCount) override;
-    const String* supportedCommands(size_t& count) const override;
+    bool handleCommand(SerialCommandManager* sender, const char* command, const StringKeyValue params[], uint8_t paramCount) override;
+    const char* const* supportedCommands(size_t& count) const override;
 
 	float getTemperature() const { return _lastTemperature; }
 	uint8_t getHumidity() const { return _lastHumidity; }

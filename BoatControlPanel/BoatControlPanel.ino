@@ -196,12 +196,15 @@ void loop()
 
 void onLinkCommandReceived(SerialCommandManager* mgr)
 {
-    String cmd = mgr->getCommand();
-    commandMgrComputer.sendError(String(F("Unknown command: ")) + cmd, F("LINKHANDLER"));
+    char cmd[64];
+	snprintf(cmd, sizeof(cmd), "%s", mgr->getCommand());
+    commandMgrComputer.sendError(cmd, "LINKHANDLER");
 }
 
 void onComputerCommandReceived(SerialCommandManager* mgr)
 {
-    String cmd = mgr->getCommand();
-    commandMgrComputer.sendError(String(F("Unknown command: ")) + cmd, F("PCHANDLER"));
+    char cmd[64];
+	snprintf(cmd, sizeof(cmd), "%s", mgr->getCommand());
+
+    commandMgrComputer.sendError(cmd, "PCHANDLER");
 }

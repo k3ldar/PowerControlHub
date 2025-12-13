@@ -15,9 +15,9 @@ private:
 
 public:
     SoundCommandHandler(SerialCommandManager* commandMgrComputer, SerialCommandManager* commandMgrLink, SoundController* soundController);
-    bool handleCommand(SerialCommandManager* sender, const String command, const StringKeyValue params[], uint8_t paramCount) override;
+    bool handleCommand(SerialCommandManager* sender, const char* command, const StringKeyValue params[], uint8_t paramCount) override;
 
-    const String* supportedCommands(size_t& count) const override;
+    const char* const* supportedCommands(size_t& count) const override;
 private:
     void broadcast(const String& cmd, const StringKeyValue* param = nullptr);
 };

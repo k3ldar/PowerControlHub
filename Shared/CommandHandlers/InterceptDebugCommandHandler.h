@@ -11,7 +11,7 @@ public:
     {
     }
 
-    bool supportsCommand(const String& command) const override
+    bool supportsCommand(const char* command) const override
     {
 		(void)command;
 
@@ -19,7 +19,7 @@ public:
         return true;
     }
 
-    bool handleCommand(SerialCommandManager* sender, const String command, const StringKeyValue params[], uint8_t paramCount) override
+    bool handleCommand(SerialCommandManager* sender, const char* command, const StringKeyValue params[], uint8_t paramCount) override
     {
 		(void)command;
 		(void)params;
@@ -28,7 +28,7 @@ public:
 		return false; // Indicate that we did not fully handle the command
     }
 
-    const String* supportedCommands(size_t& count) const override
+    const char* const* supportedCommands(size_t& count) const override
     {
         // Return empty array since we override supportsCommand() to claim all commands
         count = 0;

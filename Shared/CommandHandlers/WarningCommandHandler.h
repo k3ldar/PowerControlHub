@@ -26,7 +26,7 @@
 class WarningCommandHandler : public WARNING_BASE_CLASS
 {
 private:
-	bool convertWarningTypeFromString(const String& str, WarningType& outType);
+	bool convertWarningTypeFromString(const char* str, WarningType& outType);
 public:
 #if defined(BOAT_CONTROL_PANEL)
     // Constructor: pass the NextionControl pointer so we can notify the current page
@@ -36,8 +36,8 @@ public:
 	explicit WarningCommandHandler(BroadcastManager* broadcastManager, WarningManager* warningManager);
 #endif
 
-    bool handleCommand(SerialCommandManager* sender, const String command, const StringKeyValue params[], uint8_t paramCount) override;
-    const String* supportedCommands(size_t& count) const override;
+    bool handleCommand(SerialCommandManager* sender, const char* command, const StringKeyValue params[], uint8_t paramCount) override;
+    const char* const* supportedCommands(size_t& count) const override;
 };
 
 #undef WARNING_BASE_CLASS

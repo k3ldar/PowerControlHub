@@ -97,3 +97,38 @@ size_t SystemFunctions::copyString(char* dest, const char* src, size_t maxLen)
         return strlcpy(dest, src, maxLen);
     }
 }
+
+// Implementation
+size_t SystemFunctions::appendString(char* dest, size_t destSize, size_t offset, const char* src) {
+    if (!dest || !src || offset >= destSize - 1) return 0;
+    
+    size_t available = destSize - offset - 1; // Reserve space for null terminator
+    size_t written = 0;
+    
+    if (isProgmem(src)) {
+        while (available > 0) {
+            char c = pgm_read_byte(src++);
+            if (c == '\0') break;
+            dest[offset + written++] = c;
+            available--;
+        }
+    } else {
+        while (available > 0 && *src != '\0') {
+            dest[offset + written++] = *src++;
+            available--;
+        }
+    }
+    
+    dest[offset + written] = '\0';
+    return written;
+}
+
+size_t SystemFunctions::calculateLength(const char* str) {
+    if (!str) return 0;
+    
+    if (isProgmem(str)) {
+        return strlen_P(str);
+    } else {
+        return strlen(str);
+    }
+}

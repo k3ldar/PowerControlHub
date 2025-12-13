@@ -1,4 +1,5 @@
 #include "WarningCommandHandler.h"
+#include "SystemFunctions.h"
 
 #if defined(BOAT_CONTROL_PANEL)
 // Constructor: pass the NextionControl pointer so we can notify the current page
@@ -12,94 +13,90 @@ WarningCommandHandler::WarningCommandHandler(BroadcastManager* broadcastManager,
 {
 }
 
-bool WarningCommandHandler::handleCommand(SerialCommandManager* sender, const String command, const StringKeyValue params[], uint8_t paramCount)
+bool WarningCommandHandler::handleCommand(SerialCommandManager* sender, const char* command, const StringKeyValue params[], uint8_t paramCount)
 {
-    String cmd = command;
-    cmd.trim();
-
 	WarningManager* warningManager = getWarningManager();
 
     // Ensure warning manager is available
     if (!warningManager)
     {
-        sendAckErr(sender, cmd, F("Warning manager not configured"));
+        sendAckErr(sender, command, F("Warning manager not configured"));
         sendDebugMessage(F("Warning manager not available"), F("WarningCommandHandler"));
         return false;
     }
 
-    if (cmd == WarningsActive && paramCount == 0)
+    if (command == WarningsActive && paramCount == 0)
     {
         // Return the active warnings as a bitmask value
         uint32_t activeWarnings = warningManager->getActiveWarningsMask();
-        
-        StringKeyValue param = { ValueParamName, String(activeWarnings, HEX) };
-        sendAckOk(sender, cmd, &param);
+
+        StringKeyValue param;
+        strcpy(param.key, ValueParamName);
+        strcpy(param.value, (HexPrefix + String(activeWarnings, HEX)).c_str());
+        sendAckOk(sender, command, &param);
         return true;
     }
-    else if (cmd == WarningsList && paramCount == 0)
+    else if (command == WarningsList && paramCount == 0)
     {
         // Return the complete bitmask of active warnings as a single value
         uint32_t activeWarnings = warningManager->getActiveWarningsMask();
-        
-        StringKeyValue param = { ValueParamName, HexPrefix + String(activeWarnings, HEX)};
-        sendAckOk(sender, cmd, &param);
+
+        StringKeyValue param;
+        strcpy(param.key, ValueParamName);
+        strcpy(param.value, (HexPrefix + String(activeWarnings, HEX)).c_str());
+        sendAckOk(sender, command, &param);
         return true;
     }
-    else if (cmd == WarningStatus && paramCount == 1)
+    else if (command == WarningStatus && paramCount == 1)
     {
         // Return warning status for specific warning (true if active otherwise false)
         // key will be warning type expressed as 0x04 etc, value is ignored on request and
         // returned as "1" or "0" in AckOk
-        String key = params[0].key;
-        key.trim();
 
         WarningType warningType = WarningType::None;
 
         // Parse and validate warning type
-        if (!convertWarningTypeFromString(key, warningType))
+        if (!convertWarningTypeFromString(params[0].key, warningType))
         {
-            sendAckErr(sender, cmd, F("Invalid warning type"));
+            sendAckErr(sender, command, F("Invalid warning type"));
             return true;
         }
 
         bool isActive = warningManager->isWarningActive(warningType);
 
-        StringKeyValue param = { key, isActive ? "1" : "0" };
-        sendAckOk(sender, cmd, &param);
+        StringKeyValue param;
+        strcpy(param.key, params[0].key);
+        strcpy(param.value, (isActive ? "1" : "0"));
+        sendAckOk(sender, command, &param);
 
         return true;
     }
-    else if (cmd == WarningsClear && paramCount == 0)
+    else if (command == WarningsClear && paramCount == 0)
     {
         warningManager->clearAllWarnings();
 
-        sendAckOk(sender, cmd);
+        sendAckOk(sender, command);
         return true;
     }
-    else if (cmd == WarningsAdd && paramCount == 1)
+    else if (command == WarningsAdd && paramCount == 1)
     {
-        String key = params[0].key;
-        key.trim();
-        String val = params[0].value;
-        val.trim();
-
         WarningType warningType = WarningType::None;
 
         // Parse and validate warning type
-        if (!convertWarningTypeFromString(key, warningType))
+        if (!convertWarningTypeFromString(params[0].key, warningType))
         {
-            sendAckErr(sender, cmd, F("Invalid warning type"));
+            sendAckErr(sender, command, F("Invalid warning type"));
             return true;
         }
 
-        bool isActive = SystemFunctions::parseBooleanValue(val.c_str());
+        bool isActive = SystemFunctions::parseBooleanValue(params[0].value);
 
         if (isActive)
             warningManager->raiseWarning(warningType);
         else
             warningManager->clearWarning(warningType);
 
-        sendAckOk(sender, cmd, &params[0]);
+        sendAckOk(sender, command, &params[0]);
         return true;
     }
     else
@@ -109,20 +106,20 @@ bool WarningCommandHandler::handleCommand(SerialCommandManager* sender, const St
     }
 }
 
-bool WarningCommandHandler::convertWarningTypeFromString(const String& str, WarningType& outType)
+bool WarningCommandHandler::convertWarningTypeFromString(const char* str, WarningType& outType)
 {
     uint32_t warningTypeInt = 0;
 
     // Parse the string based on format
-    if (str.startsWith(F("0x")) || str.startsWith(F("0X")))
+    if (SystemFunctions::startsWith(str, F("0x")) || SystemFunctions::startsWith(str, F("0X")))
     {
         // Parse hexadecimal (skip the "0x" prefix)
-        warningTypeInt = strtoul(str.c_str() + 2, nullptr, 16);
+        warningTypeInt = strtoul(str + 2, nullptr, 16);
     }
-    else if (SystemFunctions::isAllDigits(str.c_str()))
+    else if (SystemFunctions::isAllDigits(str))
     {
         // Parse decimal
-        warningTypeInt = str.toInt();
+        warningTypeInt = static_cast<uint32_t>(strtoul(str, nullptr, 0));
     }
     else
     {
@@ -149,9 +146,9 @@ bool WarningCommandHandler::convertWarningTypeFromString(const String& str, Warn
     return true;
 }
 
-const String* WarningCommandHandler::supportedCommands(size_t& count) const
+const char* const* WarningCommandHandler::supportedCommands(size_t& count) const
 {
-    static const String cmds[] = { WarningsActive, WarningsList, WarningStatus,
+    static const char* cmds[] = { WarningsActive, WarningsList, WarningStatus,
         WarningsClear, WarningsAdd };
     count = sizeof(cmds) / sizeof(cmds[0]);
     return cmds;

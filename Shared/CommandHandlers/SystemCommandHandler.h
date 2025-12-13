@@ -17,8 +17,8 @@ public:
     explicit SystemCommandHandler(BroadcastManager* broadcaster, WarningManager* warningManager);
     ~SystemCommandHandler();
 
-    bool handleCommand(SerialCommandManager* sender, const String command, const StringKeyValue params[], uint8_t paramCount) override;
-    const String* supportedCommands(size_t& count) const override;
+    bool handleCommand(SerialCommandManager* sender, const char*, const StringKeyValue params[], uint8_t paramCount) override;
+    const char* const* supportedCommands(size_t& count) const override;
 
 #if defined(ARDUINO_UNO_R4)
     // Add this method

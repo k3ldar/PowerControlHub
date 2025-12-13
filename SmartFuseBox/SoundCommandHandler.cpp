@@ -13,9 +13,9 @@ SoundCommandHandler::SoundCommandHandler(SerialCommandManager* commandMgrCompute
 
 }
 
-const String* SoundCommandHandler::supportedCommands(size_t& count) const
+const char* const* SoundCommandHandler::supportedCommands(size_t& count) const
 {
-    static const String cmds[] = { SoundSignalCancel, SoundSignalActive, SoundSignalSoS, 
+    static const char* cmds[] = { SoundSignalCancel, SoundSignalActive, SoundSignalSoS,
         SoundSignalFog, SoundSignalMoveStarboard, SoundSignalMovePort, SoundSignalMoveAstern, 
         SoundSignalMoveDanger, SoundSignalOvertakeStarboard, SoundSignalOvertakePort, 
         SoundSignalOvertakeConsent, SoundSignalOvertakeDanger, SoundSignalTest };
@@ -23,7 +23,7 @@ const String* SoundCommandHandler::supportedCommands(size_t& count) const
     return cmds;
 }
 
-bool SoundCommandHandler::handleCommand(SerialCommandManager* sender, const String command, const StringKeyValue params[], uint8_t paramCount)
+bool SoundCommandHandler::handleCommand(SerialCommandManager* sender, const char* command, const StringKeyValue params[], uint8_t paramCount)
 {
 	(void)params;
 

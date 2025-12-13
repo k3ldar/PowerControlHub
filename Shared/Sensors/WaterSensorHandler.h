@@ -53,10 +53,11 @@ protected:
 
 		digitalWrite(WaterSensorActivePin, LOW);
 
-		StringKeyValue params[] = {
-			{"avg", String(_waterPumpQueue.average())},
-			{"v", String(sensorValue) }
-		};
+		StringKeyValue params[2];
+		strcpy(params[0].key, "avg");
+		snprintf(params[0].value, sizeof(params[0].value), "%u", static_cast<unsigned int>(_waterPumpQueue.average()));
+		strcpy(params[1].key, "v");
+		snprintf(params[1].value, sizeof(params[1].value), "%u", static_cast<unsigned int>(sensorValue));
 
 		sendCommand(SensorWaterLevel, params, 2);
 
@@ -64,9 +65,6 @@ protected:
 		{
 			_sensorCommandHandler->setWaterLevel(static_cast<uint16_t>(_waterPumpQueue.average()));
 		}
-
-		sendDebug(String(sensorValue), F("WTRLVL"));
-		sendDebug(String(_waterPumpQueue.average()), F("WTRAVG"));
 
 		return WaterSensorCheckIntervalMs;
 	}

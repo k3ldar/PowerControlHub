@@ -100,8 +100,6 @@ void SystemPage::handleTouch(uint8_t compId, uint8_t eventType)
 
 void SystemPage::handleExternalUpdate(uint8_t updateType, const void* data)
 {
-    getCommandMgrComputer()->sendDebug("SystemPage::handleExternalUpdate type=" + String(updateType), F("SystemPage"));
-
     // Call base class first to handle heartbeat ACKs
     BaseBoatPage::handleExternalUpdate(updateType, data);
 

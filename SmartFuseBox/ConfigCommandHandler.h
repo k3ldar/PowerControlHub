@@ -23,6 +23,6 @@ public:
     explicit ConfigCommandHandler(SoundController* soundController, BluetoothController* bluetoothController,
 		WifiController* wifiController, RelayCommandHandler* relayCommandHandler);
 
-    bool handleCommand(SerialCommandManager* sender, const String command, const StringKeyValue params[], uint8_t paramCount) override;
-    const String* supportedCommands(size_t& count) const override;
+    bool handleCommand(SerialCommandManager* sender, const char* command, const StringKeyValue params[], uint8_t paramCount) override;
+    const char* const* supportedCommands(size_t& count) const override;
 };

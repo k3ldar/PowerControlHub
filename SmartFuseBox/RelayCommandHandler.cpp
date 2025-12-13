@@ -12,15 +12,15 @@ RelayCommandHandler::~RelayCommandHandler()
 
 }
 
-const String* RelayCommandHandler::supportedCommands(size_t& count) const
+const char* const* RelayCommandHandler::supportedCommands(size_t& count) const
 {
-    static const String cmds[] = { RelayTurnAllOff, RelayTurnAllOn, RelayRetrieveStates, 
+    static const char* cmds[] = { RelayTurnAllOff, RelayTurnAllOn, RelayRetrieveStates, 
         RelaySetState, RelayStatusGet };
     count = sizeof(cmds) / sizeof(cmds[0]);
     return cmds;
 }
 
-bool RelayCommandHandler::handleCommand(SerialCommandManager* sender, const String command, const StringKeyValue params[], uint8_t paramCount)
+bool RelayCommandHandler::handleCommand(SerialCommandManager* sender, const char* command, const StringKeyValue params[], uint8_t paramCount)
 {
     if (!_relayController)
     {

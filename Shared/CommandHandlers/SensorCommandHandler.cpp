@@ -1,4 +1,5 @@
 #include "SensorCommandHandler.h"
+#include "SystemFunctions.h"
 
 #if defined(BOAT_CONTROL_PANEL)
 SensorCommandHandler::SensorCommandHandler(BroadcastManager* broadcastManager, 
@@ -11,11 +12,8 @@ SensorCommandHandler::SensorCommandHandler(BroadcastManager* broadcastManager, W
 {
 }
 
-bool SensorCommandHandler::handleCommand(SerialCommandManager* sender, const String command, const StringKeyValue params[], uint8_t paramCount)
+bool SensorCommandHandler::handleCommand(SerialCommandManager* sender, const char* command, const StringKeyValue params[], uint8_t paramCount)
 {
-    String cmd = command;
-    cmd.trim();
-
     // the first param indicates the value (v=23 or v=NNW)
 
     if (paramCount == 0)
@@ -24,57 +22,52 @@ bool SensorCommandHandler::handleCommand(SerialCommandManager* sender, const Str
         return true;
     }
 
-    String key = params[0].key;
-    key.trim();
-    String val = params[0].value;
-    val.trim();
-
 #if defined(BOAT_CONTROL_PANEL)
-    if (cmd == SensorTemperature)
+    if (command == SensorTemperature)
     {
-		_lastTemperature = val.toFloat();
+		_lastTemperature = atof(params[0].value);
         FloatStateUpdate update = { _lastTemperature };
         notifyCurrentPage(static_cast<uint8_t>(PageUpdateType::Temperature), &update);
     }
-    else if (cmd == SensorHumidity)
+    else if (command == SensorHumidity)
     {
-		_lastHumidity = static_cast<int16_t>(val.toFloat());
+		_lastHumidity = static_cast<int16_t>(atof(params[0].value));
         UInt16Update update = { _lastHumidity };
         notifyCurrentPage(static_cast<uint8_t>(PageUpdateType::Humidity), &update);
     }
-    else if (cmd == SensorBearing)
+    else if (command == SensorBearing)
     {
-		_lastBearing = val.toFloat();
+		_lastBearing = atof(params[0].value);
         FloatStateUpdate update = { _lastBearing };
         notifyCurrentPage(static_cast<uint8_t>(PageUpdateType::Bearing), &update);
     }
-    else if (cmd == SensorDirection)
+    else if (command == SensorDirection)
     {
         CharStateUpdate update = {};
-        update.length = min(val.length(), (unsigned int)(CharStateUpdate::MaxLength - 1));
-        val.toCharArray(update.value, CharStateUpdate::MaxLength);
+        update.length = min(SystemFunctions::calculateLength(params[0].value), static_cast<unsigned int>((CharStateUpdate::MaxLength - 1)));
+		snprintf(update.value, CharStateUpdate::MaxLength, "%s", params[0].value);
         notifyCurrentPage(static_cast<uint8_t>(PageUpdateType::Direction), &update);
     }
-    else if (cmd == SensorSpeed)
+    else if (command == SensorSpeed)
     {
-		_lastSpeed = static_cast<int16_t>(val.toInt());
+		_lastSpeed = static_cast<int16_t>(strtoul(params[0].value, nullptr, 0));
         UInt16Update update = { _lastSpeed };
         notifyCurrentPage(static_cast<uint8_t>(PageUpdateType::Speed), &update);
     }
-    else if (cmd == SensorCompassTemp)
+    else if (command == SensorCompassTemp)
     {
-		_lastCompassTemp = static_cast<int16_t>(val.toInt());
-        FloatStateUpdate update = { val.toFloat() };
+		_lastCompassTemp = static_cast<int16_t>(strtoul(params[0].value, nullptr, 0));
+        FloatStateUpdate update = { atof(params[0].value) };
         notifyCurrentPage(static_cast<uint8_t>(PageUpdateType::CompassTemp), &update);
     }
-    else if (cmd == SensorWaterLevel)
+    else if (command == SensorWaterLevel)
     {
-        UInt16Update update = { static_cast<uint16_t>(val.toInt()) };
+        UInt16Update update = { static_cast<uint16_t>(strtoul(params[0].value, nullptr, 0)) };
         notifyCurrentPage(static_cast<uint8_t>(PageUpdateType::WaterLevel), &update);
     }
-    else if (cmd == SensorWaterPumpActive)
+    else if (command == SensorWaterPumpActive)
     {
-        BoolStateUpdate update = { val.toInt() > 0 };
+        BoolStateUpdate update = { strtoul(params[0].value, nullptr, 0) > 0 };
         notifyCurrentPage(static_cast<uint8_t>(PageUpdateType::WaterPumpActive), &update);
     }
     else
@@ -84,13 +77,13 @@ bool SensorCommandHandler::handleCommand(SerialCommandManager* sender, const Str
     }
 #endif
 
-    sendAckOk(sender, cmd);
+    sendAckOk(sender, params[0].key);
     return true;
 }
 
-const String* SensorCommandHandler::supportedCommands(size_t& count) const
+const char* const* SensorCommandHandler::supportedCommands(size_t& count) const
 {
-    static const String cmds[] = { SensorTemperature, SensorHumidity, SensorBearing,
+    static const char* cmds[] = { SensorTemperature, SensorHumidity, SensorBearing,
         SensorDirection, SensorSpeed, SensorCompassTemp, SensorWaterLevel,
         SensorWaterPumpActive, SensorHornActive };
     count = sizeof(cmds) / sizeof(cmds[0]);

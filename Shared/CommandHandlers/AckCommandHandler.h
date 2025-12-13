@@ -36,8 +36,8 @@ public:
 #endif
     
 
-    bool handleCommand(SerialCommandManager* sender, const String command, const StringKeyValue params[], uint8_t paramCount) override;
-    const String* supportedCommands(size_t& count) const override;
+    bool handleCommand(SerialCommandManager* sender, const char* command, const StringKeyValue params[], uint8_t paramCount) override;
+    const char* const* supportedCommands(size_t& count) const override;
 
 private:
 #ifdef BOAT_CONTROL_PANEL

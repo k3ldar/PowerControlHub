@@ -1,6 +1,7 @@
 #include "AckCommandHandler.h"
 #include "SystemFunctions.h"
 
+
 const char AckCommand[] = "ACK";
 
 #if defined(BOAT_CONTROL_PANEL)
@@ -31,7 +32,7 @@ bool AckCommandHandler::processHeartbeatAck(SerialCommandManager* sender, const 
 
     if (sender)
     {
-        sender->sendDebug(F("Heartbeat ACK received"), AckCommand);
+        sender->sendDebug("Heartbeat ACK received", AckCommand);
     }
 
     return true;
@@ -54,29 +55,26 @@ bool AckCommandHandler::processWarningsListAck(SerialCommandManager* sender, con
     // The warning bitmask is in params[1].value
     if (paramCount >= 2)
     {
-        String warningKey = params[1].key;
-        warningKey.trim();
-        String warningValue = params[1].value;
-        warningValue.trim();
-
-        if (warningKey == ValueParamName)
+        if (SystemFunctions::startsWith(params[1].key, ValueParamName))
         {
             // Parse the hexadecimal bitmask
             uint32_t remoteWarningMask = 0;
             
-            if (warningValue.startsWith(F("0x")) || warningValue.startsWith(F("0X")))
+            if (SystemFunctions::startsWith(params[1].value, F("0x")) || SystemFunctions::startsWith(params[1].value, F("0X")))
             {
                 // Parse hexadecimal (skip the "0x" prefix)
-                remoteWarningMask = strtoul(warningValue.c_str() + 2, nullptr, 16);
+                remoteWarningMask = strtoul(params[1].value, nullptr, 16);
             }
-            else if (SystemFunctions::isAllDigits(warningValue.c_str()))
+            else if (SystemFunctions::isAllDigits(params[1].value))
             {
                 // Parse decimal
-                remoteWarningMask = warningValue.toInt();
+                remoteWarningMask = static_cast<uint8_t>(strtoul(params[1].value, nullptr, 0));
             }
             else
             {
-                sendDebugMessage("Invalid warning mask format: " + warningValue, AckCommand);
+				char debugMsg[64];
+				snprintf(debugMsg, sizeof(debugMsg), "Invalid warning mask format: %s", params[1].value);
+                sendDebugMessage(debugMsg, AckCommand);
                 return false;
             }
 
@@ -88,7 +86,9 @@ bool AckCommandHandler::processWarningsListAck(SerialCommandManager* sender, con
 
             if (sender)
             {
-                sender->sendDebug("Remote warnings updated: 0x" + String(remoteWarningMask, HEX), AckCommand);
+                char buffer[48];
+                snprintf(buffer, sizeof(buffer), "Remote warnings updated: 0x%lX", (unsigned long)remoteWarningMask);
+                sender->sendDebug(buffer, AckCommand);
             }
 
             return true;
@@ -102,7 +102,7 @@ bool AckCommandHandler::processWarningsListAck(SerialCommandManager* sender, con
         
         if (sender)
         {
-            sender->sendDebug(F("W1 ACK received (no warnings)"), AckCommand);
+            sender->sendDebug("W1 ACK received (no warnings)", AckCommand);
         }
         return true;
     }
@@ -111,18 +111,17 @@ bool AckCommandHandler::processWarningsListAck(SerialCommandManager* sender, con
 }
 #endif
 
-bool AckCommandHandler::handleCommand(SerialCommandManager* sender, const String command, const StringKeyValue params[], uint8_t paramCount)
+bool AckCommandHandler::handleCommand(SerialCommandManager* sender, const char* command, const StringKeyValue params[], uint8_t paramCount)
 {
     (void)sender;
-    sendDebugMessage("Processing ACK: " + command + " (" + String(paramCount) + " params)", AckCommand);
+    sendDebugMessage("Processing ACK: " + String(command) + " (" + String(paramCount) + " params)", AckCommand);
     
-    String cmd = command;
-    cmd.trim();
-
     // Validate command
-    if (cmd != AckCommand)
+    if (command != AckCommand)
     {
-        sendDebugMessage("Unknown ACK command " + cmd, AckCommand);
+        char debugMsg[64];
+        snprintf(debugMsg, sizeof(debugMsg), "Unknown ACK command %s", command);
+        sendDebugMessage(debugMsg, AckCommand);
         return false;
     }
 
@@ -134,37 +133,34 @@ bool AckCommandHandler::handleCommand(SerialCommandManager* sender, const String
         return false;
 	}
 
-    String key = params[0].key;
-    key.trim();
-	String val = params[0].value;
-	val.trim();
-
     // Ignore redundant ACK:ACK=ok messages
-    if (key.equalsIgnoreCase(AckCommand))
+    if (strcmp(params[0].key, AckCommand) == 0)
     {
         return true; // Silently ignore, consider it handled
     }
 
-    if (!val.equalsIgnoreCase(AckSuccess))
+    if (strcmp(params[0].value, AckSuccess) != 0)
     {
-        _broadcaster->sendDebug("ACK indicates failure: key='" + key + "', val='" + val + "'", AckCommand);
+        char debugMsg[100];
+        snprintf(debugMsg, sizeof(debugMsg), "ACK indicates failure: key='%s', val='%s'", params[0].key, params[0].value);
+        _broadcaster->sendDebug(debugMsg, AckCommand);
         return false;
     }
 
     // only process known ACK keys if you need to take action
 
 #ifdef BOAT_CONTROL_PANEL
-    if (key == SystemHeartbeatCommand && val.equalsIgnoreCase(AckSuccess))
+    if (strcmp(params[0].key, SystemHeartbeatCommand) == 0 && strcmp(params[0].value, AckSuccess) == 0)
     {
         // Heartbeat acknowledgement
-        processHeartbeatAck(sender, key, val);
+        processHeartbeatAck(sender, params[0].key, params[0].value);
 	}
-    else if (key == WarningsList && val.equalsIgnoreCase(AckSuccess))
+    else if (strcmp(params[0].key, WarningsList) == 0 && strcmp(params[0].value, AckSuccess) == 0)
     {
         // Warnings list acknowledgement - merge remote warnings
-        processWarningsListAck(sender, key, val, params, paramCount);
+        processWarningsListAck(sender, params[0].key, params[0].value, params, paramCount);
     }
-    else if (key == RelayRetrieveStates && val.equalsIgnoreCase(AckSuccess))
+    else if (strcmp(params[0].key, RelayRetrieveStates) == 0 && strcmp(params[0].value, AckSuccess) == 0)
     {
         // Relay state acknowledgement - handle both formats:
         // 1. ACK:R2=ok (just acknowledgement, no relay state - paramCount == 1)
@@ -173,24 +169,24 @@ bool AckCommandHandler::handleCommand(SerialCommandManager* sender, const String
         if (paramCount >= 2)
         {
             // Format: ACK:R2=ok:0=0 (with relay index and state)
-            if (!SystemFunctions::isAllDigits(params[1].key.c_str()) || !SystemFunctions::isAllDigits(params[1].value.c_str()))
+            if (!SystemFunctions::isAllDigits(params[1].key) || !SystemFunctions::isAllDigits(params[1].value))
             {
                 return true;
             }
 
-            uint8_t relayIndex = params[1].key.toInt();
-            bool isOn = SystemFunctions::parseBooleanValue(params[1].value.c_str());
+            uint8_t relayIndex = static_cast<uint8_t>(strtoul(params[1].key, nullptr, 0));
+            bool isOn = SystemFunctions::parseBooleanValue(params[1].value);
             
             RelayStateUpdate update = { relayIndex, isOn };
             notifyCurrentPage(static_cast<uint8_t>(PageUpdateType::RelayState), &update);
         }
     }
-    else if (key == RelayStatusGet && val.equalsIgnoreCase(AckSuccess))
+    else if (strcmp(params[0].key, RelayStatusGet) == 0 && strcmp(params[0].value, AckSuccess) == 0)
     {
         if (paramCount >= 2)
         {
-            uint8_t relayIndex = params[1].key.toInt();
-            bool isOn = SystemFunctions::parseBooleanValue(params[1].value.c_str());
+            uint8_t relayIndex = static_cast<uint8_t>(strtoul(params[1].key, nullptr, 0));
+            bool isOn = SystemFunctions::parseBooleanValue(params[1].value);
 
             RelayStateUpdate update = { relayIndex, isOn };
             notifyCurrentPage(static_cast<uint8_t>(PageUpdateType::RelayState), &update);
@@ -200,11 +196,11 @@ bool AckCommandHandler::handleCommand(SerialCommandManager* sender, const String
 			sendDebugMessage("Invalid R4 ACK format: paramCount=" + String(paramCount), AckCommand);
         }
     }
-    else if (key == SoundSignalActive && val.equalsIgnoreCase(AckSuccess))
+    else if (strcmp(params[0].key, SoundSignalActive) == 0 && strcmp(params[0].value, AckSuccess) == 0)
     {
         if (paramCount >= 2)
         {
-            bool isOn = SystemFunctions::parseBooleanValue(params[1].value.c_str());
+            bool isOn = SystemFunctions::parseBooleanValue(params[1].value);
 
             BoolStateUpdate update = { isOn };
             notifyCurrentPage(static_cast<uint8_t>(PageUpdateType::SoundSignal), &update);
@@ -214,30 +210,34 @@ bool AckCommandHandler::handleCommand(SerialCommandManager* sender, const String
             sendDebugMessage("Invalid R4 ACK format: paramCount=" + String(paramCount), AckCommand);
         }
     }
-	else if (key == SystemCpuUsage && val.equalsIgnoreCase(AckSuccess))
+	else if (strcmp(params[0].key, SystemCpuUsage) == 0 && strcmp(params[0].value, AckSuccess) == 0)
     {
         if (paramCount >= 2)
         {
-            uint8_t cpuUsage = params[1].value.toInt();
-            UInt8Update update = { cpuUsage };
+            uint8_t cpuUsage = static_cast<uint8_t>(strtoul(params[1].value, nullptr, 0));
+			UInt8Update update = { cpuUsage };
             notifyCurrentPage(static_cast<uint8_t>(PageUpdateType::CpuUsage), &update);
         }
         else
         {
-            sendDebugMessage("Invalid F3 ACK format: paramCount=" + String(paramCount), AckCommand);
+            char debugMsg[64];
+            snprintf(debugMsg, sizeof(debugMsg), "Invalid F3 ACK format: paramCount=%d", paramCount);
+            sendDebugMessage(debugMsg, AckCommand);
         }
     }
-    else if (key == SystemFreeMemory && val.equalsIgnoreCase(AckSuccess))
+    else if (strcmp(params[0].key, SystemFreeMemory) == 0 && strcmp(params[0].value, AckSuccess) == 0)
     {
         if (paramCount >= 2)
         {
-            uint16_t freeMemory = params[1].value.toInt();
+            uint16_t freeMemory = static_cast<uint8_t>(strtoul(params[1].value, nullptr, 0));
             UInt16Update update = { freeMemory };
             notifyCurrentPage(static_cast<uint8_t>(PageUpdateType::MemoryUsage), &update);
         }
         else
         {
-            sendDebugMessage("Invalid F2 ACK format: paramCount=" + String(paramCount), AckCommand);
+            char debugMsg[64];
+            snprintf(debugMsg, sizeof(debugMsg), "Invalid F23 ACK format: paramCount=%d", paramCount);
+            sendDebugMessage(debugMsg, AckCommand);
         }
 	}
 #endif
@@ -245,9 +245,9 @@ bool AckCommandHandler::handleCommand(SerialCommandManager* sender, const String
     return true;
 }
 
-const String* AckCommandHandler::supportedCommands(size_t& count) const
+const char* const* AckCommandHandler::supportedCommands(size_t& count) const
 {
-    static const String cmds[] = { AckCommand };
+    static const char* cmds[] = { AckCommand };
     count = sizeof(cmds) / sizeof(cmds[0]);
     return cmds;
 }

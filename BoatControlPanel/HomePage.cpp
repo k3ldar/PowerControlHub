@@ -165,23 +165,24 @@ void HomePage::handleTouch(uint8_t compId, uint8_t eventType)
     if (relayIndex == 0xFF || relayIndex >= ConfigRelayCount)
         return;
 
-    // Get the relay short name from config (for home page display)
-    String relayName = String(config->relayShortNames[relayIndex]);
-
     SerialCommandManager* commandMgrComputer = getCommandMgrComputer();
 
     if (eventType == EventPress)
     {
         if (commandMgrComputer)
         {
-            commandMgrComputer->sendDebug(relayName + String(F(" pressed")), F("HomePage"));
+			char debugMsg[64];
+			snprintf(debugMsg, sizeof(debugMsg), "%s pressed", config->relayShortNames[relayIndex]);
+            commandMgrComputer->sendDebug(debugMsg, F("HomePage"));
         }
     }
     else if (eventType == EventRelease)
     {
         if (commandMgrComputer)
         {
-            commandMgrComputer->sendDebug(relayName + String(F(" released")), F("HomePage"));
+			char debugMsg[64];
+			snprintf(debugMsg, sizeof(debugMsg), "%s released", config->relayShortNames[relayIndex]);
+            commandMgrComputer->sendDebug(debugMsg, F("HomePage"));
         }
 
         // Toggle button state
@@ -209,7 +210,9 @@ void HomePage::handleTouch(uint8_t compId, uint8_t eventType)
 
 void HomePage::handleExternalUpdate(uint8_t updateType, const void* data)
 {
-    getCommandMgrComputer()->sendDebug("HomePage::handleExternalUpdate type=" + String(updateType), F("HomePage"));
+	char debugMsg[64];
+	snprintf(debugMsg, sizeof(debugMsg), "HomePage::handleExternalUpdate type=%u", updateType);
+    getCommandMgrComputer()->sendDebug(debugMsg, F("HomePage"));
     
     // Call base class first to handle heartbeat ACKs
     BaseBoatPage::handleExternalUpdate(updateType, data);

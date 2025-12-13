@@ -136,36 +136,30 @@ void RelayPage::handleTouch(uint8_t compId, uint8_t eventType)
         return;
     }
 
-    // Get the relay long name from config (for home page display)
-    String relayName = String(config->relayLongNames[relayIndex]);
-
-    SerialCommandManager* commandMgrComputer = getCommandMgrComputer();
-
-    if (eventType == EventPress)
+    if (eventType == EventRelease)
     {
-        if (commandMgrComputer)
-        {
-            commandMgrComputer->sendDebug(relayName + String(F(" pressed")), F("RelayPage"));
-        }
-    }
-    else if (eventType == EventRelease)
-    {
-        if (commandMgrComputer)
-        {
-            commandMgrComputer->sendDebug(relayName + String(F(" released")), F("RelayPage"));
-        }
-
         // Send relay command
         SerialCommandManager* commandMgrLink = getCommandMgrLink();
         if (commandMgrLink)
         {
             // R3 to update relay status in fuse box
-            StringKeyValue param = { String(relayIndex), _buttonOn[buttonIndex] ? ButtonOff : ButtonOn };
+            bool newState = !_buttonOn[buttonIndex];
+
+            // R3 to update relay status in fuse box
+            char buffer[12];
+            snprintf(buffer, sizeof(buffer), "%u", relayIndex);
+            
+            StringKeyValue param;
+            strncpy(param.key, buffer, DefaultMaxParamKeyLength);
+            param.key[DefaultMaxParamKeyLength] = '\0';
+            strncpy(param.value, (newState ? ButtonOn : ButtonOff), DefaultMaxParamValueLength);
+            param.value[DefaultMaxParamValueLength] = '\0';
+            
             commandMgrLink->sendCommand(RelaySetState, "", "", &param, 1);
 
             // send R4 to get relay state, to confirm change and reflect any failures etc,
             // this will prevent the UI being in an incorrect state if the command fails
-			      param.value = "";
+            param.value[0] = '\0';
             commandMgrLink->sendCommand(RelayStatusGet, "", "", &param, 1);
         }
     }
@@ -205,10 +199,6 @@ void RelayPage::handleExternalUpdate(uint8_t updateType, const void* data)
                 {
                     Config* config = getConfig();
                     String relayName = config ? String(config->relayLongNames[update->relayIndex]) : String(update->relayIndex);
-                    commandMgrComputer->sendDebug(
-                        relayName + " state updated to " + (update->isOn ? F("ON") : F("OFF")),
-                        F("RelayPage")
-                    );
                 }
 
                 break;
