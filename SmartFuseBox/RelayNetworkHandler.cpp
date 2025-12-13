@@ -5,8 +5,8 @@ RelayNetworkHandler::RelayNetworkHandler(RelayController* relayController)
 {
 }
 
-CommandResult RelayNetworkHandler::handleRequest(const String& method,
-	const String& command, StringKeyValue* params, uint8_t paramCount,
+CommandResult RelayNetworkHandler::handleRequest(const char* method,
+	const char* command, StringKeyValue* params, uint8_t paramCount,
 	char* responseBuffer, size_t bufferSize)
 {
 	(void)method;
@@ -17,32 +17,29 @@ CommandResult RelayNetworkHandler::handleRequest(const String& method,
 		return CommandResult::error(RelayControllerNotInitialised);
 	}
 
-	String cmd = command;
-	cmd.trim();
-
-	if (cmd == RelayTurnAllOff)
+	if (strcmp(command, RelayTurnAllOff) == 0)
 	{
 		_relayController->turnAllRelaysOff();
 		formatStatusJson(responseBuffer, bufferSize);
 		return CommandResult::ok();
 	}
-	else if (cmd == RelayTurnAllOn)
+	else if (strcmp(command, RelayTurnAllOn) == 0)
 	{
 		_relayController->turnAllRelaysOn();
 		formatStatusJson(responseBuffer, bufferSize);
 		return CommandResult::ok();
 	}
-	else if (cmd == RelayRetrieveStates)
+	else if (strcmp(command, RelayRetrieveStates) == 0)
 	{
 		formatStatusJson(responseBuffer, bufferSize);
 		return CommandResult::ok();
 	}
-	else if (cmd == RelaySetState)
+	else if (strcmp(command, RelaySetState) == 0)
 	{
 		if (paramCount == 1)
 		{
-			uint8_t relayIndex = params[0].key.toInt();
-			uint8_t state = params[0].value.toInt();
+			uint8_t relayIndex = atoi(params[0].key);
+			uint8_t state = atoi(params[0].value);
 
 			if (relayIndex >= _relayController->getRelayCount())
 			{
@@ -69,11 +66,11 @@ CommandResult RelayNetworkHandler::handleRequest(const String& method,
 			return CommandResult::error(InvalidCommandParameters);
 		}
 	}
-	else if (cmd == RelayStatusGet)
+	else if (strcmp(command, RelayStatusGet) == 0)
 	{
 		if (paramCount == 1)
 		{
-			uint8_t relayIndex = params[0].key.toInt();
+			uint8_t relayIndex = atoi(params[0].key);
 
 			if (relayIndex >= _relayController->getRelayCount())
 			{

@@ -6,8 +6,8 @@ SoundNetworkHandler::SoundNetworkHandler(SoundController* soundController)
 {
 }
 
-CommandResult SoundNetworkHandler::handleRequest(const String& method,
-	const String& command,
+CommandResult SoundNetworkHandler::handleRequest(const char* method,
+	const char* command,
 	StringKeyValue* params,
 	uint8_t paramCount,
 	char* responseBuffer,
@@ -22,9 +22,6 @@ CommandResult SoundNetworkHandler::handleRequest(const String& method,
 		return CommandResult::error(SoundControllerNotInitialised);
 	}
 
-	String cmd = command;
-	cmd.trim();
-
 	// none of the sound commands should receive any parameters
 	if (paramCount > 0)
 	{
@@ -32,55 +29,55 @@ CommandResult SoundNetworkHandler::handleRequest(const String& method,
 		return CommandResult::error(InvalidCommandParameters);
 	}
 
-	if (cmd == SoundSignalCancel)
+	if (strcmp(command, SoundSignalCancel) == 0)
 	{
 		_soundController->playSound(SoundType::None);
 	}
-	else if (cmd == SoundSignalActive)
+	else if (strcmp(command, SoundSignalActive) == 0)
 	{
 		// status is always returned below
 	}
-	else if (cmd == SoundSignalSoS)
+	else if (strcmp(command, SoundSignalSoS) == 0)
 	{
 		_soundController->playSound(SoundType::Sos);
 	}
-	else if (cmd == SoundSignalFog)
+	else if (strcmp(command, SoundSignalFog) == 0)
 	{
 		_soundController->playSound(SoundType::Fog);
 	}
-	else if (cmd == SoundSignalMoveAstern)
+	else if (strcmp(command, SoundSignalMoveAstern) == 0)
 	{
 		_soundController->playSound(SoundType::MoveAstern);
 	}
-	else if (cmd == SoundSignalMovePort)
+	else if (strcmp(command, SoundSignalMovePort) == 0)
 	{
 		_soundController->playSound(SoundType::MovePort);
 	}
-	else if (cmd == SoundSignalMoveStarboard)
+	else if (strcmp(command, SoundSignalMoveStarboard) == 0)
 	{
 		_soundController->playSound(SoundType::MoveStarboard);
 	}
-	else if (cmd == SoundSignalMoveDanger)
+	else if (strcmp(command, SoundSignalMoveDanger) == 0)
 	{
 		_soundController->playSound(SoundType::MoveDanger);
 	}
-	else if (cmd == SoundSignalOvertakeConsent)
+	else if (strcmp(command, SoundSignalOvertakeConsent) == 0)
 	{
 		_soundController->playSound(SoundType::OvertakeConsent);
 	}
-	else if (cmd == SoundSignalOvertakeDanger)
+	else if (strcmp(command, SoundSignalOvertakeDanger) == 0)
 	{
 		_soundController->playSound(SoundType::OvertakeDanger);
 	}
-	else if (cmd == SoundSignalOvertakePort)
+	else if (strcmp(command, SoundSignalOvertakePort) == 0)
 	{
 		_soundController->playSound(SoundType::OvertakePort);
 	}
-	else if (cmd == SoundSignalOvertakeStarboard)
+	else if (strcmp(command, SoundSignalOvertakeStarboard) == 0)
 	{
 		_soundController->playSound(SoundType::OvertakeStarboard);
 	}
-	else if (cmd == SoundSignalTest)
+	else if (strcmp(command, SoundSignalTest) == 0)
 	{
 		_soundController->playSound(SoundType::Test);
 	}

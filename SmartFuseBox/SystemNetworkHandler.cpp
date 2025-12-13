@@ -9,8 +9,8 @@ SystemNetworkHandler::SystemNetworkHandler(WifiController* wifiController)
 {
 }
 
-CommandResult SystemNetworkHandler::handleRequest(const String& method,
-	const String& command,
+CommandResult SystemNetworkHandler::handleRequest(const char* method,
+	const char* command,
 	StringKeyValue* params,
 	uint8_t paramCount,
 	char* responseBuffer,
@@ -20,10 +20,7 @@ CommandResult SystemNetworkHandler::handleRequest(const String& method,
 	(void)params;
 	(void)paramCount;
 
-	String cmd = command;
-	cmd.trim();
-
-	if (cmd == SystemHeartbeatCommand)
+	if (strcmp(command, SystemHeartbeatCommand) == 0)
 	{
 		formatStatusJson(responseBuffer, bufferSize);
 		return CommandResult::ok();

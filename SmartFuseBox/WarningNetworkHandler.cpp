@@ -10,8 +10,8 @@ WarningNetworkHandler::WarningNetworkHandler(WarningManager* warningManager)
 {
 }
 
-CommandResult WarningNetworkHandler::handleRequest(const String& method,
-	const String& command,
+CommandResult WarningNetworkHandler::handleRequest(const char* method,
+	const char* command,
 	StringKeyValue* params,
 	uint8_t paramCount,
 	char* responseBuffer,
@@ -26,9 +26,6 @@ CommandResult WarningNetworkHandler::handleRequest(const String& method,
 		return CommandResult::error(WarningControllerNotInitialised);
 	}
 
-	String cmd = command;
-	cmd.trim();
-
 	// none of the warning commands should receive any parameters
 	if (paramCount > 0)
 	{
@@ -36,7 +33,7 @@ CommandResult WarningNetworkHandler::handleRequest(const String& method,
 		return CommandResult::error(InvalidCommandParameters);
 	}
 
-	if (cmd == WarningsList)
+	if (strcmp(command, WarningsList) == 0)
 	{
 		formatStatusJson(responseBuffer, bufferSize);
 		return CommandResult::ok();

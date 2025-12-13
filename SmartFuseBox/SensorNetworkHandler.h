@@ -18,8 +18,8 @@ public:
 
     void formatStatusJson(char* buffer, size_t size);
 
-    CommandResult handleRequest(const String& method,
-        const String& command,
+    CommandResult handleRequest(const char* method,
+        const char* command,
         StringKeyValue* params,
         uint8_t paramCount,
         char* responseBuffer,

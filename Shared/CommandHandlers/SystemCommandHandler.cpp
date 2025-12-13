@@ -124,7 +124,7 @@ bool SystemCommandHandler::handleCommand(SerialCommandManager* sender, const cha
         {
             StringKeyValue param;
 			strcpy(param.key, ValueParamName);
-			strcpy(param.value, DateTimeManager::formatDateTime().c_str());
+            DateTimeManager::formatDateTime(param.value, sizeof(param.value));
             sendAckOk(sender, command, &param);
         }
         else
@@ -140,7 +140,7 @@ bool SystemCommandHandler::handleCommand(SerialCommandManager* sender, const cha
         {
             StringKeyValue param;
             strcpy(param.key, ValueParamName);
-            strcpy(param.value, DateTimeManager::formatDateTime().c_str());
+            DateTimeManager::formatDateTime(param.value, sizeof(param.value));
             sendAckOk(sender, command, &param);
         }
         else

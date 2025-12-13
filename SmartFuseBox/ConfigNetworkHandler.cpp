@@ -6,8 +6,8 @@ ConfigNetworkHandler::ConfigNetworkHandler()
 {
 }
 
-CommandResult ConfigNetworkHandler::handleRequest(const String& method,
-	const String& command,
+CommandResult ConfigNetworkHandler::handleRequest(const char* method,
+	const char* command,
 	StringKeyValue* params,
 	uint8_t paramCount,
 	char* responseBuffer,
@@ -16,9 +16,6 @@ CommandResult ConfigNetworkHandler::handleRequest(const String& method,
 	(void)method;
 	(void)params;
 	(void)paramCount;
-
-	String cmd = command;
-	cmd.trim();
 
 	return CommandResult::error(InvalidCommandParameters);
 }

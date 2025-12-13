@@ -7,8 +7,8 @@ SensorNetworkHandler::SensorNetworkHandler(SensorController* sensorController)
 {
 }
 
-CommandResult SensorNetworkHandler::handleRequest(const String& method,
-	const String& command, StringKeyValue* params, uint8_t paramCount,
+CommandResult SensorNetworkHandler::handleRequest(const char* method,
+	const char* command, StringKeyValue* params, uint8_t paramCount,
 	char* responseBuffer, size_t bufferSize)
 {
 	(void)method;
