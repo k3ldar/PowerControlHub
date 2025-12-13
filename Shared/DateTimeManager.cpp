@@ -1,7 +1,3 @@
-// 
-// 
-// 
-
 #include "DateTimeManager.h"
 
 constexpr unsigned long DefaultTimestamp = 1735689600UL;
@@ -22,27 +18,31 @@ void DateTimeManager::setDateTime(unsigned long unixTimestamp) {
     _isSet = true;
 }
 
-bool DateTimeManager::setDateTimeISO(const String& isoDateTime) {
+bool DateTimeManager::setDateTimeISO(const char* isoDateTime) {
     // Expected format: YYYY-MM-DDTHH:MM:SS (19 characters minimum)
-    if (isoDateTime.length() < 19) {
+    if (strlen(isoDateTime) < 19) {
         return false;
     }
 
-    // Parse components
-    uint16_t year = isoDateTime.substring(0, 4).toInt();
-    uint8_t month = isoDateTime.substring(5, 7).toInt();
-    uint8_t day = isoDateTime.substring(8, 10).toInt();
-    uint8_t hour = isoDateTime.substring(11, 13).toInt();
-    uint8_t minute = isoDateTime.substring(14, 16).toInt();
-    uint8_t second = isoDateTime.substring(17, 19).toInt();
+    // Parse components directly
+    uint16_t year = (isoDateTime[0] - '0') * 1000 + 
+                    (isoDateTime[1] - '0') * 100 + 
+                    (isoDateTime[2] - '0') * 10 + 
+                    (isoDateTime[3] - '0');
+                    
+    uint8_t month = (isoDateTime[5] - '0') * 10 + (isoDateTime[6] - '0');
+    uint8_t day = (isoDateTime[8] - '0') * 10 + (isoDateTime[9] - '0');
+    uint8_t hour = (isoDateTime[11] - '0') * 10 + (isoDateTime[12] - '0');
+    uint8_t minute = (isoDateTime[14] - '0') * 10 + (isoDateTime[15] - '0');
+    uint8_t second = (isoDateTime[17] - '0') * 10 + (isoDateTime[18] - '0');
 
     // Basic validation
     if (year < 2000 || year > 2099 || 
         month < 1 || month > 12 || 
         day < 1 || day > 31 ||
-        hour < 0 || hour > 23 ||
-        minute < 0 || minute > 59 ||
-        second < 0 || second > 59) {
+        hour > 23 ||
+        minute > 59 ||
+        second > 59) {
         return false;
     }
 
@@ -77,7 +77,8 @@ bool DateTimeManager::isTimeSet() {
     return _isSet;
 }
 
-unsigned long DateTimeManager::getSecondsSinceSync() {
+unsigned long DateTimeManager::getSecondsSinceSync()
+{
     if (!_isSet) {
         return 0;
     }
@@ -94,9 +95,10 @@ unsigned long DateTimeManager::getSecondsSinceSync() {
     return elapsedMillis / 1000;
 }
 
-String DateTimeManager::formatDateTime() {
+bool DateTimeManager::formatDateTime(char* buffer, uint8_t bufferLength)
+{
     if (!_isSet) {
-        return "Not Set";
+        return false;
     }
 
     unsigned long currentTime = getCurrentTime();
@@ -104,15 +106,16 @@ String DateTimeManager::formatDateTime() {
     uint8_t month, day, hour, minute, second;
     unixToDateTime(currentTime, year, month, day, hour, minute, second);
 
-    char buffer[20];
-    snprintf(buffer, sizeof(buffer), "%04d-%02d-%02dT%02d:%02d:%02d",
+    snprintf(buffer, bufferLength, "%04d-%02d-%02dT%02d:%02d:%02d",
              year, month, day, hour, minute, second);
-    return String(buffer);
+    return true;
 }
 
-String DateTimeManager::formatDateTimeReadable() {
-    if (!_isSet) {
-        return "Not Set";
+bool DateTimeManager::formatDateTimeReadable(char* buffer, uint8_t bufferLength)
+{
+    if (!_isSet)
+    {
+        return false;
     }
 
     unsigned long currentTime = getCurrentTime();
@@ -120,20 +123,21 @@ String DateTimeManager::formatDateTimeReadable() {
     uint8_t month, day, hour, minute, second;
     unixToDateTime(currentTime, year, month, day, hour, minute, second);
 
-    char buffer[20];
-    snprintf(buffer, sizeof(buffer), "%04d-%02d-%02d %02d:%02d:%02d",
+    snprintf(buffer, bufferLength, "%04d-%02d-%02d %02d:%02d:%02d",
              year, month, day, hour, minute, second);
-    return String(buffer);
+    return true;
 }
 
-void DateTimeManager::reset() {
+void DateTimeManager::reset()
+{
     _syncedTimestamp = 0;
     _syncedMillis = 0;
     _isSet = false;
 }
 
 unsigned long DateTimeManager::dateTimeToUnix(uint16_t year, uint8_t month, uint8_t day,
-    uint8_t hour, uint8_t minute, uint8_t second) {
+    uint8_t hour, uint8_t minute, uint8_t second)
+{
     // Simple Unix timestamp calculation (no timezone, no leap seconds)
     // Days in each month (non-leap year)
     const uint8_t daysInMonth[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
