@@ -25,7 +25,7 @@
 #include "SoundManeuveringPage.h"
 #include "SoundEmergencyPage.h"
 #include "SoundOtherPage.h"
-#include "FlagsPage.h"
+//#include "FlagsPage.h"
 #include "AboutPage.h"
 
 #include "Config.h"
@@ -70,12 +70,12 @@ SoundManeuveringPage soundManeuveringPage(&NEXTION_SERIAL, &warningManager, &com
 SoundEmergencyPage soundEmergencyPage(&NEXTION_SERIAL, &warningManager, &commandMgrLink, &commandMgrComputer);
 SoundOtherPage soundOtherPage(&NEXTION_SERIAL, &warningManager, &commandMgrLink, &commandMgrComputer);
 SystemPage systemPage(&NEXTION_SERIAL, &warningManager, &commandMgrLink, &commandMgrComputer);
-FlagsPage flagsPage(&NEXTION_SERIAL, &warningManager, &commandMgrLink, &commandMgrComputer);
+//FlagsPage flagsPage(&NEXTION_SERIAL, &warningManager, &commandMgrLink, &commandMgrComputer);
 AboutPage aboutPage(&NEXTION_SERIAL);
 
 BaseDisplayPage* displayPages[] = { &splashPage, &homePage, &warningPage, &relayPage, &soundSignalsPage, 
     &soundOvertakingPage, &soundFogPage, &soundManeuveringPage, &soundEmergencyPage, &soundOtherPage,
-    &systemPage, &flagsPage, &aboutPage };
+    &systemPage, /*&flagsPage,*/ &aboutPage };
 NextionControl nextion(&NEXTION_SERIAL, displayPages, sizeof(displayPages) / sizeof(displayPages[0]));
 
 // link command handlers

@@ -254,9 +254,7 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
         // Expect "C13:v=<value>"
         if (paramCount >= 1)
         {
-            String ssid = params[0].value;
-            ssid.trim();
-            ssid.toCharArray(config->apSSID, sizeof(config->apSSID));
+            strncpy(config->apSSID, params[0].value, sizeof(config->apSSID));
             sendAckOk(sender, command, &params[0]);
         }
         else
@@ -270,9 +268,7 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
         // Expect "C14:v=<value>"
         if (paramCount >= 1)
         {
-            String password = params[0].value;
-            password.trim();
-            password.toCharArray(config->apPassword, sizeof(config->apPassword));
+            strncpy(config->apPassword, params[0].value, sizeof(config->apPassword));
             sendAckOk(sender, command, &params[0]);
         }
         else
@@ -319,17 +315,13 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
         // Expect "C17:v=<value>"
         if (paramCount >= 1)
         {
-            String ipAddress = params[0].value;
-            ipAddress.trim();
-
             IPAddress ip;
-            if (!ip.fromString(ipAddress))
+            if (!ip.fromString(params[0].value))
             {
                 sendAckErr(sender, command, F("Invalid IP address"), &params[0]);
                 return true;
 			}
-
-            ipAddress.toCharArray(config->apIpAddress, sizeof(config->apIpAddress));
+			strncpy(config->apIpAddress, params[0].value, sizeof(config->apIpAddress));
             sendAckOk(sender, command, &params[0]);
         }
         else

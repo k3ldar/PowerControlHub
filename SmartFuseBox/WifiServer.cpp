@@ -30,6 +30,7 @@ WifiServer::WifiServer(SerialCommandManager* commandMgrComputer, WarningManager*
 	_activeClient.state = ClientHandlingState::Idle;
 	_activeClient.lastActivity = 0;
 	_activeClient.isPersistent = false;
+	_activeClient.request[0] = '\0';
 	registerJsonVisitors(jsonVisitors, jsonVisitorCount);
 }
 
@@ -605,32 +606,11 @@ void WifiServer::sendResponse(WiFiClient& client, int statusCode, const char* co
 	}
 	
 	client.print(F("Content-Length: "));
-	client.println(SystemFunctions::calculateLength(body));
+	client.println(SystemFunctions::calculateLength(body) + 2); // 2 = {}
 	client.println();
-	client.println(F("{"));
+	client.print(F("{"));
 	client.print(body);
-	client.println(F("}"));
-}
-
-String WifiServer::parseQueryParameter(const String& query, const String& paramName)
-{
-	String searchFor = paramName + "=";
-	int startIndex = query.indexOf(searchFor);
-	
-	if (startIndex == -1)
-	{
-		return "";
-	}
-	
-	startIndex += searchFor.length();
-	int endIndex = query.indexOf('&', startIndex);
-	
-	if (endIndex == -1)
-	{
-		return query.substring(startIndex);
-	}
-	
-	return query.substring(startIndex, endIndex);
+	client.print(F("}"));
 }
 
 bool WifiServer::isConnected() const
@@ -744,27 +724,47 @@ bool WifiServer::dispatchToHandler(WiFiClient& client, INetworkCommandHandler* h
 		return false;
 	}
 
-	sendDebug(F("dispatchToHandler"), F("WifiServer"));
-	
 	// Extract command from path: /api/{handler}/{command}
 	// For example: /api/sound/H10 -> command = H10
 	//              /api/config/C8 -> command = C8
 	char command[MaximumPathLength];
+	command[0] = '\0';
+
+	sendDebug(F("dispatchToHandler"), F("WifiServer"));
+	sendDebug(F("Path: "), F("WifiServer"));
+	sendDebug(path, F("WifiServer"));
+	sendDebug(F("Route: "), F("WifiServer"));
+	sendDebug(handler->getRoute(), F("WifiServer"));
+	sendDebug(F("Command: "), F("WifiServer"));
+	sendDebug(command, F("WifiServer"));
+	sendDebug(F("Query: "), F("WifiServer"));
+	sendDebug(query, F("WifiServer"));
 	
-	if (SystemFunctions::calculateLength(path) > SystemFunctions::calculateLength(handler->getRoute()))
+	size_t routeLen = SystemFunctions::calculateLength(handler->getRoute());
+	size_t pathLen = SystemFunctions::calculateLength(path);
+
+	if (pathLen > routeLen)
 	{
-		// Extract everything after the handler route
-		SystemFunctions::substr(command, sizeof(command), path, SystemFunctions::calculateLength(handler->getRoute()), MaximumPathLength);
-		
-		// Remove leading slash if present
-		if (SystemFunctions::startsWith(command, F("/")))
-		{
-			SystemFunctions::substr(command, sizeof(command), command, 1);
-		}
+	    size_t commandLen = pathLen - routeLen;
+
+	    if (commandLen >= sizeof(command))
+	    {
+	        sendDebug(F("Command too long"), F("WifiServer"));
+	        return false;
+	    }
+	    
+	    // Extract everything after the handler route
+	    SystemFunctions::substr(command, sizeof(command), path, SystemFunctions::calculateLength(handler->getRoute()), MaximumPathLength);
+	    
+	    // Remove leading slash if present
+	    if (SystemFunctions::startsWith(command, F("/")))
+	    {
+	        SystemFunctions::substr(command, sizeof(command), command, 1);
+	    }
 	}
 
 	// Parse query string into parameter array (max 6 parameters)
-	StringKeyValue params[MaximumParameterCount];
+	StringKeyValue params[MaximumParameterCount] = {};
 	uint8_t paramCount = 0;
 	uint16_t queryLength = SystemFunctions::calculateLength(query);
 
@@ -846,6 +846,9 @@ void WifiServer::updateClientConnection()
 					_connectionState = WifiConnectionState::Connected;
 					_consecutiveFailures = 0;
 					_lastRSSI = WiFi.RSSI();
+					IPAddress ip = WiFi.localIP();
+					snprintf(_ipAddress, sizeof(_ipAddress), "%d.%d.%d.%d", ip[0], ip[1], ip[2], ip[3]);
+
 					sendDebug(F("WiFi connected!"), F("WifiServer"));
 					
 					// Start the HTTP server now that we're connected

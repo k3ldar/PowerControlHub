@@ -196,18 +196,18 @@ void configureWifiSupport(Config* config)
 {
 	// network command handlers
 	INetworkCommandHandler* networkHandlers[] = { &relayNetworkHandler, &soundNetworkHandler, &warningNetworkHandler,
-		&systemNetworkHandler, &sensorNetworkHandler };
+		&systemNetworkHandler, &sensorNetworkHandler, &configNetworkHandler };
 	size_t networkHandlerCount = sizeof(networkHandlers) / sizeof(networkHandlers[0]);
 	wifiController.registerHandlers(networkHandlers, networkHandlerCount);
 
 
 	// json status visitors for wifi
 	NetworkJsonVisitor* jsonVisitors[] = {
+		&systemNetworkHandler,
 		&configNetworkHandler,
 		&relayNetworkHandler,
 		&soundNetworkHandler,
 		&warningNetworkHandler,
-		&systemNetworkHandler,
 		&sensorNetworkHandler,
 	};
 	uint8_t jsonVisitorCount = sizeof(jsonVisitors) / sizeof(jsonVisitors[0]);

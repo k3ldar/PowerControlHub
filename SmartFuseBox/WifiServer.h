@@ -84,7 +84,6 @@ private:
 	void sendResponse(WiFiClient& client, int statusCode, const char* contentType, const char* body);
 	void send400(WiFiClient& client);
 	void send404(WiFiClient& client);
-	String parseQueryParameter(const String& query, const String& paramName);
 	void updateClientConnection();
 	void updateClientHandling();
 	void processClientRequest();
