@@ -197,8 +197,7 @@ void RelayPage::handleExternalUpdate(uint8_t updateType, const void* data)
                 SerialCommandManager* commandMgrComputer = getCommandMgrComputer();
                 if (commandMgrComputer)
                 {
-                    Config* config = getConfig();
-                    String relayName = config ? String(config->relayLongNames[update->relayIndex]) : String(update->relayIndex);
+					commandMgrComputer->sendDebug(F("Relay State Updated"), F("RelayPage"));
                 }
 
                 break;

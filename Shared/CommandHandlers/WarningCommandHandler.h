@@ -5,11 +5,11 @@
 #include "Local.h"
 #include "SystemFunctions.h"
 
-#ifdef FUSE_BOX_CONTROLLER
+#if defined(FUSE_BOX_CONTROLLER)
 #include "SharedBaseCommandHandler.h"
 #endif
 
-#ifdef BOAT_CONTROL_PANEL
+#if defined(BOAT_CONTROL_PANEL)
 #include "HomePage.h"
 #include "BaseBoatCommandHandler.h"
 #endif

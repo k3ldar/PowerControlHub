@@ -35,7 +35,7 @@ bool TLVCompassHandler::begin()
         return false;
     }
 
-#ifdef Mcu_Module
+#if defined(Mcu_Module)
 
     // MPU6050
     delay(500);
@@ -98,7 +98,7 @@ bool TLVCompassHandler::update(unsigned long now)
 
     smooth(bxCal, byCal);
 
-#ifdef Mcu_Module
+#if defined(Mcu_Module)
 
     // Accelerometer
     sensors_event_t a, g, t;

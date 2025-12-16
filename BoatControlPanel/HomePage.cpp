@@ -212,8 +212,12 @@ void HomePage::handleExternalUpdate(uint8_t updateType, const void* data)
 {
 	char debugMsg[64];
 	snprintf(debugMsg, sizeof(debugMsg), "HomePage::handleExternalUpdate type=%u", updateType);
-    getCommandMgrComputer()->sendDebug(debugMsg, F("HomePage"));
-    
+	SerialCommandManager* commandMgrComputer = getCommandMgrComputer();
+    if (commandMgrComputer)
+    {
+        commandMgrComputer->sendDebug(debugMsg, F("HomePage"));
+    }
+
     // Call base class first to handle heartbeat ACKs
     BaseBoatPage::handleExternalUpdate(updateType, data);
 
@@ -240,11 +244,8 @@ void HomePage::handleExternalUpdate(uint8_t updateType, const void* data)
                 setPicture(cmd, newColor);
                 setPicture2(cmd, newColor);
 
-                // Log the update for debugging (using short name)
-                Config* config = getConfig();
-                String relayName = config ? String(config->relayShortNames[update->relayIndex]) : String(update->relayIndex);
-
-                break; // Found the button, no need to continue
+                // Found the button, no need to continue
+                break;
             }
         }
     }

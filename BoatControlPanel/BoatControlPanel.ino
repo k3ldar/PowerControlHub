@@ -1,7 +1,11 @@
-#include "FlagsPage.h"
+#include "Local.h"
 #include <Arduino.h>
 #include <SerialCommandManager.h>
 #include <NextionControl.h>
+
+#if defined(ARDUINO_R4_MINIMA)
+#include <SoftwareSerial.h>
+#endif
 
 #include "BoatControlPanelConstants.h"
 #include "BroadcastManager.h"
@@ -25,18 +29,27 @@
 #include "SoundManeuveringPage.h"
 #include "SoundEmergencyPage.h"
 #include "SoundOtherPage.h"
-//#include "FlagsPage.h"
+#include "FlagsPage.h"
+#include "CardinalMarkersPage.h"
 #include "AboutPage.h"
 
 #include "Config.h"
 #include "ConfigManager.h"
 #include "WarningManager.h"
-#include "TLVCompassHandler.h"
+//#include "TLVCompassHandler.h"
+
+#if defined(ARDUINO_MEGA2560)
+#define NEXTION_SERIAL Serial1
+#define LINK_SERIAL Serial2
+#elif defined(ARDUINO_R4_MINIMA)
+SoftwareSerial LINK_SERIAL(2, 3); // RX, TX
+SoftwareSerial NEXTION_SERIAL(4, 5); // RX, TX
+#else
+#error "You must define 'ARDUINO_MEGA2560' or 'ARDUINO_R4_MINIMA'"
+#endif
 
 
 #define COMPUTER_SERIAL Serial
-#define NEXTION_SERIAL Serial1
-#define LINK_SERIAL Serial2
 
 
 constexpr unsigned long UpdateIntervalMs = 600;
@@ -46,11 +59,11 @@ void onLinkCommandReceived(SerialCommandManager* mgr);
 void onComputerCommandReceived(SerialCommandManager* mgr);
 
 // Serial managers
-SerialCommandManager commandMgrComputer(&COMPUTER_SERIAL, onComputerCommandReceived, '\n', ':', ';', '=', 500, 64);
-SerialCommandManager commandMgrLink(&LINK_SERIAL, onLinkCommandReceived, '\n', ':', ';', '=', 500, 64);
+SerialCommandManager commandMgrComputer(&COMPUTER_SERIAL, onComputerCommandReceived, '\n', ':', ';', '=', 512, 64);
+SerialCommandManager commandMgrLink(&LINK_SERIAL, onLinkCommandReceived, '\n', ':', ';', '=', 1024, 64);
 
 // Compass with smoothing filter size 15
-TLVCompassHandler compass(&commandMgrComputer, 15);
+//TLVCompassHandler compass(&commandMgrComputer, 5);
 
 // Broadcast manager for coordinated messaging
 BroadcastManager broadcastManager(&commandMgrComputer, &commandMgrLink);
@@ -70,12 +83,13 @@ SoundManeuveringPage soundManeuveringPage(&NEXTION_SERIAL, &warningManager, &com
 SoundEmergencyPage soundEmergencyPage(&NEXTION_SERIAL, &warningManager, &commandMgrLink, &commandMgrComputer);
 SoundOtherPage soundOtherPage(&NEXTION_SERIAL, &warningManager, &commandMgrLink, &commandMgrComputer);
 SystemPage systemPage(&NEXTION_SERIAL, &warningManager, &commandMgrLink, &commandMgrComputer);
-//FlagsPage flagsPage(&NEXTION_SERIAL, &warningManager, &commandMgrLink, &commandMgrComputer);
+FlagsPage flagsPage(&NEXTION_SERIAL, &warningManager, &commandMgrLink, &commandMgrComputer);
+CardinalMarkersPage cardinalMarkersPage(&NEXTION_SERIAL, &warningManager, &commandMgrLink, &commandMgrComputer);
 AboutPage aboutPage(&NEXTION_SERIAL);
 
 BaseDisplayPage* displayPages[] = { &splashPage, &homePage, &warningPage, &relayPage, &soundSignalsPage, 
     &soundOvertakingPage, &soundFogPage, &soundManeuveringPage, &soundEmergencyPage, &soundOtherPage,
-    &systemPage, /*&flagsPage,*/ &aboutPage };
+    &systemPage, &flagsPage, & cardinalMarkersPage, &aboutPage };
 NextionControl nextion(&NEXTION_SERIAL, displayPages, sizeof(displayPages) / sizeof(displayPages[0]));
 
 // link command handlers
@@ -107,12 +121,18 @@ void setup()
     commandMgrComputer.registerHandlers(computerHandlers, computerHandlerCount);
 
     SystemFunctions::initializeSerial(COMPUTER_SERIAL, 115200, true);
+
+#if defined(ARDUINO_MEGA2560)
     SystemFunctions::initializeSerial(NEXTION_SERIAL, 19200, false);
     SystemFunctions::initializeSerial(LINK_SERIAL, 9600, false);
+#elif defined(ARDUINO_R4_MINIMA)
+	NEXTION_SERIAL.begin(19200);
+	LINK_SERIAL.begin(9600);
+#endif
 
-#ifdef NEXTION_DEBUG
+#if defined(NEXTION_DEBUG)
     nextion.setDebugCallback([](const String& msg) {
-        commandMgrComputer.sendCommand(msg, F("NEXTION"));
+        commandMgrComputer.sendCommand(msg.c_str(), "NEXTION");
         });
 #endif
 
@@ -130,12 +150,17 @@ void setup()
 	relayPage.configSet(config);
 
     nextion.begin();
+    
+    //commandMgrComputer.sendError(memBuffer, "MEMORY");
 
-    if (!compass.begin())
-    {
-        warningManager.raiseWarning(WarningType::SensorFailure);
-        warningManager.raiseWarning(WarningType::CompassFailure);
-    }
+    //if (!compass.begin())
+    //{
+    //    snprintf(memBuffer, sizeof(memBuffer), "Compass failed: %d", freeMemory());
+    //    commandMgrComputer.sendError(memBuffer, "MEMORY");
+    //    
+    //    warningManager.raiseWarning(WarningType::SensorFailure);
+    //    warningManager.raiseWarning(WarningType::CompassFailure);
+    //}
 
     // Simplified broadcasting
     char buffer[10];
@@ -153,6 +178,9 @@ void loop()
 
     SystemCpuMonitor::startTask();
     commandMgrComputer.readCommands();
+    SystemCpuMonitor::endTask();
+
+    SystemCpuMonitor::startTask();
     commandMgrLink.readCommands();
     SystemCpuMonitor::endTask();
 
@@ -185,10 +213,10 @@ void loop()
                 else
 					speed += 2;
 
-                homePage.setBearing(compass.getHeading());
-                homePage.setDirection(compass.getDirection());
+                //homePage.setBearing(compass.getHeading());
+                //homePage.setDirection(compass.getDirection());
                 homePage.setSpeed(speed);
-                homePage.setCompassTemperature(compass.getTemperature());
+                //homePage.setCompassTemperature(compass.getTemperature());
             }
         }
     }

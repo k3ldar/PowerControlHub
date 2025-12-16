@@ -12,13 +12,14 @@ AckCommandHandler::AckCommandHandler(BroadcastManager* broadcastManager, Warning
     : SharedBaseCommandHandler(broadcastManager, warningManager)
 #endif
 {
+
 }
 
-#ifdef BOAT_CONTROL_PANEL
-bool AckCommandHandler::processHeartbeatAck(SerialCommandManager* sender, const String& key, const String& value)
+#if defined(BOAT_CONTROL_PANEL)
+bool AckCommandHandler::processHeartbeatAck(SerialCommandManager* sender, const char* key, const char* value)
 {
     // Check for heartbeat acknowledgement (F0=ok)
-    if (key != SystemHeartbeatCommand || !value.equalsIgnoreCase(AckSuccess))
+    if (strcmp(key, SystemHeartbeatCommand) != 0 || strcmp(value, AckSuccess) != 0)
         return false;
 
     if (getWarningManager())
@@ -38,10 +39,10 @@ bool AckCommandHandler::processHeartbeatAck(SerialCommandManager* sender, const 
     return true;
 }
 
-bool AckCommandHandler::processWarningsListAck(SerialCommandManager* sender, const String& key, const String& value, const StringKeyValue params[], uint8_t paramCount)
+bool AckCommandHandler::processWarningsListAck(SerialCommandManager* sender, const char* key, const char* value, const StringKeyValue params[], uint8_t paramCount)
 {
     // Check for warnings list acknowledgement (W1=ok)
-    if (key != WarningsList || !value.equalsIgnoreCase(AckSuccess))
+    if (strcmp(key, SystemHeartbeatCommand) != 0 || strcmp(value, AckSuccess) != 0)
         return false;
 
     WarningManager* warningManager = getWarningManager();
@@ -110,9 +111,9 @@ bool AckCommandHandler::processWarningsListAck(SerialCommandManager* sender, con
 bool AckCommandHandler::handleCommand(SerialCommandManager* sender, const char* command, const StringKeyValue params[], uint8_t paramCount)
 {
     (void)sender;
-    
+
     // Validate command
-    if (command != AckCommand)
+    if (strncmp(command, AckCommand, 3) != 0)
     {
         char debugMsg[64];
         snprintf(debugMsg, sizeof(debugMsg), "Unknown ACK command %s", command);
@@ -129,7 +130,7 @@ bool AckCommandHandler::handleCommand(SerialCommandManager* sender, const char* 
 	}
 
     // Ignore redundant ACK:ACK=ok messages
-    if (strcmp(params[0].key, AckCommand) == 0)
+    if (strncmp(params[0].key, AckCommand, 3) == 0)
     {
         return true; // Silently ignore, consider it handled
     }
@@ -144,7 +145,7 @@ bool AckCommandHandler::handleCommand(SerialCommandManager* sender, const char* 
 
     // only process known ACK keys if you need to take action
 
-#ifdef BOAT_CONTROL_PANEL
+#if defined(BOAT_CONTROL_PANEL)
     if (strcmp(params[0].key, SystemHeartbeatCommand) == 0 && strcmp(params[0].value, AckSuccess) == 0)
     {
         // Heartbeat acknowledgement
@@ -222,7 +223,7 @@ bool AckCommandHandler::handleCommand(SerialCommandManager* sender, const char* 
     {
         if (paramCount >= 2)
         {
-            uint16_t freeMemory = static_cast<uint8_t>(strtoul(params[1].value, nullptr, 0));
+            uint16_t freeMemory = static_cast<uint16_t>(strtoul(params[1].value, nullptr, 0));
             UInt16Update update = { freeMemory };
             notifyCurrentPage(static_cast<uint8_t>(PageUpdateType::MemoryUsage), &update);
         }

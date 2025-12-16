@@ -255,9 +255,6 @@
     <ClInclude Include="JsonVisitor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="BaseSensor.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="SystemDefinitions.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -275,6 +272,9 @@
     </ClInclude>
     <ClInclude Include="SystemFunctions.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BaseSensor.h">
+      <Filter>Header Files\SharedCode\SerialCommandHandlers</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
