@@ -17,7 +17,7 @@ These are commands used to configure the system settings and can only be sent fr
 
 
 ### Wifi System Commands (SFB)
-Only F0 is supported via wife.
+Only F0 is supported via wifi.
 Route: /api/system/{command}
 Example: Return free memory = /api/system/F2 
 

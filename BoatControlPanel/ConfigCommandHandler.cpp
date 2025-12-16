@@ -20,20 +20,14 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
     {
         if (paramCount >= 1)
         {
-            // Expect "C3:name=<value>" where value is the boat name (or just a single token)
-            String name = params[0].value;
-            if (name.length() == 0)
-                name = params[0].key;
-
-            name.trim();
-            if (name.length() == 0)
+            if (SystemFunctions::calculateLength(params[0].value) == 0)
             {
                 sendAckErr(sender, command, F("Empty name"), &params[0]);
                 return true;
             }
 
             // enforce max length BOAT_NAME_MAX_LEN (defined in ConfigManager / Config.h)
-            strncpy(cfg->boatName, name.c_str(), sizeof(cfg->boatName) - 1);
+            strncpy(cfg->boatName, params[0].value, sizeof(cfg->boatName) - 1);
             cfg->boatName[sizeof(cfg->boatName) - 1] = '\0';
             sendAckOk(sender, command, &params[0]);
         }
@@ -49,8 +43,8 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
         if (paramCount >= 1)
         {
             uint8_t idx = static_cast<uint8_t>(strtoul(params[0].key, nullptr, 0));
-            String name = params[0].value;
-            if (name.length() == 0)
+            //String name = params[0].value;
+            if (SystemFunctions::calculateLength(params[0].value) == 0)
             {
                 // fallback if they sent single token e.g. "RNAME 2" (no name) -> error
                 sendAckErr(sender, command, F("Missing name"), &params[0]);
@@ -64,35 +58,29 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
             }
 
             // Parse short and long names (format: "shortName|longName" or just "shortName")
-            int pipeIndex = name.indexOf('|');
-            String shortName;
-            String longName;
+            int pipeIndex = SystemFunctions::indexOf(params[0].value, '|', 0);
+            char shortName[6] = "";
+            char longName[21] = "";
 
             if (pipeIndex >= 0)
             {
                 // Pipe character found - split into short and long names
-                shortName = name.substring(0, pipeIndex);
-                longName = name.substring(pipeIndex + 1);
-                shortName.trim();
-                longName.trim();
-            }
-            else
-            {
-                // No pipe character - use the same name for both short and long
-                shortName = name;
-                longName = name;
-                shortName.trim();
-                longName.trim();
+                char tmpShortName[6] = "";
+                char tmpLongName[21] = "";
+				SystemFunctions::substr(tmpShortName, sizeof(tmpShortName), params[0].value, 0, pipeIndex);
+				SystemFunctions::substr(tmpLongName, sizeof(tmpLongName), params[0].value, pipeIndex + 1);
+				strncpy(shortName, tmpShortName, sizeof(shortName) - 1);
+                strncpy(longName, tmpLongName, sizeof(longName) - 1);
             }
 
             // Copy short name with truncation to relay short name length
             size_t maxShortLen = sizeof(cfg->relayShortNames[idx]) - 1;
-            strncpy(cfg->relayShortNames[idx], shortName.c_str(), maxShortLen);
+            strncpy(cfg->relayShortNames[idx], shortName, maxShortLen);
             cfg->relayShortNames[idx][maxShortLen] = '\0';
 
             // Copy long name with truncation to relay long name length
             size_t maxLongLen = sizeof(cfg->relayLongNames[idx]) - 1;
-            strncpy(cfg->relayLongNames[idx], longName.c_str(), maxLongLen);
+            strncpy(cfg->relayLongNames[idx], longName, maxLongLen);
             cfg->relayLongNames[idx][maxLongLen] = '\0';
 
             sendAckOk(sender, command, &params[0]);

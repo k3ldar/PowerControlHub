@@ -29,50 +29,58 @@ bool SensorCommandHandler::handleCommand(SerialCommandManager* sender, const cha
     }
 
 #if defined(BOAT_CONTROL_PANEL)
-    if (command == SensorTemperature)
+    if (strcmp(command, SensorTemperature) == 0)
     {
-		_lastTemperature = atof(params[0].value);
+        sendDebugMessage(F("Sensor Temperature"), F("SensorCommandHandler"));
+        _lastTemperature = atof(params[0].value);
         FloatStateUpdate update = { _lastTemperature };
         notifyCurrentPage(static_cast<uint8_t>(PageUpdateType::Temperature), &update);
     }
-    else if (command == SensorHumidity)
+    else if (strcmp(command, SensorHumidity) == 0)
     {
-		_lastHumidity = static_cast<int16_t>(atof(params[0].value));
+        sendDebugMessage(F("Sensor Humidity"), F("SensorCommandHandler"));
+        _lastHumidity = static_cast<int16_t>(atof(params[0].value));
         UInt16Update update = { _lastHumidity };
         notifyCurrentPage(static_cast<uint8_t>(PageUpdateType::Humidity), &update);
     }
-    else if (command == SensorBearing)
+    else if (strcmp(command, SensorBearing) == 0)
     {
-		_lastBearing = atof(params[0].value);
+        sendDebugMessage(F("Sensor Bearing"), F("SensorCommandHandler"));
+        _lastBearing = atof(params[0].value);
         FloatStateUpdate update = { _lastBearing };
         notifyCurrentPage(static_cast<uint8_t>(PageUpdateType::Bearing), &update);
     }
-    else if (command == SensorDirection)
+    else if (strcmp(command, SensorDirection) == 0)
     {
+        sendDebugMessage(F("Sensor Direction"), F("SensorCommandHandler"));
         CharStateUpdate update = {};
         update.length = min(SystemFunctions::calculateLength(params[0].value), static_cast<unsigned int>((CharStateUpdate::MaxLength - 1)));
 		snprintf(update.value, CharStateUpdate::MaxLength, "%s", params[0].value);
         notifyCurrentPage(static_cast<uint8_t>(PageUpdateType::Direction), &update);
     }
-    else if (command == SensorSpeed)
+    else if (strcmp(command, SensorSpeed) == 0)
     {
-		_lastSpeed = static_cast<int16_t>(strtoul(params[0].value, nullptr, 0));
+        sendDebugMessage(F("Sensor Speed"), F("SensorCommandHandler"));
+        _lastSpeed = static_cast<int16_t>(strtoul(params[0].value, nullptr, 0));
         UInt16Update update = { _lastSpeed };
         notifyCurrentPage(static_cast<uint8_t>(PageUpdateType::Speed), &update);
     }
-    else if (command == SensorCompassTemp)
+    else if (strcmp(command, SensorCompassTemp) == 0)
     {
-		_lastCompassTemp = static_cast<int16_t>(strtoul(params[0].value, nullptr, 0));
+        sendDebugMessage(F("Sensor Compass Temp"), F("SensorCommandHandler"));
+        _lastCompassTemp = static_cast<int16_t>(strtoul(params[0].value, nullptr, 0));
         FloatStateUpdate update = { atof(params[0].value) };
         notifyCurrentPage(static_cast<uint8_t>(PageUpdateType::CompassTemp), &update);
     }
-    else if (command == SensorWaterLevel)
+    else if (strcmp(command, SensorWaterLevel) == 0)
     {
+        sendDebugMessage(F("Sensor Water Level"), F("SensorCommandHandler"));
         UInt16Update update = { static_cast<uint16_t>(strtoul(params[0].value, nullptr, 0)) };
         notifyCurrentPage(static_cast<uint8_t>(PageUpdateType::WaterLevel), &update);
     }
-    else if (command == SensorWaterPumpActive)
+    else if (strcmp(command, SensorWaterPumpActive) == 0)
     {
+        sendDebugMessage(F("Sensor Water Pump Active"), F("SensorCommandHandler"));
         BoolStateUpdate update = { strtoul(params[0].value, nullptr, 0) > 0 };
         notifyCurrentPage(static_cast<uint8_t>(PageUpdateType::WaterPumpActive), &update);
     }

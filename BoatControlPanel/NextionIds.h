@@ -12,6 +12,7 @@ constexpr uint8_t PageSoundEmergency = 8;
 constexpr uint8_t PageSoundOther = 9;
 constexpr uint8_t PageSystem = 10;
 constexpr uint8_t PageFlags = 11;
+constexpr uint8_t PageCardinalMarkers = 12;
 constexpr uint8_t PageAbout = 17;
 
 constexpr uint8_t InvalidButtonIndex = 0xFF;

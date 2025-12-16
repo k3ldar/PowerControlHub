@@ -28,7 +28,7 @@ bool RelayCommandHandler::handleCommand(SerialCommandManager* sender, const char
         return true;
 	}
 
-    if (command == RelayTurnAllOff)
+    if (strncmp(command, RelayTurnAllOff, 2) == 0)
     {
         if (paramCount == 0)
         {
@@ -41,7 +41,7 @@ bool RelayCommandHandler::handleCommand(SerialCommandManager* sender, const char
             return true;
         }
     }
-    else if (command == RelayTurnAllOn)
+    else if (strncmp(command, RelayTurnAllOn, 2) == 0)
     {
         if (paramCount == 0)
         {
@@ -54,7 +54,7 @@ bool RelayCommandHandler::handleCommand(SerialCommandManager* sender, const char
 			return true;
         }
     }
-    else if (command == RelayRetrieveStates)
+    else if (strncmp(command,  RelayRetrieveStates, 2) == 0)
     {
         if (paramCount == 0)
         {
@@ -76,7 +76,7 @@ bool RelayCommandHandler::handleCommand(SerialCommandManager* sender, const char
 			return true;
         }
     }
-    else if (command == RelaySetState)
+    else if (strncmp(command, RelaySetState, 2) == 0)
     {
         if (paramCount == 1)
         {
@@ -111,7 +111,7 @@ bool RelayCommandHandler::handleCommand(SerialCommandManager* sender, const char
 			return true;
         }
 	}
-    else if (command == RelayStatusGet)
+    else if (strncmp(command, RelayStatusGet, 2) == 0)
     {
         if (paramCount == 1)
         {

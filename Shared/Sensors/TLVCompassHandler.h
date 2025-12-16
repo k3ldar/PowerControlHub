@@ -8,7 +8,7 @@
 #include <Wire.h>
 #include <math.h>
 
-#ifdef Mcu_Module
+#if defined(Mcu_Module)
 #include <Adafruit_MPU6050.h>
 #include <Adafruit_Sensor.h>
 #endif
@@ -47,7 +47,7 @@ private:
     // Magnetometer
     TLx493D_A1B6 sensor;
 
-#ifdef Mcu_Module
+#if defined(Mcu_Module)
     // Accelerometer/Gyro
     Adafruit_MPU6050 mpu;
 #endif

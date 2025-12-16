@@ -5,7 +5,7 @@
 #include "Local.h"
 #include "ConfigManager.h"
 
-#ifdef BOAT_CONTROL_PANEL
+#if defined(BOAT_CONTROL_PANEL)
 #include <NextionControl.h>
 #include "BoatControlPanelConstants.h"
 #include "HomePage.h"
@@ -40,9 +40,9 @@ public:
     const char* const* supportedCommands(size_t& count) const override;
 
 private:
-#ifdef BOAT_CONTROL_PANEL
-    bool processHeartbeatAck(SerialCommandManager* sender, const String& key, const String& value);
-    bool processWarningsListAck(SerialCommandManager* sender, const String& key, const String& value, const StringKeyValue params[], uint8_t paramCount);
+#if defined(BOAT_CONTROL_PANEL)
+    bool processHeartbeatAck(SerialCommandManager* sender, const char* key, const char* value);
+    bool processWarningsListAck(SerialCommandManager* sender, const char* key, const char* value, const StringKeyValue params[], uint8_t paramCount);
 #endif
 };
 
