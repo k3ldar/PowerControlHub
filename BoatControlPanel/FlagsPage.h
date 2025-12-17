@@ -14,7 +14,6 @@ class FlagsPage : public BaseBoatPage
 private:
 	uint8_t _currentFlagIndex = 0;
     void updateFlagDisplay();
-    const char* getFlagMeaning(uint8_t flagIndex) const;
     void cycleNextFlag();
     void cyclePrevFlag(); 
 protected:

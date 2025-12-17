@@ -74,6 +74,7 @@
     <ProjectCapability Include="VisualMicroLinux" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="BuoysPage.cpp" />
     <ClCompile Include="CardinalMarkersPage.cpp" />
     <ClCompile Include="DateTimeManager.cpp" />
     <ClCompile Include="FlagsPage.cpp" />
@@ -119,6 +120,7 @@
       <FileType>CppCode</FileType>
       <DeploymentContent>true</DeploymentContent>
     </ClCompile>
+    <ClInclude Include="BuoysPage.h" />
     <ClInclude Include="CardinalMarkersPage.h" />
     <ClInclude Include="DateTimeManager.h" />
     <ClInclude Include="FlagsPage.h" />

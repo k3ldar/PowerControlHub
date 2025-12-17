@@ -98,19 +98,6 @@ void FlagsPage::updateFlagDisplay()
     }
 }
 
-const char* FlagsPage::getFlagMeaning(uint8_t flagIndex) const
-{
-    // Check if the flag is within the letter range (A-Z)
-    if (flagIndex >= FlagLetterA && flagIndex <= FlagLetterZ)
-    {
-        uint8_t letterIndex = flagIndex - FlagLetterA;
-        return (const char*)pgm_read_ptr(&FlagMeanings[letterIndex]);
-    }
-    
-    // Not a letter flag, return empty string
-    return "";
-}
-
 void FlagsPage::cycleNextFlag()
 {
     if (_currentFlagIndex >= FlagLast)
