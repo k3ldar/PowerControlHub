@@ -142,6 +142,9 @@
     <ClCompile Include="CardinalMarkersPage.cpp">
       <Filter>Source Files\Pages</Filter>
     </ClCompile>
+    <ClCompile Include="BuoysPage.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="__vm\.BoatControlPanel.vsarduino.h">
@@ -250,6 +253,9 @@
       <Filter>Header Files\Pages</Filter>
     </ClInclude>
     <ClInclude Include="CardinalMarkersPage.h">
+      <Filter>Header Files\Pages</Filter>
+    </ClInclude>
+    <ClInclude Include="BuoysPage.h">
       <Filter>Header Files\Pages</Filter>
     </ClInclude>
   </ItemGroup>

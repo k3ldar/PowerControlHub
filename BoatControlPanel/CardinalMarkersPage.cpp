@@ -34,7 +34,7 @@ void CardinalMarkersPage::handleTouch(uint8_t compId, uint8_t eventType)
     switch (compId)
     {
     case ButtonNext:
-        setPage(PageSystem);
+        setPage(PageBuoys);
         return;
 
     case ButtonPrevious:
