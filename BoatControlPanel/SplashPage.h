@@ -28,7 +28,7 @@ public:
         }
 
         // initialize global variables
-        sendText("pageSplash.vaBoatName", config->boatName);
+        sendText("pageSplash.vaBoatName", config->name);
         sendText("pageSplash.vaHomeB1", config->relayShortNames[0]);
         sendText("pageSplash.vaHomeB2", config->relayShortNames[1]);
         sendText("pageSplash.vaHomeB3", config->relayShortNames[2]);

@@ -7,6 +7,7 @@ constexpr uint8_t DefaultValue = 0xFF;
 constexpr uint8_t BufferSuccess = 0x00;
 constexpr uint8_t BufferInvalid = 0x01;
 constexpr uint8_t BufferOverflow = 0x02;
+constexpr uint8_t InvalidConfiguration = 0x03;
 
 constexpr char SystemHeartbeatCommand[] = "F0";
 constexpr char SystemInitialized[] = "F1";
@@ -41,7 +42,7 @@ constexpr char SoundSignalTest[] = "H12";
 constexpr char ConfigSaveSettings[] = "C0";
 constexpr char ConfigGetSettings[] = "C1";
 constexpr char ConfigResetSettings[] = "C2";
-constexpr char ConfigRenameBoat[] = "C3";
+constexpr char ConfigRename[] = "C3";
 constexpr char ConfigRenameRelay[] = "C4";
 constexpr char ConfigMapHomeButton[] = "C5";
 constexpr char ConfigSetButtonColor[] = "C6";
@@ -59,6 +60,8 @@ constexpr char ConfigWifiPort[] = "C15";
 constexpr char ConfigWifiState[] = "C16";
 constexpr char ConfigWifiApIpAddress[] = "C17";
 #endif
+
+constexpr char ConfigDefaultRelayState[] = "C18";
 
 constexpr char WarningsActive[] = "W0";
 constexpr char WarningsList[] = "W1";

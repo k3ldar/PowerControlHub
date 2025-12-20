@@ -14,6 +14,8 @@ SystemCpuMonitor.cpp|..\Shared\SystemCpuMonitor.cpp
 SharedBaseCommandHandler.h|..\Shared\CommandHandlers\SharedBaseCommandHandler.h
 AckCommandHandler.h|..\Shared\CommandHandlers\AckCommandHandler.h
 AckCommandHandler.cpp|..\Shared\CommandHandlers\AckCommandHandler.cpp
+ConfigCommandHandler.h|..\Shared\CommandHandlers\ConfigCommandHandler.h
+ConfigCommandHandler.cpp|..\Shared\CommandHandlers\ConfigCommandHandler.cpp
 SystemCommandHandler.h|..\Shared\CommandHandlers\SystemCommandHandler.h
 SystemCommandHandler.cpp|..\Shared\CommandHandlers\SystemCommandHandler.cpp
 WarningCommandHandler.h|..\Shared\CommandHandlers\WarningCommandHandler.h

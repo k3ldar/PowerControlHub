@@ -33,7 +33,7 @@ These are commands used to configure the system settings and can only be sent fr
 | `C0` — Save settings | `C0` | Persist current in-memory config to EEPROM. Responds `SAVED` on success; error `EEPROM commit failed` on failure. No params. |
 | `C1` — Get settings | `C1` | Request full config. Device replies with multiple commands: `C3 <boatName>`, `C4 <idx>:<shortName|longName>` for each relay, `C5 <slot>:<relay>` for each home-slot mapping, then `OK`. No params. |
 | `C2` — Reset settings | `C2` | Request full reset of all config settings. No params. |
-| `C3` — Rename boat (BCP) | `C3:Sea Wolf` or `C3:name=SeaWolf` | Set the boat name. Accepts a single token or a `<key>:<value>` pair (value is used if present). Empty name → error. Name is truncated to configured max length. |
+| `C3` — Rename boat (BCP) | `C3:Sea Wolf` or `C3:name=SeaWolf` | Set the boat name. `<key>:<value>` pair (value is used as boat name. Empty name → error. Name is truncated to configured max length. |
 | `C4` — Rename relay (BCP) | `C4:2=Bilge` or `C4:2=Bilge\|Bilge Pump` | Rename a relay. Param format: `<idx>=<shortName>` or `<idx>=<shortName|longName>`. `idx` must be 0..7 (`RELAY_COUNT`). If no pipe character or long name provided, the short name is used for both. Short name is truncated to 5 chars (used on home page), long name is truncated to 20 chars (used on buttons page). Missing name → error. |
 | `C5` — Map home button (BCP) | `C5:1=3` (map) — `C5:1=255` (unmap) | Map a home-page slot to a relay. Param format: `<slot>:<relay>`. `button` must be 0..3 (`HOME_BUTTONS`). `relay` must be 0..7 or `255` to clear/unmap. |
 | `C6` — Map home button color (BCP) | `C6:0=4` (map button 1 to Red when activated) — `C6:1=255` (unmap colors) | Map a home-page button to a color when activated (on). Param format: `<slot>:<relay>`. `slot` must be 0..3 (`ConfigManager::HOME_SLOTS`). `relay` must be 0..7 or `255` to clear/unmap. |
@@ -48,6 +48,7 @@ These are commands used to configure the system settings and can only be sent fr
 | `C15` — Wifi Port (SFB) | `C15:v=80` | Set's the wifi port, this is the port used to listen on, default value is 80 |
 | `C16` — Wifi connection state (SFB) | `C16` | Wifi connection state, no params, returns WifiConnectionState value |
 | `C17` — Wifi AP Ip address (SFB) | `C17` | Sets the IP address when using access point mode, default is 192.168.4.1 |
+| `C18` — Initial relay on | `C18:3=1` — `C18:3=0`  | Set's the initial status of a relay to on by default. Param format: `<relay>:<value>`. `relay` must be 0..7 (`RELAY_COUNT`), `value` must be 0 (off by default) or 1 (on by default.  |
 
 
 Common error responses you may see: `Missing param`, `Missing params`, `Missing name`, `Empty name`, `Index out of range`, `Slot out of range`, `Relay out of range (or 255 to clear)`, `EEPROM commit failed`, `Unknown config command`.

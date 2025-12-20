@@ -78,7 +78,7 @@ void ConfigManager::resetToDefaults()
     _cfg.version = ConfigVersion;
 
     // Default boat name
-    strncpy(_cfg.boatName, DefaultBoatName, ConfigMaxBoatNameLength);
+    strncpy(_cfg.name, DefaultBoatName, ConfigMaxNameLength);
 
     // Default relay names (both short and long)
     for (uint8_t i = 0; i < ConfigRelayCount; ++i)
@@ -112,6 +112,12 @@ void ConfigManager::resetToDefaults()
 	_cfg.hornRelayIndex = 0xFF; // none
 	_cfg.soundStartDelayMs = 500; // 500ms
 	
+    // default relay states
+	for (uint8_t i = 0; i < ConfigRelayCount; ++i)
+    {
+        _cfg.defaulRelayState[i] = false; // default off (relay closed)
+    }
+
 #if defined(ARDUINO_UNO_R4)
     _cfg.bluetoothEnabled = false;
     _cfg.wifiEnabled = false;

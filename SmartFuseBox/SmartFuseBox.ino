@@ -38,6 +38,7 @@
 #include "SystemNetworkHandler.h"
 #include "SensorNetworkHandler.h"
 
+#include "ConfigController.h"
 #include "RelayController.h"
 #include "SensorController.h"
 #include "SoundController.h"
@@ -90,9 +91,10 @@ SensorManager sensorManager(sensorHandlers, sensorHandlerCount);
 BluetoothController bluetoothController(&systemCommandHandler, &sensorCommandHandler, &relayController, &warningManager, &commandMgrComputer);
 
 WifiController wifiController(&commandMgrComputer, &warningManager);
+ConfigController configController(&soundController, &bluetoothController, &wifiController);
 
 // computer command handlers
-ConfigCommandHandler configHandler(&soundController, &bluetoothController, &wifiController, &relayHandler);
+ConfigCommandHandler configHandler(&wifiController, &configController);
 
 // middleware
 BaseSensor* baseSensors[] = {

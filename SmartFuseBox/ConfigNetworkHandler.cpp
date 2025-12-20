@@ -17,6 +17,21 @@ CommandResult ConfigNetworkHandler::handleRequest(const char* method,
 	(void)params;
 	(void)paramCount;
 
+	// Access the in-memory config
+	Config* config = ConfigManager::getConfigPtr();
+
+	if (!config)
+	{
+		formatJsonResponse(responseBuffer, bufferSize, false, "Config not available");
+		return CommandResult::error(InvalidConfiguration);
+	}
+
+	if (strcmp(command, ConfigRename) == 0)
+	{
+		formatStatusJson(responseBuffer, bufferSize);
+		return CommandResult::ok();
+	}
+
 	return CommandResult::error(InvalidCommandParameters);
 }
 
