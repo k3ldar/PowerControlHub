@@ -38,9 +38,12 @@
 #include "SystemNetworkHandler.h"
 #include "SensorNetworkHandler.h"
 
+#include "ConfigController.h"
 #include "RelayController.h"
 #include "SensorController.h"
 #include "SoundController.h"
+
+#include "LedManager.h"
 
 
 #define COMPUTER_SERIAL Serial
@@ -90,9 +93,10 @@ SensorManager sensorManager(sensorHandlers, sensorHandlerCount);
 BluetoothController bluetoothController(&systemCommandHandler, &sensorCommandHandler, &relayController, &warningManager, &commandMgrComputer);
 
 WifiController wifiController(&commandMgrComputer, &warningManager);
+ConfigController configController(&soundController, &bluetoothController, &wifiController);
 
 // computer command handlers
-ConfigCommandHandler configHandler(&soundController, &bluetoothController, &wifiController, &relayHandler);
+ConfigCommandHandler configHandler(&wifiController, &configController);
 
 // middleware
 BaseSensor* baseSensors[] = {
@@ -103,12 +107,15 @@ SensorController sensorController(baseSensors, sensorHandlerCount);
 
 
 // configure wifi support
-ConfigNetworkHandler configNetworkHandler;
+ConfigNetworkHandler configNetworkHandler(&configController, &wifiController);
 RelayNetworkHandler relayNetworkHandler(&relayController);
 SoundNetworkHandler soundNetworkHandler(&soundController);
 WarningNetworkHandler warningNetworkHandler(&warningManager);
 SystemNetworkHandler systemNetworkHandler(&wifiController);
 SensorNetworkHandler sensorNetworkHandler(&sensorController);
+
+// led
+LedManager ledManager(&wifiController);
 
 void setup()
 {
@@ -149,6 +156,17 @@ void setup()
 	relayHandler.configUpdated(config);
 	sensorManager.setup();
 
+	ledManager.Initialize();
+
+	// open any relays that are default open
+	for (uint8_t i = 0; i < ConfigRelayCount; i++)
+	{
+		if (config->defaulRelayState[i])
+		{
+			relayController.setRelayState(i, true);
+		}
+	}
+
 	// indicate system initialized
 	commandMgrComputer.sendCommand(SystemInitialized, "");
 }
@@ -160,6 +178,10 @@ void loop()
 	SystemCpuMonitor::startTask();
 	commandMgrComputer.readCommands();
 	commandMgrLink.readCommands();
+	SystemCpuMonitor::endTask();
+
+	SystemCpuMonitor::startTask();
+	ledManager.ProcessLedMatrix(now);
 	SystemCpuMonitor::endTask();
 
 	SystemCpuMonitor::startTask();

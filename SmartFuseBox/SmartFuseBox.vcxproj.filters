@@ -142,10 +142,16 @@
     <ClCompile Include="SensorNetworkHandler.cpp">
       <Filter>Source Files\NetworkCommandHandlers</Filter>
     </ClCompile>
-    <ClCompile Include="ConfigNetworkHandler.cpp">
+    <ClCompile Include="SystemFunctions.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="SystemFunctions.cpp">
+    <ClCompile Include="ConfigNetworkHandler.cpp">
+      <Filter>Source Files\NetworkCommandHandlers</Filter>
+    </ClCompile>
+    <ClCompile Include="ConfigController.cpp">
+      <Filter>Source Files\BusinessLogic</Filter>
+    </ClCompile>
+    <ClCompile Include="LedManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -267,14 +273,20 @@
     <ClInclude Include="SystemNetworkHandler.h">
       <Filter>Header Files\NetworkCommandHandlers</Filter>
     </ClInclude>
-    <ClInclude Include="ConfigNetworkHandler.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="SystemFunctions.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="BaseSensor.h">
       <Filter>Header Files\SharedCode\SerialCommandHandlers</Filter>
+    </ClInclude>
+    <ClInclude Include="ConfigNetworkHandler.h">
+      <Filter>Header Files\NetworkCommandHandlers</Filter>
+    </ClInclude>
+    <ClInclude Include="ConfigController.h">
+      <Filter>Header Files\BusinessLogic</Filter>
+    </ClInclude>
+    <ClInclude Include="LedManager.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

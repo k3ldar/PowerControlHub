@@ -1,19 +1,22 @@
 #pragma once
 
 #include "INetworkCommandHandler.h"
-#include "SystemDefinitions.h"
-
+#include "ConfigController.h"
+#include "WifiController.h"
 
 class ConfigNetworkHandler : public INetworkCommandHandler
 {
+private:
+	ConfigController* _configController;
+	WifiController* _wifiController;
 public:
-	explicit ConfigNetworkHandler();
+	explicit ConfigNetworkHandler(ConfigController* configController, WifiController* wifiController);
 
 	const char* getRoute() const override { return "/api/config"; }
 
 	void formatWifiStatusJson(WiFiClient* client) override;
 
-	void formatStatusJson(char* buffer, size_t size);
+	void formatStatusJson(WiFiClient* client);
 
 	CommandResult handleRequest(const char* method,
 		const char* cmd,

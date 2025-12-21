@@ -16,7 +16,7 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
         return true;
     }
 
-    if (strcmp(command, ConfigRenameBoat) == 0)
+    if (strcmp(command, ConfigRename) == 0)
     {
         if (paramCount >= 1)
         {
@@ -27,8 +27,8 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
             }
 
             // enforce max length BOAT_NAME_MAX_LEN (defined in ConfigManager / Config.h)
-            strncpy(cfg->boatName, params[0].value, sizeof(cfg->boatName) - 1);
-            cfg->boatName[sizeof(cfg->boatName) - 1] = '\0';
+            strncpy(cfg->name, params[0].value, sizeof(cfg->name) - 1);
+            cfg->name[sizeof(cfg->name) - 1] = '\0';
             sendAckOk(sender, command, &params[0]);
         }
         else
@@ -209,7 +209,7 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
         char buffer[128];
         // return summary of config back to caller in multiple commands
         // C1:<name>
-        sender->sendCommand(ConfigRenameBoat, cfg->boatName);
+        sender->sendCommand(ConfigRename, cfg->name);
 
         // C4 entries - send both short and long names in format: <idx>=<shortName|longName>
         for (uint8_t i = 0; i < ConfigRelayCount; ++i)
@@ -282,7 +282,7 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
 
 const char* const* ConfigCommandHandler::supportedCommands(size_t& count) const
 {
-    static const char* cmds[] = { ConfigSaveSettings, ConfigGetSettings, ConfigResetSettings, ConfigRenameBoat,
+    static const char* cmds[] = { ConfigSaveSettings, ConfigGetSettings, ConfigResetSettings, ConfigRename,
         ConfigRenameRelay, ConfigMapHomeButton, ConfigSetButtonColor, ConfigBoatType, ConfigSoundRelayId };
     count = sizeof(cmds) / sizeof(cmds[0]);
     return cmds;

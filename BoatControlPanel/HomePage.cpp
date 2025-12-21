@@ -465,5 +465,5 @@ void HomePage::configUpdated()
     }
 
     // Update the boat name
-    sendText(ControlBoatName, config->boatName);
+    sendText(ControlBoatName, config->name);
 }
