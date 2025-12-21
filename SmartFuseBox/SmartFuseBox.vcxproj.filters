@@ -151,6 +151,9 @@
     <ClCompile Include="ConfigController.cpp">
       <Filter>Source Files\BusinessLogic</Filter>
     </ClCompile>
+    <ClCompile Include="LedManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="__vm\.SmartFuseBox.vsarduino.h">
@@ -281,6 +284,9 @@
     </ClInclude>
     <ClInclude Include="ConfigController.h">
       <Filter>Header Files\BusinessLogic</Filter>
+    </ClInclude>
+    <ClInclude Include="LedManager.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

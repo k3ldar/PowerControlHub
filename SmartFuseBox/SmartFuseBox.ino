@@ -105,7 +105,7 @@ SensorController sensorController(baseSensors, sensorHandlerCount);
 
 
 // configure wifi support
-ConfigNetworkHandler configNetworkHandler;
+ConfigNetworkHandler configNetworkHandler(&configController, &wifiController);
 RelayNetworkHandler relayNetworkHandler(&relayController);
 SoundNetworkHandler soundNetworkHandler(&soundController);
 WarningNetworkHandler warningNetworkHandler(&warningManager);
@@ -150,6 +150,15 @@ void setup()
 	soundController.configUpdated(config);
 	relayHandler.configUpdated(config);
 	sensorManager.setup();
+
+	// open any relays that are default open
+	for (uint8_t i = 0; i < ConfigRelayCount; i++)
+	{
+		if (config->defaulRelayState[i])
+		{
+			relayController.setRelayState(i, true);
+		}
+	}
 
 	// indicate system initialized
 	commandMgrComputer.sendCommand(SystemInitialized, "");
