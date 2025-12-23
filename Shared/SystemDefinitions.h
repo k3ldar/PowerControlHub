@@ -159,3 +159,28 @@ struct CommandResult {
         return CommandResult{ false, errorCode };
     }
 };
+
+
+// Wifi server enums
+enum class WifiMode : uint8_t
+{
+    AccessPoint = 0,
+    Client = 1
+};
+
+enum class WifiConnectionState : uint8_t
+{
+    Disconnected = 0,
+    Connecting = 1,
+    Connected = 2,
+    Failed = 3
+};
+
+enum class ClientHandlingState : uint8_t
+{
+    Idle,
+    ReadingRequest,
+    ProcessingRequest,
+    KeepAlive
+};
+

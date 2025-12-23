@@ -7,10 +7,13 @@
 #include "WifiServer.h"
 #include "Config.h"
 #include "WarningManager.h"
+#include "MessageBus.h"
 
+constexpr unsigned long LedUpdateIntevalMs = 300;
 class WifiController
 {
 private:
+	MessageBus* _messageBus;
     SerialCommandManager* _commandMgrComputer;
     WarningManager* _warningManager;
     WifiServer* _wifiServer;
@@ -20,6 +23,7 @@ private:
     uint16_t _port = 80;
     NetworkJsonVisitor** _jsonVisitors;
     uint8_t _jsonVisitorCount;
+	unsigned long _lastUpdateTime;
 
     bool isConfigValid(const Config* cfg) const
     {
@@ -93,8 +97,9 @@ private:
         _enabled = false;
     }
 public:
-    WifiController(SerialCommandManager* commandMgrComputer, WarningManager* warningManager)
-        : _commandMgrComputer(commandMgrComputer),
+    WifiController(MessageBus* messageBus, SerialCommandManager* commandMgrComputer, WarningManager* warningManager)
+		: _messageBus(messageBus),
+        _commandMgrComputer(commandMgrComputer),
 		_warningManager(warningManager),
         _wifiServer(nullptr),
         _enabled(false),
@@ -102,7 +107,8 @@ public:
 		_handlerCount(0),
 		_port(80),
         _jsonVisitors(nullptr),
-        _jsonVisitorCount(0)
+        _jsonVisitorCount(0),
+		_lastUpdateTime(0)
     {
     }
 
@@ -172,11 +178,18 @@ public:
         }
     }
 
-    void update()
+    void update(unsigned long now)
     {
         if (_enabled && _wifiServer)
         {
             _wifiServer->update();
+
+            if (now - _lastUpdateTime >= LedUpdateIntevalMs)
+            {
+                _lastUpdateTime = now;
+				_messageBus->publish<WifiConnectionStateChanged>(_wifiServer->getConnectionState());
+				_messageBus->publish<WifiSignalStrengthChanged>(_wifiServer->getSignalStrength());
+            }
         }
     }
 

@@ -6,28 +6,6 @@
 #include "INetworkCommandHandler.h"
 #include "WarningManager.h"
 
-enum class WifiMode : uint8_t
-{
-	AccessPoint = 0,
-	Client = 1
-};
-
-enum class WifiConnectionState : uint8_t
-{
-	Disconnected = 0,
-	Connecting = 1,
-	Connected = 2,
-	Failed = 3
-};
-
-enum class ClientHandlingState : uint8_t
-{
-	Idle,
-	ReadingRequest,
-	ProcessingRequest,
-	KeepAlive
-};
-
 constexpr uint16_t MaximumRequestSize = 1024;
 constexpr uint8_t MaximumPathLength = 128;
 

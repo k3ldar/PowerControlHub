@@ -1,7 +1,7 @@
 #include "LedMatrixManager.h"
 
-LedMatrixManager::LedMatrixManager()
-	: _wifiController(nullptr),
+LedMatrixManager::LedMatrixManager(MessageBus* messageBus)
+	: _messageBus(messageBus),
 	_nextLedUpdate(0),
 	_matrix(nullptr),
 	_temperature(0),
@@ -14,6 +14,27 @@ LedMatrixManager::LedMatrixManager()
 	_sequenceDelay(0),
 	_sequenceIsOn(false)
 {
+	if (messageBus)
+	{
+		messageBus->subscribe<WarningChanged>([this](uint32_t mask) {
+			this->UpdateWarningIndicators(mask);
+		});
+		messageBus->subscribe<WifiConnectionStateChanged>([this](WifiConnectionState status) {
+			this->UpdateConnectedState(status);
+		});
+		messageBus->subscribe<WifiSignalStrengthChanged>([this](uint16_t strength) {
+			this->UpdateSignalStrength(strength);
+		});
+		messageBus->subscribe<RelayStatusChanged>([this](uint8_t status) {
+			this->setRelayStatus(status);
+		});
+		messageBus->subscribe<TemperatureUpdated>([this](float newTemp) {
+			this->SetTemperature(newTemp);
+		});
+		messageBus->subscribe<HumidityUpdated>([this](float newHumidity) {
+			this->SetHumidity(newHumidity);
+		});
+	}
 }
 
 LedMatrixManager::~LedMatrixManager()
@@ -21,9 +42,8 @@ LedMatrixManager::~LedMatrixManager()
 	delete _matrix;
 }
 
-void LedMatrixManager::Initialize(WifiController* wifiController)
+void LedMatrixManager::Initialize()
 {
-	_wifiController = wifiController;
 	_matrix = new ArduinoLEDMatrix();
 	_matrix->begin();
 	UpdateLedFrame(LedOff);
@@ -45,14 +65,14 @@ void LedMatrixManager::UpdateConnectedState(WifiConnectionState status)
     }
 }
 
-void LedMatrixManager::UpdateSignalStrength(int16_t strenth)
+void LedMatrixManager::UpdateSignalStrength(int16_t strength)
 {
     _ledFrame[MaxLedRows -1][0] = LedOn;
 
     for (int i = 2; i < MaxLedRows -1; i++)
-        _ledFrame[i][0] = strenth >= rssiRate[i -2] ? LedOn : LedOff;
+        _ledFrame[i][0] = strength >= rssiRate[i -2] ? LedOn : LedOff;
 
-    if (strenth == 0)
+    if (strength == 0)
     {
         _ledFrame[2][0] = LedOff;
         _ledFrame[4][0] = LedOff;
@@ -71,17 +91,6 @@ void LedMatrixManager::ProcessLedMatrix(unsigned long currMillis)
 	{
 		processShutdownSequence(currMillis);
 		return;
-	}
-
-	if (_wifiController)
-	{
-		bool canUpdate = currMillis > _nextLedUpdate;
-		if (canUpdate)
-		{
-			UpdateSignalStrength(_wifiController->getServer()->getSignalStrength());
-			UpdateConnectedState(_wifiController->getServer()->getConnectionState());
-			_nextLedUpdate = currMillis + 300;
-		}
 	}
 
 	updateTemperature(currMillis);

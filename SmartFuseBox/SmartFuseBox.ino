@@ -57,12 +57,14 @@ void onLinkCommandReceived(SerialCommandManager* mgr);
 void configureWifiSupport(Config* config);
 void configureBluetoothSupport(Config* config);
 
+// message bus
+MessageBus messageBus;
 
 // led
-LedMatrixManager ledManager;
+LedMatrixManager ledManager(&messageBus);
 
 // controllers
-RelayController relayController(&ledManager, Relays, TotalRelays);
+RelayController relayController(&messageBus, Relays, TotalRelays);
 SoundController soundController;
 
 SerialCommandManager commandMgrComputer(&COMPUTER_SERIAL, onComputerCommandReceived, '\n', ':', ';', '=', 500, 64);
@@ -98,7 +100,7 @@ SensorManager sensorManager(sensorHandlers, sensorHandlerCount);
 // configure bluetooth support
 BluetoothController bluetoothController(&systemCommandHandler, &sensorCommandHandler, &relayController, &warningManager, &commandMgrComputer);
 
-WifiController wifiController(&commandMgrComputer, &warningManager);
+WifiController wifiController(&messageBus, &commandMgrComputer, &warningManager);
 ConfigController configController(&soundController, &bluetoothController, &wifiController, &relayController);
 
 // computer command handlers
@@ -161,7 +163,7 @@ void setup()
 	sensorManager.setup();
 
 
-	ledManager.Initialize(&wifiController);
+	ledManager.Initialize();
 
 	// open any relays that are default open
 	for (uint8_t i = 0; i < ConfigRelayCount; i++)
@@ -186,7 +188,7 @@ void loop()
 	SystemCpuMonitor::endTask();
 
 	SystemCpuMonitor::startTask();
-	//ledManager.ProcessLedMatrix(now);
+	ledManager.ProcessLedMatrix(now);
 	SystemCpuMonitor::endTask();
 
 	SystemCpuMonitor::startTask();
@@ -202,7 +204,7 @@ void loop()
 	SystemCpuMonitor::endTask();
 
 	SystemCpuMonitor::startTask();
-	wifiController.update();
+	wifiController.update(now);
 	SystemCpuMonitor::endTask();
 
 	SystemCpuMonitor::update();

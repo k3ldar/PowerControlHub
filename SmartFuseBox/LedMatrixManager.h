@@ -1,7 +1,7 @@
 #pragma once
 
 #include <Arduino_LED_Matrix.h>
-#include "WifiController.h"
+#include "MessageBus.h"
 
 constexpr auto LedUpdateFrequency = 500;
 
@@ -32,7 +32,7 @@ enum class LedSequenceType {
 class LedMatrixManager
 {
 private:
-	WifiController* _wifiController;
+	MessageBus* _messageBus;
 	unsigned long _nextLedUpdate;
 	ArduinoLEDMatrix* _matrix;
 	uint8_t _ledFrame[MaxLedRows][MaxLedColumns];
@@ -56,22 +56,21 @@ private:
 	void updateLed();
 	void processStartupSequence(unsigned long currMillis);
 	void processShutdownSequence(unsigned long currMillis);
+	void UpdateConnectedState(WifiConnectionState status);
+	void UpdateSignalStrength(int16_t strenth);
+	void setRelayStatus(uint8_t relayStatus);
+	void UpdateWarningIndicators(uint32_t warningMask);
+	void SetTemperature(float temperature);
+	void SetHumidity(float humidity);
 
 public:
-	LedMatrixManager();
+	LedMatrixManager(MessageBus* messageBus);
 	~LedMatrixManager();
-	void Initialize(WifiController* wifiController);
+	void Initialize();
 	void ProcessLedMatrix(unsigned long currMillis);
-	void UpdateSignalStrength(int16_t strenth);
-	void UpdateConnectedState(WifiConnectionState status);
 	void UpdateLedFrame(uint8_t state);
 	void UpdateRow(uint8_t row, uint8_t state);
 	void UpdateColumn(uint8_t column, uint8_t state);
 	void StartupSequence();
 	void ShutdownSequence();
-	
-	void SetTemperature(float temperature);
-	void SetHumidity(float humidity);
-	void setRelayStatus(uint8_t relayStatus);
-	void UpdateWarningIndicators(uint32_t warningMask);
 };

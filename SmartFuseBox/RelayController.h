@@ -2,7 +2,7 @@
 
 #include "SystemDefinitions.h"
 #include "ConfigManager.h"
-#include "LedMatrixManager.h"
+#include "MessageBus.h"
 
 enum class RelayResult : uint8_t
 {
@@ -15,7 +15,7 @@ enum class RelayResult : uint8_t
 class RelayController
 {
 private:
-	LedMatrixManager* _ledManager;
+	MessageBus* _messageBus;
 	bool* _relayStatus;
 	uint8_t* _relays;
 	uint8_t _relayCount;
@@ -55,7 +55,7 @@ private:
 			}
 		}
 
-		if (_ledManager)
+		if (_messageBus)
 		{
 			// Update LED matrix relay status
 			uint8_t relayBitmask = 0;
@@ -67,15 +67,15 @@ private:
 				}
 			}
 
-			_ledManager->setRelayStatus(relayBitmask);
+			_messageBus->publish<RelayStatusChanged>(relayBitmask);
 		}
 
 		return RelayResult::Success;
 	}
 
 public:
-	RelayController(LedMatrixManager* ledManager, const uint8_t* relayPins, uint8_t totalRelays)
-		: _ledManager(ledManager), _relayStatus(nullptr), _relays(nullptr), _relayCount(totalRelays), 
+	RelayController(MessageBus* messageBus, const uint8_t* relayPins, uint8_t totalRelays)
+		: _messageBus(messageBus), _relayStatus(nullptr), _relays(nullptr), _relayCount(totalRelays),
 		  _reservedSoundRelay(DefaultValue)
 	{
 		_relays = new uint8_t[_relayCount];
