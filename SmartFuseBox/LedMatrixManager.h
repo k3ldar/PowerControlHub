@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Arduino_LED_Matrix.h>
+#include "new_Arduino_LED_Matrix.h"
 #include "MessageBus.h"
 
 constexpr auto LedUpdateFrequency = 500;
@@ -52,6 +52,7 @@ private:
 	uint8_t _shutdownBottomRow;
 	uint8_t _shutdownLeftColumn;
 	uint8_t _shutdownRightColumn;
+	bool _ledInitialized;
 
 	void updateTemperature(unsigned long currMillis);
 	void updateHumidity(unsigned long currMillis);

@@ -13,7 +13,8 @@ LedMatrixManager::LedMatrixManager(MessageBus* messageBus)
 	_sequenceStep(0),
 	_sequenceLastStepTime(0),
 	_sequenceDelay(0),
-	_sequenceIsOn(false)
+	_sequenceIsOn(false),
+	_ledInitialized(false)
 {
 	if (messageBus)
 	{
@@ -48,13 +49,19 @@ LedMatrixManager::LedMatrixManager(MessageBus* messageBus)
 LedMatrixManager::~LedMatrixManager()
 {
 	delete _matrix;
+	_ledInitialized = false;
 }
 
 void LedMatrixManager::Initialize()
 {
+	if (_ledInitialized)
+		return;
+
 	_matrix = new ArduinoLEDMatrix();
 	_matrix->begin();
+
 	UpdateLedFrame(LedOff);
+	_ledInitialized = true;
 }
 
 void LedMatrixManager::UpdateConnectedState(WifiConnectionState status)
@@ -103,7 +110,6 @@ void LedMatrixManager::ProcessLedMatrix(unsigned long currMillis)
 
 	updateTemperature(currMillis);
 	updateHumidity(currMillis);
-
 	updateLed();
 }
 
@@ -248,7 +254,15 @@ void LedMatrixManager::SetHumidity(float humidity)
 
 void LedMatrixManager::updateLed()
 {
-	_matrix->renderBitmap(_ledFrame, MaxLedRows, MaxLedColumns);
+	if (!_ledInitialized)
+	{
+		return;
+	}
+
+	if (_matrix && _ledInitialized)
+	{
+		_matrix->renderBitmap(_ledFrame, MaxLedRows, MaxLedColumns);
+	}
 }
 
 void LedMatrixManager::updateTemperature(unsigned long currMillis)

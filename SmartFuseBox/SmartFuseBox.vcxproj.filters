@@ -291,5 +291,8 @@
     <ClInclude Include="MessageBus.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="new_Arduino_LED_Matrix.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
