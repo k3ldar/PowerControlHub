@@ -43,7 +43,9 @@
 #include "SensorController.h"
 #include "SoundController.h"
 
+#if defined(ARDUINO_UNO_R4) && defined(LED_MANAGER)
 #include "LedMatrixManager.h"
+#endif
 
 #include "MessageBus.h"
 
@@ -60,8 +62,10 @@ void configureBluetoothSupport(Config* config);
 // message bus
 MessageBus messageBus;
 
+#if defined(ARDUINO_UNO_R4) && defined(LED_MANAGER)
 // led
 LedMatrixManager ledManager(&messageBus);
+#endif
 
 // controllers
 RelayController relayController(&messageBus, Relays, TotalRelays);
@@ -163,7 +167,9 @@ void setup()
 	sensorManager.setup();
 
 
+#if defined(ARDUINO_UNO_R4) && defined(LED_MANAGER)
 	ledManager.Initialize();
+#endif
 
 	// open any relays that are default open
 	for (uint8_t i = 0; i < ConfigRelayCount; i++)
@@ -187,9 +193,11 @@ void loop()
 	commandMgrLink.readCommands();
 	SystemCpuMonitor::endTask();
 
+#if defined(ARDUINO_UNO_R4) && defined(LED_MANAGER)
 	SystemCpuMonitor::startTask();
 	ledManager.ProcessLedMatrix(now);
 	SystemCpuMonitor::endTask();
+#endif
 
 	SystemCpuMonitor::startTask();
 	soundController.update();

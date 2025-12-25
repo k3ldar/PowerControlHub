@@ -14,6 +14,9 @@ SensorCommandHandler::SensorCommandHandler(BroadcastManager* broadcastManager, W
 
 bool SensorCommandHandler::handleCommand(SerialCommandManager* sender, const char* command, const StringKeyValue params[], uint8_t paramCount)
 {
+#if defined(FUSE_BOX_CONTROLLER)
+    (void)command;
+#endif
     // the first param indicates the value (v=23 or v=NNW)
 
     if (paramCount == 0)
