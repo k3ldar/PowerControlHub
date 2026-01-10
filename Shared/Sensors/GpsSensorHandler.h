@@ -1,19 +1,25 @@
 #pragma once
 
-#include <SoftwareSerial.h>
+#include <Arduino.h>
 #include <TinyGPS++.h>
 
 #include "SystemDefinitions.h"
+
+#if defined(FUSE_BOX_CONTROLLER)
 #include "SmartFuseBoxConstants.h"
+#endif
 #include "WarningManager.h"
 #include "WarningType.h"
 #include "BaseSensor.h"
+
+#if defined(MESSAGE_BUS)
 #include "MessageBus.h"
+#endif
 
 constexpr unsigned long GpsCheckMs = 1000;
 constexpr uint32_t GpsBaudRate = 9600;
 
-constexpr unsigned long GpsTimeSyncIntervalMs = 1000 * 60 * 5; // Sync time every 5 mins
+constexpr unsigned long GpsTimeSyncIntervalMs = 1000UL * 60UL * 5UL; // Sync time every 5 mins
 
 // New sensor command IDs for GPS
 
@@ -27,12 +33,12 @@ constexpr unsigned long GpsTimeSyncIntervalMs = 1000 * 60 * 5; // Sync time ever
 class GpsSensorHandler : public BaseSensor, public BroadcastLoggerSupport
 {
 private:
+	Stream* _gpsSerial;
+#if defined(MESSAGE_BUS)
 	MessageBus* _messageBus;
+#endif
 	SensorCommandHandler* _sensorCommandHandler;
 	WarningManager* _warningManager;
-	uint8_t _rxPin;
-	uint8_t _txPin;
-	SoftwareSerial* _gpsSerial;
 	TinyGPSPlus* _gps;
 	double _latitude;
 	double _longitude;
@@ -83,9 +89,6 @@ protected:
 	void initialize() override
 	{
 		_gps = new TinyGPSPlus();
-
-		_gpsSerial = new SoftwareSerial(_rxPin, _txPin);
-		_gpsSerial->begin(GpsBaudRate);
 
 		_lastValidData = millis();
 		_lastTimeSync = 0;
@@ -139,6 +142,7 @@ protected:
 				syncTimeFromGps();
 			}
 
+#if defined(MESSAGE_BUS)
 			// Publish to message bus
 			if (_messageBus)
 			{
@@ -146,6 +150,7 @@ protected:
 				_messageBus->publish<GpsAltitudeUpdated>(_altitude);
 				_messageBus->publish<GpsSpeedUpdated>(_speedKmh, _courseDeg);
 			}
+#endif
 
 			// Send commands to serial
 			StringKeyValue params[2];  // Array for lat/long
@@ -201,15 +206,23 @@ protected:
 	}
 
 public:
-	GpsSensorHandler(MessageBus* messageBus, BroadcastManager* broadcastManager, SensorCommandHandler* sensorCommandHandler,
-		WarningManager* warningManager, uint8_t rxPin, uint8_t txPin)
+	GpsSensorHandler(
+		Stream* gpsSerial,
+
+#if defined(MESSAGE_BUS)
+		MessageBus* messageBus, 
+#endif
+
+		BroadcastManager* broadcastManager, SensorCommandHandler* sensorCommandHandler,
+		WarningManager* warningManager)
 		: BroadcastLoggerSupport(broadcastManager), 
-		  _messageBus(messageBus), 
+		  _gpsSerial(gpsSerial),
+
+#if defined(MESSAGE_BUS)
+		_messageBus(messageBus), 
+#endif
 		  _sensorCommandHandler(sensorCommandHandler),
 		  _warningManager(warningManager), 
-		  _rxPin(rxPin),
-		  _txPin(txPin),
-		  _gpsSerial(nullptr),
 		  _gps(nullptr),
 		  _latitude(0.0), 
 		  _longitude(0.0), 
@@ -224,12 +237,6 @@ public:
 
 	~GpsSensorHandler()
 	{
-		if (_gpsSerial)
-		{
-			_gpsSerial->end();
-			delete _gpsSerial;
-			_gpsSerial = nullptr;
-		}
 		if (_gps)
 		{
 			delete _gps;
@@ -237,6 +244,7 @@ public:
 		}
 	}
 
+#if defined(FUSE_BOX_CONTROLLER)
 	void formatStatusJson(char* buffer, size_t size) override
 	{
 		char lat[16];
@@ -255,6 +263,7 @@ public:
 			"\"gps\":{\"lat\":%s,\"lon\":%s,\"alt\":%s,\"speed\":%s,\"course\":%s,\"sats\":%lu,\"valid\":%s}",
 			lat, lon, alt, speed, course, _satellites, _hasValidFix ? "true" : "false");
 	}
+#endif
 
 	SensorIdList getSensorId() const override
 	{

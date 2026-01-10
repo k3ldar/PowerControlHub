@@ -11,8 +11,6 @@ constexpr uint8_t WaterSensorPin = A0;
 constexpr uint8_t LightSensorPin = D3;
 constexpr uint8_t WaterSensorActivePin = D8;
 constexpr uint8_t Dht11SensorPin = D9;
-constexpr uint8_t GpsRxPin = D10;
-constexpr uint8_t GpsTxPin = D11;
 
 
 // Digital pins for relays

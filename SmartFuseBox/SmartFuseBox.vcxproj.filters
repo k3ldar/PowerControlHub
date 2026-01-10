@@ -52,6 +52,9 @@
     <Filter Include="Source Files\BusinessLogic">
       <UniqueIdentifier>{0936f4f8-0dcf-4bae-b691-92dcc0d450a7}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\SharedCode\Sensors">
+      <UniqueIdentifier>{2b471eb6-d372-4efd-a2d0-48c9f6e5b8e0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="SmartFuseBox.ino" />
@@ -276,9 +279,6 @@
     <ClInclude Include="SystemFunctions.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="BaseSensor.h">
-      <Filter>Header Files\SharedCode\SerialCommandHandlers</Filter>
-    </ClInclude>
     <ClInclude Include="ConfigNetworkHandler.h">
       <Filter>Header Files\NetworkCommandHandlers</Filter>
     </ClInclude>
@@ -297,8 +297,8 @@
     <ClInclude Include="LightSensorHandler.h">
       <Filter>Header Files\Sensors</Filter>
     </ClInclude>
-    <ClInclude Include="GpsSensorHandler.h">
-      <Filter>Header Files\Sensors</Filter>
+    <ClInclude Include="BaseSensor.h">
+      <Filter>Header Files\SharedCode\Sensors</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
