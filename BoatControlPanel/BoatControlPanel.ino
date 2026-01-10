@@ -116,11 +116,11 @@ SystemCommandHandler systemCommandHandler(&broadcastManager, &warningManager);
 
 GpsSensorHandler gpsSensor(&GPS_SERIAL, &broadcastManager, &sensorCommandHandler, &warningManager);
 
-BaseSensor* baseSensors[] = {
+BaseSensorHandler* sensorHandlers[] = {
     &gpsSensor
 };
-uint8_t sensorHandlerCount = sizeof(baseSensors) / sizeof(baseSensors[0]);
-SensorManager sensorManager(baseSensors, sensorHandlerCount);
+uint8_t sensorHandlerCount = sizeof(sensorHandlers) / sizeof(sensorHandlers[0]);
+SensorManager sensorManager(sensorHandlers, sensorHandlerCount);
 
 
 // Timers

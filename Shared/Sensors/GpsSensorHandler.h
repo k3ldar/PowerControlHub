@@ -105,10 +105,8 @@ protected:
 		// Process available GPS data
 		while (_gpsSerial->available() > 0)
 		{
-			Serial.print("C:");
 			char c = _gpsSerial->read();
 			Serial.print(c);
-			Serial.print(";");
 			_gps->encode(c);
 		}
 		Serial.println(";");
