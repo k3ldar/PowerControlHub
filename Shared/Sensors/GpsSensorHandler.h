@@ -160,7 +160,7 @@ private:
 		{
 			_sensorCommandHandler->setGpsLocation(_latitude, _longitude);
 			_sensorCommandHandler->setGpsAltitude(_altitude);
-			_sensorCommandHandler->setGpsSpeed(_speedKmh);
+			_sensorCommandHandler->setSpeed(_speedKmh);
 			_sensorCommandHandler->setGpsCourse(_courseDeg);
 			_sensorCommandHandler->setGpsSatellites(_satellites);
 			_sensorCommandHandler->setGpsDirection(getDirection());

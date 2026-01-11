@@ -38,7 +38,6 @@ private:
 	double _gpsLatitude;
 	double _gpsLongitude;
 	double _altitude;
-	double _gpsSpeed;
 	double _gpsCourse;
 	uint32_t _gpsSatellites;
 	const char* _gpsDirection;
@@ -65,7 +64,6 @@ public:
 	double getGpsLatitude() const;
 	double getGpsLongitude() const;
 	double getGpsAltitude() const;
-	double getGpsSpeed() const;
 	double getGpsCourse() const;
 	const char* getGpsDirection() const;
 	uint32_t getGpsSatellites() const;
@@ -82,7 +80,6 @@ public:
 	void setDaytime(bool isDaytime);
 	void setGpsLocation(double lat, double lon);
 	void setGpsAltitude(double alt);
-	void setGpsSpeed(double speed);
 	void setGpsCourse(double course);
 	void setGpsSatellites(uint32_t sats);
 	void setGpsDirection(const char* dir);

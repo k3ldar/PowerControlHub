@@ -68,11 +68,6 @@ double SensorCommandHandler::getGpsAltitude() const
 	return _altitude;
 }
 
-double SensorCommandHandler::getGpsSpeed() const
-{
-	return _gpsSpeed;
-}
-
 double SensorCommandHandler::getGpsCourse() const
 {
 	return _gpsCourse;
@@ -185,15 +180,6 @@ void SensorCommandHandler::setGpsAltitude(double alt)
 #if defined(BOAT_CONTROL_PANEL)
 	FloatStateUpdate update = { static_cast<float>(_altitude) };
 	notifyCurrentPage(static_cast<uint8_t>(PageUpdateType::GpsAltitude), &update);
-#endif
-}
-
-void SensorCommandHandler::setGpsSpeed(double speed)
-{
-	_gpsSpeed = speed;
-#if defined(BOAT_CONTROL_PANEL)
-	FloatStateUpdate update = { static_cast<float>(_gpsSpeed) };
-	notifyCurrentPage(static_cast<uint8_t>(PageUpdateType::GpsSpeed), &update);
 #endif
 }
 
@@ -337,7 +323,7 @@ bool SensorCommandHandler::handleCommand(SerialCommandManager* sender, const cha
     else if (strcmp(command, SensorGpsSpeed) == 0)
     {
         sendDebugMessage(F("GPS Speed"), F("SensorCommandHandler"));
-        setGpsSpeed(atof(params[0].value));
+        setSpeed(atof(params[0].value));
         
         // Check for optional course parameter (second parameter)
         if (paramCount >= 2)
