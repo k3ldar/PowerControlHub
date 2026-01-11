@@ -16,7 +16,8 @@
 #include "MessageBus.h"
 #endif
 
-constexpr unsigned long GpsCheckMs = 1000;
+constexpr unsigned long GpsCheckMs = 10;
+constexpr unsigned long StatusUpdateMs = 1000UL;
 constexpr uint32_t GpsBaudRate = 9600;
 
 constexpr unsigned long GpsTimeSyncIntervalMs = 1000UL * 60UL * 5UL; // Sync time every 5 mins
@@ -49,6 +50,7 @@ private:
 	bool _hasValidFix;
 	unsigned long _lastValidData;
 	unsigned long _lastTimeSync;
+	unsigned long _lastStatusUpdate;
 
 	/**
  * @brief Synchronize DateTimeManager with GPS UTC time.
@@ -85,6 +87,63 @@ private:
 		}
 	}
 
+	void processGpsUpdate(unsigned long now)
+	{
+#if defined(MESSAGE_BUS)
+		// Publish to message bus
+		if (_messageBus)
+		{
+			_messageBus->publish<GpsLocationUpdated>(_latitude, _longitude);
+			_messageBus->publish<GpsAltitudeUpdated>(_altitude);
+			_messageBus->publish<GpsSpeedUpdated>(_speedKmh, _courseDeg);
+		}
+#endif
+		if (now - _lastStatusUpdate < StatusUpdateMs)
+		{
+			return;
+		}
+
+		sendDebug("Valid GPS fix", getSensorName());
+
+		// Send commands to serial
+		StringKeyValue params[2];  // Array for lat/long
+
+		// Populate latitude parameter (use dtostrf for Arduino compatibility)
+		strncpy(params[0].key, "lat", sizeof(params[0].key));
+		dtostrf(_latitude, 10, 6, params[0].value);
+
+		// Populate longitude parameter  
+		strncpy(params[1].key, "lon", sizeof(params[1].key));
+		dtostrf(_longitude, 10, 6, params[1].value);
+
+		// Send both lat and long as a single command
+		sendCommand(SensorGpsLatLong, params, 2);
+
+		// Send altitude
+		StringKeyValue altParam;
+		strncpy(altParam.key, ValueParamName, sizeof(altParam.key));
+		dtostrf(_altitude, 8, 2, altParam.value);
+		sendCommand(SensorGpsAltitude, &altParam, 1);
+
+		// Send speed
+		dtostrf(_speedKmh, 8, 2, altParam.value);
+		sendCommand(SensorGpsSpeed, &altParam, 1);
+
+		// Send satellites (integers work fine with snprintf)
+		snprintf(altParam.value, sizeof(altParam.value), "%lu", _satellites);
+		sendCommand(SensorGpsSatellites, &altParam, 1);
+
+		// Update sensor command handler if available
+		if (_sensorCommandHandler)
+		{
+			_sensorCommandHandler->setGpsLocation(_latitude, _longitude);
+			_sensorCommandHandler->setGpsAltitude(_altitude);
+			_sensorCommandHandler->setGpsSpeed(_speedKmh);
+			_sensorCommandHandler->setGpsSatellites(_satellites);
+		}
+
+		_lastStatusUpdate = now;
+	}
 protected:
 	void initialize() override
 	{
@@ -101,28 +160,25 @@ protected:
 			return GpsCheckMs;
 		}
 
-		Serial.print("Receiving data from Gps: ");
 		// Process available GPS data
 		while (_gpsSerial->available() > 0)
 		{
 			char c = _gpsSerial->read();
-			Serial.print(c);
 			_gps->encode(c);
 		}
-		Serial.println(";");
+
+		unsigned long now = millis();
 
 		// Check if we have a valid location fix
 		if (_gps->location.isValid())
 		{
-			sendDebug("Valid GPS fix", getSensorName());
-
 			_hasValidFix = true;
-			_lastValidData = millis();
+			_lastValidData = now;
 			
 			// Clear any previous GPS failure warnings
-			if (_warningManager && _warningManager->isWarningActive(WarningType::SensorFailure))
+			if (_warningManager && _warningManager->isWarningActive(WarningType::GpsFailure))
 			{
-				_warningManager->clearWarning(WarningType::SensorFailure);
+				_warningManager->clearWarning(WarningType::GpsFailure);
 			}
 
 			// Update stored values
@@ -135,62 +191,18 @@ protected:
 
 			// Sync time from GPS periodically or if never synced
 			if (!DateTimeManager::isTimeSet() ||
-				(millis() - _lastTimeSync) > GpsTimeSyncIntervalMs)
+				(now - _lastTimeSync) > GpsTimeSyncIntervalMs)
 			{
 				syncTimeFromGps();
 			}
 
-#if defined(MESSAGE_BUS)
-			// Publish to message bus
-			if (_messageBus)
-			{
-				_messageBus->publish<GpsLocationUpdated>(_latitude, _longitude);
-				_messageBus->publish<GpsAltitudeUpdated>(_altitude);
-				_messageBus->publish<GpsSpeedUpdated>(_speedKmh, _courseDeg);
-			}
-#endif
-
-			// Send commands to serial
-			StringKeyValue params[2];  // Array for lat/long
-
-			// Populate latitude parameter
-			strncpy(params[0].key, "lat", sizeof(params[0].key));
-			snprintf(params[0].value, sizeof(params[0].value), "%.6f", _latitude);
-
-			// Populate longitude parameter  
-			strncpy(params[1].key, "lon", sizeof(params[1].key));
-			snprintf(params[1].value, sizeof(params[1].value), "%.6f", _longitude);
-
-			// Send both lat and long as a single command
-			sendCommand(SensorGpsLatLong, params, 2);
-
-			// Send altitude
-			StringKeyValue altParam;
-			strncpy(altParam.key, ValueParamName, sizeof(altParam.key));
-			snprintf(altParam.value, sizeof(altParam.value), "%.2f", _altitude);
-			sendCommand(SensorGpsAltitude, &altParam, 1);
-
-			// Send speed
-			snprintf(altParam.value, sizeof(altParam.value), "%.2f", _speedKmh);
-			sendCommand(SensorGpsSpeed, &altParam, 1);
-
-			// Send satellites
-			snprintf(altParam.value, sizeof(altParam.value), "%lu", _satellites);
-			sendCommand(SensorGpsSatellites, &altParam, 1);
-			// Update sensor command handler if available
-			if (_sensorCommandHandler)
-			{
-				_sensorCommandHandler->setGpsLocation(_latitude, _longitude);
-				_sensorCommandHandler->setGpsAltitude(_altitude);
-				_sensorCommandHandler->setGpsSpeed(_speedKmh);
-				_sensorCommandHandler->setGpsSatellites(_satellites);
-			}
+			processGpsUpdate(now);
 		}
 		else
 		{
 			sendDebug("No valid GPS fix", getSensorName());
 			// Check if GPS data is stale (no valid fix for 30 seconds)
-			if (millis() - _lastValidData > 30000)
+			if (now - _lastValidData > 30000)
 			{
 				if (_warningManager && !_warningManager->isWarningActive(WarningType::GpsFailure))
 				{
@@ -229,7 +241,8 @@ public:
 		  _courseDeg(0.0),
 		  _satellites(0),
 		  _hasValidFix(false),
-		  _lastValidData(0)
+		  _lastValidData(0),
+		_lastStatusUpdate(0)
 	{
 	}
 

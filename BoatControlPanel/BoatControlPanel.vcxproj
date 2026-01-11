@@ -160,6 +160,9 @@
     <ClInclude Include="WarningPage.h" />
     <ClInclude Include="__vm\.BoatControlPanel.vsarduino.h" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Commands.md" />
+  </ItemGroup>
   <PropertyGroup>
     <DebuggerFlavor>VisualMicroDebugger</DebuggerFlavor>
   </PropertyGroup>

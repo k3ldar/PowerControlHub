@@ -91,39 +91,48 @@ bool SensorCommandHandler::handleCommand(SerialCommandManager* sender, const cha
     else if (strcmp(command, SensorGpsLatLong) == 0)
     {
         sendDebugMessage(F("GPS LatLong"), F("SensorCommandHandler"));
-        _gpsLatitude = atof(params[0].value);
-		_gpsLongitude = atof(params[1].value);
-        FloatStateUpdate updateLat = { static_cast<float>(_gpsLatitude) };
-        notifyCurrentPage(static_cast<uint8_t>(PageUpdateType::GpsLatitude), &updateLat);
-		FloatStateUpdate updateLong = { static_cast<float>(_gpsLongitude) };
-		notifyCurrentPage(static_cast<uint8_t>(PageUpdateType::GpsLongitude), &updateLong);
+        
+        // GPS sends lat/lon with named parameters: lat=value&lon=value
+        // Need to find which param is lat and which is lon
+        if (paramCount >= 2)
+        {
+            for (uint8_t i = 0; i < paramCount; i++)
+            {
+                if (strcmp(params[i].key, "lat") == 0)
+                {
+                    _gpsLatitude = atof(params[i].value);
+                    FloatStateUpdate updateLat = { static_cast<float>(_gpsLatitude) };
+                    notifyCurrentPage(static_cast<uint8_t>(PageUpdateType::GpsLatitude), &updateLat);
+                }
+                else if (strcmp(params[i].key, "lon") == 0)
+                {
+                    _gpsLongitude = atof(params[i].value);
+                    FloatStateUpdate updateLong = { static_cast<float>(_gpsLongitude) };
+                    notifyCurrentPage(static_cast<uint8_t>(PageUpdateType::GpsLongitude), &updateLong);
+                }
+            }
+        }
     }
     else if (strcmp(command, SensorGpsAltitude) == 0)
     {
         sendDebugMessage(F("GPS Altitude"), F("SensorCommandHandler"));
         _altitude = atof(params[0].value);
-#if defined(BOAT_CONTROL_PANEL)
         FloatStateUpdate update = { static_cast<float>(_altitude) };
         notifyCurrentPage(static_cast<uint8_t>(PageUpdateType::GpsAltitude), &update);
-#endif
     }
     else if (strcmp(command, SensorGpsSpeed) == 0)
     {
         sendDebugMessage(F("GPS Speed"), F("SensorCommandHandler"));
         _gpsSpeed = atof(params[0].value);
-#if defined(BOAT_CONTROL_PANEL)
         FloatStateUpdate update = { static_cast<float>(_gpsSpeed) };
         notifyCurrentPage(static_cast<uint8_t>(PageUpdateType::GpsSpeed), &update);
-#endif
     }
     else if (strcmp(command, SensorGpsSatellites) == 0)
     {
         sendDebugMessage(F("GPS Satellites"), F("SensorCommandHandler"));
         _gpsSatellites = strtoul(params[0].value, nullptr, 0);
-#if defined(BOAT_CONTROL_PANEL)
         UInt16Update update = { static_cast<uint16_t>(_gpsSatellites) };
         notifyCurrentPage(static_cast<uint8_t>(PageUpdateType::GpsSatellites), &update);
-#endif
     }
     else
     {
