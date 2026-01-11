@@ -96,6 +96,10 @@ void HomePage::refresh(unsigned long now)
         // Update connection-related displays
         if (warningMgr->isWarningActive(WarningType::ConnectionLost) || warningMgr->isWarningActive(WarningType::TemperatureSensorFailure))
         {
+            // Reset internal state to NaN to prevent flickering
+            _lastTemp = NAN;
+            _lastHumidity = NAN;
+            
             sendText(ControlHumidity, NoValueText);
             sendText(ControlTemperature, NoValueText);
         }
