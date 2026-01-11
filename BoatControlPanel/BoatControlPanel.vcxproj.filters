@@ -52,6 +52,9 @@
     <Filter Include="Header Files\SharedCode\CommandHandlers">
       <UniqueIdentifier>{ef1dabf8-aa0d-4157-9749-1f26386d9b9f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\SharedCode\Sensors">
+      <UniqueIdentifier>{9180112a-bbb9-4c34-860f-2fd6fa1edb72}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BoatControlPanel.ino" />
@@ -258,5 +261,14 @@
     <ClInclude Include="BuoysPage.h">
       <Filter>Header Files\Pages</Filter>
     </ClInclude>
+    <ClInclude Include="GpsSensorHandler.h">
+      <Filter>Header Files\Sensors</Filter>
+    </ClInclude>
+    <ClInclude Include="SensorHandler.h">
+      <Filter>Header Files\SharedCode\Sensors</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Commands.md" />
   </ItemGroup>
 </Project>

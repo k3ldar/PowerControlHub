@@ -8,6 +8,7 @@ constexpr unsigned long serialInitTimeoutMs = 300;
 
 
 constexpr uint8_t WaterSensorPin = A0;
+constexpr uint8_t LightSensorPin = D3;
 constexpr uint8_t WaterSensorActivePin = D8;
 constexpr uint8_t Dht11SensorPin = D9;
 

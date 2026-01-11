@@ -16,6 +16,10 @@ struct HumidityUpdated {
     using Callback = std::function<void(uint8_t newHumidity)>;
 };
 
+struct LightSensorUpdated {
+    using Callback = std::function<void(bool isDayTime)>;
+};
+
 struct WaterLevelUpdated {
     using Callback = std::function<void(uint16_t newWaterLevel, uint16_t averageWaterLevel)>;
 };
@@ -34,6 +38,18 @@ struct RelayStatusChanged {
 
 struct WifiServerProcessingRequestChanged {
     using Callback = std::function<void(const char* method, const char* path, const char* query, bool isProcessing)>;
+};
+
+struct GpsLocationUpdated {
+    using Callback = std::function<void(double latitude, double longitude)>;
+};
+
+struct GpsAltitudeUpdated {
+    using Callback = std::function<void(double altitude)>;
+};
+
+struct GpsSpeedUpdated {
+    using Callback = std::function<void(double speedKmh, double course)>;
 };
 
 class MessageBus {

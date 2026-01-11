@@ -2,7 +2,10 @@
 
 #include <SensorManager.h>
 #include "LoggingSupport.h"
+
+#if defined(FUSE_BOX_CONTROLLER)
 #include "JsonVisitor.h"
+#endif
 
 enum class SensorType : uint8_t
 {
@@ -10,7 +13,10 @@ enum class SensorType : uint8_t
 	Remote = 1,
 };
 
-class BaseSensor : public BaseSensorHandler, public JsonVisitor
+class BaseSensor : public BaseSensorHandler
+#if defined(FUSE_BOX_CONTROLLER)
+	, public JsonVisitor
+#endif
 {
 public:
 	virtual SensorIdList getSensorId() const = 0;

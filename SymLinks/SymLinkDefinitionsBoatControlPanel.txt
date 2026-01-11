@@ -21,11 +21,13 @@ SystemCommandHandler.cpp|..\Shared\CommandHandlers\SystemCommandHandler.cpp
 WarningCommandHandler.h|..\Shared\CommandHandlers\WarningCommandHandler.h
 WarningCommandHandler.cpp|..\Shared\CommandHandlers\WarningCommandHandler.cpp
 BaseSensor.h|..\Shared\Sensors\BaseSensor.h
+SensorHandler.h|..\Shared\Sensors\SensorHandler.h
 SensorCommandHandler.h|..\Shared\CommandHandlers\SensorCommandHandler.h
 SensorCommandHandler.cpp|..\Shared\CommandHandlers\SensorCommandHandler.cpp
 InterceptDebugCommandHandler.h|..\Shared\CommandHandlers\InterceptDebugCommandHandler.h
 LoggingSupport.h|..\Shared\Logging\LoggingSupport.h
 TLVCompassHandler.h|..\Shared\Sensors\TLVCompassHandler.h
 TLVCompassHandler.cpp|..\Shared\Sensors\TLVCompassHandler.cpp
+GpsSensorHandler.h|..\Shared\Sensors\GpsSensorHandler.h
 DateTimeManager.h|..\Shared\DateTimeManager.h
 DateTimeManager.cpp|..\Shared\DateTimeManager.cpp

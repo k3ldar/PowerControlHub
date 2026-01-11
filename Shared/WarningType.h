@@ -32,6 +32,7 @@ enum class WarningType : uint32_t {
     SensorFailure = 1UL << 20,                        // 0x00100000 - Sensor communication failure
     TemperatureSensorFailure = 1UL << 21,             // 0x00200000 - Temperature sensor failure
     CompassFailure = 1UL << 22,                       // 0x00400000 - Compass failed to initialize
+	GpsFailure = 1UL << 23,                           // 0x00800000 - GPS sensor failure
 };
 
 // Warning type display strings - keep in sync with WarningType enum
@@ -60,7 +61,7 @@ constexpr const char* WARNING_TYPE_STRINGS[32] = {
     "Sensor Failure",                           // Bit 20 - SensorFailure
     "Temperature Sensor Failure",               // Bit 21 - TemperatureSensorFailure
     "Compass Failure",                          // Bit 22 - CompassFailure
-    "",                                         // Bit 23 - Unused
+    "GPS Module Failure",                       // Bit 23 - Unused
     "",                                         // Bit 24 - Unused
     "",                                         // Bit 25 - Unused
     "",                                         // Bit 26 - Unused

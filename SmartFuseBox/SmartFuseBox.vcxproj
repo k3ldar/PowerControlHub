@@ -114,6 +114,7 @@
       <FileType>CppCode</FileType>
       <DeploymentContent>true</DeploymentContent>
     </ClCompile>
+    <ClInclude Include="LightSensorHandler.h" />
     <ClInclude Include="MessageBus.h" />
     <ClInclude Include="BaseSensor.h" />
     <ClInclude Include="ConfigController.h" />

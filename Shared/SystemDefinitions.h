@@ -70,15 +70,20 @@ constexpr char WarningStatus[] = "W2";
 constexpr char WarningsClear[] = "W3";
 constexpr char WarningsAdd[] = "W4";
 
-const char SensorTemperature[] = "S0";
-const char SensorHumidity[] = "S1";
-const char SensorBearing[] = "S2";
-const char SensorDirection[] = "S3";
-const char SensorSpeed[] = "S4";
-const char SensorCompassTemp[] = "S5";
-const char SensorWaterLevel[] = "S6";
-const char SensorWaterPumpActive[] = "S7";
-const char SensorHornActive[] = "S8";
+constexpr char SensorTemperature[] = "S0";
+constexpr char SensorHumidity[] = "S1";
+constexpr char SensorBearing[] = "S2";
+constexpr char SensorDirection[] = "S3";
+constexpr char SensorSpeed[] = "S4";
+constexpr char SensorCompassTemp[] = "S5";
+constexpr char SensorWaterLevel[] = "S6";
+constexpr char SensorWaterPumpActive[] = "S7";
+constexpr char SensorHornActive[] = "S8";
+constexpr char SensorLightSensor[] = "S9";
+constexpr char SensorGpsLatLong[] = "S10";
+constexpr char SensorGpsAltitude[] = "S11";
+constexpr char SensorGpsSpeed[] = "S12";
+constexpr char SensorGpsSatellites[] = "S13";
 
 
 constexpr char AckSuccess[] = "ok";
@@ -135,6 +140,8 @@ enum class SensorIdList : uint8_t
 {
     WaterSensor = 0x0,
     Dht11Sensor = 0x1,
+    LightSensor = 0x2,
+    GpsSensor = 0x3,
 };
 
 struct CommandResult {

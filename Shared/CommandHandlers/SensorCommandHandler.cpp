@@ -81,6 +81,59 @@ bool SensorCommandHandler::handleCommand(SerialCommandManager* sender, const cha
         BoolStateUpdate update = { strtoul(params[0].value, nullptr, 0) > 0 };
         notifyCurrentPage(static_cast<uint8_t>(PageUpdateType::WaterPumpActive), &update);
     }
+    else if (strcmp(command, SensorLightSensor) == 0)
+    {
+        sendDebugMessage(F("Sensor Day Time"), F("SensorCommandHandler"));
+        BoolStateUpdate update = { strtoul(params[0].value, nullptr, 0) > 0 };
+        notifyCurrentPage(static_cast<uint8_t>(PageUpdateType::Daytime), &update);
+    }
+    // Add GPS command handlers
+    else if (strcmp(command, SensorGpsLatLong) == 0)
+    {
+        sendDebugMessage(F("GPS LatLong"), F("SensorCommandHandler"));
+        
+        // GPS sends lat/lon with named parameters: lat=value&lon=value
+        // Need to find which param is lat and which is lon
+        if (paramCount >= 2)
+        {
+            for (uint8_t i = 0; i < paramCount; i++)
+            {
+                if (strcmp(params[i].key, "lat") == 0)
+                {
+                    _gpsLatitude = atof(params[i].value);
+                    FloatStateUpdate updateLat = { static_cast<float>(_gpsLatitude) };
+                    notifyCurrentPage(static_cast<uint8_t>(PageUpdateType::GpsLatitude), &updateLat);
+                }
+                else if (strcmp(params[i].key, "lon") == 0)
+                {
+                    _gpsLongitude = atof(params[i].value);
+                    FloatStateUpdate updateLong = { static_cast<float>(_gpsLongitude) };
+                    notifyCurrentPage(static_cast<uint8_t>(PageUpdateType::GpsLongitude), &updateLong);
+                }
+            }
+        }
+    }
+    else if (strcmp(command, SensorGpsAltitude) == 0)
+    {
+        sendDebugMessage(F("GPS Altitude"), F("SensorCommandHandler"));
+        _altitude = atof(params[0].value);
+        FloatStateUpdate update = { static_cast<float>(_altitude) };
+        notifyCurrentPage(static_cast<uint8_t>(PageUpdateType::GpsAltitude), &update);
+    }
+    else if (strcmp(command, SensorGpsSpeed) == 0)
+    {
+        sendDebugMessage(F("GPS Speed"), F("SensorCommandHandler"));
+        _gpsSpeed = atof(params[0].value);
+        FloatStateUpdate update = { static_cast<float>(_gpsSpeed) };
+        notifyCurrentPage(static_cast<uint8_t>(PageUpdateType::GpsSpeed), &update);
+    }
+    else if (strcmp(command, SensorGpsSatellites) == 0)
+    {
+        sendDebugMessage(F("GPS Satellites"), F("SensorCommandHandler"));
+        _gpsSatellites = strtoul(params[0].value, nullptr, 0);
+        UInt16Update update = { static_cast<uint16_t>(_gpsSatellites) };
+        notifyCurrentPage(static_cast<uint8_t>(PageUpdateType::GpsSatellites), &update);
+    }
     else
     {
         sendDebugMessage(F("Unknown or invalid Sensor command"), F("SensorCommandHandler"));
@@ -96,7 +149,8 @@ const char* const* SensorCommandHandler::supportedCommands(size_t& count) const
 {
     static const char* cmds[] = { SensorTemperature, SensorHumidity, SensorBearing,
         SensorDirection, SensorSpeed, SensorCompassTemp, SensorWaterLevel,
-        SensorWaterPumpActive, SensorHornActive };
+        SensorWaterPumpActive, SensorHornActive, SensorLightSensor, SensorGpsLatLong,
+        SensorGpsAltitude, SensorGpsSpeed, SensorGpsSatellites };
     count = sizeof(cmds) / sizeof(cmds[0]);
     return cmds;
 }

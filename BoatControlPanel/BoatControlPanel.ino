@@ -2,6 +2,7 @@
 #include <Arduino.h>
 #include <SerialCommandManager.h>
 #include <NextionControl.h>
+#include <SensorManager.h>
 
 #if defined(ARDUINO_R4_MINIMA)
 #include <SoftwareSerial.h>
@@ -16,6 +17,7 @@
 #include "WarningCommandHandler.h"
 #include "SystemCommandHandler.h"
 #include "SystemCpuMonitor.h"
+#include "DateTimeManager.h"
 
 #include "SplashPage.h"
 #include "HomePage.h"
@@ -37,11 +39,17 @@
 #include "Config.h"
 #include "ConfigManager.h"
 #include "WarningManager.h"
+
+// sensors
 //#include "TLVCompassHandler.h"
+
+#include "GpsSensorHandler.h"
+#include "SensorCommandHandler.h"
 
 #if defined(ARDUINO_MEGA2560)
 #define NEXTION_SERIAL Serial1
 #define LINK_SERIAL Serial2
+#define GPS_SERIAL Serial3
 #elif defined(ARDUINO_R4_MINIMA)
 SoftwareSerial LINK_SERIAL(2, 3); // RX, TX
 SoftwareSerial NEXTION_SERIAL(4, 5); // RX, TX
@@ -62,9 +70,6 @@ void onComputerCommandReceived(SerialCommandManager* mgr);
 // Serial managers
 SerialCommandManager commandMgrComputer(&COMPUTER_SERIAL, onComputerCommandReceived, '\n', ':', ';', '=', 512, 64);
 SerialCommandManager commandMgrLink(&LINK_SERIAL, onLinkCommandReceived, '\n', ':', ';', '=', 1024, 64);
-
-// Compass with smoothing filter size 15
-//TLVCompassHandler compass(&commandMgrComputer, 5);
 
 // Broadcast manager for coordinated messaging
 BroadcastManager broadcastManager(&commandMgrComputer, &commandMgrLink);
@@ -106,12 +111,26 @@ ConfigCommandHandler configHandler(&broadcastManager, &homePage);
 AckCommandHandler ackHandler(&broadcastManager, &nextion, &warningManager);
 SystemCommandHandler systemCommandHandler(&broadcastManager, &warningManager);
 
+// sensors
+//TLVCompassHandler compass(&commandMgrComputer, 5);
+
+GpsSensorHandler gpsSensor(&GPS_SERIAL, &broadcastManager, &sensorCommandHandler, &warningManager);
+
+BaseSensorHandler* sensorHandlers[] = {
+    &gpsSensor
+};
+uint8_t sensorHandlerCount = sizeof(sensorHandlers) / sizeof(sensorHandlers[0]);
+SensorManager sensorManager(sensorHandlers, sensorHandlerCount);
+
+
 // Timers
 unsigned long lastUpdate = 0;
 uint8_t speed = 0;
 
 void setup()
 {
+    DateTimeManager::setDateTime();
+
     ISerialCommandHandler* linkHandlers[] = { &interceptDebugHandler, &ackHandler, &sensorCommandHandler,
         &warningCommandHandler, &systemCommandHandler };
     size_t linkHandlerCount = sizeof(linkHandlers) / sizeof(linkHandlers[0]);
@@ -127,9 +146,11 @@ void setup()
 #if defined(ARDUINO_MEGA2560)
     SystemFunctions::initializeSerial(NEXTION_SERIAL, 19200, false);
     SystemFunctions::initializeSerial(LINK_SERIAL, 9600, false);
+	SystemFunctions::initializeSerial(GPS_SERIAL, 9600, false);
 #elif defined(ARDUINO_R4_MINIMA)
 	NEXTION_SERIAL.begin(19200);
 	LINK_SERIAL.begin(9600);
+	GPS_SERIAL.begin(9600);
 #endif
 
 #if defined(NEXTION_DEBUG)
@@ -153,6 +174,7 @@ void setup()
 
     nextion.begin();
     
+    sensorManager.setup();
     //commandMgrComputer.sendError(memBuffer, "MEMORY");
 
     //if (!compass.begin())
@@ -196,6 +218,10 @@ void loop()
 
     SystemCpuMonitor::startTask();
     broadcastManager.update(now);
+    SystemCpuMonitor::endTask();
+
+    SystemCpuMonitor::startTask();
+    sensorManager.update(now);
     SystemCpuMonitor::endTask();
 
     SystemCpuMonitor::startTask();
