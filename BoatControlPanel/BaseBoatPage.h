@@ -31,7 +31,8 @@ enum class PageUpdateType : uint8_t
 	GpsAltitude = 0x12,
 	GpsSpeed = 0x13, 
 	GpsCourse = 0x14,
-	Daytime = 0x15
+	Daytime = 0x15,
+	HornActive = 0x16
 };
 
 // Data structure for relay state updates
