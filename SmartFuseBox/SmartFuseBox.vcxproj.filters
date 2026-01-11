@@ -139,9 +139,6 @@
     <ClCompile Include="ConfigManager.cpp">
       <Filter>Source Files\SharedCode</Filter>
     </ClCompile>
-    <ClCompile Include="SensorController.h">
-      <Filter>Header Files</Filter>
-    </ClCompile>
     <ClCompile Include="SensorNetworkHandler.cpp">
       <Filter>Source Files\NetworkCommandHandlers</Filter>
     </ClCompile>
@@ -156,6 +153,9 @@
     </ClCompile>
     <ClCompile Include="LedMatrixManager.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SensorController.h">
+      <Filter>Header Files\SharedCode\Sensors</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
