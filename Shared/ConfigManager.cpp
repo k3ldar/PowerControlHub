@@ -84,16 +84,16 @@ void ConfigManager::resetToDefaults()
     for (uint8_t i = 0; i < ConfigRelayCount; ++i)
     {
         // Default short name: "R0", "R1", etc.
-        char shortBuf[ConfigShortRelayName]{ 0 };
+        char shortBuf[ConfigShortRelayNameLength]{ 0 };
         snprintf(shortBuf, sizeof(shortBuf), RelayNameShort, (unsigned)i);
-        strncpy(_cfg.relayShortNames[i], shortBuf, ConfigShortRelayName - 1);
-        _cfg.relayShortNames[i][ConfigShortRelayName - 1] = '\0';
+        strncpy(_cfg.relayShortNames[i], shortBuf, ConfigShortRelayNameLength - 1);
+        _cfg.relayShortNames[i][ConfigShortRelayNameLength - 1] = '\0';
 
         // Default long name: "Relay 0", "Relay 1", etc.
-        char longBuf[ConfigLongRelayName]{ 0 };
+        char longBuf[ConfigLongRelayNameLength]{ 0 };
         snprintf(longBuf, sizeof(longBuf), RelayNameLong, (unsigned)i);
-        strncpy(_cfg.relayLongNames[i], longBuf, ConfigLongRelayName - 1);
-        _cfg.relayLongNames[i][ConfigLongRelayName - 1] = '\0';
+        strncpy(_cfg.relayLongNames[i], longBuf, ConfigLongRelayNameLength - 1);
+        _cfg.relayLongNames[i][ConfigLongRelayNameLength - 1] = '\0';
     }
 
     // Default home page mapping: first four relays visible in order

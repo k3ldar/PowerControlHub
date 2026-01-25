@@ -4,6 +4,8 @@
 // Nextion Names/Ids on current Page
 constexpr uint8_t BtnNextFlag = 3; // b3
 constexpr uint8_t BtnBack = 2; // b4
+constexpr uint8_t BtnSetup = 7; // b0
+constexpr uint8_t BtnRelaySetup = 9; // b1
 
 constexpr unsigned long RefreshIntervalMs = 10000;
 
@@ -29,6 +31,14 @@ void AboutPage::handleTouch(uint8_t compId, uint8_t eventType)
 
     switch (compId)
     {
+    case BtnSetup:
+        setPage(PageSettings);
+		break;
+
+    case BtnRelaySetup:
+        setPage(PageSettingsRelays);
+        break;
+
     case BtnNextFlag:
 		setPage(PageHome);
         break;
@@ -36,6 +46,5 @@ void AboutPage::handleTouch(uint8_t compId, uint8_t eventType)
     case BtnBack:
         setPage(PageSystem);
         break;
-
     }
 }

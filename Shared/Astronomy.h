@@ -30,7 +30,6 @@ static const char moon_phase_5[] PROGMEM = "Waning Gibbous";
 static const char moon_phase_6[] PROGMEM = "Last Quarter";
 static const char moon_phase_7[] PROGMEM = "Waning Crescent";
 
-// table of pointers (also stored in PROGMEM)
 static const char* const MoonPhaseNames[] PROGMEM = {
     moon_phase_0, moon_phase_1, moon_phase_2, moon_phase_3,
     moon_phase_4, moon_phase_5, moon_phase_6, moon_phase_7

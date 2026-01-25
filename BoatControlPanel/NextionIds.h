@@ -20,6 +20,8 @@ constexpr uint8_t PageMoonPhases = 15;
 constexpr uint8_t PageVhfRadio = 16;
 constexpr uint8_t PageVhfDistress = 17;
 constexpr uint8_t PageVhfChannels = 18;
+constexpr uint8_t PageSettingsRelays = 19;
+constexpr uint8_t PageSettings = 20;
 
 constexpr uint8_t InvalidButtonIndex = 0xFF;
 

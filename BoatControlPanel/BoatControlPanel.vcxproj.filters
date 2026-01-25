@@ -73,12 +73,6 @@
     <ClCompile Include="BaseBoatCommandHandler.cpp">
       <Filter>Source Files\CommandHandlers</Filter>
     </ClCompile>
-    <ClCompile Include="TLVCompassHandler.cpp">
-      <Filter>Source Files\Sensors</Filter>
-    </ClCompile>
-    <ClCompile Include="TLVCompassHandler.h">
-      <Filter>Header Files\Sensors</Filter>
-    </ClCompile>
     <ClCompile Include="WarningCommandHandler.cpp">
       <Filter>Source Files\CommandHandlers</Filter>
     </ClCompile>
@@ -146,6 +140,27 @@
       <Filter>Source Files\Pages</Filter>
     </ClCompile>
     <ClCompile Include="BuoysPage.cpp">
+      <Filter>Source Files\Pages</Filter>
+    </ClCompile>
+    <ClCompile Include="MoonPhasePage.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Phonetic.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SettingsPage.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="VhfChannelsPage.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="VhfDistressPage.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="VhfRadioPage.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="RelaySettingsPage.cpp">
       <Filter>Source Files\Pages</Filter>
     </ClCompile>
   </ItemGroup>
@@ -266,6 +281,27 @@
     </ClInclude>
     <ClInclude Include="Astronomy.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MoonPhasePage.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Phonetic.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SettingsPage.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="VhfChannelsPage.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="VhfDistressPage.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="VhfRadioPage.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RelaySettingsPage.h">
+      <Filter>Header Files\Pages</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -38,6 +38,8 @@
 #include "VhfRadioPage.h"
 #include "VhfChannelsPage.h"
 #include "VhfDistressPage.h"
+#include "SettingsPage.h"
+#include "RelaySettingsPage.h"
 #include "AboutPage.h"
 
 #include "Config.h"
@@ -100,12 +102,14 @@ MoonPhasePage moonPhasePage(&NEXTION_SERIAL, &warningManager, &commandMgrLink, &
 VhfRadioPage radioPage(&NEXTION_SERIAL, &warningManager, &commandMgrLink, &commandMgrComputer);
 VhfDistressPage radioPageDistress(&NEXTION_SERIAL, &warningManager, &commandMgrLink, &commandMgrComputer);
 VhfChannelsPage radioPageChannels(&NEXTION_SERIAL, &warningManager, &commandMgrLink, &commandMgrComputer);
+SettingsPage settingsPage(&NEXTION_SERIAL, &warningManager, &commandMgrLink, &commandMgrComputer);
+RelaySettingsPage relaySettingsPage(&NEXTION_SERIAL, &warningManager, &commandMgrLink, &commandMgrComputer);
 AboutPage aboutPage(&NEXTION_SERIAL);
 
 BaseDisplayPage* displayPages[] = { &splashPage, &homePage, &warningPage, &relayPage, &soundSignalsPage, 
     &soundOvertakingPage, &soundFogPage, &soundManeuveringPage, &soundEmergencyPage, &soundOtherPage,
     &systemPage, &flagsPage, & cardinalMarkersPage, &buoysPage, &moonPhasePage, &radioPage, 
-    &radioPageDistress, &radioPageChannels, &aboutPage };
+    &radioPageDistress, &radioPageChannels, &relaySettingsPage, &settingsPage, &aboutPage };
 NextionControl nextion(&NEXTION_SERIAL, displayPages, sizeof(displayPages) / sizeof(displayPages[0]));
 
 // link command handlers
@@ -182,6 +186,8 @@ void setup()
 	relayPage.configSet(config);
     radioPage.configSet(config);
 	radioPageDistress.configSet(config);
+    settingsPage.configSet(config);
+	relaySettingsPage.configSet(config);
 
     nextion.begin();
     

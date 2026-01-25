@@ -32,24 +32,25 @@ constexpr uint8_t ConfigVersion = 0;
 constexpr uint8_t ConfigRelayCount = 8;
 constexpr uint8_t ConfigHomeButtons = 4;
 constexpr uint8_t ConfigMaxNameLength = 31; // max characters (inc null)
-constexpr uint8_t ConfigShortRelayName = 6; // max characters (inc null) - for home page
-constexpr uint8_t ConfigLongRelayName = 21; // max characters (inc null) - for buttons page
+constexpr uint8_t ConfigShortRelayNameLength = 6; // max characters (inc null) - for home page
+constexpr uint8_t ConfigLongRelayNameLength = 21; // max characters (inc null) - for buttons page
 constexpr uint8_t ConfigMmsiLength = 10; // 9 chars + null
 constexpr uint8_t ConfigHomePortLength = 31; // 30 chars + null
 constexpr uint8_t ConfigCallSignLength = 10; // 9 chars + null
+constexpr uint8_t ConfigLinkededRelayCount = 2;
 
 struct Config {
     uint8_t version;
     char name[ConfigMaxNameLength];
-    char relayShortNames[ConfigRelayCount][ConfigShortRelayName];
-    char relayLongNames[ConfigRelayCount][ConfigLongRelayName];
+    char relayShortNames[ConfigRelayCount][ConfigShortRelayNameLength];
+    char relayLongNames[ConfigRelayCount][ConfigLongRelayNameLength];
     uint8_t homePageMapping[ConfigHomeButtons]; // 0..7 or 0xFF = empty
     uint8_t buttonImage[ConfigRelayCount]; // 0..7 or 0xFF = empty
     VesselType vesselType;
 	uint8_t hornRelayIndex; // 0..7 or 0xFF = none
 	uint16_t soundStartDelayMs; // 500ms default
     bool defaulRelayState[ConfigRelayCount]; // default on (relay open) states
-    uint8_t linkedRelays[ConfigMaxLinkedRelays][2];
+    uint8_t linkedRelays[ConfigMaxLinkedRelays][ConfigLinkededRelayCount];
 	char mMSI[ConfigMmsiLength]; // 9 chars + null
 	char callSign[ConfigCallSignLength]; // 9 chars + null
 	char homePort[ConfigHomePortLength]; // 30 chars + null
