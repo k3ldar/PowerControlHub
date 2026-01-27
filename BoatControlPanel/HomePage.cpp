@@ -22,7 +22,6 @@ constexpr char SpeedUnitKilometer[] = "%d km/h";
 constexpr char DistanceUnitKnots[] = "%s nm";
 constexpr char DistanceUnitKilometer[] = "%s km";
 constexpr char BearingFormat[] = "%d°";
-constexpr char CelsiusSuffix[] = "C";
 constexpr char ButtonOn[] = "=1";
 constexpr char ButtonOff[] = "=0";
 
@@ -32,6 +31,8 @@ constexpr uint8_t Button1 = 1; // bHomeRelay1
 constexpr uint8_t Button2 = 2; // bHomeRelay2
 constexpr uint8_t Button3 = 3; // bHomeRelay3
 constexpr uint8_t Button4 = 4; // bHomeRelay4
+constexpr uint8_t ButtonTemperature = 6; //t2
+constexpr uint8_t ButtonHumidity = 7; //t3
 constexpr uint8_t ButtonSpeed = 9; //tSpeed / swap between kn/km
 constexpr uint8_t ButtonVhf = 10; //p0
 constexpr uint8_t ButtonNext = 12;
@@ -145,15 +146,6 @@ void HomePage::handleTouch(uint8_t compId, uint8_t eventType)
     }
 
 
-    if (config->hornRelayIndex < DefaultValue &&
-        compId - 1 == config->hornRelayIndex)
-    {
-        // relay button is configured to sound system (horn) and will be
-        // controlled via own command methods from sound pages
-        setPage(PageSoundSignals);
-        return;
-    }
-
 
     // Map component ID to button index
     uint8_t buttonIndex = InvalidButtonIndex;
@@ -163,8 +155,23 @@ void HomePage::handleTouch(uint8_t compId, uint8_t eventType)
         case Button2:
         case Button3:
         case Button4:
-            buttonIndex = compId - ButtonIdOffset;
-            break;
+            buttonIndex = compId - ButtonIdOffset;  // Get slot index (0-3)
+            
+            // Check if THIS button's mapped relay is the horn
+            if (config->hornRelayIndex < DefaultValue &&
+                _slotToRelay[buttonIndex] == config->hornRelayIndex)
+            {
+                // This button controls the horn, go to sound page
+                setPage(PageSoundSignals);
+                return;
+            }
+
+            break;  // Continue to normal relay button handling
+
+        case ButtonTemperature:
+        case ButtonHumidity:
+			setPage(PageEnvironment);
+			return;
 
         case ButtonSpeed:
             _speedInKnots = !_speedInKnots;
@@ -575,7 +582,7 @@ void HomePage::updateDistance()
 
 void HomePage::updateTime()
 {
-    char buf[MaxDateTimeStringLength + 5];
+    char buf[DateTimeBufferLength + 5];
     if (!DateTimeManager::formatDateTimeReadable(buf, sizeof(buf)))
     {
         sendText(ControlCurrTime, NoValueText);

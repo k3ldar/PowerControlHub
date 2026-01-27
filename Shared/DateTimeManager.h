@@ -2,7 +2,8 @@
 
 #include <Arduino.h>
 
-constexpr uint8_t MaxDateTimeStringLength = 20; // "YYYY-MM-DDTHH:MM:SS" + null terminator
+constexpr uint8_t DateTimeBufferLength = 20;     // "YYYY-MM-DD HH:MM:SS" + null terminator
+constexpr uint8_t DateTimeISOBufferLength = 20;  // "YYYY-MM-DDTHH:MM:SS" + null terminator
 
 /**
  * @class DateTimeManager
@@ -29,6 +30,11 @@ constexpr uint8_t MaxDateTimeStringLength = 20; // "YYYY-MM-DDTHH:MM:SS" + null 
  * 
  * // Get current time
  * unsigned long currentTime = DateTimeManager::getCurrentTime();
+ * 
+ * // Get individual components
+ * uint16_t year = DateTimeManager::getYear();
+ * uint8_t month = DateTimeManager::getMonth();
+ * uint8_t day = DateTimeManager::getDay();
  * 
  * // Check if time has been synchronized
  * if (DateTimeManager::isTimeSet()) {
@@ -80,6 +86,42 @@ public:
      * @return Seconds elapsed since setDateTime() was called
      */
     static unsigned long getSecondsSinceSync();
+
+    /**
+     * @brief Get the current year.
+     * @return Current year (e.g., 2026), or 0 if time not set
+     */
+    static uint16_t getYear();
+
+    /**
+     * @brief Get the current month.
+     * @return Current month (1-12), or 0 if time not set
+     */
+    static uint8_t getMonth();
+
+    /**
+     * @brief Get the current day of month.
+     * @return Current day (1-31), or 0 if time not set
+     */
+    static uint8_t getDay();
+
+    /**
+     * @brief Get the current hour.
+     * @return Current hour (0-23), or 0 if time not set
+     */
+    static uint8_t getHour();
+
+    /**
+     * @brief Get the current minute.
+     * @return Current minute (0-59), or 0 if time not set
+     */
+    static uint8_t getMinute();
+
+    /**
+     * @brief Get the current second.
+     * @return Current second (0-59), or 0 if time not set
+     */
+    static uint8_t getSecond();
 
     /**
      * @brief Format current date/time as ISO 8601 string.

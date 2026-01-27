@@ -243,3 +243,13 @@ void SystemFunctions::wrapTextAtWordBoundary(const char* input, char* output, si
 
     output[outPos] = '\0';
 }
+
+bool SystemFunctions::progmemToBuffer(const char* progmemStr, char* buffer, size_t bufferSize)
+{
+    if (!progmemStr || !buffer || bufferSize == 0)
+        return false;
+
+	strncpy_P(buffer, progmemStr, bufferSize);
+	buffer[bufferSize - 1] = '\0';
+	return true;
+}

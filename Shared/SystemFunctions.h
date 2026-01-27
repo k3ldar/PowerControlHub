@@ -190,6 +190,8 @@ public:
     static int32_t indexOf(const char* str, char ch, size_t start);
 
     static void wrapTextAtWordBoundary(const char* input, char* output, size_t outputSize, size_t maxLineLength);
+
+	static bool progmemToBuffer(const char* progmemStr, char* buffer, size_t bufferSize);
 private:
     // Helper: Append a single string to buffer
     static size_t appendString(char* dest, size_t destSize, size_t offset, const char* src);

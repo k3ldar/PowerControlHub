@@ -28,21 +28,21 @@ public:
         }
 
         // initialize global variables
-        sendText("pageSplash.vaBoatName", config->name);
-        sendText("pageSplash.vaHomeB1", config->relayShortNames[0]);
-        sendText("pageSplash.vaHomeB2", config->relayShortNames[1]);
-        sendText("pageSplash.vaHomeB3", config->relayShortNames[2]);
-        sendText("pageSplash.vaHomeB4", config->relayShortNames[3]);
+        sendText(F("pageSplash.vaBoatName"), config->name);
+        sendText(F("pageSplash.vaHomeB1"), config->relayShortNames[0]);
+        sendText(F("pageSplash.vaHomeB2"), config->relayShortNames[1]);
+        sendText(F("pageSplash.vaHomeB3"), config->relayShortNames[2]);
+        sendText(F("pageSplash.vaHomeB4"), config->relayShortNames[3]);
 
         // Relay page global variables
-        sendText("pageSplash.vaRelayName1", config->relayLongNames[0]);
-        sendText("pageSplash.vaRelayName2", config->relayLongNames[1]);
-        sendText("pageSplash.vaRelayName3", config->relayLongNames[2]);
-        sendText("pageSplash.vaRelayName4", config->relayLongNames[3]);
-        sendText("pageSplash.vaRelayName5", config->relayLongNames[4]);
-        sendText("pageSplash.vaRelayName6", config->relayLongNames[5]);
-        sendText("pageSplash.vaRelayName7", config->relayLongNames[6]);
-        sendText("pageSplash.vaRelayName8", config->relayLongNames[7]);
+        sendText(F("pageSplash.vaRelayName1"), config->relayLongNames[0]);
+        sendText(F("pageSplash.vaRelayName2"), config->relayLongNames[1]);
+        sendText(F("pageSplash.vaRelayName3"), config->relayLongNames[2]);
+        sendText(F("pageSplash.vaRelayName4"), config->relayLongNames[3]);
+        sendText(F("pageSplash.vaRelayName5"), config->relayLongNames[4]);
+        sendText(F("pageSplash.vaRelayName6"), config->relayLongNames[5]);
+        sendText(F("pageSplash.vaRelayName7"), config->relayLongNames[6]);
+        sendText(F("pageSplash.vaRelayName8"), config->relayLongNames[7]);
     }
 
     void refresh(unsigned long now) override

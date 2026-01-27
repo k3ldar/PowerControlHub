@@ -77,11 +77,13 @@
     <ClCompile Include="BuoysPage.cpp" />
     <ClCompile Include="CardinalMarkersPage.cpp" />
     <ClCompile Include="DateTimeManager.cpp" />
+    <ClCompile Include="EnvironmentPage.cpp" />
     <ClCompile Include="FlagsPage.cpp" />
     <ClCompile Include="MoonPhasePage.cpp" />
     <ClCompile Include="Phonetic.cpp" />
     <ClCompile Include="RelaySettingsPage.cpp" />
     <ClCompile Include="SettingsPage.cpp" />
+    <ClCompile Include="SunCalculator.cpp" />
     <ClCompile Include="SystemFunctions.cpp" />
     <ClCompile Include="AboutPage.cpp" />
     <ClCompile Include="SystemCpuMonitor.cpp" />
@@ -121,6 +123,8 @@
       <DeploymentContent>true</DeploymentContent>
     </ClCompile>
     <ClInclude Include="Astronomy.h" />
+    <ClInclude Include="Environment.h" />
+    <ClInclude Include="EnvironmentPage.h" />
     <ClInclude Include="GpsSensorHandler.h" />
     <ClInclude Include="BuoysPage.h" />
     <ClInclude Include="CardinalMarkersPage.h" />
@@ -131,6 +135,7 @@
     <ClInclude Include="RelaySettingsPage.h" />
     <ClInclude Include="Sensors\BaseSensor.h" />
     <ClInclude Include="SettingsPage.h" />
+    <ClInclude Include="SunCalculator.h" />
     <ClInclude Include="SystemDefinitions.h" />
     <ClInclude Include="LoggingSupport.h" />
     <ClInclude Include="AboutPage.h" />

@@ -16,6 +16,9 @@
 #include "MessageBus.h"
 #endif
 
+#include "DateTimeManager.h"
+#include "SensorCommandHandler.h"
+
 constexpr unsigned long GpsCheckMs = 10;
 constexpr unsigned long StatusUpdateMs = 1000UL;
 constexpr uint32_t GpsBaudRate = 9600;

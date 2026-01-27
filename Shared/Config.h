@@ -54,7 +54,7 @@ struct Config {
 	char mMSI[ConfigMmsiLength]; // 9 chars + null
 	char callSign[ConfigCallSignLength]; // 9 chars + null
 	char homePort[ConfigHomePortLength]; // 30 chars + null
-	uint8_t timezoneOffset; // hours from UTC
+	int8_t timezoneOffset; // hours from UTC
 
 #if defined(ARDUINO_UNO_R4)
     bool bluetoothEnabled;

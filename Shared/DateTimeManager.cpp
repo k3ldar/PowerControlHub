@@ -95,6 +95,72 @@ unsigned long DateTimeManager::getSecondsSinceSync()
     return elapsedMillis / 1000;
 }
 
+uint16_t DateTimeManager::getYear() {
+    if (!_isSet) {
+        return 0;
+    }
+
+    uint16_t year;
+    uint8_t month, day, hour, minute, second;
+    unixToDateTime(getCurrentTime(), year, month, day, hour, minute, second);
+    return year;
+}
+
+uint8_t DateTimeManager::getMonth() {
+    if (!_isSet) {
+        return 0;
+    }
+
+    uint16_t year;
+    uint8_t month, day, hour, minute, second;
+    unixToDateTime(getCurrentTime(), year, month, day, hour, minute, second);
+    return month;
+}
+
+uint8_t DateTimeManager::getDay() {
+    if (!_isSet) {
+        return 0;
+    }
+
+    uint16_t year;
+    uint8_t month, day, hour, minute, second;
+    unixToDateTime(getCurrentTime(), year, month, day, hour, minute, second);
+    return day;
+}
+
+uint8_t DateTimeManager::getHour() {
+    if (!_isSet) {
+        return 0;
+    }
+
+    uint16_t year;
+    uint8_t month, day, hour, minute, second;
+    unixToDateTime(getCurrentTime(), year, month, day, hour, minute, second);
+    return hour;
+}
+
+uint8_t DateTimeManager::getMinute() {
+    if (!_isSet) {
+        return 0;
+    }
+
+    uint16_t year;
+    uint8_t month, day, hour, minute, second;
+    unixToDateTime(getCurrentTime(), year, month, day, hour, minute, second);
+    return minute;
+}
+
+uint8_t DateTimeManager::getSecond() {
+    if (!_isSet) {
+        return 0;
+    }
+
+    uint16_t year;
+    uint8_t month, day, hour, minute, second;
+    unixToDateTime(getCurrentTime(), year, month, day, hour, minute, second);
+    return second;
+}
+
 bool DateTimeManager::formatDateTime(char* buffer, const uint8_t bufferLength)
 {
     if (!_isSet) {

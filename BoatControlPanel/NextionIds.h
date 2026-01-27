@@ -22,6 +22,7 @@ constexpr uint8_t PageVhfDistress = 17;
 constexpr uint8_t PageVhfChannels = 18;
 constexpr uint8_t PageSettingsRelays = 19;
 constexpr uint8_t PageSettings = 20;
+constexpr uint8_t PageEnvironment = 21;
 
 constexpr uint8_t InvalidButtonIndex = 0xFF;
 
@@ -52,6 +53,15 @@ constexpr uint8_t ImageMoonPhaseWaningGibbous = 78;
 constexpr uint8_t ImageMoonPhaseLastQuarter = 79;
 constexpr uint8_t ImageMoonPhaseWaningCrescent = 80;
 
+
+constexpr uint8_t ImageGreenCircle = 82;
+constexpr uint8_t ImageOrangeCircle = 83;
+constexpr uint8_t ImageRedCircle = 84;
+
+constexpr uint8_t ImageDownArrow = 85;
+constexpr uint8_t ImageInwardArrow = 86;
+constexpr uint8_t ImageUpArrow = 87;
+constexpr uint8_t ImageQuestionMark = 88;
 
 constexpr uint8_t MoonImages[8] = {
     ImageMoonPhaseNew,

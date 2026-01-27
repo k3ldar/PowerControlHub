@@ -110,6 +110,8 @@ constexpr char PercentSuffix[] = "%";
 constexpr char NoValueText[] = "--";
 constexpr char HexPrefix[] = "0x";
 
+constexpr char CelsiusSuffix[] = "C";
+
 
 constexpr unsigned long SerialInitTimeoutMs = 300;
 
