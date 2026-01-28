@@ -3,8 +3,17 @@
 // Define sensor warning mask (bits 20-31)
 constexpr uint32_t SENSOR_WARNING_MASK = 0xFFF00000U; // Bits 20-31 set
 
-WarningManager::WarningManager(SerialCommandManager* commandMgr, unsigned long heartbeatInterval, unsigned long heartbeatTimeout)
+WarningManager::WarningManager(SerialCommandManager* commandMgr, unsigned long heartbeatInterval, 
+	unsigned long heartbeatTimeout
+#if defined(BOAT_CONTROL_PANEL)
+	, RgbLedFade* warningStatus
+#endif
+	)
+
 	: _commandMgr(commandMgr),
+#if defined(BOAT_CONTROL_PANEL)
+	_warningStatus(warningStatus),
+#endif
 	  _localWarnings(0),
 	  _remoteWarnings(0),
 	  _heartbeatInterval(heartbeatInterval),
@@ -13,6 +22,9 @@ WarningManager::WarningManager(SerialCommandManager* commandMgr, unsigned long h
 	  _lastHeartbeatReceived(0),
 	  _heartbeatEnabled(heartbeatInterval > 0)
 {
+#if defined(BOAT_CONTROL_PANEL)
+	updateLedStatus();
+#endif
 }
 
 void WarningManager::update(unsigned long now)
@@ -21,6 +33,11 @@ void WarningManager::update(unsigned long now)
 	{
 		updateConnection(now);
 	}
+	
+#if defined(BOAT_CONTROL_PANEL)
+	// Update LED status every loop iteration
+	updateLedStatus();
+#endif
 }
 
 void WarningManager::notifyHeartbeatAck()
@@ -43,6 +60,10 @@ void WarningManager::raiseWarning(WarningType type)
 	if (warningBit & SENSOR_WARNING_MASK) {
 		_localWarnings |= static_cast<uint32_t>(WarningType::SensorFailure);
 	}
+	
+#if defined(BOAT_CONTROL_PANEL)
+	updateLedStatus();
+#endif
 }
 
 void WarningManager::clearWarning(WarningType type)
@@ -61,12 +82,20 @@ void WarningManager::clearWarning(WarningType type)
 			_localWarnings &= ~static_cast<uint32_t>(WarningType::SensorFailure);
 		}
 	}
+	
+#if defined(BOAT_CONTROL_PANEL)
+	updateLedStatus();
+#endif
 }
 
 void WarningManager::clearAllWarnings()
 {
 	_localWarnings = 0;
 	_remoteWarnings = 0;
+	
+#if defined(BOAT_CONTROL_PANEL)
+	updateLedStatus();
+#endif
 }
 
 bool WarningManager::hasWarnings() const
@@ -139,4 +168,22 @@ uint32_t WarningManager::getRemoteWarningsMask() const
 void WarningManager::updateRemoteWarnings(uint32_t remoteWarningMask)
 {
 	_remoteWarnings = remoteWarningMask;
+	
+#if defined(BOAT_CONTROL_PANEL)
+	updateLedStatus();
+#endif
 }
+
+#if defined(BOAT_CONTROL_PANEL)
+
+void WarningManager::updateLedStatus()
+{
+    if (!_warningStatus)
+        return;
+    
+    uint32_t allWarnings = _localWarnings | _remoteWarnings;
+    
+    // Set warning state based on active warnings
+    _warningStatus->setWarning(allWarnings != 0);
+}
+#endif

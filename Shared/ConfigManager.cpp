@@ -143,6 +143,27 @@ void ConfigManager::resetToDefaults()
 	_cfg.apIpAddress[sizeof(_cfg.apIpAddress) - 1] = '\0';
 #endif
 
+    _cfg.ledConfig.dayBrightness = 80;
+    _cfg.ledConfig.dayGoodColor[0] = 0;
+    _cfg.ledConfig.dayGoodColor[1] = 80; 
+    _cfg.ledConfig.dayGoodColor[2] = 255;
+    _cfg.ledConfig.dayBadColor[0] = 255;
+    _cfg.ledConfig.dayBadColor[1] = 140;
+    _cfg.ledConfig.dayBadColor[2] = 0;
+
+    _cfg.ledConfig.nightBrightness = 20;
+    _cfg.ledConfig.nightGoodColor[0] = 100;
+    _cfg.ledConfig.nightGoodColor[1] = 0;
+    _cfg.ledConfig.nightGoodColor[2] = 0;
+    _cfg.ledConfig.nightBadColor[0] = 255;
+    _cfg.ledConfig.nightBadColor[1] = 50;
+    _cfg.ledConfig.nightBadColor[2] = 0;
+
+    _cfg.ledConfig.autoSwitch = true;
+    _cfg.ledConfig.gpsEnabled = true;
+    _cfg.ledConfig.warningEnabled = true;
+    _cfg.ledConfig.systemEnabled = true;
+
     // compute checksum
     _cfg.checksum = 0;
     _cfg.checksum = calcChecksum(_cfg);

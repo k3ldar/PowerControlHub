@@ -51,7 +51,7 @@ void SystemNetworkHandler::formatStatusJson(char* buffer, size_t size)
 		rssi = _wifiController->getServer()->getSignalStrength();
 	}
 
-	char dateTimeStr[MaxDateTimeStringLength];
+	char dateTimeStr[DateTimeBufferLength];
 	DateTimeManager::formatDateTime(dateTimeStr, sizeof(dateTimeStr));
 
 	// Enhanced JSON formatting with WiFi runtime details

@@ -236,7 +236,11 @@ protected:
 			_hasValidFix = true;
 			_lastValidData = now;
 			
-			
+			if (_warningManager && _warningManager->isWarningActive(WarningType::GpsFailure))
+			{
+				_warningManager->clearWarning(WarningType::GpsFailure);
+			}
+
 			double newLat = _gps->location.lat();
 			double newLon = _gps->location.lng();
 			
@@ -294,6 +298,7 @@ protected:
 				{
 					_warningManager->raiseWarning(WarningType::GpsFailure);
 				}
+				
 				_hasValidFix = false;
 			}
 		}
@@ -309,30 +314,29 @@ public:
 		MessageBus* messageBus, 
 #endif
 
-		BroadcastManager* broadcastManager, SensorCommandHandler* sensorCommandHandler,
-		WarningManager* warningManager)
+		BroadcastManager* broadcastManager, SensorCommandHandler* sensorCommandHandler, WarningManager* warningManager)
 		: BroadcastLoggerSupport(broadcastManager), 
 		  _gpsSerial(gpsSerial),
 
 #if defined(MESSAGE_BUS)
 		_messageBus(messageBus), 
 #endif
-		  _sensorCommandHandler(sensorCommandHandler),
-		  _warningManager(warningManager), 
-		  _gps(nullptr),
-		  _latitude(0.0), 
-		  _longitude(0.0), 
-		  _altitude(0.0), 
-		  _speedKmh(0.0), 
-		  _courseDeg(0.0),
-		  _satellites(0),
-		  _hasValidFix(false),
-		  _lastValidData(0),
+		_sensorCommandHandler(sensorCommandHandler),
+		_warningManager(warningManager),
+		_gps(nullptr),
+		_latitude(0.0), 
+		_longitude(0.0), 
+		_altitude(0.0), 
+		_speedKmh(0.0), 
+		_courseDeg(0.0),
+		_satellites(0),
+		_hasValidFix(false),
+		_lastValidData(0),
 		_lastStatusUpdate(0),
-      _prevLatitude(0.0),
-      _prevLongitude(0.0),
-      _totalDistanceKm(0.0),
-      _firstFix(true)
+		_prevLatitude(0.0),
+		_prevLongitude(0.0),
+		_totalDistanceKm(0.0),
+		_firstFix(true)
 	{
 	}
 
@@ -401,6 +405,4 @@ public:
         _totalDistanceKm = 0.0; 
         _firstFix = true;
     }
-
-private:
 };
