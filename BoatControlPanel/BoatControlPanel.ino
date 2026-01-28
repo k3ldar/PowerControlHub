@@ -48,6 +48,8 @@
 #include "ConfigManager.h"
 #include "WarningManager.h"
 
+#include "RgbLedFade.h"
+
 // sensors
 //#include "TLVCompassHandler.h"
 
@@ -75,6 +77,9 @@ constexpr unsigned long UpdateIntervalMs = 600;
 void onLinkCommandReceived(SerialCommandManager* mgr);
 void onComputerCommandReceived(SerialCommandManager* mgr);
 
+// led indicators
+RgbLedFade systemLedStatus(4, 3, 2);
+
 // Serial managers
 SerialCommandManager commandMgrComputer(&COMPUTER_SERIAL, onComputerCommandReceived, '\n', ':', ';', '=', 512, 64);
 SerialCommandManager commandMgrLink(&LINK_SERIAL, onLinkCommandReceived, '\n', ':', ';', '=', 1024, 64);
@@ -83,7 +88,7 @@ SerialCommandManager commandMgrLink(&LINK_SERIAL, onLinkCommandReceived, '\n', '
 BroadcastManager broadcastManager(&commandMgrComputer, &commandMgrLink);
 
 // Warning manager with heartbeat monitoring
-WarningManager warningManager(&commandMgrLink, HeartbeatIntervalMs, HeartbeatTimeoutMs);
+WarningManager warningManager(&commandMgrLink, HeartbeatIntervalMs, HeartbeatTimeoutMs, &systemLedStatus);
 
 // Nextion display setup
 SplashPage splashPage(&NEXTION_SERIAL);
@@ -139,13 +144,21 @@ BaseSensorHandler* sensorHandlers[] = {
 uint8_t sensorHandlerCount = sizeof(sensorHandlers) / sizeof(sensorHandlers[0]);
 SensorManager sensorManager(sensorHandlers, sensorHandlerCount);
 
-
 // Timers
 unsigned long lastUpdate = 0;
 uint8_t speed = 0;
 
 void setup()
 {
+    systemLedStatus.setWarning(false);
+    systemLedStatus.setDayTime(false);
+    systemLedStatus.setColor(120, 0, 180);
+    systemLedStatus.setFadeSpeed(0.008f);
+    systemLedStatus.setMaxBrightness(60);
+    systemLedStatus.setMinBrightness(10);
+    systemLedStatus.begin();
+    systemLedStatus.update(0);
+
     DateTimeManager::setDateTime();
 
     ISerialCommandHandler* linkHandlers[] = { &interceptDebugHandler, &ackHandler, &sensorCommandHandler,
@@ -193,6 +206,7 @@ void setup()
     settingsPage.configSet(config);
 	relaySettingsPage.configSet(config);
     environmentPage.configSet(config);
+    systemLedStatus.configSet(config);
 
     nextion.begin();
     
@@ -207,6 +221,7 @@ void setup()
     broadcastManager.sendCommand(SystemInitialized, "");
 
 	nextion.sendCommand(PageOne);
+    systemLedStatus.setColor(180, 240, 255);
 }
 
 void loop()
@@ -235,6 +250,10 @@ void loop()
 
     SystemCpuMonitor::startTask();
     sensorManager.update(now);
+    SystemCpuMonitor::endTask();
+
+    SystemCpuMonitor::startTask();
+    systemLedStatus.update(now);
     SystemCpuMonitor::endTask();
 
     SystemCpuMonitor::update();

@@ -6,6 +6,9 @@
 #include "SystemDefinitions.h"
 #include "WarningType.h"
 
+#if defined(BOAT_CONTROL_PANEL)
+#include "RgbLedFade.h"
+#endif
 
 /**
  * @class WarningManager
@@ -43,6 +46,9 @@
 class WarningManager {
 private:
     SerialCommandManager* _commandMgr;      // For sending heartbeat commands
+#if defined(BOAT_CONTROL_PANEL)
+	RgbLedFade* _warningStatus;			    // LED indicator for warnings
+#endif
     uint32_t _localWarnings;                // Bitmap of LOCAL warnings (raised by this device)
     uint32_t _remoteWarnings;               // Bitmap of REMOTE warnings (from connected device)
 
@@ -63,6 +69,11 @@ private:
      * @param now Current time in milliseconds
      */
     void updateConnection(unsigned long now);
+
+#if defined(BOAT_CONTROL_PANEL)
+    void updateLedStatus();
+#endif
+
 public:
     /**
      * @brief Constructor.
@@ -70,9 +81,15 @@ public:
      * @param commandMgr Pointer to SerialCommandManager for heartbeat commands (optional)
      * @param heartbeatInterval How often to send heartbeat in milliseconds
      * @param heartbeatTimeout Timeout before connection considered lost in milliseconds
+	 * @param warningStatus Pointer to RgbLedFade for warning status LED
      */
-    explicit WarningManager(SerialCommandManager* commandMgr, unsigned long heartbeatInterval, unsigned long heartbeatTimeout);
-
+    explicit WarningManager(SerialCommandManager* commandMgr, unsigned long heartbeatInterval,
+        unsigned long heartbeatTimeout
+#if defined(BOAT_CONTROL_PANEL)
+        , RgbLedFade* warningStatus);
+#else
+        );
+#endif
     /**
      * @brief Update heartbeat and check for timeouts.
      * Call this periodically (e.g., from refresh()).

@@ -602,6 +602,41 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
         // C23 Home port
         sender->sendCommand(ConfigHomePort, cfg->homePort);
 
+        // C24 LED colors (send 4 color configs: day good, day bad, night good, night bad)
+        snprintf(buffer, sizeof(buffer), "t=0;c=0;r=%u;g=%u;b=%u", 
+            cfg->ledConfig.dayGoodColor[0], cfg->ledConfig.dayGoodColor[1], cfg->ledConfig.dayGoodColor[2]);
+        sender->sendCommand(ConfigLedColor, buffer);
+        
+        snprintf(buffer, sizeof(buffer), "t=0;c=1;r=%u;g=%u;b=%u", 
+            cfg->ledConfig.dayBadColor[0], cfg->ledConfig.dayBadColor[1], cfg->ledConfig.dayBadColor[2]);
+        sender->sendCommand(ConfigLedColor, buffer);
+        
+        snprintf(buffer, sizeof(buffer), "t=1;c=0;r=%u;g=%u;b=%u", 
+            cfg->ledConfig.nightGoodColor[0], cfg->ledConfig.nightGoodColor[1], cfg->ledConfig.nightGoodColor[2]);
+        sender->sendCommand(ConfigLedColor, buffer);
+        
+        snprintf(buffer, sizeof(buffer), "t=1;c=1;r=%u;g=%u;b=%u", 
+            cfg->ledConfig.nightBadColor[0], cfg->ledConfig.nightBadColor[1], cfg->ledConfig.nightBadColor[2]);
+        sender->sendCommand(ConfigLedColor, buffer);
+        
+        // C25 LED brightness
+        snprintf(buffer, sizeof(buffer), "t=0;b=%u", cfg->ledConfig.dayBrightness);
+        sender->sendCommand(ConfigLedBrightness, buffer);
+        
+        snprintf(buffer, sizeof(buffer), "t=1;b=%u", cfg->ledConfig.nightBrightness);
+        sender->sendCommand(ConfigLedBrightness, buffer);
+        
+        // C26 LED auto-switch
+        snprintf(buffer, sizeof(buffer), "v=%s", cfg->ledConfig.autoSwitch ? "true" : "false");
+        sender->sendCommand(ConfigLedAutoSwitch, buffer);
+        
+        // C27 LED enable states
+        snprintf(buffer, sizeof(buffer), "g=%s;w=%s;s=%s",
+            cfg->ledConfig.gpsEnabled ? "true" : "false",
+            cfg->ledConfig.warningEnabled ? "true" : "false",
+            cfg->ledConfig.systemEnabled ? "true" : "false");
+        sender->sendCommand(ConfigLedEnable, buffer);
+
         sendAckOk(sender, command);
     }
     else if (strcmp(command, ConfigBoatType) == 0)
@@ -630,6 +665,156 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
         ConfigManager::resetToDefaults();
         sendAckOk(sender, command);
 	}
+    else if (strcmp(command, ConfigLedColor) == 0)
+    {
+        // Expect "C24:t=0;r=255;g=50;b=213" where t=0 (day) or t=1 (night)
+        if (paramCount >= 4)
+        {
+            uint8_t type = static_cast<uint8_t>(strtoul(params[0].value, nullptr, 0));
+            uint8_t r = static_cast<uint8_t>(strtoul(params[1].value, nullptr, 0));
+            uint8_t g = static_cast<uint8_t>(strtoul(params[2].value, nullptr, 0));
+            uint8_t b = static_cast<uint8_t>(strtoul(params[3].value, nullptr, 0));
+            
+            if (type > 1)
+            {
+                sendAckErr(sender, command, F("Invalid type (0=day, 1=night)"), &params[0]);
+                return true;
+            }
+            
+            // Check which color set to update based on param key
+            bool isGoodColor = false;
+            if (paramCount >= 5 && strcmp(params[4].key, "c") == 0)
+            {
+                uint8_t colorType = static_cast<uint8_t>(strtoul(params[4].value, nullptr, 0));
+                isGoodColor = (colorType == 0); // 0=good, 1=bad
+            }
+            
+            if (type == 0) // Day mode
+            {
+                if (isGoodColor)
+                {
+                    cfg->ledConfig.dayGoodColor[0] = r;
+                    cfg->ledConfig.dayGoodColor[1] = g;
+                    cfg->ledConfig.dayGoodColor[2] = b;
+                }
+                else
+                {
+                    cfg->ledConfig.dayBadColor[0] = r;
+                    cfg->ledConfig.dayBadColor[1] = g;
+                    cfg->ledConfig.dayBadColor[2] = b;
+                }
+            }
+            else // Night mode
+            {
+                if (isGoodColor)
+                {
+                    cfg->ledConfig.nightGoodColor[0] = r;
+                    cfg->ledConfig.nightGoodColor[1] = g;
+                    cfg->ledConfig.nightGoodColor[2] = b;
+                }
+                else
+                {
+                    cfg->ledConfig.nightBadColor[0] = r;
+                    cfg->ledConfig.nightBadColor[1] = g;
+                    cfg->ledConfig.nightBadColor[2] = b;
+                }
+            }
+            
+            sendAckOk(sender, command, &params[0]);
+        }
+        else
+        {
+            sendAckErr(sender, command, F("Missing params (t,r,g,b)"));
+        }
+    }
+    else if (strcmp(command, ConfigLedBrightness) == 0)
+    {
+        // Expect "C25:t=0;b=75" where t=0 (day) or t=1 (night), b=0-100
+        if (paramCount >= 2)
+        {
+            uint8_t type = static_cast<uint8_t>(strtoul(params[0].value, nullptr, 0));
+            uint8_t brightness = static_cast<uint8_t>(strtoul(params[1].value, nullptr, 0));
+            
+            if (type > 1)
+            {
+                sendAckErr(sender, command, F("Invalid type (0=day, 1=night)"), &params[0]);
+                return true;
+            }
+            
+            if (brightness > 100)
+            {
+                sendAckErr(sender, command, F("Brightness must be 0-100"), &params[1]);
+                return true;
+            }
+            
+            if (type == 0)
+                cfg->ledConfig.dayBrightness = brightness;
+            else
+                cfg->ledConfig.nightBrightness = brightness;
+            
+            sendAckOk(sender, command, &params[0]);
+        }
+        else
+        {
+            sendAckErr(sender, command, F("Missing params (t,b)"));
+        }
+    }
+    else if (strcmp(command, ConfigLedAutoSwitch) == 0)
+    {
+        // Expect "C26:v=true" or "C26:v=1"
+        if (paramCount >= 1)
+        {
+            bool autoSwitch = false;
+            if (strcmp(params[0].value, "true") == 0 || strcmp(params[0].value, "1") == 0)
+                autoSwitch = true;
+            else if (strcmp(params[0].value, "false") == 0 || strcmp(params[0].value, "0") == 0)
+                autoSwitch = false;
+            else
+            {
+                sendAckErr(sender, command, F("Invalid value (true/false or 0/1)"), &params[0]);
+                return true;
+            }
+            
+            cfg->ledConfig.autoSwitch = autoSwitch;
+            sendAckOk(sender, command, &params[0]);
+        }
+        else
+        {
+            sendAckErr(sender, command, F("Missing param"));
+        }
+    }
+    else if (strcmp(command, ConfigLedEnable) == 0)
+    {
+        // Expect "C27:g=true;w=true;s=false"
+        if (paramCount >= 3)
+        {
+            bool gpsEnabled = false;
+            bool warningEnabled = false;
+            bool systemEnabled = false;
+            
+            for (uint8_t i = 0; i < paramCount; ++i)
+            {
+                bool value = (strcmp(params[i].value, "true") == 0 || strcmp(params[i].value, "1") == 0);
+                
+                if (strcmp(params[i].key, "g") == 0)
+                    gpsEnabled = value;
+                else if (strcmp(params[i].key, "w") == 0)
+                    warningEnabled = value;
+                else if (strcmp(params[i].key, "s") == 0)
+                    systemEnabled = value;
+            }
+            
+            cfg->ledConfig.gpsEnabled = gpsEnabled;
+            cfg->ledConfig.warningEnabled = warningEnabled;
+            cfg->ledConfig.systemEnabled = systemEnabled;
+            
+            sendAckOk(sender, command);
+        }
+        else
+        {
+            sendAckErr(sender, command, F("Missing params (g,w,s)"));
+        }
+    }
     else
     {
         sendAckErr(sender, command, F("Unknown config command"));
@@ -646,9 +831,10 @@ const char* const* ConfigCommandHandler::supportedCommands(size_t& count) const
 {
     static const char* cmds[] = { 
         ConfigSaveSettings, ConfigGetSettings, ConfigResetSettings, ConfigRename,
-        ConfigRenameRelay, ConfigMapHomeButton, ConfigSetButtonColor, ConfigBoatType, 
+        ConfigRenameRelay, ConfigMapHomeButton, ConfigSetButtonColor, ConfigBoatType,
         ConfigSoundRelayId, ConfigSoundStartDelay, ConfigDefaultRelayState, ConfigLinkRelays,
-        ConfigTimeZoneOffset, ConfigMmsi, ConfigCallSign, ConfigHomePort
+        ConfigTimeZoneOffset, ConfigMmsi, ConfigCallSign, ConfigHomePort, ConfigLedColor,
+		ConfigLedBrightness, ConfigLedAutoSwitch, ConfigLedEnable
 #if defined(ARDUINO_UNO_R4)
         , ConfigBluetoothEnable, ConfigWifiEnable, ConfigWifiMode, ConfigWifiSSID,
         ConfigWifiPassword, ConfigWifiPort, ConfigWifiApIpAddress

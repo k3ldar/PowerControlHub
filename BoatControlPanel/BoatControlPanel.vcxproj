@@ -133,6 +133,7 @@
     <ClInclude Include="MoonPhasePage.h" />
     <ClInclude Include="Phonetic.h" />
     <ClInclude Include="RelaySettingsPage.h" />
+    <ClInclude Include="RgbLedFade.h" />
     <ClInclude Include="Sensors\BaseSensor.h" />
     <ClInclude Include="SettingsPage.h" />
     <ClInclude Include="SunCalculator.h" />

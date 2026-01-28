@@ -14,6 +14,26 @@ enum class VesselType : uint8_t
     Yacht = 0x03,                   // Yacht
 };
 
+struct LedConfig {
+    // Day Mode
+    uint8_t dayBrightness;
+    uint8_t dayGoodColor[3];
+    uint8_t dayBadColor[3];
+
+    // Night Mode
+    uint8_t nightBrightness;
+    uint8_t nightGoodColor[3];
+    uint8_t nightBadColor[3];
+
+    // Auto-switching
+    bool autoSwitch;            // Enable/disable auto day/night
+
+    // Per-LED enable
+    bool gpsEnabled;
+    bool warningEnabled;
+    bool systemEnabled;
+};
+
 //
 // Layout:
 // - version (uint8_t)
@@ -28,7 +48,7 @@ enum class VesselType : uint8_t
 //
 // Keep struct packed and stable. Increase 'VERSION' when you change layout.
 // Packed POD for persistent configuration.
-constexpr uint8_t ConfigVersion = 0;
+constexpr uint8_t ConfigVersion = 1;
 constexpr uint8_t ConfigRelayCount = 8;
 constexpr uint8_t ConfigHomeButtons = 4;
 constexpr uint8_t ConfigMaxNameLength = 31; // max characters (inc null)
@@ -65,6 +85,8 @@ struct Config {
     uint16_t wifiPort;
 	char apIpAddress[MaxIpAddressLength]; // xxx.xxx.xxx.xxx + null
 #endif
+
+    LedConfig ledConfig;
 
     uint16_t checksum;
 } __attribute__((packed));

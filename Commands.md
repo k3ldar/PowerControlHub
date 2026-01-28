@@ -54,10 +54,13 @@ These are commands used to configure the system settings and can only be sent fr
 | `C21` — MMSI | `C21:123456789` | Set Maritime Mobile Service Identity (MMSI) number. Param format: MMSI value directly (no v= prefix). Must be exactly 9 digits. Invalid length → error. |
 | `C22` — Call Sign | `C22:ABCD123` | Set vessel call sign. Param format: call sign value directly (no v= prefix). Truncated to configured max length (ConfigCallSignLength). |
 | `C23` — Home Port | `C23:Miami` | Set vessel home port. Param format: port name directly (no v= prefix). Truncated to configured max length (ConfigHomePortLength). |
+| `C24` — LED Color | `C24:t=0;c=0;r=255;g=50;b=213` | Set LED RGB color. Param format: `t=<type>;c=<colorset>;r=<red>;g=<green>;b=<blue>`. `type` must be 0 (day) or 1 (night). `colorset` must be 0 (good) or 1 (bad). RGB values 0-255. |
+| `C25` — LED Brightness | `C25:t=0;b=75` | Set LED brightness. Param format: `t=<type>;b=<brightness>`. `type` must be 0 (day) or 1 (night). `brightness` must be 0-100. |
+| `C26` — LED Auto Switch | `C26:v=true` or `C26:v=1` | Enable/disable auto day/night switching. Param format: `v=<value>`. `value` must be true/false or 1/0. |
+| `C27` — LED Enable States | `C27:g=true;w=true;s=false` | Enable/disable individual LEDs. Param format: `g=<gps>;w=<warning>;s=<system>`. Each value must be true/false or 1/0. `g`=GPS LED, `w`=Warning LED, `s`=System LED. |
 
 
-
-Common error responses you may see: `Missing param`, `Missing params`, `Missing name`, `Empty name`, `Index out of range`, `Button out of range`, `Slot out of range`, `Relay out of range (or 255 to clear)`, `Invalid value (0 or 1)`, `Invalid mode (0=AP, 1=Client)`, `Only available in Client mode`, `Invalid port`, `Invalid offset (-12 to +14)`, `MMSI must be 9 digits`, `Invalid boat type`, `No available link slots`, `EEPROM commit failed`, `Unknown config command`.
+Common error responses you may see: `Missing param`, `Missing params`, `Missing name`, `Empty name`, `Index out of range`, `Button out of range`, `Slot out of range`, `Relay out of range (or 255 to clear)`, `Invalid value (0 or 1)`, `Invalid mode (0=AP, 1=Client)`, `Only available in Client mode`, `Invalid port`, `Invalid offset (-12 to +14)`, `MMSI must be 9 digits`, `Invalid boat type`, `No available link slots`, `EEPROM commit failed`, `Unknown config command`, `Invalid type (0=day, 1=night)`, `Brightness must be 0-100`, `Invalid value (true/false or 0/1)`, `Missing params (t,r,g,b)`, `Missing params (t,b)`, `Missing params (g,w,s)`.
 
 
 ### Wifi Configuration Commands (SFB)

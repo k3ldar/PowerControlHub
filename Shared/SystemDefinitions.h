@@ -67,6 +67,10 @@ constexpr char ConfigTimeZoneOffset[] = "C20";
 constexpr char ConfigMmsi[] = "C21";
 constexpr char ConfigCallSign[] = "C22";
 constexpr char ConfigHomePort[] = "C23";
+constexpr char ConfigLedColor[] = "C24";
+constexpr char ConfigLedBrightness[] = "C25";
+constexpr char ConfigLedAutoSwitch[] = "C26";
+constexpr char ConfigLedEnable[] = "C27";
 
 constexpr char WarningsActive[] = "W0";
 constexpr char WarningsList[] = "W1";
