@@ -47,7 +47,7 @@
 #include "Config.h"
 #include "ConfigManager.h"
 #include "WarningManager.h"
-
+#include "SoundManager.h"
 #include "RgbLedFade.h"
 
 // sensors
@@ -76,6 +76,9 @@ constexpr unsigned long UpdateIntervalMs = 600;
 // forward declares
 void onLinkCommandReceived(SerialCommandManager* mgr);
 void onComputerCommandReceived(SerialCommandManager* mgr);
+
+// sound
+SoundManager soundManager(22);
 
 // led indicators
 RgbLedFade systemLedStatus(4, 3, 2);
@@ -208,7 +211,7 @@ void setup()
 	environmentPage.configSet(config);
 	systemLedStatus.configSet(config);
 
-    systemLedStatus.setDayTime(true); // Use day mode colors after config load
+    systemLedStatus.setDayTime(true);
 
 	nextion.begin();
 
@@ -255,6 +258,10 @@ void loop()
 
     SystemCpuMonitor::startTask();
     systemLedStatus.update(now);
+    SystemCpuMonitor::endTask();
+
+    SystemCpuMonitor::startTask();
+    soundManager.update(now);
     SystemCpuMonitor::endTask();
 
     SystemCpuMonitor::update();

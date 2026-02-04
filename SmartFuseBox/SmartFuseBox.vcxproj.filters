@@ -160,6 +160,9 @@
     <ClCompile Include="ConfigSyncManager.cpp">
       <Filter>Source Files\BusinessLogic</Filter>
     </ClCompile>
+    <ClCompile Include="Shared\CommandHandlers\SensorCommandHandler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="__vm\.SmartFuseBox.vsarduino.h">
@@ -306,8 +309,8 @@
     <ClInclude Include="DateTimeManager.h">
       <Filter>Header Files\SharedCode</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="SmartFuseBox\SMART_RETRY_STRATEGY.md" />
+    <ClInclude Include="Shared\Sensors\GpsSensorHandler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

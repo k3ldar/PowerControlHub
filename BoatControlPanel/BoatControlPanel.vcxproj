@@ -136,6 +136,7 @@
     <ClInclude Include="RgbLedFade.h" />
     <ClInclude Include="Sensors\BaseSensor.h" />
     <ClInclude Include="SettingsPage.h" />
+    <ClInclude Include="SoundManager.h" />
     <ClInclude Include="SunCalculator.h" />
     <ClInclude Include="SystemDefinitions.h" />
     <ClInclude Include="LoggingSupport.h" />

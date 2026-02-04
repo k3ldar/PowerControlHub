@@ -142,32 +142,32 @@
     <ClCompile Include="BuoysPage.cpp">
       <Filter>Source Files\Pages</Filter>
     </ClCompile>
-    <ClCompile Include="MoonPhasePage.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Phonetic.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SettingsPage.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="VhfChannelsPage.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="VhfDistressPage.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="VhfRadioPage.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="RelaySettingsPage.cpp">
       <Filter>Source Files\Pages</Filter>
     </ClCompile>
-    <ClCompile Include="EnvironmentPage.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="SunCalculator.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SettingsPage.cpp">
+      <Filter>Source Files\Pages</Filter>
+    </ClCompile>
+    <ClCompile Include="VhfChannelsPage.cpp">
+      <Filter>Source Files\Pages</Filter>
+    </ClCompile>
+    <ClCompile Include="VhfDistressPage.cpp">
+      <Filter>Source Files\Pages</Filter>
+    </ClCompile>
+    <ClCompile Include="VhfRadioPage.cpp">
+      <Filter>Source Files\Pages</Filter>
+    </ClCompile>
+    <ClCompile Include="MoonPhasePage.cpp">
+      <Filter>Source Files\Pages</Filter>
+    </ClCompile>
+    <ClCompile Include="EnvironmentPage.cpp">
+      <Filter>Source Files\Pages</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -279,37 +279,16 @@
     <ClInclude Include="BuoysPage.h">
       <Filter>Header Files\Pages</Filter>
     </ClInclude>
-    <ClInclude Include="GpsSensorHandler.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Astronomy.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="MoonPhasePage.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Phonetic.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="SettingsPage.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="VhfChannelsPage.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="VhfDistressPage.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="VhfRadioPage.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="RelaySettingsPage.h">
       <Filter>Header Files\Pages</Filter>
     </ClInclude>
     <ClInclude Include="Environment.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="EnvironmentPage.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="RgbLedFade.h">
@@ -320,6 +299,30 @@
     </ClInclude>
     <ClInclude Include="Sensors\BaseSensor.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SoundManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SettingsPage.h">
+      <Filter>Header Files\Pages</Filter>
+    </ClInclude>
+    <ClInclude Include="MoonPhasePage.h">
+      <Filter>Header Files\Pages</Filter>
+    </ClInclude>
+    <ClInclude Include="VhfRadioPage.h">
+      <Filter>Header Files\Pages</Filter>
+    </ClInclude>
+    <ClInclude Include="VhfDistressPage.h">
+      <Filter>Header Files\Pages</Filter>
+    </ClInclude>
+    <ClInclude Include="VhfChannelsPage.h">
+      <Filter>Header Files\Pages</Filter>
+    </ClInclude>
+    <ClInclude Include="EnvironmentPage.h">
+      <Filter>Header Files\Pages</Filter>
+    </ClInclude>
+    <ClInclude Include="GpsSensorHandler.h">
+      <Filter>Header Files\Sensors</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -35,7 +35,7 @@ void VhfChannelsPage::handleTouch(uint8_t compId, uint8_t eventType)
     switch (compId)
     {
     case ButtonPrevious:
-        setPage(PageRelay);
+        setPage(PageVhfRadio);
         return;
     }
 }
