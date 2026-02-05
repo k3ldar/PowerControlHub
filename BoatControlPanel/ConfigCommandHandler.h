@@ -1,1 +1,21 @@
-../Shared/CommandHandlers/ConfigCommandHandler.h
+#pragma once
+#include <Arduino.h>
+#include "Config.h"
+#include "ConfigManager.h"
+#include "HomePage.h"
+#include "BaseCommandHandler.h"
+#include "BroadcastManager.h"
+
+class ConfigCommandHandler : public BaseCommandHandler
+{
+public:
+    // Constructor: pass the HomePage pointer so we can notify UI when saved/updated
+    explicit ConfigCommandHandler(BroadcastManager* broadcastManager, HomePage* homePage);
+
+    bool handleCommand(SerialCommandManager* sender, const char* command, const StringKeyValue params[], uint8_t paramCount) override;
+    const char* const* supportedCommands(size_t& count) const override;
+
+private:
+    BroadcastManager* _broadcastManager;
+    HomePage* _homePage;
+};
