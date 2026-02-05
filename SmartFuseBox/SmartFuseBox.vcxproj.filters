@@ -163,6 +163,9 @@
     <ClCompile Include="SensorCommandHandler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="SensorCommandHandler.cpp">
+      <Filter>Source Files\SharedCode\SerialCommandHandlers</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="__vm\.SmartFuseBox.vsarduino.h">
@@ -309,8 +312,8 @@
     <ClInclude Include="DateTimeManager.h">
       <Filter>Header Files\SharedCode</Filter>
     </ClInclude>
-    <ClInclude Include="Shared\Sensors\GpsSensorHandler.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="GpsSensorHandler.h">
+      <Filter>Header Files\SharedCode\Sensors</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

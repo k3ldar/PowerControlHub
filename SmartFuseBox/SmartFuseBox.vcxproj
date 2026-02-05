@@ -74,6 +74,7 @@
     <ProjectCapability Include="VisualMicroLinux" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="SensorCommandHandler.cpp" />
     <ClCompile Include="BluetoothManager.cpp" />
     <ClCompile Include="BluetoothRelayService.cpp" />
     <ClCompile Include="BluetoothSensorService.cpp" />
@@ -86,7 +87,6 @@
     <ClCompile Include="SensorController.h" />
     <ClCompile Include="SensorNetworkHandler.cpp" />
     <ClCompile Include="ConfigSyncManager.cpp" />
-    <ClCompile Include="Shared\CommandHandlers\SensorCommandHandler.cpp" />
     <ClCompile Include="SoundNetworkHandler.cpp" />
     <ClCompile Include="SystemCpuMonitor.cpp" />
     <ClCompile Include="SystemFunctions.cpp" />
@@ -116,6 +116,7 @@
       <FileType>CppCode</FileType>
       <DeploymentContent>true</DeploymentContent>
     </ClCompile>
+    <ClInclude Include="GpsSensorHandler.h" />
     <ClInclude Include="LightSensorHandler.h" />
     <ClInclude Include="MessageBus.h" />
     <ClInclude Include="BaseSensor.h" />
@@ -125,7 +126,6 @@
     <ClInclude Include="NetworkJsonVisitor.h" />
     <ClInclude Include="new_Arduino_LED_Matrix.h" />
     <ClInclude Include="ConfigSyncManager.h" />
-    <ClInclude Include="GpsSensorHandler.h" />
     <ClInclude Include="SystemDefinitions.h" />
     <ClInclude Include="DateTimeManager.h" />
     <ClInclude Include="INetworkCommandHandler.h" />
