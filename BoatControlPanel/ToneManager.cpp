@@ -1,0 +1,188 @@
+#include "ToneManager.h"
+
+ToneManager::ToneManager(uint8_t pin)
+    : _pin(pin),
+      _config(nullptr),
+      _playing(false),
+      _currentStep(0),
+      _totalSteps(0),
+      _stepStartTime(0)
+{
+    pinMode(_pin, OUTPUT);
+}
+
+void ToneManager::configSet(SoundSignalConfig* config)
+{
+    _config = config;
+}
+
+void ToneManager::play(ToneType type)
+{
+    stop();
+    buildSequence(type);
+
+    if (_totalSteps > 0)
+    {
+        _playing = true;
+        _currentStep = 0;
+        _stepStartTime = millis();
+        startCurrentStep();
+    }
+}
+
+void ToneManager::stop()
+{
+    _playing = false;
+    _currentStep = 0;
+    _totalSteps = 0;
+    noTone(_pin);
+}
+
+bool ToneManager::isPlaying() const
+{
+    return _playing;
+}
+
+uint32_t ToneManager::getRepeatIntervalMs() const
+{
+    return _config ? _config->bad_repeatMs : 30000;
+}
+
+void ToneManager::update(unsigned long now)
+{
+    if (!_playing) return;
+
+    if (now - _stepStartTime >= _steps[_currentStep].durationMs)
+    {
+        _currentStep++;
+
+        if (_currentStep >= _totalSteps)
+        {
+            stop();
+            return;
+        }
+
+        _stepStartTime = now;
+        startCurrentStep();
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Private
+// ---------------------------------------------------------------------------
+
+void ToneManager::startCurrentStep()
+{
+    const ToneStep& step = _steps[_currentStep];
+
+    if (step.frequencyHz > 0)
+    {
+        tone(_pin, step.frequencyHz, step.durationMs);
+    }
+    else
+    {
+        noTone(_pin);
+    }
+}
+
+void ToneManager::buildSequence(ToneType type)
+{
+    uint8_t preset;
+    uint16_t hz;
+    uint16_t ms;
+
+    if (type == ToneType::Good)
+    {
+        preset = _config ? _config->goodPreset : 0;
+        hz     = _config ? _config->good_toneHz : 1000;
+        ms     = _config ? _config->good_durationMs : 100;
+    }
+    else
+    {
+        preset = _config ? _config->badPreset : 0;
+        hz     = _config ? _config->bad_toneHz : 500;
+        ms     = _config ? _config->bad_durationMs : 200;
+    }
+
+    switch (static_cast<TonePreset>(preset))
+    {
+        case TonePreset::SubmarinePing:    _totalSteps = buildSubmarinePing();     break;
+        case TonePreset::DoubleBeep:       _totalSteps = buildDoubleBeep();        break;
+        case TonePreset::RisingChirp:      _totalSteps = buildRisingChirp();       break;
+        case TonePreset::DescendingAlert:  _totalSteps = buildDescendingAlert();   break;
+        case TonePreset::NauticalBell:     _totalSteps = buildNauticalBell();      break;
+        default:                           _totalSteps = buildUserDefined(hz, ms); break;
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Preset builders
+// ---------------------------------------------------------------------------
+
+uint8_t ToneManager::buildUserDefined(uint16_t hz, uint16_t ms)
+{
+    _steps[0] = { hz, ms };
+    return 1;
+}
+
+// Sonar-style sweep 1000→400 Hz then fading echo pips
+uint8_t ToneManager::buildSubmarinePing()
+{
+    uint8_t i = 0;
+    constexpr uint16_t startF = 1000;
+    constexpr uint16_t endF   = 400;
+    constexpr uint8_t  sweepSteps = 8;
+    constexpr uint16_t stepDur = 6; // ms per sweep slice (~48 ms total)
+
+    for (uint8_t s = 0; s <= sweepSteps && i < MaxSteps; ++s)
+    {
+        uint16_t f = startF + (int16_t)(endF - startF) * s / sweepSteps;
+        _steps[i++] = { f, stepDur };
+    }
+
+    if (i < MaxSteps) _steps[i++] = { 0,   30 }; // pause
+    if (i < MaxSteps) _steps[i++] = { 600, 30 }; // echo 1
+    if (i < MaxSteps) _steps[i++] = { 0,   30 }; // pause
+    if (i < MaxSteps) _steps[i++] = { 500, 25 }; // echo 2
+    if (i < MaxSteps) _steps[i++] = { 0,   45 }; // pause
+    if (i < MaxSteps) _steps[i++] = { 450, 20 }; // echo 3
+
+    return i;
+}
+
+// Two quick identical pips
+uint8_t ToneManager::buildDoubleBeep()
+{
+    _steps[0] = { 1200, 80 };
+    _steps[1] = { 0,    80 };
+    _steps[2] = { 1200, 80 };
+    return 3;
+}
+
+// Four ascending tones
+uint8_t ToneManager::buildRisingChirp()
+{
+    _steps[0] = { 400,  60 };
+    _steps[1] = { 600,  60 };
+    _steps[2] = { 800,  60 };
+    _steps[3] = { 1000, 80 };
+    return 4;
+}
+
+// Three descending tones
+uint8_t ToneManager::buildDescendingAlert()
+{
+    _steps[0] = { 1200, 80 };
+    _steps[1] = { 900,  80 };
+    _steps[2] = { 600, 100 };
+    return 3;
+}
+
+// Quick double ding (high-pitched)
+uint8_t ToneManager::buildNauticalBell()
+{
+    _steps[0] = { 2000, 40 };
+    _steps[1] = { 0,    20 };
+    _steps[2] = { 2000, 40 };
+    return 3;
+}

@@ -8,6 +8,7 @@
 
 #if defined(BOAT_CONTROL_PANEL)
 #include "RgbLedFade.h"
+class ToneManager;
 #endif
 
 /**
@@ -45,12 +46,17 @@
  */
 class WarningManager {
 private:
-    SerialCommandManager* _commandMgr;      // For sending heartbeat commands
+	SerialCommandManager* _commandMgr;      // For sending heartbeat commands
 #if defined(BOAT_CONTROL_PANEL)
 	RgbLedFade* _warningStatus;			    // LED indicator for warnings
+	ToneManager* _toneManager;              // Sound alert manager
 #endif
-    uint32_t _localWarnings;                // Bitmap of LOCAL warnings (raised by this device)
-    uint32_t _remoteWarnings;               // Bitmap of REMOTE warnings (from connected device)
+	uint32_t _localWarnings;                // Bitmap of LOCAL warnings (raised by this device)
+	uint32_t _remoteWarnings;               // Bitmap of REMOTE warnings (from connected device)
+#if defined(BOAT_CONTROL_PANEL)
+	uint32_t _previousWarnings;             // Previous warning state for change detection
+	unsigned long _lastTonePlayed;          // Last time bad tone was played
+#endif
 
     // Heartbeat state
     unsigned long _heartbeatInterval;       // How often to send heartbeat (ms)
@@ -86,7 +92,7 @@ public:
     explicit WarningManager(SerialCommandManager* commandMgr, unsigned long heartbeatInterval,
         unsigned long heartbeatTimeout
 #if defined(BOAT_CONTROL_PANEL)
-        , RgbLedFade* warningStatus);
+        , RgbLedFade* warningStatus, ToneManager* toneManager = nullptr);
 #else
         );
 #endif

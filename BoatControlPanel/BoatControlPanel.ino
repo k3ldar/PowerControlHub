@@ -47,7 +47,7 @@
 #include "Config.h"
 #include "ConfigManager.h"
 #include "WarningManager.h"
-#include "SoundManager.h"
+#include "ToneManager.h"
 #include "RgbLedFade.h"
 
 // sensors
@@ -78,7 +78,7 @@ void onLinkCommandReceived(SerialCommandManager* mgr);
 void onComputerCommandReceived(SerialCommandManager* mgr);
 
 // sound
-SoundManager soundManager(22);
+ToneManager toneManager(22);
 
 // led indicators
 RgbLedFade systemLedStatus(4, 3, 2);
@@ -91,7 +91,7 @@ SerialCommandManager commandMgrLink(&LINK_SERIAL, onLinkCommandReceived, '\n', '
 BroadcastManager broadcastManager(&commandMgrComputer, &commandMgrLink);
 
 // Warning manager with heartbeat monitoring
-WarningManager warningManager(&commandMgrLink, HeartbeatIntervalMs, HeartbeatTimeoutMs, &systemLedStatus);
+WarningManager warningManager(&commandMgrLink, HeartbeatIntervalMs, HeartbeatTimeoutMs, &systemLedStatus, &toneManager);
 
 // Nextion display setup
 SplashPage splashPage(&NEXTION_SERIAL);
@@ -210,8 +210,9 @@ void setup()
 	relaySettingsPage.configSet(config);
 	environmentPage.configSet(config);
 	systemLedStatus.configSet(config);
+	toneManager.configSet(&config->soundConfig);
 
-    systemLedStatus.setDayTime(true);
+	systemLedStatus.setDayTime(true);
 
 	nextion.begin();
 
@@ -226,6 +227,7 @@ void setup()
 	broadcastManager.sendCommand(SystemInitialized, "");
 
 	nextion.sendCommand(PageOne);
+	toneManager.play(ToneType::Good);
 }
 
 void loop()
@@ -261,7 +263,7 @@ void loop()
     SystemCpuMonitor::endTask();
 
     SystemCpuMonitor::startTask();
-    soundManager.update(now);
+    toneManager.update(now);
     SystemCpuMonitor::endTask();
 
     SystemCpuMonitor::update();

@@ -73,6 +73,11 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
                 strncpy(longName, tmpLongName, sizeof(longName) - 1);
                 longName[sizeof(longName) - 1] = '\0';
             }
+            else
+            {
+                strncpy(shortName, params[0].value, sizeof(shortName) - 1);
+                shortName[sizeof(shortName) - 1] = '\0';
+			}
 
             // Copy short name with truncation to relay short name length
             size_t maxShortLen = sizeof(cfg->relayShortNames[idx]) - 1;
@@ -388,33 +393,54 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
                 return true;
             }
 
-            // Find existing link or empty slot
-            bool found = false;
+            // First check if relay is already linked
+            bool alreadyLinked = false;
+            int8_t existingIndex = -1;
+
             for (uint8_t i = 0; i < ConfigMaxLinkedRelays; ++i)
             {
-                if (cfg->linkedRelays[i][0] == relay || cfg->linkedRelays[i][0] == 0xFF)
+                if (cfg->linkedRelays[i][0] == relay)
                 {
-                    if (linkedRelay == 0xFF)
-                    {
-                        // Unlink
-                        cfg->linkedRelays[i][0] = 0xFF;
-                        cfg->linkedRelays[i][1] = 0xFF;
-                    }
-                    else
-                    {
-                        // Link
-                        cfg->linkedRelays[i][0] = relay;
-                        cfg->linkedRelays[i][1] = linkedRelay;
-                    }
-                    found = true;
+                    alreadyLinked = true;
+                    existingIndex = i;
                     break;
                 }
             }
 
-            if (!found)
+            if (linkedRelay == 0xFF)
             {
-                sendAckErr(sender, command, F("No available link slots"));
-                return true;
+                if (alreadyLinked)
+                {
+                    cfg->linkedRelays[existingIndex][0] = 0xFF;
+                    cfg->linkedRelays[existingIndex][1] = 0xFF;
+                }
+            }
+            else
+            {
+                if (alreadyLinked)
+                {
+                    sendAckErr(sender, command, F("Relay already linked"));
+                    return true;
+                }
+                
+                // Find empty slot
+                bool found = false;
+                for (uint8_t i = 0; i < ConfigMaxLinkedRelays; ++i)
+                {
+                    if (cfg->linkedRelays[i][0] == 0xFF)
+                    {
+                        cfg->linkedRelays[i][0] = relay;
+                        cfg->linkedRelays[i][1] = linkedRelay;
+                        found = true;
+                        break;
+                    }
+                }
+                
+                if (!found)
+                {
+                    sendAckErr(sender, command, F("No available link slots"));
+                    return true;
+                }
             }
 
             sendAckOk(sender, command, &params[0]);
@@ -670,7 +696,11 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
         // Expect "C24:t=0;r=255;g=50;b=213" where t=0 (day) or t=1 (night)
         if (paramCount >= 5)
         {
-            uint8_t type = 0, colorSet = 0, r = 0, g = 0, b = 0;
+            uint8_t type = 0;
+            uint8_t colorSet = 0;
+            uint8_t r = 0;
+            uint8_t g = 0;
+            uint8_t b = 0;
 
             for (uint8_t i = 0; i < paramCount; i++)
             {
@@ -699,12 +729,7 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
 			}
             
             // Check which color set to update based on param key
-            bool isGoodColor = false;
-            if (paramCount >= 5 && strcmp(params[4].key, "c") == 0)
-            {
-                uint8_t colorType = static_cast<uint8_t>(strtoul(params[4].value, nullptr, 0));
-                isGoodColor = (colorType == 0); // 0=good, 1=bad
-            }
+            bool isGoodColor = colorSet == 0;
             
             if (type == 0) // Day mode
             {

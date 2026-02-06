@@ -3,6 +3,10 @@
 #include "ConfigManager.h"
 #include "SystemFunctions.h"
 
+#if defined(BOAT_CONTROL_PANEL)
+#include "ToneManager.h"
+#endif
+
 constexpr char DefaultBoatName[] = "My Boat";
 constexpr char RelayNameShort[] = "R %u";
 constexpr char RelayNameLong[] = "Relay %u";
@@ -163,6 +167,15 @@ void ConfigManager::resetToDefaults()
     _cfg.ledConfig.gpsEnabled = true;
     _cfg.ledConfig.warningEnabled = true;
     _cfg.ledConfig.systemEnabled = true;
+
+    // default sound config
+    _cfg.soundConfig.goodPreset     = static_cast<uint8_t>(TonePreset::SubmarinePing);
+    _cfg.soundConfig.good_toneHz    = 1000;
+    _cfg.soundConfig.good_durationMs = 100;
+    _cfg.soundConfig.badPreset      = static_cast<uint8_t>(TonePreset::DescendingAlert);
+    _cfg.soundConfig.bad_toneHz     = 500;
+    _cfg.soundConfig.bad_durationMs = 200;
+	_cfg.soundConfig.bad_repeatMs = 30000;
 
     // compute checksum
     _cfg.checksum = 0;

@@ -32,7 +32,18 @@ struct LedConfig {
     bool gpsEnabled;
     bool warningEnabled;
     bool systemEnabled;
-};
+} __attribute__((packed));
+
+struct SoundSignalConfig
+{
+    uint8_t goodPreset;
+    uint16_t good_toneHz;
+	uint16_t good_durationMs;
+	uint8_t badPreset;
+	uint16_t bad_toneHz;
+	uint16_t bad_durationMs;
+    uint32_t bad_repeatMs;
+} __attribute__((packed));
 
 //
 // Layout:
@@ -87,6 +98,7 @@ struct Config {
 #endif
 
     LedConfig ledConfig;
+	SoundSignalConfig soundConfig;
 
     uint16_t checksum;
 } __attribute__((packed));
