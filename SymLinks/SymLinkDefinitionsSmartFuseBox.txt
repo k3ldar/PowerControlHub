@@ -33,3 +33,5 @@ DateTimeManager.h|..\Shared\DateTimeManager.h
 DateTimeManager.cpp|..\Shared\DateTimeManager.cpp
 MessageBus.h|..\Shared\MessageBus.h
 GpsSensorHander.h|..\Shared\Sensors\GpsSensorHandler.h
+ToneManager.h|..\Shared\ToneManager.h
+ToneManager.cpp|..\Shared\ToneManager.cpp

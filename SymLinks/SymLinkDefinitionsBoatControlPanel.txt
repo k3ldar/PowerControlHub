@@ -29,3 +29,5 @@ GpsSensorHandler.h|..\Shared\Sensors\GpsSensorHandler.h
 DateTimeManager.h|..\Shared\DateTimeManager.h
 DateTimeManager.cpp|..\Shared\DateTimeManager.cpp
 Astronomy.h|..\Shared\Astronomy.h
+ToneManager.h|..\Shared\ToneManager.h
+ToneManager.cpp|..\Shared\ToneManager.cpp

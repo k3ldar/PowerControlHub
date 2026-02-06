@@ -3,9 +3,7 @@
 #include "ConfigManager.h"
 #include "SystemFunctions.h"
 
-#if defined(BOAT_CONTROL_PANEL)
 #include "ToneManager.h"
-#endif
 
 constexpr char DefaultBoatName[] = "My Boat";
 constexpr char RelayNameShort[] = "R %u";
