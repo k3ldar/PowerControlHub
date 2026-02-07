@@ -29,6 +29,7 @@ enum class WarningType : uint32_t {
 	WeakWifiSignal = 1UL << 8,                        // 0x00000100 - WiFi signal weak
 	SyncFailed = 1UL << 9,                            // 0x00000200 - Configuration sync issue detected
 	SdCardError = 1UL << 10,                          // 0x00000400 - SD card read/write error
+	SdCardMissing = 1UL << 11,                        // 0x00000800 - SD card not detected
 
     // Sensor warnings (bits 20+)
     SensorFailure = 1UL << 20,                        // 0x00100000 - Sensor communication failure
@@ -50,7 +51,7 @@ static const char WT_7[]  PROGMEM = "Wifi Invalid Config";
 static const char WT_8[]  PROGMEM = "Weak Wifi Signal";
 static const char WT_9[]  PROGMEM = "Synchronization Failed";
 static const char WT_10[] PROGMEM = "SD Card Error";
-static const char WT_11[] PROGMEM = "";
+static const char WT_11[] PROGMEM = "SD Card Not Found";
 static const char WT_12[] PROGMEM = "";
 static const char WT_13[] PROGMEM = "";
 static const char WT_14[] PROGMEM = "";
