@@ -18,40 +18,23 @@ void ToneManager::configSet(SoundSignalConfig* config)
 
 void ToneManager::play(ToneType type)
 {
-    Serial.print(F("[ToneManager::play] Type="));
-    Serial.println(type == ToneType::Good ? F("Good") : F("Bad"));
-
     stop();
     buildSequence(type);
 
     if (_totalSteps > 0)
     {
-        Serial.print(F("[ToneManager::play] Starting sequence - steps="));
-        Serial.println(_totalSteps);
         _playing = true;
         _currentStep = 0;
         _stepStartTime = millis();
         startCurrentStep();
     }
-    else
-    {
-        Serial.println(F("[ToneManager::play] No steps built"));
-    }
 }
 
 void ToneManager::stop()
 {
-    Serial.print(F("[ToneManager::stop] Called - _playing="));
-    Serial.println(_playing);
-
     if (_playing)
     {
-        Serial.println(F("[ToneManager::stop] Calling noTone()"));
         noTone(_pin);
-    }
-    else
-    {
-        Serial.println(F("[ToneManager::stop] Skipped noTone() - not playing"));
     }
 
     _playing = false;
@@ -80,12 +63,10 @@ void ToneManager::update(unsigned long now)
 
         if (_currentStep >= _totalSteps)
         {
-            Serial.println(F("[ToneManager::update] Sequence complete"));
             stop();
             return;
         }
 
-        Serial.println(F("[ToneManager::update] Advancing to next step"));
         _stepStartTime = now;
         startCurrentStep();
     }
@@ -99,23 +80,13 @@ void ToneManager::startCurrentStep()
 {
     const ToneStep& step = _steps[_currentStep];
 
-    Serial.print(F("[ToneManager::startCurrentStep] Step "));
-    Serial.print(_currentStep);
-    Serial.print(F("/"));
-    Serial.print(_totalSteps);
-    Serial.print(F(" - Hz="));
-    Serial.print(step.frequencyHz);
-    Serial.print(F(", ms="));
-    Serial.println(step.durationMs);
 
     if (step.frequencyHz > 0)
     {
-        Serial.println(F("[ToneManager::startCurrentStep] Calling tone()"));
         tone(_pin, step.frequencyHz, step.durationMs);
     }
     else
     {
-        Serial.println(F("[ToneManager::startCurrentStep] Calling noTone() - silence step"));
         noTone(_pin);
     }
 }

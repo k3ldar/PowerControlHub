@@ -321,7 +321,7 @@
     <ClInclude Include="GpsSensorHandler.h">
       <Filter>Header Files\Sensors</Filter>
     </ClInclude>
-    <ClInclude Include="..\Shared\Sensors\BaseSensor.h">
+    <ClInclude Include="BaseSensor.h">
       <Filter>Header Files\SharedCode</Filter>
     </ClInclude>
     <ClInclude Include="ToneManager.h">

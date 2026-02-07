@@ -50,11 +50,7 @@
 #include "ToneManager.h"
 #include "RgbLedFade.h"
 
-// sensors
-//#include "TLVCompassHandler.h"
-
 #include "GpsSensorHandler.h"
-#include "SensorCommandHandler.h"
 
 #if defined(ARDUINO_MEGA2560)
 #define NEXTION_SERIAL Serial1
