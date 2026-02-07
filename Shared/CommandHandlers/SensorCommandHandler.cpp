@@ -241,54 +241,148 @@ bool SensorCommandHandler::handleCommand(SerialCommandManager* sender, const cha
     // Handle query requests (no parameters) - return current sensor values
     if (paramCount == 0)
     {
-        char buffer[32];
+        char buffer[64];
+        sendDebugMessage(F("Query request - no params"), F("SensorCommandHandler"));
 
-        if (strcmp(command, SensorLightSensor) == 0)
+        if (strcmp(command, SensorTemperature) == 0)
         {
-            // S9 query - return current day/night status
-            snprintf_P(buffer, sizeof(buffer), PSTR("v=%d"), _isDaytime ? 1 : 0);
-            sender->sendCommand(SensorLightSensor, buffer);
-            sendAckOk(sender, command);
-            return true;
-        }
-        else if (strcmp(command, SensorTemperature) == 0)
-        {
+            // S0 query
             snprintf_P(buffer, sizeof(buffer), PSTR("v=%.1f"), _lastTemperature);
             sender->sendCommand(SensorTemperature, buffer);
             sendAckOk(sender, command);
+            sendDebugMessage(F("Returned Temperature"), F("SensorCommandHandler"));
             return true;
         }
         else if (strcmp(command, SensorHumidity) == 0)
         {
+            // S1 query
             snprintf_P(buffer, sizeof(buffer), PSTR("v=%d"), _lastHumidity);
             sender->sendCommand(SensorHumidity, buffer);
             sendAckOk(sender, command);
+            sendDebugMessage(F("Returned Humidity"), F("SensorCommandHandler"));
+            return true;
+        }
+        else if (strcmp(command, SensorBearing) == 0)
+        {
+            // S2 query
+            snprintf_P(buffer, sizeof(buffer), PSTR("v=%.1f"), _lastBearing);
+            sender->sendCommand(SensorBearing, buffer);
+            sendAckOk(sender, command);
+            sendDebugMessage(F("Returned Bearing"), F("SensorCommandHandler"));
+            return true;
+        }
+        else if (strcmp(command, SensorDirection) == 0)
+        {
+            // S3 query
+            snprintf_P(buffer, sizeof(buffer), PSTR("v=%s"), _gpsDirection ? _gpsDirection : "N");
+            sender->sendCommand(SensorDirection, buffer);
+            sendAckOk(sender, command);
+            sendDebugMessage(F("Returned Direction"), F("SensorCommandHandler"));
+            return true;
+        }
+        else if (strcmp(command, SensorSpeed) == 0)
+        {
+            // S4 query
+            snprintf_P(buffer, sizeof(buffer), PSTR("v=%d"), _lastSpeed);
+            sender->sendCommand(SensorSpeed, buffer);
+            sendAckOk(sender, command);
+            sendDebugMessage(F("Returned Speed"), F("SensorCommandHandler"));
+            return true;
+        }
+        else if (strcmp(command, SensorCompassTemp) == 0)
+        {
+            // S5 query
+            snprintf_P(buffer, sizeof(buffer), PSTR("v=%.1f"), _lastCompassTemp);
+            sender->sendCommand(SensorCompassTemp, buffer);
+            sendAckOk(sender, command);
+            sendDebugMessage(F("Returned Compass Temp"), F("SensorCommandHandler"));
             return true;
         }
         else if (strcmp(command, SensorWaterLevel) == 0)
         {
+            // S6 query
             snprintf_P(buffer, sizeof(buffer), PSTR("v=%d"), _lastWaterLevel);
             sender->sendCommand(SensorWaterLevel, buffer);
             sendAckOk(sender, command);
+            sendDebugMessage(F("Returned Water Level"), F("SensorCommandHandler"));
             return true;
         }
         else if (strcmp(command, SensorWaterPumpActive) == 0)
         {
+            // S7 query
             snprintf_P(buffer, sizeof(buffer), PSTR("v=%d"), _lastWaterPumpActive ? 1 : 0);
             sender->sendCommand(SensorWaterPumpActive, buffer);
             sendAckOk(sender, command);
+            sendDebugMessage(F("Returned Water Pump"), F("SensorCommandHandler"));
             return true;
         }
         else if (strcmp(command, SensorHornActive) == 0)
         {
+            // S8 query
             snprintf_P(buffer, sizeof(buffer), PSTR("v=%d"), _lastHornActive ? 1 : 0);
             sender->sendCommand(SensorHornActive, buffer);
             sendAckOk(sender, command);
+            sendDebugMessage(F("Returned Horn Active"), F("SensorCommandHandler"));
+            return true;
+        }
+        else if (strcmp(command, SensorLightSensor) == 0)
+        {
+            // S9 query
+            snprintf_P(buffer, sizeof(buffer), PSTR("v=%d"), _isDaytime ? 1 : 0);
+            sender->sendCommand(SensorLightSensor, buffer);
+            sendAckOk(sender, command);
+            sendDebugMessage(F("Returned Light Sensor"), F("SensorCommandHandler"));
+            return true;
+        }
+        else if (strcmp(command, SensorGpsLatLong) == 0)
+        {
+            // S10 query
+            snprintf_P(buffer, sizeof(buffer), PSTR("lat=%.6f&lon=%.6f"), _gpsLatitude, _gpsLongitude);
+            sender->sendCommand(SensorGpsLatLong, buffer);
+            sendAckOk(sender, command);
+            sendDebugMessage(F("Returned GPS LatLong"), F("SensorCommandHandler"));
+            return true;
+        }
+        else if (strcmp(command, SensorGpsAltitude) == 0)
+        {
+            // S11 query
+            snprintf_P(buffer, sizeof(buffer), PSTR("v=%.2f"), _altitude);
+            sender->sendCommand(SensorGpsAltitude, buffer);
+            sendAckOk(sender, command);
+            sendDebugMessage(F("Returned GPS Altitude"), F("SensorCommandHandler"));
+            return true;
+        }
+        else if (strcmp(command, SensorGpsSpeed) == 0)
+        {
+            // S12 query
+            snprintf_P(buffer, sizeof(buffer), PSTR("v=%.2f&course=%.2f&dir=%s"),
+                (double)_lastSpeed, _gpsCourse, _gpsDirection ? _gpsDirection : "N");
+            sender->sendCommand(SensorGpsSpeed, buffer);
+            sendAckOk(sender, command);
+            sendDebugMessage(F("Returned GPS Speed"), F("SensorCommandHandler"));
+            return true;
+        }
+        else if (strcmp(command, SensorGpsSatellites) == 0)
+        {
+            // S13 query
+            snprintf_P(buffer, sizeof(buffer), PSTR("v=%lu"), (unsigned long)_gpsSatellites);
+            sender->sendCommand(SensorGpsSatellites, buffer);
+            sendAckOk(sender, command);
+            sendDebugMessage(F("Returned GPS Satellites"), F("SensorCommandHandler"));
+            return true;
+        }
+        else if (strcmp(command, SensorGpsDistance) == 0)
+        {
+            // S14 query
+            snprintf_P(buffer, sizeof(buffer), PSTR("v=%.2f"), _gpsDistance);
+            sender->sendCommand(SensorGpsDistance, buffer);
+            sendAckOk(sender, command);
+            sendDebugMessage(F("Returned GPS Distance"), F("SensorCommandHandler"));
             return true;
         }
 
         // Unknown query command
-        sendDebugMessage(F("No parameters in sensor command"), F("SensorCommandHandler"));
+        sendErrorMessage(F("Unknown sensor query command"), "SensorCommandHandler");
         return false;
     }
 

@@ -63,6 +63,7 @@ private:
 	/**
  * @brief Synchronize DateTimeManager with GPS UTC time.
  * Converts GPS date/time to Unix timestamp and updates DateTimeManager.
+ * Supports partial updates: if only date or time is valid, uses existing value from DateTimeManager for the missing component.
  */
 	void syncTimeFromGps()
 	{
@@ -71,34 +72,69 @@ private:
 			return;
 		}
 
-		// Check if GPS date and time are valid
-		if (_gps->date.isValid() && _gps->time.isValid())
+		bool hasGpsDate = _gps->date.isValid();
+		bool hasGpsTime = _gps->time.isValid();
+
+		// Need at least one valid component
+		if (!hasGpsDate && !hasGpsTime)
 		{
-			// Extract date/time components
-			uint16_t year = _gps->date.year();
-			uint8_t month = _gps->date.month();
-			uint8_t day = _gps->date.day();
-			uint8_t hour = _gps->time.hour();
-			uint8_t minute = _gps->time.minute();
-			uint8_t second = _gps->time.second();
+			return;
+		}
 
-			// Format as ISO 8601 string: YYYY-MM-DDTHH:MM:SS
-			char isoDateTime[20];
-			snprintf_P(isoDateTime, sizeof(isoDateTime), PSTR("%04d-%02d-%02dT%02d:%02d:%02d"),
-				year, month, day, hour, minute, second);
+		// Extract date/time components
+		uint16_t year;
+		uint8_t month;
+		uint8_t day;
+		uint8_t hour;
+		uint8_t minute;
+		uint8_t second;
 
-			// Update DateTimeManager with GPS time (UTC)
-			if (DateTimeManager::setDateTimeISO(isoDateTime))
-			{
+		// Get date components (from GPS or existing DateTimeManager)
+		if (hasGpsDate)
+		{
+			year = _gps->date.year();
+			month = _gps->date.month();
+			day = _gps->date.day();
+		}
+		else
+		{
+			// Use existing date from DateTimeManager
+			year = DateTimeManager::getYear();
+			month = DateTimeManager::getMonth();
+			day = DateTimeManager::getDay();
+		}
 
-				// Send F6 command to notify of time update
-				StringKeyValue timeParam;
-				strncpy(timeParam.key, ValueParamName, sizeof(timeParam.key));
-				strncpy(timeParam.value, isoDateTime, sizeof(timeParam.value));
-				sendCommand(SystemSetDateTime, &timeParam, 1);
+		// Get time components (from GPS or existing DateTimeManager)
+		if (hasGpsTime)
+		{
+			hour = _gps->time.hour();
+			minute = _gps->time.minute();
+			second = _gps->time.second();
+		}
+		else
+		{
+			// Use existing time from DateTimeManager
+			hour = DateTimeManager::getHour();
+			minute = DateTimeManager::getMinute();
+			second = DateTimeManager::getSecond();
+		}
 
-				_lastTimeSync = millis();
-			}
+		// Format as ISO 8601 string: YYYY-MM-DDTHH:MM:SS
+		char isoDateTime[20];
+		snprintf_P(isoDateTime, sizeof(isoDateTime), PSTR("%04d-%02d-%02dT%02d:%02d:%02d"),
+			year, month, day, hour, minute, second);
+
+		// Update DateTimeManager with GPS time (UTC)
+		if (DateTimeManager::setDateTimeISO(isoDateTime))
+		{
+
+			// Send F6 command to notify of time update
+			StringKeyValue timeParam;
+			strncpy(timeParam.key, ValueParamName, sizeof(timeParam.key));
+			strncpy(timeParam.value, isoDateTime, sizeof(timeParam.value));
+			sendCommand(SystemSetDateTime, &timeParam, 1);
+
+			_lastTimeSync = millis();
 		}
 	}
 

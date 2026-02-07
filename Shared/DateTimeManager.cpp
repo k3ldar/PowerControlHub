@@ -7,20 +7,24 @@ unsigned long DateTimeManager::_syncedTimestamp = 0;
 unsigned long DateTimeManager::_syncedMillis = 0;
 bool DateTimeManager::_isSet = false;
 
-void DateTimeManager::setDateTime() {
+void DateTimeManager::setDateTime()
+{
     // Set to default: January 1, 2025 00:00:00
     setDateTime(DefaultTimestamp);
 }
 
-void DateTimeManager::setDateTime(unsigned long unixTimestamp) {
+void DateTimeManager::setDateTime(unsigned long unixTimestamp)
+{
     _syncedTimestamp = unixTimestamp;
     _syncedMillis = millis();
     _isSet = true;
 }
 
-bool DateTimeManager::setDateTimeISO(const char* isoDateTime) {
+bool DateTimeManager::setDateTimeISO(const char* isoDateTime)
+{
     // Expected format: YYYY-MM-DDTHH:MM:SS (19 characters minimum)
-    if (strlen(isoDateTime) < 19) {
+    if (strlen(isoDateTime) < 19)
+    {
         return false;
     }
 
@@ -42,7 +46,8 @@ bool DateTimeManager::setDateTimeISO(const char* isoDateTime) {
         day < 1 || day > 31 ||
         hour > 23 ||
         minute > 59 ||
-        second > 59) {
+        second > 59)
+    {
         return false;
     }
 
@@ -52,8 +57,10 @@ bool DateTimeManager::setDateTimeISO(const char* isoDateTime) {
     return true;
 }
 
-unsigned long DateTimeManager::getCurrentTime() {
-    if (!_isSet) {
+unsigned long DateTimeManager::getCurrentTime()
+{
+    if (!_isSet)
+    {
         return 0;
     }
 
@@ -61,7 +68,8 @@ unsigned long DateTimeManager::getCurrentTime() {
     unsigned long currentMillis = millis();
     unsigned long elapsedMillis;
     
-    if (currentMillis >= _syncedMillis) {
+    if (currentMillis >= _syncedMillis)
+    {
         elapsedMillis = currentMillis - _syncedMillis;
     } else {
         // millis() has overflowed (after ~49.7 days)
@@ -73,20 +81,23 @@ unsigned long DateTimeManager::getCurrentTime() {
     return _syncedTimestamp + elapsedSeconds;
 }
 
-bool DateTimeManager::isTimeSet() {
+bool DateTimeManager::isTimeSet()
+{
     return _isSet;
 }
 
 unsigned long DateTimeManager::getSecondsSinceSync()
 {
-    if (!_isSet) {
+    if (!_isSet)
+    {
         return 0;
     }
 
     unsigned long currentMillis = millis();
     unsigned long elapsedMillis;
     
-    if (currentMillis >= _syncedMillis) {
+    if (currentMillis >= _syncedMillis)
+    {
         elapsedMillis = currentMillis - _syncedMillis;
     } else {
         elapsedMillis = (0xFFFFFFFF - _syncedMillis) + currentMillis + 1;
@@ -95,8 +106,10 @@ unsigned long DateTimeManager::getSecondsSinceSync()
     return elapsedMillis / 1000;
 }
 
-uint16_t DateTimeManager::getYear() {
-    if (!_isSet) {
+uint16_t DateTimeManager::getYear()
+{
+    if (!_isSet)
+    {
         return 0;
     }
 
@@ -106,8 +119,10 @@ uint16_t DateTimeManager::getYear() {
     return year;
 }
 
-uint8_t DateTimeManager::getMonth() {
-    if (!_isSet) {
+uint8_t DateTimeManager::getMonth()
+{
+    if (!_isSet)
+    {
         return 0;
     }
 
@@ -117,8 +132,10 @@ uint8_t DateTimeManager::getMonth() {
     return month;
 }
 
-uint8_t DateTimeManager::getDay() {
-    if (!_isSet) {
+uint8_t DateTimeManager::getDay()
+{
+    if (!_isSet)
+    {
         return 0;
     }
 
@@ -128,8 +145,10 @@ uint8_t DateTimeManager::getDay() {
     return day;
 }
 
-uint8_t DateTimeManager::getHour() {
-    if (!_isSet) {
+uint8_t DateTimeManager::getHour()
+{
+    if (!_isSet)
+    {
         return 0;
     }
 
@@ -139,8 +158,10 @@ uint8_t DateTimeManager::getHour() {
     return hour;
 }
 
-uint8_t DateTimeManager::getMinute() {
-    if (!_isSet) {
+uint8_t DateTimeManager::getMinute()
+{
+    if (!_isSet)
+    {
         return 0;
     }
 
@@ -150,8 +171,10 @@ uint8_t DateTimeManager::getMinute() {
     return minute;
 }
 
-uint8_t DateTimeManager::getSecond() {
-    if (!_isSet) {
+uint8_t DateTimeManager::getSecond()
+{
+    if (!_isSet)
+    {
         return 0;
     }
 
@@ -163,7 +186,8 @@ uint8_t DateTimeManager::getSecond() {
 
 bool DateTimeManager::formatDateTime(char* buffer, const uint8_t bufferLength)
 {
-    if (!_isSet) {
+    if (!_isSet)
+    {
         return false;
     }
 
@@ -212,19 +236,23 @@ unsigned long DateTimeManager::dateTimeToUnix(uint16_t year, uint8_t month, uint
     unsigned long days = 0;
     
     // Years
-    for (uint16_t y = 1970; y < year; y++) {
+    for (uint16_t y = 1970; y < year; y++)
+    {
         days += 365;
         // Add leap day if leap year
-        if ((y % 4 == 0 && y % 100 != 0) || (y % 400 == 0)) {
+        if ((y % 4 == 0 && y % 100 != 0) || (y % 400 == 0))
+        {
             days++;
         }
     }
     
     // Months
-    for (uint8_t m = 1; m < month; m++) {
+    for (uint8_t m = 1; m < month; m++)
+    {
         days += daysInMonth[m - 1];
         // Add leap day for February in leap year
-        if (m == 2 && ((year % 4 == 0 && year % 100 != 0) || (year % 400 == 0))) {
+        if (m == 2 && ((year % 4 == 0 && year % 100 != 0) || (year % 400 == 0)))
+        {
             days++;
         }
     }
@@ -242,7 +270,8 @@ unsigned long DateTimeManager::dateTimeToUnix(uint16_t year, uint8_t month, uint
 }
 
 void DateTimeManager::unixToDateTime(unsigned long unixTime, uint16_t& year, uint8_t& month, uint8_t& day,
-    uint8_t& hour, uint8_t& minute, uint8_t& second) {
+    uint8_t& hour, uint8_t& minute, uint8_t& second)
+{
     // Extract time components
     second = unixTime % 60;
     unixTime /= 60;
@@ -253,13 +282,16 @@ void DateTimeManager::unixToDateTime(unsigned long unixTime, uint16_t& year, uin
     
     // Calculate year
     year = 1970;
-    while (true) {
+    while (true)
+    {
         uint16_t daysInYear = 365;
-        if ((year % 4 == 0 && year % 100 != 0) || (year % 400 == 0)) {
+        if ((year % 4 == 0 && year % 100 != 0) || (year % 400 == 0))
+        {
             daysInYear = 366;
         }
         
-        if (days < daysInYear) {
+        if (days < daysInYear)
+        {
             break;
         }
         
@@ -272,13 +304,16 @@ void DateTimeManager::unixToDateTime(unsigned long unixTime, uint16_t& year, uin
     bool isLeapYear = (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0);
     
     month = 1;
-    while (month <= 12) {
+    while (month <= 12)
+    {
         uint8_t monthDays = daysInMonth[month - 1];
-        if (month == 2 && isLeapYear) {
+        if (month == 2 && isLeapYear)
+        {
             monthDays = 29;
         }
         
-        if (days < monthDays) {
+        if (days < monthDays)
+        {
             break;
         }
         

@@ -107,7 +107,7 @@ bool SystemCommandHandler::handleCommand(SerialCommandManager* sender, const cha
     else if (strcmp(command, SystemSetDateTime) == 0 && paramCount == 1)
     {
         bool success = false;
-        
+        _broadcaster->getComputerSerial()->sendDebug(command, params[0].value);
         // Try ISO 8601 format first (contains 'T' or '-')
         if (strchr(params[0].value, 'T') != nullptr || strchr(params[0].value, '-') != nullptr)
         {
@@ -132,6 +132,7 @@ bool SystemCommandHandler::handleCommand(SerialCommandManager* sender, const cha
         }
         else
         {
+            _broadcaster->getComputerSerial()->sendDebug(command, F("Invalid Datetime"));
             sendAckErr(sender, command, F("Invalid datetime format"));
         }
         
