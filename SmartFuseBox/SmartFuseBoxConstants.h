@@ -8,9 +8,14 @@ constexpr unsigned long serialInitTimeoutMs = 300;
 
 
 constexpr uint8_t WaterSensorPin = A0;
+constexpr uint8_t LightSensorAnalogPin = A1;
 constexpr uint8_t LightSensorPin = D3;
 constexpr uint8_t WaterSensorActivePin = D8;
 constexpr uint8_t Dht11SensorPin = D9;
+constexpr uint8_t SdCardCsPin = D10;
+constexpr uint8_t SdCardMosiPin = D11;
+constexpr uint8_t SdCardMisoPin = D12;
+constexpr uint8_t SdCardSckPin = D13;
 
 
 // Digital pins for relays

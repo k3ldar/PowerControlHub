@@ -2,6 +2,7 @@
 #include <Arduino.h>
 #include <stdint.h>
 #include <SerialCommandManager.h>
+#include <SdFat.h>
 
 #include "SystemCpuMonitor.h"
 #include "DateTimeManager.h"
@@ -50,6 +51,8 @@
 #endif
 
 #include "MessageBus.h"
+#include "SensorDataRecord.h"
+#include "SdCardLogger.h"
 
 
 #define COMPUTER_SERIAL Serial
@@ -96,7 +99,7 @@ SystemCommandHandler systemCommandHandler(&broadcastManager, &warningManager);
 // Sensors
 WaterSensorHandler waterSensorHandler(&messageBus, &broadcastManager, &sensorCommandHandler, WaterSensorPin, WaterSensorActivePin);
 Dht11SensorHandler dht11SensorHandler(&messageBus, &broadcastManager, &sensorCommandHandler, &warningManager, Dht11SensorPin);
-LightSensorHandler lightSensorHandler(&messageBus, &broadcastManager, &sensorCommandHandler, &warningManager, LightSensorPin);
+LightSensorHandler lightSensorHandler(&messageBus, &broadcastManager, &sensorCommandHandler, &warningManager, LightSensorPin, LightSensorAnalogPin);
 
 BaseSensorHandler* sensorHandlers[] = {
 	&waterSensorHandler, &dht11SensorHandler, &lightSensorHandler
@@ -130,6 +133,9 @@ SoundNetworkHandler soundNetworkHandler(&soundController);
 WarningNetworkHandler warningNetworkHandler(&warningManager);
 SystemNetworkHandler systemNetworkHandler(&wifiController);
 SensorNetworkHandler sensorNetworkHandler(&sensorController);
+
+// SD card logger
+SdCardLogger sdCardLogger(&messageBus, &warningManager);
 
 
 void setup()
@@ -175,6 +181,8 @@ void setup()
 	relayHandler.configUpdated(config);
 	sensorManager.setup();
 
+	// Initialize SD card logger (always enabled)
+	sdCardLogger.initialize();
 
 #if defined(ARDUINO_UNO_R4) && defined(LED_MANAGER)
 	ledManager.Initialize();
@@ -228,6 +236,10 @@ void loop()
 
 	SystemCpuMonitor::startTask();
 	configSyncManager.update(now);
+	SystemCpuMonitor::endTask();
+
+	SystemCpuMonitor::startTask();
+	sdCardLogger.update(now);
 	SystemCpuMonitor::endTask();
 
 	SystemCpuMonitor::update();

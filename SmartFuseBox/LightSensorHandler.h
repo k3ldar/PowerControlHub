@@ -11,6 +11,7 @@ private:
 	SensorCommandHandler* _sensorCommandHandler;
 	WarningManager* _warningManager;
 	const uint8_t _sensorPin;
+	const uint8_t _analogPin;
 	bool _isPinActive;
 	bool _isDaytime;
 protected:
@@ -42,9 +43,9 @@ protected:
 	}
 public:
 	LightSensorHandler(MessageBus* messageBus, BroadcastManager* broadcastManager, SensorCommandHandler* sensorCommandHandler,
-		WarningManager* warningManager, uint8_t sensorPin)
+		WarningManager* warningManager, uint8_t sensorPin, uint8_t analogPin)
 		: BroadcastLoggerSupport(broadcastManager), _messageBus(messageBus), _sensorCommandHandler(sensorCommandHandler),
-		_warningManager(warningManager), _sensorPin(sensorPin), _isPinActive(false), _isDaytime(true)
+		_warningManager(warningManager), _sensorPin(sensorPin), _analogPin(analogPin), _isPinActive(false), _isDaytime(true)
 	{
 	}
 
