@@ -1,0 +1,146 @@
+# SmartFuseBox Configuration File
+# This file is automatically loaded at boot if present on SD card
+# Format: COMMAND:parameters
+# Lines starting with # are comments and are ignored
+# Empty lines are ignored
+
+# Boat Name
+C3:Sea Wolf
+
+# Relay Names (format: index=ShortName|LongName)
+# Short name: max 5 chars (used on home page)
+# Long name: max 20 chars (used on buttons page)
+C4:0=Nav|Navigation
+C4:1=Bilge|Bilge Pump
+C4:2=Light|Cabin Lights
+C4:3=Pump|Water Pump
+C4:4=Horn|Sound Horn
+C4:5=Fan|Ventilation
+C4:6=Spare|Spare 6
+C4:7=Spare|Spare 7
+
+# Home Button Mappings (format: slot=relay)
+# Maps home page buttons (0-3) to relays (0-7 or 255 for unmapped)
+C5:0=0
+C5:1=1
+C5:2=2
+C5:3=3
+
+# Button Colors (format: relay=color_index)
+# Color indices: 0-7 or 255 for default
+C6:0=4
+C6:1=4
+C6:2=4
+C6:3=4
+C6:4=4
+C6:5=4
+C6:6=4
+C6:7=4
+
+# Vessel Type
+# 0=Motor, 1=Sail, 2=Fishing, 3=Yacht
+C7:v=0
+
+# Sound Relay Button
+# Which relay controls the horn (0-7 or 255 for unmapped)
+C8:v=255
+
+# Sound Start Delay (milliseconds)
+C9:v=244
+
+# Bluetooth Enabled (0=disabled, 1=enabled)
+C10:v=0
+
+# WiFi Enabled (0=disabled, 1=enabled)
+C11:v=1
+
+# WiFi Access Mode (0=AP, 1=Client)
+C12:v=0
+
+# WiFi SSID (for Client mode)
+C13:SmartFuseBox
+
+# WiFi Password (for Client mode)
+C14:sfb-776064
+
+# WiFi Port (default: 80)
+C15:v=80
+
+# WiFi AP IP Address (for AP mode)
+C17:192.168.4.1
+
+# Default Relay States (format: relay=state)
+# 0=off by default, 1=on by default
+C18:0=0
+C18:1=0
+C18:2=0
+C18:3=0
+C18:4=0
+C18:5=0
+C18:6=0
+C18:7=0
+
+# Linked Relays (format: relay1=relay2)
+# When relay1 is toggled, relay2 is toggled as well
+# Use 255 to unlink
+C19:255=255
+C19:255=255
+
+# Timezone Offset (hours from UTC, range: -12 to +14)
+C20:v=0
+
+# MMSI (Maritime Mobile Service Identity, 9 digits)
+C21:000000000
+
+# Call Sign (vessel call sign, can be empty)
+C22:
+
+# Home Port (vessel home port, can be empty)
+C23:
+
+# LED Colors (format: t=type;c=colorset;r=red;g=green;b=blue)
+# type: 0=day, 1=night
+# colorset: 0=good, 1=bad
+# r,g,b: 0-255
+
+# Day Mode - Good Color (blue)
+C24:t=0;c=0;r=0;g=80;b=255
+
+# Day Mode - Bad Color (orange)
+C24:t=0;c=1;r=255;g=140;b=0
+
+# Night Mode - Good Color (dark red)
+C24:t=1;c=0;r=100;g=0;b=0
+
+# Night Mode - Bad Color (bright orange)
+C24:t=1;c=1;r=255;g=50;b=0
+
+# LED Brightness (format: t=type;b=brightness)
+# type: 0=day, 1=night
+# brightness: 0-100
+
+# Day Brightness (80%)
+C25:t=0;b=80
+
+# Night Brightness (20%)
+C25:t=1;b=20
+
+# LED Auto Day/Night Switch (0=disabled, 1=enabled)
+C26:v=1
+
+# LED Enable States (format: g=gps;w=warning;s=system)
+# 0=disabled, 1=enabled
+C27:g=1;w=1;s=1
+
+# Control Panel Tones (format: t=type;h=Hz;d=duration;p=preset;r=repeat)
+# type: 0=good, 1=bad
+# h: tone frequency in Hz
+# d: duration in milliseconds
+# p: preset (0=custom, 1=submarine ping, 2=double beep, 3=rising chirp, 4=descending alert, 5=nautical bell, 0xFF=no sound)
+# r: repeat interval in milliseconds (0=no repeat, only used for bad tones)
+
+# Good Tone (startup sound)
+C28:t=0;h=1000;d=100;p=1;r=0
+
+# Bad Tone (warning sound)
+C28:t=1;h=400;d=500;p=5;r=30000
