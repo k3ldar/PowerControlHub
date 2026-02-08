@@ -4,10 +4,9 @@
 #include <SdFat.h>
 #include <stdint.h>
 #include "SensorDataRecord.h"
-#include "MessageBus.h"
+#include "SensorCommandHandler.h"
 #include "WarningManager.h"
 
-constexpr uint8_t SD_CHIP_SELECT_PIN = 10;
 constexpr uint8_t SD_BUFFER_SIZE = 64;              // Number of records to buffer
 constexpr uint8_t SD_MAX_WRITES_PER_LOOP = 5;       // Max records to write per update() call
 constexpr uint16_t SD_WRITE_INTERVAL_MS = 1000;     // Minimum time between write operations
@@ -46,10 +45,12 @@ constexpr uint16_t SD_FILE_CHECK_INTERVAL_MS = 60000; // Check for date change e
  * }
  * @endcode
  */
-class SdCardLogger {
+class SdCardLogger
+{
 private:
-    MessageBus* _messageBus;
+    SensorCommandHandler* _sensorHandler;
     WarningManager* _warningManager;
+	uint8_t _csPin;
 
     // SD card
     SdFat _sd;              // Main SD card object
@@ -101,7 +102,7 @@ public:
      * @param messageBus Pointer to MessageBus for subscribing to events
      * @param warningManager Pointer to WarningManager for error reporting
      */
-    SdCardLogger(MessageBus* messageBus, WarningManager* warningManager);
+    SdCardLogger(SensorCommandHandler* sensorHandler, WarningManager* warningManager, uint8_t csPin);
     
     /**
      * @brief Initialize SD card logger with configuration

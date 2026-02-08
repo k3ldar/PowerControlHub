@@ -119,7 +119,6 @@
       <DeploymentContent>true</DeploymentContent>
     </ClCompile>
     <ClInclude Include="GpsSensorHandler.h" />
-    <ClInclude Include="SdCardLogger.h" />
     <ClInclude Include="SensorDataRecord.h" />
     <ClInclude Include="ToneManager.h" />
     <ClInclude Include="LightSensorHandler.h" />

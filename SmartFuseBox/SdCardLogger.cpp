@@ -52,31 +52,17 @@ bool SdCardLogger::initializeSdCard()
 {
     // Explicitly set CS pin as output (best practice, though SdFat usually handles this)
     pinMode(_csPin, OUTPUT);
-    digitalWrite(_csPin, HIGH); // Deselect card initially
+    digitalWrite(_csPin, HIGH);
     
-    // Explicitly initialize SPI before SD card
-    // SPI.begin() automatically configures:
-    //   - MOSI (D11) as OUTPUT
-    //   - MISO (D12) as INPUT  
-    //   - SCK (D13) as OUTPUT
     SPI.begin();
     
     // Small delay to allow SPI to stabilize
     delay(10);
     
-    Serial.println(F("Initializing SD card..."));
-    Serial.print(F("CS Pin: "));
-    Serial.println(_csPin);
-    
     // Initialize SD card with explicit CS pin and slower speed for reliability
     // SD_SCK_MHZ(4) = 4MHz (try 1, 2, or 4 if having issues)
     if (!_sd.begin(_csPin, SD_SCK_MHZ(4)))
     {
-        Serial.println(F("SD card initialization FAILED"));
-        Serial.print(F("Error code: 0x"));
-        Serial.println(_sd.card()->errorCode(), HEX);
-        Serial.print(F("Error data: 0x"));
-        Serial.println(_sd.card()->errorData(), HEX);
         return false;
     }
     
