@@ -12,10 +12,10 @@ These are commands used to configure the system settings and can only be sent fr
 | `F3` — Cpu Usage | `F3` | When received will return the current CPU usage. No params. |
 | `F4` — Bluetooth Enabled | `F4` | When received will return the current enabled state of bluetooth 0 off 1 on. No params. |
 | `F5` — Wifi Enabled | `F5` | When received will return the current enabled state of wifi 0 off 1 on. No params. |
-| `F6` — Set DateTime | `F6:v=2025-12-04T15:30:00` or `F6:v=1733328600` | Set current date/time. Accepts ISO 8601 datetime string `YYYY-MM-DDTHH:MM:SS` or Unix timestamp (seconds since epoch). Returns current stored time. |
+| `F6` — Set DateTime | `F6:v=1733328600` | Set current date/time. Accepts Unix timestamp (seconds since epoch). Returns current stored time. |
 | `F7` — Get DateTime | `F7` | Get current date/time as ISO 8601 datetime string `YYYY-MM-DDTHH:MM:SS`. |
 | `F8` — SD Card Present | `F8` | Query if SD card is present. Returns `v=0` (not present) or `v=1` (present). No params. |
-| `F9` — SD Card Log File Size | `F11` | Get current log file size in bytes. Returns `v=<bytes>` where bytes is the size of the active log file. Returns `v=0` if no file is open. No params. |
+| `F9` — SD Card Log File Size | `F9` | Get current log file size in bytes. Returns `v=<bytes>` where bytes is the size of the active log file. Returns `v=0` if no file is open. No params. |
 
 
 ### Wifi System Commands (SFB)
