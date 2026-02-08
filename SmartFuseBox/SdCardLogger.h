@@ -3,7 +3,6 @@
 #include <Arduino.h>
 #include <SdFat.h>
 #include <stdint.h>
-#include "SensorDataRecord.h"
 #include "SensorCommandHandler.h"
 #include "WarningManager.h"
 
@@ -11,6 +10,35 @@ constexpr uint8_t SD_BUFFER_SIZE = 64;              // Number of records to buff
 constexpr uint8_t SD_MAX_WRITES_PER_LOOP = 5;       // Max records to write per update() call
 constexpr uint16_t SD_WRITE_INTERVAL_MS = 1000;     // Minimum time between write operations
 constexpr uint16_t SD_FILE_CHECK_INTERVAL_MS = 60000; // Check for date change every minute
+constexpr uint16_t SD_CARD_PRESENCE_CHECK_MS = 5000; // Check for card presence every 5 seconds
+
+/**
+ * @struct SensorSnapshot
+ * @brief Snapshot of all sensor values at a point in time
+ */
+struct SensorSnapshot {
+    float temperature;
+    uint8_t humidity;
+    float bearing;
+    float compassTemp;
+    uint8_t speed;
+    uint16_t waterLevel;
+    bool waterPumpActive;
+    double gpsLat;
+    double gpsLon;
+    double altitude;
+    double gpsCourse;
+    uint32_t gpsSats;
+    double gpsDistance;
+    uint32_t warnings;
+    bool hornActive;
+
+    SensorSnapshot()
+        : temperature(NAN), humidity(0), bearing(NAN), compassTemp(NAN), 
+          speed(0), waterLevel(0), waterPumpActive(false),
+          gpsLat(NAN), gpsLon(NAN), altitude(NAN), gpsCourse(NAN),
+          gpsSats(0), gpsDistance(NAN), warnings(0), hornActive(false) {}
+};
 
 /**
  * @class SdCardLogger
@@ -61,7 +89,7 @@ private:
     bool _sdCardPresent;
 
     // Circular buffer
-    SensorDataRecord _buffer[SD_BUFFER_SIZE];
+    SensorSnapshot _buffer[SD_BUFFER_SIZE];
     uint8_t _bufferHead;        // Next position to write
     uint8_t _bufferTail;        // Next position to read
     uint8_t _bufferCount;       // Number of records in buffer
@@ -71,30 +99,28 @@ private:
     // Timing
     unsigned long _lastWriteTime;
     unsigned long _lastFileCheckTime;
+    unsigned long _lastCardPresenceCheck;
     
     // Statistics
     unsigned long _totalRecordsLogged;
     unsigned long _recordsDropped;
     bool _sdCardErrorRaised;
+    bool _sdCardMissingRaised;
     
     // Internal methods
     bool initializeSdCard();
     bool openOrCreateFile(unsigned long now);
     void closeCurrentFile();
     bool writeRecordsToCard(uint8_t maxRecords);
-    void writeRecordToCsv(const SensorDataRecord& record);
-    void addRecordToBuffer(const SensorDataRecord& record);
+    void writeSnapshotToCsv(const SensorSnapshot& snapshot);
+    void captureSensorSnapshot();
+    void addSnapshotToBuffer(const SensorSnapshot& snapshot);
     bool isBufferFull() const;
     bool isBufferEmpty() const;
     void updateFileName(unsigned long now);
     void checkForDateChange(unsigned long now);
-    const char* getSensorTypeName(SensorDataType type) const;
-    
-    // MessageBus callbacks
-    void onTemperatureUpdated(float temperature);
-    void onHumidityUpdated(uint8_t humidity);
-    void onWaterLevelUpdated(uint16_t waterLevel, uint16_t averageWaterLevel);
-    void onLightSensorUpdated(bool isDayTime);
+    void checkCardPresence(unsigned long now);
+    bool isCardMissingError();
     
 public:
     /**
