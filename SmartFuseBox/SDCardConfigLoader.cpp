@@ -100,15 +100,18 @@ bool SdCardConfigLoader::applyConfigCommand(const char* line)
             if (equalPos)
             {
                 *equalPos = '\0';
-                params[paramCount].key = param;
-                params[paramCount].value = equalPos + 1;
+                strncpy(params[paramCount].key, param, sizeof(params[paramCount].key) - 1);
+                params[paramCount].key[sizeof(params[paramCount].key) - 1] = '\0';
+                strncpy(params[paramCount].value, equalPos + 1, sizeof(params[paramCount].value) - 1);
+                params[paramCount].value[sizeof(params[paramCount].value) - 1] = '\0';
             }
             else
             {
                 // For commands like C13:SSID, the whole thing after : is the value
                 // with an implied key (often "v" or empty)
-                params[paramCount].key = "";
-                params[paramCount].value = param;
+                params[paramCount].key[0] = '\0';
+                strncpy(params[paramCount].value, param, sizeof(params[paramCount].value) - 1);
+                params[paramCount].value[sizeof(params[paramCount].value) - 1] = '\0';
             }
             paramCount++;
             param = strtok_r(nullptr, ";", &savePtr1);

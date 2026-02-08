@@ -1,5 +1,6 @@
 #include "ConfigCommandHandler.h"
 #include "ConfigSyncManager.h"
+#include "SdCardConfigLoader.h"
 
 #if defined(ARDUINO_UNO_R4)
 #include "BluetoothController.h"
@@ -10,7 +11,8 @@
 ConfigCommandHandler::ConfigCommandHandler(WifiController* wifiController, ConfigController* configController)
 	: _wifiController(wifiController),
 	  _configController(configController),
-	  _configSyncManager(nullptr)
+	  _configSyncManager(nullptr),
+      _sdCardConfigLoader(nullptr)
 {
 }
 
@@ -634,6 +636,48 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
             result = ConfigResult::InvalidParameter;
         }
     }
+    else if (strcmp(command, ConfigReloadFromSd) == 0)  // ADD THIS BLOCK
+    {
+        // C29 - Reload config from SD card
+        if (_sdCardConfigLoader)
+        {
+            if (_sdCardConfigLoader->reloadConfigFromSd())
+            {
+                result = ConfigResult::Success;
+            }
+            else
+            {
+                sendAckErr(sender, command, F("Failed to reload from SD"));
+                return true;
+            }
+        }
+        else
+        {
+            sendAckErr(sender, command, F("SD config loader not available"));
+            return true;
+        }
+        }
+    else if (strcmp(command, ConfigExportToSd) == 0)  // ADD THIS BLOCK
+    {
+        // C30 - Export current config to SD card
+        if (_sdCardConfigLoader)
+        {
+            if (_sdCardConfigLoader->exportConfigToSd())
+            {
+                result = ConfigResult::Success;
+            }
+            else
+            {
+                sendAckErr(sender, command, F("Failed to export to SD"));
+                return true;
+            }
+        }
+        else
+        {
+            sendAckErr(sender, command, F("SD config loader not available"));
+            return true;
+        }
+        }
     else
     {
         result = ConfigResult::InvalidCommand;
@@ -677,6 +721,11 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
     return true;
 }
 
+void ConfigCommandHandler::setSdCardConfigLoader(SdCardConfigLoader* sdCardConfigLoader)
+{
+    _sdCardConfigLoader = sdCardConfigLoader;
+}
+
 const char* const* ConfigCommandHandler::supportedCommands(size_t& count) const
 {
     static const char* cmds[] = { 
@@ -690,7 +739,7 @@ const char* const* ConfigCommandHandler::supportedCommands(size_t& count) const
         ConfigDefaultRelayState, ConfigLinkRelays,
         ConfigTimeZoneOffset, ConfigMmsi, ConfigCallSign, ConfigHomePort,
         ConfigLedColor, ConfigLedBrightness, ConfigLedAutoSwitch, ConfigLedEnable,
-        ControlPanelTones
+        ControlPanelTones, ConfigReloadFromSd, ConfigExportToSd
     };
     count = sizeof(cmds) / sizeof(cmds[0]);
     return cmds;

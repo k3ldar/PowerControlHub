@@ -54,6 +54,7 @@
 #include "MessageBus.h"
 #include "SensorDataRecord.h"
 #include "SdCardLogger.h"
+#include "SDCardConfigLoader.h"
 
 
 #define COMPUTER_SERIAL Serial
@@ -137,7 +138,7 @@ SensorNetworkHandler sensorNetworkHandler(&sensorController);
 
 // SD card logger
 SdCardLogger sdCardLogger(&sensorCommandHandler, &warningManager, SdCardCsPin);
-
+SdCardConfigLoader sdCardConfigLoader(&commandMgrComputer, &commandMgrLink, &configController, &configSyncManager, SdCardCsPin);
 
 void setup()
 {
@@ -173,6 +174,7 @@ void setup()
 	// Link config sync manager to handlers so they can coordinate config synchronization
 	ackHandler.setConfigSyncManager(&configSyncManager, &configController);
 	configHandler.setConfigSyncManager(&configSyncManager);
+	configHandler.setSdCardConfigLoader(&sdCardConfigLoader);
 
 	Config* config = ConfigManager::getConfigPtr();
 
@@ -184,6 +186,8 @@ void setup()
 
 	// Initialize SD card logger
 	sdCardLogger.initialize();
+
+	bool sdConfigLoaded = sdCardConfigLoader.loadConfigFromSd();
 
 #if defined(ARDUINO_UNO_R4) && defined(LED_MANAGER)
 	ledManager.Initialize();
@@ -198,7 +202,10 @@ void setup()
 		}
 	}
 
-	configSyncManager.requestSync();
+	if (!sdConfigLoaded)
+	{
+		configSyncManager.requestSync();
+	}
 
 	// indicate system initialized
 	commandMgrComputer.sendCommand(SystemInitialized, "");
