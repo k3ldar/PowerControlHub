@@ -149,7 +149,7 @@ void ConfigSyncManager::saveConfigIfChanged()
 
             if (_computerSerial)
             {
-                _computerSerial->sendError("Config synced and saved", "ConfigSync");
+                _computerSerial->sendDebug("Config synced and saved", "ConfigSync");
             }
         }
         else

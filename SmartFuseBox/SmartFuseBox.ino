@@ -2,6 +2,7 @@
 #include <Arduino.h>
 #include <stdint.h>
 #include <SerialCommandManager.h>
+#include <SPI.h>
 #include <SdFat.h>
 
 #include "SystemCpuMonitor.h"
@@ -135,7 +136,7 @@ SystemNetworkHandler systemNetworkHandler(&wifiController);
 SensorNetworkHandler sensorNetworkHandler(&sensorController);
 
 // SD card logger
-SdCardLogger sdCardLogger(&messageBus, &warningManager);
+SdCardLogger sdCardLogger(&sensorCommandHandler, &warningManager, SdCardCsPin);
 
 
 void setup()
@@ -181,7 +182,7 @@ void setup()
 	relayHandler.configUpdated(config);
 	sensorManager.setup();
 
-	// Initialize SD card logger (always enabled)
+	// Initialize SD card logger
 	sdCardLogger.initialize();
 
 #if defined(ARDUINO_UNO_R4) && defined(LED_MANAGER)

@@ -28,7 +28,6 @@ bool BluetoothSystemService::begin()
 {
     if (!_commandHandler)
     {
-        Serial.println(F("[BluetoothSystemService] Error: Command handler is null"));
         return false;
     }
 
@@ -37,7 +36,6 @@ bool BluetoothSystemService::begin()
 
     if (!_service)
     {
-        Serial.println(F("[BluetoothSystemService] Error: Failed to create service"));
         return false;
     }
 
@@ -62,7 +60,6 @@ bool BluetoothSystemService::begin()
     // Add service to BLE
     BLE.addService(*_service);
 
-    Serial.println(F("[BluetoothSystemService] Service initialized successfully"));
     return true;
 }
 
@@ -112,7 +109,6 @@ void BluetoothSystemService::notifyInitialized()
     if (_charInitialized)
     {
         _charInitialized->writeValue((uint8_t)1);
-        Serial.println(F("[BluetoothSystemService] Notified clients: System Initialized"));
     }
 }
 
