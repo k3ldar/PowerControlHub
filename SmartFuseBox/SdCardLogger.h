@@ -106,6 +106,11 @@ private:
     unsigned long _recordsDropped;
     bool _sdCardErrorRaised;
     bool _sdCardMissingRaised;
+
+    // Cached SD card info (to avoid expensive freeClusterCount calls)
+    uint64_t _cachedTotalSize;
+    uint64_t _cachedFreeSpace;
+    uint32_t _initialLogFileSize;
     
     // Internal methods
     bool initializeSdCard();
@@ -148,7 +153,19 @@ public:
      * @return true if SD card is ready, false otherwise
      */
     bool isSdCardReady() const { return _initialized && _sdCardPresent; }
-    
+
+    /**
+     * @brief Check if SD card is present (may not be initialized)
+     * @return true if card is present, false otherwise
+     */
+    bool isSdCardPresent();
+
+    /**
+     * @brief Get current log file size in bytes
+     * @return Log file size in bytes, or 0 if file not open
+     */
+    uint32_t getCurrentLogFileSize() const;
+
     /**
      * @brief Get total number of records successfully logged
      * @return Total records logged
@@ -172,4 +189,16 @@ public:
      * Use sparingly, typically only during shutdown
      */
     void flush();
+
+    /**
+     * @brief Temporarily release SD card access (closes file and deinitializes SD)
+     * Use before operations that need exclusive SD card access (e.g., config reload)
+     */
+    void releaseSDCard();
+
+    /**
+     * @brief Re-initialize SD card after temporary release
+     * @return true if re-initialization successful
+     */
+    bool reacquireSDCard();
 };

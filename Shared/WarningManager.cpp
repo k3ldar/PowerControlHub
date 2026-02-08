@@ -201,7 +201,11 @@ void WarningManager::sendHeartbeat()
 {
 	if (_commandMgr)
 	{
-		_commandMgr->sendCommand(SystemHeartbeatCommand, "");
+		// Include local warnings in heartbeat
+		char params[32];
+		snprintf_P(params, sizeof(params), PSTR("w=%s%lx"),
+			HexPrefix, _localWarnings);
+		_commandMgr->sendCommand(SystemHeartbeatCommand, params);
 	}
 }
 

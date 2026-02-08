@@ -19,7 +19,10 @@ SdCardLogger::SdCardLogger(SensorCommandHandler* sensorHandler, WarningManager* 
       _totalRecordsLogged(0),
       _recordsDropped(0),
       _sdCardErrorRaised(false),
-      _sdCardMissingRaised(false)
+      _sdCardMissingRaised(false),
+      _cachedTotalSize(0),
+      _cachedFreeSpace(0),
+      _initialLogFileSize(0)
 {
     memset(_currentFileName, 0, sizeof(_currentFileName));
 }
@@ -41,10 +44,18 @@ bool SdCardLogger::initialize()
         }
         return false;
     }
-    
+
     _initialized = true;
     _sdCardPresent = true;
-    
+
+    // Cache SD card size info (expensive operations done once at init)
+    uint32_t cardSizeBlocks = _sd.card()->sectorCount();
+    _cachedTotalSize = (uint64_t)cardSizeBlocks * 512ULL;
+
+    uint32_t freeClusterCount = _sd.freeClusterCount();
+    uint32_t sectorsPerCluster = _sd.sectorsPerCluster();
+    _cachedFreeSpace = (uint64_t)freeClusterCount * sectorsPerCluster * 512ULL;
+
     return true;
 }
 
@@ -285,6 +296,9 @@ bool SdCardLogger::openOrCreateFile(unsigned long now)
         return false;
     }
 
+    // Track initial file size for free space calculation
+    _initialLogFileSize = _currentFile.fileSize();
+
     // Write CSV header if new file
     if (!fileExists)
     {
@@ -412,6 +426,14 @@ void SdCardLogger::checkCardPresence()
         _sdCardPresent = true;
         _initialized = true;
 
+        // Re-cache SD card size info after reinsertion
+        uint32_t cardSizeBlocks = _sd.card()->sectorCount();
+        _cachedTotalSize = (uint64_t)cardSizeBlocks * 512ULL;
+
+        uint32_t freeClusterCount = _sd.freeClusterCount();
+        uint32_t sectorsPerCluster = _sd.sectorsPerCluster();
+        _cachedFreeSpace = (uint64_t)freeClusterCount * sectorsPerCluster * 512ULL;
+
         // Clear any SD card warnings
         if (_sdCardMissingRaised)
         {
@@ -433,7 +455,7 @@ void SdCardLogger::checkCardPresence()
         {
             closeCurrentFile();
         }
-        
+
         _sdCardPresent = false;
         _initialized = false;
 
@@ -489,4 +511,59 @@ bool SdCardLogger::isCardMissingError()
     // 0x02 = SD_CARD_ERROR_CMD8 (card not responding to voltage check)
     // 0xFF = No card or no response
     return (errorCode == 0x01 || errorCode == 0x02 || errorCode == 0xFF);
+}
+
+bool SdCardLogger::isSdCardPresent()
+{
+    return _sdCardPresent;
+}
+
+uint32_t SdCardLogger::getCurrentLogFileSize() const
+{
+    if (!_currentFile || !_currentFile.isOpen())
+    {
+        return 0;
+    }
+
+    return _currentFile.fileSize();
+}
+
+void SdCardLogger::releaseSDCard()
+{
+    if (!_initialized)
+    {
+        return;
+    }
+
+    // Flush any pending writes first
+    flush();
+
+    // Close the current file
+    closeCurrentFile();
+
+    // Mark as not initialized to prevent operations during release
+    _initialized = false;
+}
+
+bool SdCardLogger::reacquireSDCard()
+{
+    // Attempt to reinitialize the SD card
+    if (!initializeSdCard())
+    {
+        return false;
+    }
+
+    _initialized = true;
+    _sdCardPresent = true;
+
+    // Recache SD card size info
+    uint32_t cardSizeBlocks = _sd.card()->sectorCount();
+    _cachedTotalSize = (uint64_t)cardSizeBlocks * 512ULL;
+
+    uint32_t freeClusterCount = _sd.freeClusterCount();
+    uint32_t sectorsPerCluster = _sd.sectorsPerCluster();
+    _cachedFreeSpace = (uint64_t)freeClusterCount * sectorsPerCluster * 512ULL;
+
+    // Note: File will be reopened automatically on next update() call via openOrCreateFile()
+    return true;
 }

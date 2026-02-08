@@ -8,11 +8,18 @@
 #include "Local.h"
 
 #if defined(ARDUINO_UNO_R4)
+#include "SdCardLogger.h"
 #include "WifiController.h"
 #endif
 
 class SystemCommandHandler : public SharedBaseCommandHandler
 {
+private:
+#if defined(ARDUINO_UNO_R4)
+    WifiController* _wifiController = nullptr;
+    SdCardLogger* _sdCardLogger = nullptr;
+#endif
+
 public:
     explicit SystemCommandHandler(BroadcastManager* broadcaster, WarningManager* warningManager);
     ~SystemCommandHandler();
@@ -21,12 +28,8 @@ public:
     const char* const* supportedCommands(size_t& count) const override;
 
 #if defined(ARDUINO_UNO_R4)
-    // Add this method
     void setWifiController(WifiController* wifiController);
+    void setSdCardLogger(SdCardLogger* sdCardLogger);
 #endif
 
-private:
-#if defined(ARDUINO_UNO_R4)
-    WifiController* _wifiController = nullptr;
-#endif
 };

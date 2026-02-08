@@ -265,18 +265,6 @@ void loop()
     SystemCpuMonitor::update();
 }
 
-void resetSerial(Stream& serial)
-{
-    // Flush outgoing data
-    serial.flush();
-
-    // Clear incoming buffer
-    while (serial.available() > 0)
-    {
-        serial.read();
-    }
-}
-
 void onLinkCommandReceived(SerialCommandManager* mgr)
 {
     char cmd[64];
@@ -284,7 +272,7 @@ void onLinkCommandReceived(SerialCommandManager* mgr)
     commandMgrComputer.sendError(cmd, F("LINKHANDLER"));
 
 	// Reset serial to clear any residual data
-	resetSerial(LINK_SERIAL);
+	SystemFunctions::resetSerial(LINK_SERIAL);
 }
 
 void onComputerCommandReceived(SerialCommandManager* mgr)
@@ -295,5 +283,5 @@ void onComputerCommandReceived(SerialCommandManager* mgr)
     commandMgrComputer.sendError(cmd, F("PCHANDLER"));
 
     // Reset serial to clear any residual data
-	resetSerial(COMPUTER_SERIAL);
+    SystemFunctions::resetSerial(COMPUTER_SERIAL);
 }

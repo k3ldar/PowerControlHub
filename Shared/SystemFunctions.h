@@ -88,6 +88,25 @@ public:
     static bool hasElapsed(unsigned long now, unsigned long previous, unsigned long interval);
 
     /**
+     * @brief Reset a serial port by flushing outgoing data and clearing incoming buffer.
+     *
+     * This can help recover from communication issues by ensuring the serial port is in a clean state.
+     *
+	 * @param serial Reference to the Stream (e.g., HardwareSerial) to reset
+    */
+    static void resetSerial(Stream& serial)
+    {
+        // Flush outgoing data
+        serial.flush();
+
+        // Clear incoming buffer
+        while (serial.available() > 0)
+        {
+            serial.read();
+        }
+    }
+
+    /**
      * @brief Concatenate multiple strings into a provided buffer.
      * 
      * Safely concatenates any number of strings (PROGMEM or RAM) into a destination buffer.

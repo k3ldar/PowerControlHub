@@ -5,6 +5,7 @@
 #include <SerialCommandManager.h>
 #include "ConfigController.h"
 #include "ConfigSyncManager.h"
+#include "SdCardLogger.h"
 
 constexpr char SD_CONFIG_FILENAME[] = "config.txt";
 constexpr uint16_t SD_CONFIG_MAX_LINE_LENGTH = 128;
@@ -48,6 +49,7 @@ private:
     SerialCommandManager* _linkSerial;
     ConfigController* _configController;
     ConfigSyncManager* _configSyncManager;
+    SdCardLogger* _sdCardLogger;
     uint8_t _csPin;
     bool _sdConfigPresent;
 
@@ -105,6 +107,12 @@ public:
                        ConfigController* configController,
                        ConfigSyncManager* configSyncManager,
                        uint8_t csPin);
+
+    /**
+     * @brief Set the SdCardLogger reference for coordinated SD card access
+     * @param sdCardLogger Pointer to the SdCardLogger instance
+     */
+    void setSdCardLogger(SdCardLogger* sdCardLogger);
 
     /**
      * @brief Load configuration from SD card if present

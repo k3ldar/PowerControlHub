@@ -18,8 +18,11 @@ SystemCommandHandler::~SystemCommandHandler()
 
 const char* const* SystemCommandHandler::supportedCommands(size_t& count) const
 {
-    static const char* cmds[] = { SystemHeartbeatCommand, SystemInitialized, SystemFreeMemory, SystemCpuUsage,
-        SystemBluetoothStatus, SystemWifiStatus, SystemSetDateTime, SystemGetDateTime };
+    static const char* cmds[] = { 
+        SystemHeartbeatCommand, SystemInitialized, SystemFreeMemory, SystemCpuUsage,
+        SystemBluetoothStatus, SystemWifiStatus, SystemSetDateTime, SystemGetDateTime,
+        SystemSdCardPresent, SystemSdCardLogFileSize
+    };
     count = sizeof(cmds) / sizeof(cmds[0]);
     return cmds;
 }
@@ -147,6 +150,37 @@ bool SystemCommandHandler::handleCommand(SerialCommandManager* sender, const cha
         
         return true;
     }
+    else if (strcmp(command, SystemSdCardPresent) == 0)
+    {
+        bool present = false;
+
+#if defined(ARDUINO_UNO_R4)
+        if (_sdCardLogger)
+        {
+            present = _sdCardLogger->isSdCardPresent();
+        }
+#endif
+
+        char value = present ? '1' : '0';
+        StringKeyValue param = makeParam(ValueParamName, value);
+        sendAckOk(sender, command, &param);
+    }
+    else if (strcmp(command, SystemSdCardLogFileSize) == 0)
+    {
+        uint32_t fileSize = 0;
+
+#if defined(ARDUINO_UNO_R4)
+        if (_sdCardLogger)
+        {
+            fileSize = _sdCardLogger->getCurrentLogFileSize();
+        }
+#endif
+
+        StringKeyValue param;
+        strncpy(param.key, ValueParamName, sizeof(param.key));
+        snprintf_P(param.value, sizeof(param.value), PSTR("%lu"), (unsigned long)fileSize);
+        sendAckOk(sender, command, &param);
+    }
     else
     {
         sendAckErr(sender, command, F("Unknown system command"));
@@ -156,6 +190,12 @@ bool SystemCommandHandler::handleCommand(SerialCommandManager* sender, const cha
 }
 
 #if defined(ARDUINO_UNO_R4)
+
+void SystemCommandHandler::setSdCardLogger(SdCardLogger* sdCardLogger)
+{
+    _sdCardLogger = sdCardLogger;
+}
+
 void SystemCommandHandler::setWifiController(WifiController* wifiController)
 { 
     _wifiController = wifiController;

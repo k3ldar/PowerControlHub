@@ -5,7 +5,8 @@
 #include "SystemFunctions.h"
 
 SystemNetworkHandler::SystemNetworkHandler(WifiController* wifiController)
-	: _wifiController(wifiController)
+	: _wifiController(wifiController),
+      _sdCardLogger(nullptr)
 {
 }
 
@@ -45,7 +46,6 @@ void SystemNetworkHandler::formatStatusJson(char* buffer, size_t size)
 		wifiEnabled = config->wifiEnabled;
 	}
 
-	// Get runtime WiFi status if available
 	if (_wifiController && wifiEnabled && _wifiController->isEnabled())
 	{
 		rssi = _wifiController->getServer()->getSignalStrength();
@@ -54,15 +54,26 @@ void SystemNetworkHandler::formatStatusJson(char* buffer, size_t size)
 	char dateTimeStr[DateTimeBufferLength];
 	DateTimeManager::formatDateTime(dateTimeStr, sizeof(dateTimeStr));
 
-	// Enhanced JSON formatting with WiFi runtime details
+	bool sdPresent = false;
+	uint32_t logSize = 0;
+
+	if (_sdCardLogger)
+	{
+		sdPresent = _sdCardLogger->isSdCardPresent();
+		logSize = _sdCardLogger->getCurrentLogFileSize();
+	}
+
 	snprintf(buffer, size,
-		"\"system\":{\"mem\":%d,\"cpu\":%d,\"bluetooth\":%d,\"wifi\":%d,\"rssi\":%d,\"time\":\"%s\"}",
+		"\"system\":{\"mem\":%d,\"cpu\":%d,\"bluetooth\":%d,\"wifi\":%d,\"rssi\":%d,\"time\":\"%s\","
+		"\"sd\":{\"present\":%d,\"log\":%lu}}",
 		SystemFunctions::freeMemory(),
 		SystemCpuMonitor::getCpuUsage(),
 		bluetoothEnabled,
 		wifiEnabled,
 		rssi,
-		dateTimeStr);
+		dateTimeStr,
+		sdPresent,
+		(unsigned long)logSize);
 }
 
 void SystemNetworkHandler::formatWifiStatusJson(WiFiClient* client)

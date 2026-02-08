@@ -37,13 +37,12 @@
 #include "ConfigNetworkHandler.h"
 #include "RelayNetworkHandler.h"
 #include "SoundNetworkHandler.h"
-#include "WarningNetworkHandler.h"
 #include "SystemNetworkHandler.h"
 #include "SensorNetworkHandler.h"
+#include "WarningNetworkHandler.h"
 
 #include "ConfigController.h"
 #include "ConfigSyncManager.h"
-#include "RelayController.h"
 #include "SensorController.h"
 #include "SoundController.h"
 
@@ -54,8 +53,10 @@
 #include "MessageBus.h"
 #include "SensorDataRecord.h"
 #include "SdCardLogger.h"
-#include "SDCardConfigLoader.h"
 
+#if defined(CARD_CONFIG_LOADER)
+#include "SDCardConfigLoader.h"
+#endif
 
 #define COMPUTER_SERIAL Serial
 #define LINK_SERIAL Serial1
@@ -138,7 +139,10 @@ SensorNetworkHandler sensorNetworkHandler(&sensorController);
 
 // SD card logger
 SdCardLogger sdCardLogger(&sensorCommandHandler, &warningManager, SdCardCsPin);
+
+#if defined(CARD_CONFIG_LOADER)
 SdCardConfigLoader sdCardConfigLoader(&commandMgrComputer, &commandMgrLink, &configController, &configSyncManager, SdCardCsPin);
+#endif
 
 void setup()
 {
@@ -174,20 +178,23 @@ void setup()
 	// Link config sync manager to handlers so they can coordinate config synchronization
 	ackHandler.setConfigSyncManager(&configSyncManager, &configController);
 	configHandler.setConfigSyncManager(&configSyncManager);
+
+#if defined(CARD_CONFIG_LOADER)
 	configHandler.setSdCardConfigLoader(&sdCardConfigLoader);
+#endif
 
 	Config* config = ConfigManager::getConfigPtr();
 
 	configureWifiSupport(config);
 	configureBluetoothSupport(config);
+	systemCommandHandler.setSdCardLogger(&sdCardLogger);
+	systemNetworkHandler.setSdCardLogger(&sdCardLogger);
 	soundController.configUpdated(config);
 	relayHandler.configUpdated(config);
 	sensorManager.setup();
 
 	// Initialize SD card logger
 	sdCardLogger.initialize();
-
-	bool sdConfigLoaded = sdCardConfigLoader.loadConfigFromSd();
 
 #if defined(ARDUINO_UNO_R4) && defined(LED_MANAGER)
 	ledManager.Initialize();
@@ -202,10 +209,16 @@ void setup()
 		}
 	}
 
+#if defined(CARD_CONFIG_LOADER)
+	// Link SD card logger to config loader for coordinated SD card access
+	sdCardConfigLoader.setSdCardLogger(&sdCardLogger);
+
+	bool sdConfigLoaded = sdCardConfigLoader.loadConfigFromSd();
 	if (!sdConfigLoaded)
 	{
 		configSyncManager.requestSync();
 	}
+#endif
 
 	// indicate system initialized
 	commandMgrComputer.sendCommand(SystemInitialized, "");
@@ -257,11 +270,13 @@ void loop()
 void onComputerCommandReceived(SerialCommandManager* mgr)
 {
 	commandMgrComputer.sendError(mgr->getRawMessage(), F("STATCMD"));
+	SystemFunctions::resetSerial(COMPUTER_SERIAL);
 }
 
 void onLinkCommandReceived(SerialCommandManager* mgr)
 {
 	commandMgrComputer.sendError(mgr->getRawMessage(), F("STATLNK"));
+	SystemFunctions::resetSerial(LINK_SERIAL);
 }
 
 void configureWifiSupport(Config* config)

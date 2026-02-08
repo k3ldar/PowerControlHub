@@ -636,7 +636,7 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
             result = ConfigResult::InvalidParameter;
         }
     }
-    else if (strcmp(command, ConfigReloadFromSd) == 0)  // ADD THIS BLOCK
+    else if (strcmp(command, ConfigReloadFromSd) == 0)
     {
         // C29 - Reload config from SD card
         if (_sdCardConfigLoader)
@@ -657,7 +657,7 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
             return true;
         }
         }
-    else if (strcmp(command, ConfigExportToSd) == 0)  // ADD THIS BLOCK
+    else if (strcmp(command, ConfigExportToSd) == 0)
     {
         // C30 - Export current config to SD card
         if (_sdCardConfigLoader)
