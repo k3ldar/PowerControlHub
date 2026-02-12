@@ -1,61 +1,72 @@
 #pragma once
 
 #include <Arduino.h>
+#include "RtcDS1302Driver.h"
 
 constexpr uint8_t DateTimeBufferLength = 20;     // "YYYY-MM-DD HH:MM:SS" + null terminator
 constexpr uint8_t DateTimeISOBufferLength = 20;  // "YYYY-MM-DDTHH:MM:SS" + null terminator
 
 /**
  * @class DateTimeManager
- * @brief Static date/time manager for tracking system time.
+ * @brief Static date/time manager for tracking system time with RTC backup support.
  * 
- * This class provides centralized date/time management. Initially updated via
- * the F6 system command, it will be replaced with an RTC Clock module later.
+ * This class provides centralized date/time management with optional hardware RTC backup.
+ * Time can be updated via GPS, manual commands (F6), or read from RTC on startup.
+ * Uses RtcDS1302Driver for hardware abstraction.
  * 
  * Features:
+ * - Hardware RTC backup via RtcDS1302Driver
  * - Unix timestamp storage (seconds since epoch)
  * - Millisecond-precision offset tracking
  * - Automatic time progression using millis()
- * - Easy migration path to RTC hardware
+ * - Bidirectional sync: RTC → DateTimeManager on boot, DateTimeManager → RTC on updates
+ * - Graceful fallback if RTC is not present
  * 
  * Usage:
  * @code
- * // Initialize with current time (F6 command handler)
+ * // Initialize RTC and read time on startup
+ * DateTimeManager::begin(); // Call this once in setup()
+ * 
+ * // Set time via GPS, F6 command, or manually (automatically updates RTC)
  * DateTimeManager::setDateTime(1733328600); // Unix timestamp
  * 
  * // Or use ISO 8601 format
- * if (DateTimeManager::setDateTimeISO("2025-12-04T15:30:00")) {
- *     // Successfully parsed and set
+ * if (DateTimeManager::setDateTimeISO("2025-12-04T15:30:00"))
+ * {
+ *     // Successfully parsed, set, and RTC updated
  * }
  * 
  * // Get current time
  * unsigned long currentTime = DateTimeManager::getCurrentTime();
  * 
- * // Get individual components
- * uint16_t year = DateTimeManager::getYear();
- * uint8_t month = DateTimeManager::getMonth();
- * uint8_t day = DateTimeManager::getDay();
- * 
  * // Check if time has been synchronized
- * if (DateTimeManager::isTimeSet()) {
+ * if (DateTimeManager::isTimeSet())
+ * {
  *     // Time is available
  * }
- * 
- * // Format time as string
- * String timeStr = DateTimeManager::formatDateTime();
- * // Returns: "2025-12-04 15:30:45"
  * @endcode
  */
-class DateTimeManager {
+class DateTimeManager
+{
 public:
+    /**
+     * @brief Initialize the RTC hardware and read time from it.
+     * Call this once in setup() before any other DateTimeManager methods.
+     * If RTC is present and has valid time, loads it into DateTimeManager.
+     * If RTC is not present or time is invalid, uses default time.
+     */
+    static void begin();
+
     /**
      * @brief Set date/time to default value (January 1, 2025 00:00:00).
      * Used during initialization when no external time source is available.
+     * Also updates RTC if available.
      */
     static void setDateTime();
 
     /**
      * @brief Set the current date/time using Unix timestamp.
+     * Automatically updates RTC if available.
      * @param unixTimestamp Seconds since Unix epoch (Jan 1, 1970 00:00:00 UTC)
      */
     static void setDateTime(unsigned long unixTimestamp);
@@ -147,10 +158,39 @@ public:
      */
     static void reset();
 
+    /**
+     * @brief Set the timezone offset from UTC.
+     * @param offsetHours Hours offset from UTC (-12 to +14)
+     */
+    static void setTimezoneOffset(int8_t offsetHours);
+
+    /**
+     * @brief Get the current timezone offset.
+     * @return Hours offset from UTC
+     */
+    static int8_t getTimezoneOffset();
+
+    /**
+     * @brief Check if RTC hardware is available.
+     * @return true if RTC hardware is detected and initialized
+     */
+    static bool isRtcAvailable();
+
+    /**
+     * @brief Perform RTC diagnostic check.
+     * Delegates to RTC driver for hardware-specific diagnostics.
+     * @param buffer Buffer to store diagnostic message
+     * @param bufferLength Size of the buffer
+     * @return true if all tests pass, false if any test fails
+     */
+    static bool rtcDiagnostic(char* buffer, const uint8_t bufferLength);
+
 private:
-    static unsigned long _syncedTimestamp;     // Unix timestamp at last sync
-    static unsigned long _syncedMillis;        // millis() value at last sync
-    static bool _isSet;                        // Has time been synchronized
+    static RtcDS1302Driver _rtcDriver;
+    static unsigned long _syncedTimestamp;
+    static unsigned long _syncedMillis;
+    static bool _isSet;
+    static int8_t _timezoneOffset;
 
     /**
      * @brief Convert year/month/day/hour/minute/second to Unix timestamp.

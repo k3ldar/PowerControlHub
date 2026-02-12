@@ -172,6 +172,9 @@
     <ClCompile Include="ToneManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="RtcDS1302Driver.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="__vm\.BoatControlPanel.vsarduino.h">
@@ -325,6 +328,9 @@
       <Filter>Header Files\SharedCode</Filter>
     </ClInclude>
     <ClInclude Include="ToneManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RtcDS1302Driver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

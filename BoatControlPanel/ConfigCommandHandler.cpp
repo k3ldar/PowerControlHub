@@ -1,5 +1,6 @@
 #include "ConfigCommandHandler.h"
 #include "SystemFunctions.h"
+#include "DateTimeManager.h"
 
 ConfigCommandHandler::ConfigCommandHandler(BroadcastManager* broadcastManager, HomePage* homePage)
 	: _broadcastManager(broadcastManager), _homePage(homePage)
@@ -462,6 +463,7 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
                 return true;
             }
             cfg->timezoneOffset = offset;
+            DateTimeManager::setTimezoneOffset(offset);
             sendAckOk(sender, command, &params[0]);
         }
         else

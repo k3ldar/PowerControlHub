@@ -17,7 +17,6 @@ constexpr uint8_t SdCardMosiPin = D11;
 constexpr uint8_t SdCardMisoPin = D12;
 constexpr uint8_t SdCardSckPin = D13;
 
-
 // Digital pins for relays
 constexpr uint8_t Relay4 = D4;
 constexpr uint8_t Relay3 = D5;

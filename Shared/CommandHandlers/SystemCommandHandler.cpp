@@ -21,7 +21,7 @@ const char* const* SystemCommandHandler::supportedCommands(size_t& count) const
     static const char* cmds[] = { 
         SystemHeartbeatCommand, SystemInitialized, SystemFreeMemory, SystemCpuUsage,
         SystemBluetoothStatus, SystemWifiStatus, SystemSetDateTime, SystemGetDateTime,
-        SystemSdCardPresent, SystemSdCardLogFileSize
+        SystemSdCardPresent, SystemSdCardLogFileSize, SystemRtcDiagnostic
     };
     count = sizeof(cmds) / sizeof(cmds[0]);
     return cmds;
@@ -180,6 +180,24 @@ bool SystemCommandHandler::handleCommand(SerialCommandManager* sender, const cha
         strncpy(param.key, ValueParamName, sizeof(param.key));
         snprintf_P(param.value, sizeof(param.value), PSTR("%lu"), (unsigned long)fileSize);
         sendAckOk(sender, command, &param);
+    }
+    else if (strcmp(command, SystemRtcDiagnostic) == 0)
+    {
+        char diagnosticMsg[64];
+        bool success = DateTimeManager::rtcDiagnostic(diagnosticMsg, sizeof(diagnosticMsg));
+
+        StringKeyValue param;
+        strncpy(param.key, ValueParamName, sizeof(param.key));
+        strncpy(param.value, diagnosticMsg, sizeof(param.value));
+
+        if (success)
+        {
+            sendAckOk(sender, command, &param);
+        }
+        else
+        {
+            sendAckErr(sender, command, param.value);
+        }
     }
     else
     {

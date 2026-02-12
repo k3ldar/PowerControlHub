@@ -158,7 +158,7 @@ void setup()
     systemLedStatus.setColor(120, 0, 180);
     systemLedStatus.update(0);
 
-    DateTimeManager::setDateTime();
+    DateTimeManager::begin();
 
     ISerialCommandHandler* linkHandlers[] = { &interceptDebugHandler, &ackHandler, &sensorCommandHandler,
         &warningCommandHandler, &systemCommandHandler, &configHandler };
@@ -197,6 +197,7 @@ void setup()
     }
 
     Config* config = ConfigManager::getConfigPtr();
+    DateTimeManager::setTimezoneOffset(config->timezoneOffset);
     homePage.configSet(config);
     warningPage.configSet(config);
 	relayPage.configSet(config);
