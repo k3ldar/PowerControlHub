@@ -4,6 +4,8 @@
 #include <SdFat.h>
 #include <stdint.h>
 
+class WarningManager;
+
 // Configuration constants
 constexpr uint8_t SdMaximumOpenFiles = 3;            // Maximum simultaneous open files
 constexpr uint16_t SdCardPresenceCheckMs = 5000;       // Card presence check interval (5 seconds)
@@ -100,8 +102,11 @@ struct SdFileInfo
 class MicroSdDriver
 {
 private:
-    // Singleton instance
-    static MicroSdDriver* _instance;
+	// Singleton instance
+	static MicroSdDriver* _instance;
+
+	// Warning manager for status notifications
+	WarningManager* _warningManager;
 
 	// SD card state
 	SdFat _sd;
@@ -162,12 +167,23 @@ private:
      */
     uint64_t readTotalSizeFromBootSector();
 
+    /**
+     * @brief Check free space and raise/clear low space warning
+     */
+    void checkFreeSpaceWarning();
+
 public:
     /**
      * @brief Get singleton instance
      * @return Reference to the singleton SdDiskDriver instance
      */
     static MicroSdDriver& getInstance();
+
+    /**
+     * @brief Set warning manager for status notifications
+     * @param warningManager Pointer to WarningManager instance
+     */
+    void setWarningManager(WarningManager* warningManager);
 
     /**
      * @brief Start non-blocking SD card initialization

@@ -3,13 +3,15 @@
 // 
 
 #include "MicroSdDriver.h"
+#include "WarningManager.h"
 #include <SPI.h>
 
 // Initialize static singleton instance
 MicroSdDriver* MicroSdDriver::_instance = nullptr;
 
 MicroSdDriver::MicroSdDriver()
-    : _csPin(0),
+    : _warningManager(nullptr),
+      _csPin(0),
       _speedMhz(4),
       _initState(MicroSdInitState::NotInitialized),
       _cardPresent(false),
@@ -31,6 +33,11 @@ MicroSdDriver& MicroSdDriver::getInstance()
         _instance = new MicroSdDriver();
     }
     return *_instance;
+}
+
+void MicroSdDriver::setWarningManager(WarningManager* warningManager)
+{
+    _warningManager = warningManager;
 }
 
 void MicroSdDriver::beginInitialize(uint8_t csPin, uint32_t speedMhz)
@@ -250,9 +257,11 @@ void MicroSdDriver::update(unsigned long now)
             // Read card serial number for change detection
             _cardSerialNumber = readCardSerialNumber();
 
-            Serial.print(F("SD Init: Success @ "));
-            Serial.print(_speedMhz);
-            Serial.println(F(" MHz - Settling..."));
+            // Clear SD card missing warning
+            if (_warningManager)
+            {
+                _warningManager->clearWarning(WarningType::SdCardMissing);
+            }
         }
         else
         {
@@ -261,9 +270,11 @@ void MicroSdDriver::update(unsigned long now)
             _cardPresent = false;
             _lastInitAttemptTime = now;
 
-            Serial.print(F("SD Init: Failed @ "));
-            Serial.print(_speedMhz);
-            Serial.println(F(" MHz"));
+            // Raise SD card missing warning
+            if (_warningManager)
+            {
+                _warningManager->raiseWarning(WarningType::SdCardMissing);
+            }
         }
 
         return;
@@ -275,12 +286,12 @@ void MicroSdDriver::update(unsigned long now)
         if (now - _lastInitAttemptTime >= SdCardSettlingDelayMs)
         {
             // Card has settled - now safe to do expensive operations
-            Serial.println(F("SD Card: Settled, updating card info..."));
-
             updateCardInfo(false); // Fast update (total size only)
 
             _initState = MicroSdInitState::Initialized;
-            Serial.println(F("SD Card: Ready"));
+
+            // Check free space and raise warning if below 10%
+            checkFreeSpaceWarning();
         }
         return;
     }
@@ -290,7 +301,6 @@ void MicroSdDriver::update(unsigned long now)
     {
         if (now - _lastInitAttemptTime >= SdCardPresenceCheckMs)
         {
-            Serial.println(F("[SD] Reinitializing after failure..."));
             reinitialize();
         }
         return;
@@ -301,27 +311,25 @@ void MicroSdDriver::update(unsigned long now)
     {
         if (now - _lastPresenceCheck >= SdCardPresenceCheckMs)
         {
-            Serial.println(F("[SD] Checking card presence..."));
-
             // Check if card is still present
             if (!isCardPresent(true))
             {
-                Serial.println(F("[SD] Card presence check FAILED"));
-
                 // Card removed - reset state
                 closeAllFiles();
                 _initState = MicroSdInitState::Failed;
                 _cardSerialNumber = 0;
                 _lastFreeSpaceUpdate = 0;
 
-                Serial.println(F("SD Card: Removed"));
+                // Raise SD card missing warning
+                if (_warningManager)
+                {
+                    _warningManager->raiseWarning(WarningType::SdCardMissing);
+                    _warningManager->clearWarning(WarningType::SdCardLowSpace);
+                }
             }
             else
             {
-                Serial.println(F("[SD] Card presence check OK"));
-
                 // Card present - check if it's the same card
-                Serial.println(F("[SD] Checking card serial..."));
                 uint32_t currentSerial = readCardSerialNumber();
 
                 if (_cardSerialNumber != 0 && currentSerial != 0 && currentSerial != _cardSerialNumber)
@@ -332,13 +340,8 @@ void MicroSdDriver::update(unsigned long now)
                     _lastFreeSpaceUpdate = 0;
                     updateCardInfo(true); // Force full recalculation for new card
 
-                    Serial.print(F("SD Card: Swapped (SN: 0x"));
-                    Serial.print(currentSerial, HEX);
-                    Serial.println(F(")"));
-                }
-                else
-                {
-                    Serial.println(F("[SD] Card serial match"));
+                    // Check free space on new card
+                    checkFreeSpaceWarning();
                 }
             }
 
@@ -369,38 +372,27 @@ void MicroSdDriver::updateCardInfo(bool forceExpensiveCheck)
 {
     if (_initState != MicroSdInitState::Initialized)
     {
-        Serial.println(F("[SD] UpdateCardInfo: Not initialized"));
         return;
     }
 
-    Serial.println(F("[SD] Reading total size..."));
     // Fast: Read total size from FAT32 boot sector (single 512-byte sector read)
     _totalSize = readTotalSizeFromBootSector();
-    Serial.print(F("[SD] Total size: "));
-    Serial.print((unsigned long)(_totalSize / 1048576UL)); // MB
-    Serial.println(F(" MB"));
 
     // Expensive: Only recalculate free space if forced or cache is stale (> 5 minutes)
     unsigned long now = millis();
-    bool freeSpaceStale = (now - _lastFreeSpaceUpdate) >= 300000UL; // 5 minutes
+    bool freeSpaceStale = (now - _lastFreeSpaceUpdate) >= SdFreeSpaceCacheMs;
 
     if (forceExpensiveCheck || freeSpaceStale || _lastFreeSpaceUpdate == 0)
     {
-        Serial.println(F("[SD] Calculating free space (SLOW)..."));
         // This is the expensive operation (200-1000ms on large cards)
         uint32_t freeClusterCount = _sd.freeClusterCount();
         uint32_t sectorsPerCluster = _sd.sectorsPerCluster();
         _freeSpace = static_cast<uint64_t>(freeClusterCount) * sectorsPerCluster * 512ULL;
 
-        Serial.print(F("[SD] Free space: "));
-        Serial.print((unsigned long)(_freeSpace / 1048576UL)); // MB
-        Serial.println(F(" MB"));
-
         _lastFreeSpaceUpdate = now;
-    }
-    else
-    {
-        Serial.println(F("[SD] Using cached free space"));
+
+        // Check if free space warning should be raised/cleared
+        checkFreeSpaceWarning();
     }
 }
 
@@ -432,3 +424,27 @@ uint64_t MicroSdDriver::readTotalSizeFromBootSector()
     uint32_t cardSizeBlocks = _sd.card()->sectorCount();
     return static_cast<uint64_t>(cardSizeBlocks) * 512ULL;
 }
+
+void MicroSdDriver::checkFreeSpaceWarning()
+{
+    if (!_warningManager || _totalSize == 0)
+    {
+        return;
+    }
+
+    // Calculate percentage of free space
+    // Use integer math to avoid floating point: (freeSpace * 100) / totalSize
+    uint64_t freePercentage = (_freeSpace * 100ULL) / _totalSize;
+
+    if (freePercentage < 10)
+    {
+        // Free space below 10% - raise warning
+        _warningManager->raiseWarning(WarningType::SdCardLowSpace);
+    }
+    else
+    {
+        // Free space OK - clear warning
+        _warningManager->clearWarning(WarningType::SdCardLowSpace);
+    }
+}
+

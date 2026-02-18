@@ -197,6 +197,7 @@ void setup()
 	sensorManager.setup();
 
 	MicroSdDriver& microSdDriver = MicroSdDriver::getInstance();
+	microSdDriver.setWarningManager(&warningManager);
 	microSdDriver.beginInitialize(SdCardCsPin, config->sdCardInitializeSpeed);
 
 	// Initialize SD card logger
