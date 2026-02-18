@@ -11,6 +11,7 @@ MicroSdDriver* MicroSdDriver::_instance = nullptr;
 
 MicroSdDriver::MicroSdDriver()
     : _warningManager(nullptr),
+      _onCardReadyCallback(nullptr),
       _csPin(0),
       _speedMhz(4),
       _initState(MicroSdInitState::NotInitialized),
@@ -38,6 +39,11 @@ MicroSdDriver& MicroSdDriver::getInstance()
 void MicroSdDriver::setWarningManager(WarningManager* warningManager)
 {
     _warningManager = warningManager;
+}
+
+void MicroSdDriver::setOnCardReadyCallback(SdCardEventCallback callback)
+{
+    _onCardReadyCallback = callback;
 }
 
 void MicroSdDriver::beginInitialize(uint8_t csPin, uint32_t speedMhz)
@@ -315,13 +321,19 @@ void MicroSdDriver::update(unsigned long now)
     {
         if (now - _lastInitAttemptTime >= SdCardSettlingDelayMs)
         {
-            // Card has settled - now safe to do expensive operations
-            updateCardInfo(false); // Fast update (total size only)
-
             _initState = MicroSdInitState::Initialized;
+
+            // Card has settled - now safe to do expensive operations
+            updateCardInfo(false);
 
             // Check free space and raise warning if below 10%
             checkFreeSpaceWarning();
+
+            // Notify callback that card is ready (first initialization, not a swap)
+            if (_onCardReadyCallback)
+            {
+                _onCardReadyCallback(false);
+            }
         }
         return;
     }
@@ -373,6 +385,12 @@ void MicroSdDriver::update(unsigned long now)
 
                     // Check free space on new card
                     checkFreeSpaceWarning();
+
+                    // Notify callback that a new card is ready
+                    if (_onCardReadyCallback)
+                    {
+                        _onCardReadyCallback(true);
+                    }
                 }
             }
 
@@ -455,7 +473,7 @@ void MicroSdDriver::updateCardInfo(bool forceExpensiveCheck)
 
 uint32_t MicroSdDriver::readCardSerialNumber()
 {
-    if (_initState != MicroSdInitState::Initialized)
+    if (_initState != MicroSdInitState::Initialized && _initState != MicroSdInitState::Settling)
     {
         return 0;
     }

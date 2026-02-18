@@ -1,7 +1,6 @@
 #pragma once
 
 #include <Arduino.h>
-#include <SdFat.h>
 #include <SerialCommandManager.h>
 #include "ConfigController.h"
 #include "ConfigSyncManager.h"
@@ -32,7 +31,7 @@ constexpr uint16_t SD_CONFIG_MAX_LINE_LENGTH = 128;
  * Usage:
  * @code
  * SdCardConfigLoader loader(&commandMgrComputer, &commandMgrLink, 
- *                           &configController, &configSyncManager, csPin);
+ *                           &configController, &configSyncManager);
  * 
  * void setup() {
  *     bool sdConfigLoaded = loader.loadConfigFromSd();
@@ -49,16 +48,11 @@ private:
     SerialCommandManager* _linkSerial;
     ConfigController* _configController;
     ConfigSyncManager* _configSyncManager;
-    SdCardLogger* _sdCardLogger;
-    uint8_t _csPin;
     bool _sdConfigPresent;
 
-    // SD card
-    SdFat _sd;
-
     /**
-     * @brief Check if SD card is accessible
-     * @return true if SD card is present and readable
+     * @brief Check if SD card is initialized and ready for operations
+     * @return true if MicroSdDriver is ready (initialized, present, not in exclusive mode)
      */
     bool checkSdCard();
 
@@ -100,19 +94,11 @@ public:
      * @param linkSerial Serial manager for LINK communication
      * @param configController Configuration controller
      * @param configSyncManager Configuration sync manager (will be disabled if SD config loaded)
-     * @param csPin Chip select pin for SD card
      */
     SdCardConfigLoader(SerialCommandManager* computerSerial,
                        SerialCommandManager* linkSerial,
                        ConfigController* configController,
-                       ConfigSyncManager* configSyncManager,
-                       uint8_t csPin);
-
-    /**
-     * @brief Set the SdCardLogger reference for coordinated SD card access
-     * @param sdCardLogger Pointer to the SdCardLogger instance
-     */
-    void setSdCardLogger(SdCardLogger* sdCardLogger);
+                       ConfigSyncManager* configSyncManager);
 
     /**
      * @brief Load configuration from SD card if present
@@ -141,4 +127,17 @@ public:
      * @return true if SD config is present and was loaded
      */
     bool isSdConfigPresent() const { return _sdConfigPresent; }
+
+    /**
+     * @brief Callback handler for SD card ready events
+     * 
+     * Called automatically when:
+     * - SD card completes initialization
+     * - A different card is inserted
+     * 
+     * Attempts to load config from the newly available card.
+     * 
+     * @param isNewCard True if this is a new card (swap), false for initial ready
+     */
+    void onSdCardReady(bool isNewCard);
 };

@@ -19,7 +19,7 @@ constexpr uint16_t SdCardSettlingDelayMs = 2000;       // Card settling time aft
 enum class MicroSdFileHandle : uint8_t
 {
     Logger = 0,         // Reserved for SdCardLogger
-    ConfigLoader = 1,   // Reserved for SDCardConfigLoader
+    ConfigLoader = 1,   // Reserved for future SDCardConfigLoader integration
     UserFile1 = 2,      // Available for custom file operations
     Invalid = 0xFF
 };
@@ -70,7 +70,7 @@ struct SdFileInfo
  * 
  * Integration Points:
  * - SdCardLogger: Uses Logger handle for continuous logging
- * - SDCardConfigLoader: Uses ConfigLoader handle for config file access
+ * - Future: ConfigLoader handle reserved for SDCardConfigLoader integration
  * - Future components: Can use UserFile1 for additional file operations
  * 
  * Usage Pattern:
@@ -83,22 +83,34 @@ struct SdFileInfo
  * }
  * 
  * // Open a file (from SdCardLogger)
- * FsFile* logFile = sdDriver.openFile(SdFileHandle::Logger, "data.csv", 
+ * FsFile* logFile = sdDriver.openFile(MicroSdFileHandle::Logger, "data.csv", 
  *                                     O_RDWR | O_CREAT | O_APPEND);
  * if (logFile != nullptr)
  * {
  *     logFile->println("Log entry");
- *     sdDriver.closeFile(SdFileHandle::Logger);
+ *     sdDriver.closeFile(MicroSdFileHandle::Logger);
  * }
  * 
- * // Request exclusive access (from SDCardConfigLoader)
+ * // Request exclusive access for critical operations
  * if (sdDriver.requestExclusiveAccess())
  * {
- *     // Perform critical operations
+ *     // Perform critical operations (e.g., firmware update, config reload)
+ *     // All open files are closed during exclusive access
  *     sdDriver.releaseExclusiveAccess();
  * }
  * @endcode
  */
+// Forward declarations
+class MicroSdDriver;
+
+/**
+ * @typedef SdCardEventCallback
+ * @brief Callback function type for SD card events
+ * @param driver Pointer to the MicroSdDriver instance
+ * @param isNewCard True if this is a new card (different serial number), false if same card re-initialized
+ */
+typedef void (*SdCardEventCallback)(bool isNewCard);
+
 class MicroSdDriver
 {
 private:
@@ -107,6 +119,9 @@ private:
 
 	// Warning manager for status notifications
 	WarningManager* _warningManager;
+
+	// Callback for SD card ready events
+	SdCardEventCallback _onCardReadyCallback;
 
 	// SD card state
 	SdFat _sd;
@@ -184,6 +199,18 @@ public:
      * @param warningManager Pointer to WarningManager instance
      */
     void setWarningManager(WarningManager* warningManager);
+
+    /**
+     * @brief Set callback for SD card ready events
+     * 
+     * The callback will be invoked when:
+     * - Card completes initialization (Settling -> Initialized transition)
+     * - A different card is detected during presence check
+     * 
+     * @param callback Function to call when card becomes ready
+     *                 Parameters: (MicroSdDriver* driver, bool isNewCard)
+     */
+    void setOnCardReadyCallback(SdCardEventCallback callback);
 
     /**
      * @brief Start non-blocking SD card initialization
