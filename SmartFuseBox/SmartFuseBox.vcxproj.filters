@@ -169,19 +169,7 @@
     <ClCompile Include="SDCardConfigLoader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="SensorCommandHandler.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SensorCommandHandler.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SensorCommandHandler.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SensorCommandHandler.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SensorCommandHandler.cpp">
+    <ClCompile Include="MicroSdDriver.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -354,9 +342,6 @@
     <ClInclude Include="Dht11SensorHandler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="SDCardConfigLoader.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="SdCardLogger.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -375,8 +360,15 @@
     <ClInclude Include="Dht11SensorHandler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="MicroSdDriver.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Dht11SensorHandler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="C20-C27_IMPLEMENTATION.md" />
+    <None Include="SD_CARD_CALLBACK_IMPLEMENTATION.md" />
   </ItemGroup>
 </Project>

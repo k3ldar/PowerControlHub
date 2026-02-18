@@ -10,6 +10,7 @@
 #if defined(ARDUINO_UNO_R4)
 #include "SdCardLogger.h"
 #include "WifiController.h"
+#include "MicroSdDriver.h"
 #endif
 
 class SystemCommandHandler : public SharedBaseCommandHandler

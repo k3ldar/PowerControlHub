@@ -175,10 +175,9 @@ bool SystemCommandHandler::handleCommand(SerialCommandManager* sender, const cha
         bool present = false;
 
 #if defined(ARDUINO_UNO_R4)
-        if (_sdCardLogger)
-        {
-            present = _sdCardLogger->isSdCardPresent();
-        }
+        // Check SD card presence via MicroSdDriver
+        MicroSdDriver& sdDriver = MicroSdDriver::getInstance();
+        present = sdDriver.isCardPresent();
 #endif
 
         char value = present ? '1' : '0';
@@ -203,9 +202,9 @@ bool SystemCommandHandler::handleCommand(SerialCommandManager* sender, const cha
     }
     else if (strcmp(command, SystemRtcDiagnostic) == 0)
     {
+#if defined(BOAT_CONTROL_PANEL)
         char diagnosticMsg[64];
 
-#if defined(BOAT_CONTROL_PANEL)
         bool success = DateTimeManager::rtcDiagnostic(diagnosticMsg, sizeof(diagnosticMsg));
         StringKeyValue param;
         strncpy(param.key, ValueParamName, sizeof(param.key));

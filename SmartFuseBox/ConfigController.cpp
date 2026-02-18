@@ -576,3 +576,18 @@ ConfigResult ConfigController::setControlPanelTones(const uint8_t type, const ui
 
 	return ConfigResult::Success;
 }
+
+// C31: Set SD card initialize speed
+ConfigResult ConfigController::setSdCardInitializeSpeed(const uint8_t speedMhz)
+{
+	if (_config == nullptr)
+		return ConfigResult::InvalidConfig;
+
+	// Only allow specific valid speeds: 4, 8, 12, 16, 20, 24 MHz
+	if (speedMhz != 4 && speedMhz != 8 && speedMhz != 12 && 
+		speedMhz != 16 && speedMhz != 20 && speedMhz != 24)
+		return ConfigResult::InvalidParameter;
+
+	_config->sdCardInitializeSpeed = speedMhz;
+	return ConfigResult::Success;
+}

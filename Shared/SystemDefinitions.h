@@ -77,6 +77,7 @@ constexpr char ConfigLedEnable[] = "C27";
 constexpr char ControlPanelTones[] = "C28";
 constexpr char ConfigReloadFromSd[] = "C29";
 constexpr char ConfigExportToSd[] = "C30";
+constexpr char ConfigSdCardSpeed[] = "C31";
 
 constexpr char WarningsActive[] = "W0";
 constexpr char WarningsList[] = "W1";

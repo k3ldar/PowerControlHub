@@ -146,6 +146,7 @@ void ConfigManager::resetToDefaults()
 	_cfg.apIpAddress[sizeof(_cfg.apIpAddress) - 1] = '\0';
 #endif
 
+    _cfg.sdCardInitializeSpeed = 4;
     _cfg.ledConfig.dayBrightness = 80;
     _cfg.ledConfig.dayGoodColor[0] = 0;
     _cfg.ledConfig.dayGoodColor[1] = 80; 

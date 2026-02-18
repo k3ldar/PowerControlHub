@@ -418,17 +418,31 @@ CommandResult ConfigNetworkHandler::handleRequest(const char* method,
 					repeatMs = static_cast<uint32_t>(strtoul(params[i].value, nullptr, 0));
 			}
 
-			result = _configController->setControlPanelTones(type, preset, toneHz, durationMs, repeatMs);
-		}
-		else
-		{
-			result = ConfigResult::InvalidParameter;
-		}
-	}
-	else
-	{
-		result = ConfigResult::InvalidCommand;
-	}
+					result = _configController->setControlPanelTones(type, preset, toneHz, durationMs, repeatMs);
+				}
+				else
+				{
+					result = ConfigResult::InvalidParameter;
+				}
+			}
+			else if (strcmp(command, ConfigSdCardSpeed) == 0)
+			{
+				// C31 - Set SD card initialize speed
+				// Format: C31:v=4 (or 8, 12, 16, 20, 24)
+				if (paramCount >= 1)
+				{
+					uint8_t speedMhz = static_cast<uint8_t>(atoi(params[0].value));
+					result = _configController->setSdCardInitializeSpeed(speedMhz);
+				}
+				else
+				{
+					result = ConfigResult::InvalidParameter;
+				}
+			}
+			else
+			{
+				result = ConfigResult::InvalidCommand;
+			}
 
 	if (result == ConfigResult::Success)
     {
@@ -661,7 +675,11 @@ void ConfigNetworkHandler::formatStatusJson(WiFiClient* client)
 	client->print(config->soundConfig.bad_durationMs);
 	client->print(",\"badRepeatMs\":");
 	client->print(config->soundConfig.bad_repeatMs);
-	client->print("}");
+	client->print("},");
+
+	// C31 SD Card Initialize Speed
+	client->print("\"sdCardInitializeSpeed\":");
+	client->print(config->sdCardInitializeSpeed);
 
 	client->print("}");
 }

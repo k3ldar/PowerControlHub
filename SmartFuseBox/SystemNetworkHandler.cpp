@@ -1,8 +1,13 @@
+#include "Local.h"
 #include "SystemNetworkHandler.h"
 #include "SystemCpuMonitor.h"
 #include "ConfigManager.h"
 #include "DateTimeManager.h"
 #include "SystemFunctions.h"
+
+#if defined(FUSE_BOX_CONTROLLER)
+#include "MicroSdDriver.h"
+#endif
 
 SystemNetworkHandler::SystemNetworkHandler(WifiController* wifiController)
 	: _wifiController(wifiController),
@@ -59,7 +64,8 @@ void SystemNetworkHandler::formatStatusJson(char* buffer, size_t size)
 
 	if (_sdCardLogger)
 	{
-		sdPresent = _sdCardLogger->isSdCardPresent();
+		MicroSdDriver& sdDriver = MicroSdDriver::getInstance();
+		sdPresent = sdDriver.isCardPresent();
 		logSize = _sdCardLogger->getCurrentLogFileSize();
 	}
 

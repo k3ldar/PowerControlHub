@@ -46,12 +46,16 @@
 #include "SensorController.h"
 #include "SoundController.h"
 
+#include "MicroSdDriver.h"
+
+
 #if defined(ARDUINO_UNO_R4) && defined(LED_MANAGER)
 #include "LedMatrixManager.h"
 #endif
 
 #include "MessageBus.h"
 #include "SensorDataRecord.h"
+#include "MicroSdDriver.h"
 #include "SdCardLogger.h"
 
 #if defined(CARD_CONFIG_LOADER)
@@ -66,6 +70,10 @@ void onComputerCommandReceived(SerialCommandManager* mgr);
 void onLinkCommandReceived(SerialCommandManager* mgr);
 void configureWifiSupport(Config* config);
 void configureBluetoothSupport(Config* config);
+
+#if defined(CARD_CONFIG_LOADER)
+void onSdCardReady(MicroSdDriver* driver, bool isNewCard);
+#endif
 
 // message bus
 MessageBus messageBus;
@@ -138,10 +146,10 @@ SystemNetworkHandler systemNetworkHandler(&wifiController);
 SensorNetworkHandler sensorNetworkHandler(&sensorController);
 
 // SD card logger
-SdCardLogger sdCardLogger(&sensorCommandHandler, &warningManager, SdCardCsPin);
+SdCardLogger sdCardLogger(&sensorCommandHandler, &warningManager);
 
 #if defined(CARD_CONFIG_LOADER)
-SdCardConfigLoader sdCardConfigLoader(&commandMgrComputer, &commandMgrLink, &configController, &configSyncManager, SdCardCsPin);
+SdCardConfigLoader sdCardConfigLoader(&commandMgrComputer, &commandMgrLink, &configController, &configSyncManager);
 #endif
 
 void setup()
@@ -193,6 +201,16 @@ void setup()
 	relayHandler.configUpdated(config);
 	sensorManager.setup();
 
+	MicroSdDriver& microSdDriver = MicroSdDriver::getInstance();
+	microSdDriver.setWarningManager(&warningManager);
+
+#if defined(CARD_CONFIG_LOADER)
+	// Register callback for SD card ready events (handles both initial init and card swaps)
+	microSdDriver.setOnCardReadyCallback(onSdCardReady);
+#endif
+
+	microSdDriver.beginInitialize(SdCardCsPin, config->sdCardInitializeSpeed);
+
 	// Initialize SD card logger
 	sdCardLogger.initialize();
 
@@ -208,17 +226,6 @@ void setup()
 			relayController.setRelayState(i, true);
 		}
 	}
-
-#if defined(CARD_CONFIG_LOADER)
-	// Link SD card logger to config loader for coordinated SD card access
-	sdCardConfigLoader.setSdCardLogger(&sdCardLogger);
-
-	bool sdConfigLoaded = sdCardConfigLoader.loadConfigFromSd();
-	if (!sdConfigLoaded)
-	{
-		configSyncManager.requestSync();
-	}
-#endif
 
 	// indicate system initialized
 	commandMgrComputer.sendCommand(SystemInitialized, "");
@@ -257,6 +264,11 @@ void loop()
 
 	SystemCpuMonitor::startTask();
 	configSyncManager.update(now);
+	SystemCpuMonitor::endTask();
+
+	SystemCpuMonitor::startTask();
+	MicroSdDriver& microSdDriver = MicroSdDriver::getInstance();
+	microSdDriver.update(now);
 	SystemCpuMonitor::endTask();
 
 	SystemCpuMonitor::startTask();
@@ -309,3 +321,11 @@ void configureBluetoothSupport(Config* config)
 	// bluetooth
 	bluetoothController.applyConfig(config);
 }
+
+#if defined(CARD_CONFIG_LOADER)
+void onSdCardReady(bool isNewCard)
+{
+	// Forward the callback to the config loader
+	sdCardConfigLoader.onSdCardReady(isNewCard);
+}
+#endif

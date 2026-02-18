@@ -45,7 +45,6 @@ struct SoundSignalConfig
     uint32_t bad_repeatMs;
 } __attribute__((packed));
 
-//
 // Layout:
 // - version (uint8_t)
 // - boatName (30 chars + null)
@@ -96,6 +95,8 @@ struct Config {
     uint16_t wifiPort;
 	char apIpAddress[MaxIpAddressLength]; // xxx.xxx.xxx.xxx + null
 #endif
+
+    uint8_t sdCardInitializeSpeed;
 
     LedConfig ledConfig;
 	SoundSignalConfig soundConfig;

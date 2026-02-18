@@ -5,35 +5,25 @@
 SdCardConfigLoader::SdCardConfigLoader(SerialCommandManager* computerSerial,
                                        SerialCommandManager* linkSerial,
                                        ConfigController* configController,
-                                       ConfigSyncManager* configSyncManager,
-                                       uint8_t csPin)
+                                       ConfigSyncManager* configSyncManager)
     : _computerSerial(computerSerial),
       _linkSerial(linkSerial),
       _configController(configController),
       _configSyncManager(configSyncManager),
-      _sdCardLogger(nullptr),
-      _csPin(csPin),
       _sdConfigPresent(false)
 {
 }
 
-void SdCardConfigLoader::setSdCardLogger(SdCardLogger* sdCardLogger)
-{
-    _sdCardLogger = sdCardLogger;
-}
-
 bool SdCardConfigLoader::checkSdCard()
 {
-    if (!_sd.begin(_csPin, SD_SCK_MHZ(50)))
-    {
-        return false;
-    }
-    return true;
+    MicroSdDriver& sdDriver = MicroSdDriver::getInstance();
+    return sdDriver.isReady();
 }
 
 bool SdCardConfigLoader::configFileExists()
 {
-    return _sd.exists(SD_CONFIG_FILENAME);
+    MicroSdDriver& sdDriver = MicroSdDriver::getInstance();
+    return sdDriver.fileExists(SD_CONFIG_FILENAME);
 }
 
 bool SdCardConfigLoader::applyConfigCommand(const char* line)
@@ -405,25 +395,18 @@ void SdCardConfigLoader::logInfo(const char* message)
 bool SdCardConfigLoader::loadConfigFromSd()
 {
     logInfo("Checking for SD config...");
+    MicroSdDriver& sdDriver = MicroSdDriver::getInstance();
 
-    // Temporarily release SD card if logger is using it
-    bool loggerWasActive = false;
-    if (_sdCardLogger && _sdCardLogger->isSdCardReady())
+    // Request exclusive access (closes all open files including logger)
+    if (!sdDriver.requestExclusiveAccess())
     {
-        logInfo("Releasing SD card from logger...");
-        _sdCardLogger->releaseSDCard();
-        loggerWasActive = true;
+        logError("Failed to get exclusive SD card access");
+        return false;
     }
 
     if (!checkSdCard())
     {
         logInfo("SD card not present or not accessible");
-
-        // Reacquire SD card for logger if it was active
-        if (loggerWasActive && _sdCardLogger)
-        {
-            _sdCardLogger->reacquireSDCard();
-        }
 
         return false;
     }
@@ -432,28 +415,18 @@ bool SdCardConfigLoader::loadConfigFromSd()
     {
         logInfo("Config file not found on SD card");
 
-        // Reacquire SD card for logger if it was active
-        if (loggerWasActive && _sdCardLogger)
-        {
-            _sdCardLogger->reacquireSDCard();
-        }
-
         return false;
     }
 
     logInfo("Loading config from SD card...");
 
-    FsFile configFile = _sd.open(SD_CONFIG_FILENAME, O_RDONLY);
+    FsFile* configFile = sdDriver.openFile(MicroSdFileHandle::ConfigLoader,
+        SD_CONFIG_FILENAME, O_RDONLY);
+
     if (!configFile)
     {
+        sdDriver.releaseExclusiveAccess();
         logError("Failed to open config file");
-
-        // Reacquire SD card for logger if it was active
-        if (loggerWasActive && _sdCardLogger)
-        {
-            _sdCardLogger->reacquireSDCard();
-        }
-
         return false;
     }
 
@@ -463,9 +436,9 @@ bool SdCardConfigLoader::loadConfigFromSd()
     uint16_t successCount = 0;
     uint16_t errorCount = 0;
 
-    while (configFile.available())
+    while (configFile->available())
     {
-        int len = configFile.fgets(line, sizeof(line));
+        int len = configFile->fgets(line, sizeof(line));
         lineNumber++;
 
         if (len > 0)
@@ -481,7 +454,8 @@ bool SdCardConfigLoader::loadConfigFromSd()
         }
     }
 
-    configFile.close();
+    sdDriver.closeFile(MicroSdFileHandle::ConfigLoader);
+    sdDriver.releaseExclusiveAccess();
 
     // Save to EEPROM
     if (successCount > 0)
@@ -510,25 +484,12 @@ bool SdCardConfigLoader::loadConfigFromSd()
             snprintf(summary, sizeof(summary), "SD config loaded: %u commands applied, %u errors", successCount, errorCount);
             logInfo(summary);
 
-            // Reacquire SD card for logger if it was active
-            if (loggerWasActive && _sdCardLogger)
-            {
-                logInfo("Reacquiring SD card for logger...");
-                _sdCardLogger->reacquireSDCard();
-            }
-
             return true;
         }
         else
         {
             logError("Failed to save config to EEPROM");
         }
-    }
-
-    // Reacquire SD card for logger if it was active
-    if (loggerWasActive && _sdCardLogger)
-    {
-        _sdCardLogger->reacquireSDCard();
     }
 
     return false;
@@ -543,257 +504,256 @@ bool SdCardConfigLoader::reloadConfigFromSd()
 bool SdCardConfigLoader::exportConfigToSd()
 {
     logInfo("Exporting config to SD card...");
+    MicroSdDriver& sdDriver = MicroSdDriver::getInstance();
 
-    // Temporarily release SD card if logger is using it
-    bool loggerWasActive = false;
-    if (_sdCardLogger && _sdCardLogger->isSdCardReady())
+    // Request exclusive access (closes all open files including logger)
+    if (!sdDriver.requestExclusiveAccess())
     {
-        logInfo("Releasing SD card from logger...");
-        _sdCardLogger->releaseSDCard();
-        loggerWasActive = true;
+        logError("Failed to get exclusive SD card access");
+        return false;
     }
 
     if (!checkSdCard())
     {
+        sdDriver.releaseExclusiveAccess();
         logError("SD card not present or not accessible");
-
-        // Reacquire SD card for logger if it was active
-        if (loggerWasActive && _sdCardLogger)
-        {
-            _sdCardLogger->reacquireSDCard();
-        }
-
         return false;
     }
 
     // Delete existing config file if present
-    if (_sd.exists(SD_CONFIG_FILENAME))
+    if (sdDriver.fileExists(SD_CONFIG_FILENAME))
     {
-        _sd.remove(SD_CONFIG_FILENAME);
+        sdDriver.deleteFile(SD_CONFIG_FILENAME);
     }
 
-    FsFile configFile = _sd.open(SD_CONFIG_FILENAME, O_WRONLY | O_CREAT);
+    FsFile* configFile = sdDriver.openFile(MicroSdFileHandle::ConfigLoader,
+                                           SD_CONFIG_FILENAME, O_WRONLY | O_CREAT);
     if (!configFile)
     {
+        sdDriver.releaseExclusiveAccess();
         logError("Failed to create config file");
-
-        // Reacquire SD card for logger if it was active
-        if (loggerWasActive && _sdCardLogger)
-        {
-            _sdCardLogger->reacquireSDCard();
-        }
-
         return false;
     }
 
     Config* config = _configController->getConfigPtr();
     if (!config)
     {
-        configFile.close();
+        sdDriver.closeFile(MicroSdFileHandle::ConfigLoader);
+        sdDriver.releaseExclusiveAccess();
         logError("Config not available");
-
-        // Reacquire SD card for logger if it was active
-        if (loggerWasActive && _sdCardLogger)
-        {
-            _sdCardLogger->reacquireSDCard();
-        }
-
         return false;
     }
 
     // Write header comment
-    configFile.println("# SmartFuseBox Configuration");
-    configFile.println("# Generated by C30 command");
-    configFile.println();
+    configFile->println("# SmartFuseBox Configuration");
+    configFile->println("# Generated by C30 command");
+    configFile->println();
 
     // C3 - Boat name
     if (strlen(config->name) > 0)
     {
-        configFile.print("C3:");
-        configFile.println(config->name);
+        configFile->print("C3:");
+        configFile->println(config->name);
     }
 
     // C4 - Relay names
     for (uint8_t i = 0; i < ConfigRelayCount; i++)
     {
-        configFile.print("C4:");
-        configFile.print(i);
-        configFile.print("=");
-        configFile.print(config->relayShortNames[i]);
-        configFile.print("|");
-        configFile.println(config->relayLongNames[i]);
+        configFile->print("C4:");
+        configFile->print(i);
+        configFile->print("=");
+        configFile->print(config->relayShortNames[i]);
+        configFile->print("|");
+        configFile->println(config->relayLongNames[i]);
     }
 
     // C5 - Home button mappings
     for (uint8_t i = 0; i < ConfigHomeButtons; i++)
     {
-        configFile.print("C5:");
-        configFile.print(i);
-        configFile.print("=");
-        configFile.println(config->homePageMapping[i]);
+        configFile->print("C5:");
+        configFile->print(i);
+        configFile->print("=");
+        configFile->println(config->homePageMapping[i]);
     }
 
     // C6 - Button colors
     for (uint8_t i = 0; i < ConfigRelayCount; i++)
     {
-        configFile.print("C6:");
-        configFile.print(i);
-        configFile.print("=");
-        configFile.println(config->buttonImage[i]);
+        configFile->print("C6:");
+        configFile->print(i);
+        configFile->print("=");
+        configFile->println(config->buttonImage[i]);
     }
 
     // C7 - Vessel type
-    configFile.print("C7:v=");
-    configFile.println(static_cast<uint8_t>(config->vesselType));
+    configFile->print("C7:v=");
+    configFile->println(static_cast<uint8_t>(config->vesselType));
 
     // C8 - Sound relay
-    configFile.print("C8:v=");
-    configFile.println(config->hornRelayIndex);
+    configFile->print("C8:v=");
+    configFile->println(config->hornRelayIndex);
 
     // C9 - Sound delay
-    configFile.print("C9:v=");
-    configFile.println(config->soundStartDelayMs);
+    configFile->print("C9:v=");
+    configFile->println(config->soundStartDelayMs);
 
 #if defined(ARDUINO_UNO_R4)
     // C10 - Bluetooth enabled
-    configFile.print("C10:v=");
-    configFile.println(config->bluetoothEnabled ? "1" : "0");
+    configFile->print("C10:v=");
+    configFile->println(config->bluetoothEnabled ? "1" : "0");
 
     // C11 - WiFi enabled
-    configFile.print("C11:v=");
-    configFile.println(config->wifiEnabled ? "1" : "0");
+    configFile->print("C11:v=");
+    configFile->println(config->wifiEnabled ? "1" : "0");
 
     // C12 - WiFi mode
-    configFile.print("C12:v=");
-    configFile.println(config->accessMode);
+    configFile->print("C12:v=");
+    configFile->println(config->accessMode);
 
     // C13 - WiFi SSID
-    configFile.print("C13:");
-    configFile.println(config->apSSID);
+    configFile->print("C13:");
+    configFile->println(config->apSSID);
 
     // C14 - WiFi password
-    configFile.print("C14:");
-    configFile.println(config->apPassword);
+    configFile->print("C14:");
+    configFile->println(config->apPassword);
 
     // C15 - WiFi port
-    configFile.print("C15:v=");
-    configFile.println(config->wifiPort);
+    configFile->print("C15:v=");
+    configFile->println(config->wifiPort);
 
     // C17 - WiFi AP IP
-    configFile.print("C17:");
-    configFile.println(config->apIpAddress);
+    configFile->print("C17:");
+    configFile->println(config->apIpAddress);
 #endif
 
     // C18 - Default relay states
     for (uint8_t i = 0; i < ConfigRelayCount; i++)
     {
-        configFile.print("C18:");
-        configFile.print(i);
-        configFile.print("=");
-        configFile.println(config->defaulRelayState[i] ? "1" : "0");
+        configFile->print("C18:");
+        configFile->print(i);
+        configFile->print("=");
+        configFile->println(config->defaulRelayState[i] ? "1" : "0");
     }
 
     // C19 - Linked relays
     for (uint8_t i = 0; i < ConfigMaxLinkedRelays; i++)
     {
-        configFile.print("C19:");
-        configFile.print(config->linkedRelays[i][0]);
-        configFile.print("=");
-        configFile.println(config->linkedRelays[i][1]);
+        configFile->print("C19:");
+        configFile->print(config->linkedRelays[i][0]);
+        configFile->print("=");
+        configFile->println(config->linkedRelays[i][1]);
     }
 
     // C20 - Timezone offset
-    configFile.print("C20:v=");
-    configFile.println(config->timezoneOffset);
+    configFile->print("C20:v=");
+    configFile->println(config->timezoneOffset);
 
     // C21 - MMSI
-    configFile.print("C21:");
-    configFile.println(config->mMSI);
+    configFile->print("C21:");
+    configFile->println(config->mMSI);
 
     // C22 - Call sign
-    configFile.print("C22:");
-    configFile.println(config->callSign);
+    configFile->print("C22:");
+    configFile->println(config->callSign);
 
     // C23 - Home port
-    configFile.print("C23:");
-    configFile.println(config->homePort);
+    configFile->print("C23:");
+    configFile->println(config->homePort);
 
     // C24 - LED colors
-    configFile.print("C24:t=0;c=0;r=");
-    configFile.print(config->ledConfig.dayGoodColor[0]);
-    configFile.print(";g=");
-    configFile.print(config->ledConfig.dayGoodColor[1]);
-    configFile.print(";b=");
-    configFile.println(config->ledConfig.dayGoodColor[2]);
+    configFile->print("C24:t=0;c=0;r=");
+    configFile->print(config->ledConfig.dayGoodColor[0]);
+    configFile->print(";g=");
+    configFile->print(config->ledConfig.dayGoodColor[1]);
+    configFile->print(";b=");
+    configFile->println(config->ledConfig.dayGoodColor[2]);
 
-    configFile.print("C24:t=0;c=1;r=");
-    configFile.print(config->ledConfig.dayBadColor[0]);
-    configFile.print(";g=");
-    configFile.print(config->ledConfig.dayBadColor[1]);
-    configFile.print(";b=");
-    configFile.println(config->ledConfig.dayBadColor[2]);
+    configFile->print("C24:t=0;c=1;r=");
+    configFile->print(config->ledConfig.dayBadColor[0]);
+    configFile->print(";g=");
+    configFile->print(config->ledConfig.dayBadColor[1]);
+    configFile->print(";b=");
+    configFile->println(config->ledConfig.dayBadColor[2]);
 
-    configFile.print("C24:t=1;c=0;r=");
-    configFile.print(config->ledConfig.nightGoodColor[0]);
-    configFile.print(";g=");
-    configFile.print(config->ledConfig.nightGoodColor[1]);
-    configFile.print(";b=");
-    configFile.println(config->ledConfig.nightGoodColor[2]);
+    configFile->print("C24:t=1;c=0;r=");
+    configFile->print(config->ledConfig.nightGoodColor[0]);
+    configFile->print(";g=");
+    configFile->print(config->ledConfig.nightGoodColor[1]);
+    configFile->print(";b=");
+    configFile->println(config->ledConfig.nightGoodColor[2]);
 
-    configFile.print("C24:t=1;c=1;r=");
-    configFile.print(config->ledConfig.nightBadColor[0]);
-    configFile.print(";g=");
-    configFile.print(config->ledConfig.nightBadColor[1]);
-    configFile.print(";b=");
-    configFile.println(config->ledConfig.nightBadColor[2]);
+    configFile->print("C24:t=1;c=1;r=");
+    configFile->print(config->ledConfig.nightBadColor[0]);
+    configFile->print(";g=");
+    configFile->print(config->ledConfig.nightBadColor[1]);
+    configFile->print(";b=");
+    configFile->println(config->ledConfig.nightBadColor[2]);
 
     // C25 - LED brightness
-    configFile.print("C25:t=0;b=");
-    configFile.println(config->ledConfig.dayBrightness);
+    configFile->print("C25:t=0;b=");
+    configFile->println(config->ledConfig.dayBrightness);
 
-    configFile.print("C25:t=1;b=");
-    configFile.println(config->ledConfig.nightBrightness);
+    configFile->print("C25:t=1;b=");
+    configFile->println(config->ledConfig.nightBrightness);
 
     // C26 - LED auto switch
-    configFile.print("C26:v=");
-    configFile.println(config->ledConfig.autoSwitch ? "1" : "0");
+    configFile->print("C26:v=");
+    configFile->println(config->ledConfig.autoSwitch ? "1" : "0");
 
     // C27 - LED enable states
-    configFile.print("C27:g=");
-    configFile.print(config->ledConfig.gpsEnabled ? "1" : "0");
-    configFile.print(";w=");
-    configFile.print(config->ledConfig.warningEnabled ? "1" : "0");
-    configFile.print(";s=");
-    configFile.println(config->ledConfig.systemEnabled ? "1" : "0");
+    configFile->print("C27:g=");
+    configFile->print(config->ledConfig.gpsEnabled ? "1" : "0");
+    configFile->print(";w=");
+    configFile->print(config->ledConfig.warningEnabled ? "1" : "0");
+    configFile->print(";s=");
+    configFile->println(config->ledConfig.systemEnabled ? "1" : "0");
 
     // C28 - Control panel tones
-    configFile.print("C28:t=0;h=");
-    configFile.print(config->soundConfig.good_toneHz);
-    configFile.print(";d=");
-    configFile.print(config->soundConfig.good_durationMs);
-    configFile.print(";p=");
-    configFile.print(config->soundConfig.goodPreset);
-    configFile.println(";r=0");
+    configFile->print("C28:t=0;h=");
+    configFile->print(config->soundConfig.good_toneHz);
+    configFile->print(";d=");
+    configFile->print(config->soundConfig.good_durationMs);
+    configFile->print(";p=");
+    configFile->print(config->soundConfig.goodPreset);
+    configFile->println(";r=0");
 
-    configFile.print("C28:t=1;h=");
-    configFile.print(config->soundConfig.bad_toneHz);
-    configFile.print(";d=");
-    configFile.print(config->soundConfig.bad_durationMs);
-    configFile.print(";p=");
-    configFile.print(config->soundConfig.badPreset);
-    configFile.print(";r=");
-    configFile.println(config->soundConfig.bad_repeatMs);
+    configFile->print("C28:t=1;h=");
+    configFile->print(config->soundConfig.bad_toneHz);
+    configFile->print(";d=");
+    configFile->print(config->soundConfig.bad_durationMs);
+    configFile->print(";p=");
+    configFile->print(config->soundConfig.badPreset);
+    configFile->print(";r=");
+    configFile->println(config->soundConfig.bad_repeatMs);
 
-    configFile.close();
+    sdDriver.closeFile(MicroSdFileHandle::ConfigLoader);
+    sdDriver.releaseExclusiveAccess();
 
     logInfo("Config exported to SD card");
 
-    // Reacquire SD card for logger if it was active
-    if (loggerWasActive && _sdCardLogger)
+    return true;
+}
+
+void SdCardConfigLoader::onSdCardReady(bool isNewCard)
+{
+    if (isNewCard)
     {
-        logInfo("Reacquiring SD card for logger...");
-        _sdCardLogger->reacquireSDCard();
+        logInfo("New SD card detected - checking for config...");
+    }
+    else
+    {
+        logInfo("SD card initialized - checking for config...");
     }
 
-    return true;
+    bool configLoaded = loadConfigFromSd();
+
+    if (!configLoaded && !isNewCard)
+    {
+        // Initial boot and no SD config found - request sync from control panel
+        if (_configSyncManager)
+        {
+            _configSyncManager->requestSync();
+        }
+    }
 }

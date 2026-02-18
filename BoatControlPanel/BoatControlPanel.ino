@@ -74,7 +74,7 @@ void onLinkCommandReceived(SerialCommandManager* mgr);
 void onComputerCommandReceived(SerialCommandManager* mgr);
 
 // sound
-ToneManager toneManager(22);
+ToneManager toneManager(PinTone);
 
 // led indicators
 RgbLedFade systemLedStatus(PinRgbRed, PinRgbGreen, PinRgbBlue);
@@ -145,7 +145,6 @@ SensorManager sensorManager(sensorHandlers, sensorHandlerCount);
 
 // Timers
 unsigned long lastUpdate = 0;
-uint8_t speed = 0;
 
 void setup()
 {
@@ -170,16 +169,16 @@ void setup()
     size_t computerHandlerCount = sizeof(computerHandlers) / sizeof(computerHandlers[0]);
     commandMgrComputer.registerHandlers(computerHandlers, computerHandlerCount);
 
-    SystemFunctions::initializeSerial(COMPUTER_SERIAL, 115200, true);
+    SystemFunctions::initializeSerial(COMPUTER_SERIAL, BaudRateComputer, true);
 
 #if defined(ARDUINO_MEGA2560)
-    SystemFunctions::initializeSerial(NEXTION_SERIAL, 19200, false);
-    SystemFunctions::initializeSerial(LINK_SERIAL, 19200, false);
-	SystemFunctions::initializeSerial(GPS_SERIAL, 9600, false);
+    SystemFunctions::initializeSerial(NEXTION_SERIAL, BaudRateDefault, false);
+    SystemFunctions::initializeSerial(LINK_SERIAL, BaudRateDefault, false);
+	SystemFunctions::initializeSerial(GPS_SERIAL, BaudRateGps, false);
 #elif defined(ARDUINO_R4_MINIMA)
-	NEXTION_SERIAL.begin(19200);
-	LINK_SERIAL.begin(9600);
-	GPS_SERIAL.begin(9600);
+	NEXTION_SERIAL.begin(BaudRateDefault);
+	LINK_SERIAL.begin(BaudRateDefault);
+	GPS_SERIAL.begin(BaudRateGps);
 #endif
 
 #if defined(NEXTION_DEBUG)
@@ -215,7 +214,6 @@ void setup()
 
 	sensorManager.setup();
 
-	// Simplified broadcasting
 	char buffer[20];
 	snprintf_P(buffer, sizeof(buffer), PSTR("v=%u"), config->hornRelayIndex);
 	broadcastManager.sendCommand(ConfigSoundRelayId, buffer);

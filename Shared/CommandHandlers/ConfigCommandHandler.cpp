@@ -217,6 +217,10 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
 			config->soundConfig.bad_repeatMs);
 		sender->sendCommand(ControlPanelTones, buffer);
 
+		// C31 SD Card Initialize Speed
+		snprintf(buffer, sizeof(buffer), "v=%u", config->sdCardInitializeSpeed);
+		sender->sendCommand(ConfigSdCardSpeed, buffer);
+
 		result = ConfigResult::Success;
     }
     else if (strcmp(command, ConfigResetSettings) == 0)
@@ -677,7 +681,21 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
             sendAckErr(sender, command, F("SD config loader not available"));
             return true;
         }
+    }
+    else if (strcmp(command, ConfigSdCardSpeed) == 0)
+    {
+        // C31 - Set SD card initialize speed
+        // Format: C31:v=4 (or 8, 12, 16, 20, 24)
+        if (paramCount >= 1)
+        {
+            uint8_t speedMhz = static_cast<uint8_t>(atoi(params[0].value));
+            result = _configController->setSdCardInitializeSpeed(speedMhz);
         }
+        else
+        {
+            result = ConfigResult::InvalidParameter;
+        }
+    }
     else
     {
         result = ConfigResult::InvalidCommand;
@@ -739,7 +757,7 @@ const char* const* ConfigCommandHandler::supportedCommands(size_t& count) const
         ConfigDefaultRelayState, ConfigLinkRelays,
         ConfigTimeZoneOffset, ConfigMmsi, ConfigCallSign, ConfigHomePort,
         ConfigLedColor, ConfigLedBrightness, ConfigLedAutoSwitch, ConfigLedEnable,
-        ControlPanelTones, ConfigReloadFromSd, ConfigExportToSd
+        ControlPanelTones, ConfigReloadFromSd, ConfigExportToSd, ConfigSdCardSpeed
     };
     count = sizeof(cmds) / sizeof(cmds[0]);
     return cmds;

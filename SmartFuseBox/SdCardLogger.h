@@ -5,6 +5,7 @@
 #include <stdint.h>
 #include "SensorCommandHandler.h"
 #include "WarningManager.h"
+#include "MicroSdDriver.h"
 
 constexpr uint8_t SD_BUFFER_SIZE = 64;              // Number of records to buffer
 constexpr uint8_t SD_MAX_WRITES_PER_LOOP = 5;       // Max records to write per update() call
@@ -76,17 +77,14 @@ struct SensorSnapshot {
 class SdCardLogger
 {
 private:
-    SensorCommandHandler* _sensorHandler;
-    WarningManager* _warningManager;
-	uint8_t _csPin;
+	SensorCommandHandler* _sensorHandler;
+	WarningManager* _warningManager;
 
-    // SD card
-    SdFat _sd;              // Main SD card object
-    FsFile _currentFile;    // Current log file
+	// SD card (managed by MicroSdDriver)
+	FsFile* _currentFile;    // Current log file pointer from MicroSdDriver
 
-    // State
-    bool _initialized;
-    bool _sdCardPresent;
+	// State
+	bool _fileOpen;
 
     // Circular buffer
     SensorSnapshot _buffer[SD_BUFFER_SIZE];
@@ -107,13 +105,9 @@ private:
     bool _sdCardErrorRaised;
     bool _sdCardMissingRaised;
 
-    // Cached SD card info (to avoid expensive freeClusterCount calls)
-    uint64_t _cachedTotalSize;
-    uint64_t _cachedFreeSpace;
     uint32_t _initialLogFileSize;
-    
+
     // Internal methods
-    bool initializeSdCard();
     bool openOrCreateFile(unsigned long now);
     void closeCurrentFile();
     bool writeRecordsToCard(uint8_t maxRecords);
@@ -124,16 +118,15 @@ private:
     bool isBufferEmpty() const;
     void updateFileName(unsigned long now);
     void checkForDateChange(unsigned long now);
-    void checkCardPresence();
-    bool isCardMissingError();
+    void checkSdCardStatus();
     
 public:
     /**
      * @brief Constructor
-     * @param messageBus Pointer to MessageBus for subscribing to events
+     * @param sensorHandler Pointer to SensorCommandHandler for sensor data
      * @param warningManager Pointer to WarningManager for error reporting
      */
-    SdCardLogger(SensorCommandHandler* sensorHandler, WarningManager* warningManager, uint8_t csPin);
+    SdCardLogger(SensorCommandHandler* sensorHandler, WarningManager* warningManager);
     
     /**
      * @brief Initialize SD card logger with configuration
@@ -152,13 +145,7 @@ public:
      * @brief Check if SD card is initialized and working
      * @return true if SD card is ready, false otherwise
      */
-    bool isSdCardReady() const { return _initialized && _sdCardPresent; }
-
-    /**
-     * @brief Check if SD card is present (may not be initialized)
-     * @return true if card is present, false otherwise
-     */
-    bool isSdCardPresent();
+    bool isSdCardReady() const;
 
     /**
      * @brief Get current log file size in bytes
@@ -191,14 +178,8 @@ public:
     void flush();
 
     /**
-     * @brief Temporarily release SD card access (closes file and deinitializes SD)
+     * @brief Temporarily release SD card access (closes file)
      * Use before operations that need exclusive SD card access (e.g., config reload)
      */
     void releaseSDCard();
-
-    /**
-     * @brief Re-initialize SD card after temporary release
-     * @return true if re-initialization successful
-     */
-    bool reacquireSDCard();
 };
