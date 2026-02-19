@@ -134,16 +134,30 @@ void ConfigManager::resetToDefaults()
 	_cfg.timezoneOffset = 0; // UTC
 
 #if defined(ARDUINO_UNO_R4)
-    _cfg.bluetoothEnabled = false;
-    _cfg.wifiEnabled = true;
-    _cfg.accessMode = 0; // 0 = AP, 1 = Client
-    strncpy(_cfg.apSSID, "SmartFuseBox", sizeof(_cfg.apSSID) - 1);
-    _cfg.apSSID[sizeof(_cfg.apSSID) - 1] = '\0';
+	_cfg.bluetoothEnabled = false;
+	_cfg.wifiEnabled = true;
+	_cfg.accessMode = 0; // 0 = AP, 1 = Client
+	strncpy(_cfg.apSSID, "SmartFuseBox", sizeof(_cfg.apSSID) - 1);
+	_cfg.apSSID[sizeof(_cfg.apSSID) - 1] = '\0';
 	SystemFunctions::GenerateDefaultPassword(_cfg.apPassword, sizeof(_cfg.apPassword));
-    _cfg.apPassword[sizeof(_cfg.apPassword) - 1] = '\0';
-    _cfg.wifiPort = DefaultWifiPort;
+	_cfg.apPassword[sizeof(_cfg.apPassword) - 1] = '\0';
+	_cfg.wifiPort = DefaultWifiPort;
 	strncpy(_cfg.apIpAddress, DefaultApIpAddress, sizeof(_cfg.apIpAddress) - 1);
 	_cfg.apIpAddress[sizeof(_cfg.apIpAddress) - 1] = '\0';
+#endif
+
+#if defined(MQQT_SUPPORT)
+	// MQTT defaults
+	_cfg.mqtt.enabled = false;
+	strncpy(_cfg.mqtt.broker, "192.168.1.100", ConfigMqttBrokerLength - 1);
+	_cfg.mqtt.broker[ConfigMqttBrokerLength - 1] = '\0';
+	_cfg.mqtt.port = ConfigMqttDefaultPort;
+	_cfg.mqtt.username[0] = '\0';
+	_cfg.mqtt.password[0] = '\0';
+	strncpy(_cfg.mqtt.deviceId, "smartfusebox_01", ConfigMqttDeviceIdLength - 1);
+	_cfg.mqtt.deviceId[ConfigMqttDeviceIdLength - 1] = '\0';
+	_cfg.mqtt.useHomeAssistantDiscovery = false;
+	_cfg.mqtt.keepAliveInterval = ConfigMqttKeepAliveDefault;
 #endif
 
     _cfg.sdCardInitializeSpeed = 4;

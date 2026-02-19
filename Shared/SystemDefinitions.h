@@ -79,6 +79,20 @@ constexpr char ConfigReloadFromSd[] = "C29";
 constexpr char ConfigExportToSd[] = "C30";
 constexpr char ConfigSdCardSpeed[] = "C31";
 
+#if defined(MQQT_SUPPORT)
+
+constexpr char MqttConfigEnable[] = "M0";
+constexpr char MqttConfigBroker[] = "M1";
+constexpr char MqttConfigPort[] = "M2";
+constexpr char MqttConfigUsername[] = "M3";
+constexpr char MqttConfigPassword[] = "M4";
+constexpr char MqttConfigDeviceId[] = "M5";
+constexpr char MqttConfigHADiscovery[] = "M6";
+constexpr char MqttConfigKeepAlive[] = "M7";
+constexpr char MqttConfigState[] = "M8";
+
+#endif
+
 constexpr char WarningsActive[] = "W0";
 constexpr char WarningsList[] = "W1";
 constexpr char WarningStatus[] = "W2";

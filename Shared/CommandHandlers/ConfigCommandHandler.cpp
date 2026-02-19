@@ -2,6 +2,10 @@
 #include "ConfigSyncManager.h"
 #include "SdCardConfigLoader.h"
 
+#if defined(MQQT_SUPPORT)
+#include "MQTTConfigCommandHandler.h"
+#endif
+
 #if defined(ARDUINO_UNO_R4)
 #include "BluetoothController.h"
 #include <Arduino.h>
@@ -12,7 +16,10 @@ ConfigCommandHandler::ConfigCommandHandler(WifiController* wifiController, Confi
 	: _wifiController(wifiController),
 	  _configController(configController),
 	  _configSyncManager(nullptr),
-      _sdCardConfigLoader(nullptr)
+	  _sdCardConfigLoader(nullptr)
+#if defined(MQQT_SUPPORT)
+      , _mqttConfigHandler(nullptr)
+#endif
 {
 }
 
@@ -20,6 +27,13 @@ void ConfigCommandHandler::setConfigSyncManager(ConfigSyncManager* syncManager)
 {
 	_configSyncManager = syncManager;
 }
+
+#if defined(MQQT_SUPPORT)
+void ConfigCommandHandler::setMqttConfigHandler(MQTTConfigCommandHandler* mqttConfigHandler)
+{
+	_mqttConfigHandler = mqttConfigHandler;
+}
+#endif
 
 bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const char* command, const StringKeyValue params[], uint8_t paramCount)
 {
@@ -696,6 +710,34 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
             result = ConfigResult::InvalidParameter;
         }
     }
+#if defined(MQQT_SUPPORT)
+    else if (command[0] == 'M' && strlen(command) >= 2)
+    {
+        // MQTT configuration commands (M0-M8)
+        if (_mqttConfigHandler != nullptr)
+        {
+            char response[256];
+            const char* paramStr = nullptr;
+
+            // Build parameter string from key-value pairs
+            if (paramCount > 0)
+            {
+                // For simple value params like M0:v=1, extract the value
+                paramStr = params[0].value;
+            }
+
+            const char* mqttResult = _mqttConfigHandler->processCommand(command, paramStr, response, sizeof(response));
+
+            if (mqttResult != nullptr)
+            {
+                sendAckOk(sender, command, mqttResult);
+                return true;
+            }
+        }
+        // MQTT handler not set or command not recognized
+        return false;
+    }
+#endif
     else
     {
         result = ConfigResult::InvalidCommand;

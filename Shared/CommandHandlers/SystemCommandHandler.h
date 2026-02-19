@@ -11,6 +11,7 @@
 #include "SdCardLogger.h"
 #include "WifiController.h"
 #include "MicroSdDriver.h"
+#include "MQTTController.h"
 #endif
 
 class SystemCommandHandler : public SharedBaseCommandHandler
@@ -19,6 +20,9 @@ private:
 #if defined(ARDUINO_UNO_R4)
     WifiController* _wifiController = nullptr;
     SdCardLogger* _sdCardLogger = nullptr;
+#if defined(MQQT_SUPPORT)
+    MQTTController* _mqttController = nullptr;
+#endif
 #endif
 
 public:
@@ -31,6 +35,9 @@ public:
 #if defined(ARDUINO_UNO_R4)
     void setWifiController(WifiController* wifiController);
     void setSdCardLogger(SdCardLogger* sdCardLogger);
-#endif
 
+#if defined(MQQT_SUPPORT)
+    void setMqttController(MQTTController* mqttController);
+#endif
+#endif
 };

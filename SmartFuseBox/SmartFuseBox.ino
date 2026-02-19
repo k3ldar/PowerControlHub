@@ -48,6 +48,12 @@
 
 #include "MicroSdDriver.h"
 
+#if defined(MQQT_SUPPORT)
+#include "MQTTHandler.h"
+#include "MQTTController.h"
+#include "MQTTConfigCommandHandler.h"
+#include "MQTTRelayHandler.h"
+#endif
 
 #if defined(ARDUINO_UNO_R4) && defined(LED_MANAGER)
 #include "LedMatrixManager.h"
@@ -129,6 +135,13 @@ ConfigSyncManager configSyncManager(&commandMgrComputer, &commandMgrLink, &confi
 // computer command handlers
 ConfigCommandHandler configHandler(&wifiController, &configController);
 
+// MQTT instances
+#if defined(MQQT_SUPPORT)
+MQTTController mqttController(&messageBus, ConfigManager::getConfigPtr());
+MQTTConfigCommandHandler mqttConfigHandler(&configController);
+MQTTRelayHandler mqttRelayHandler(&mqttController, &messageBus, &relayController);
+#endif
+
 // middleware
 BaseSensor* baseSensors[] = {
 	&waterSensorHandler, &dht11SensorHandler, &lightSensorHandler
@@ -187,6 +200,11 @@ void setup()
 	ackHandler.setConfigSyncManager(&configSyncManager, &configController);
 	configHandler.setConfigSyncManager(&configSyncManager);
 
+#if defined(MQQT_SUPPORT)
+	// Link MQTT config handler
+	configHandler.setMqttConfigHandler(&mqttConfigHandler);
+#endif
+
 #if defined(CARD_CONFIG_LOADER)
 	configHandler.setSdCardConfigLoader(&sdCardConfigLoader);
 #endif
@@ -195,11 +213,26 @@ void setup()
 
 	configureWifiSupport(config);
 	configureBluetoothSupport(config);
+
+#if defined(MQQT_SUPPORT)
+
+	// Initialize MQTT (after WiFi initialization)
+	if (mqttController.begin())
+	{
+		// MQTT enabled in config, initialize handlers
+		mqttRelayHandler.begin();
+	}
+#endif
+
 	systemCommandHandler.setSdCardLogger(&sdCardLogger);
 	systemNetworkHandler.setSdCardLogger(&sdCardLogger);
 	soundController.configUpdated(config);
 	relayHandler.configUpdated(config);
 	sensorManager.setup();
+
+#if defined(MQQT_SUPPORT)
+	systemCommandHandler.setMqttController(&mqttController);
+#endif
 
 	MicroSdDriver& microSdDriver = MicroSdDriver::getInstance();
 	microSdDriver.setWarningManager(&warningManager);
@@ -261,6 +294,13 @@ void loop()
 	SystemCpuMonitor::startTask();
 	wifiController.update(now);
 	SystemCpuMonitor::endTask();
+
+	// MQTT update (non-blocking, processes 1 packet per call)
+#if defined(MQQT_SUPPORT)
+	SystemCpuMonitor::startTask();
+	mqttController.update();
+	SystemCpuMonitor::endTask();
+#endif
 
 	SystemCpuMonitor::startTask();
 	configSyncManager.update(now);

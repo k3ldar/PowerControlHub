@@ -12,6 +12,10 @@ class BluetoothController;
 class ConfigSyncManager;
 class SdCardConfigLoader;
 
+#if defined(MQQT_SUPPORT)
+class MQTTConfigCommandHandler;
+#endif
+
 class ConfigCommandHandler : public BaseCommandHandler
 {
 private:
@@ -20,11 +24,19 @@ private:
 	ConfigSyncManager* _configSyncManager;
 	SdCardConfigLoader* _sdCardConfigLoader;
 
+#if defined(MQQT_SUPPORT)
+	MQTTConfigCommandHandler* _mqttConfigHandler;
+#endif
+
 public:
 	explicit ConfigCommandHandler(WifiController* wifiController, ConfigController* configController);
 
 	void setConfigSyncManager(ConfigSyncManager* syncManager);
 	void setSdCardConfigLoader(SdCardConfigLoader* sdCardConfigLoader);
+
+#if defined(MQQT_SUPPORT)
+	void setMqttConfigHandler(MQTTConfigCommandHandler* mqttConfigHandler);
+#endif
 
 	bool handleCommand(SerialCommandManager* sender, const char* command, const StringKeyValue params[], uint8_t paramCount) override;
 	const char* const* supportedCommands(size_t& count) const override;

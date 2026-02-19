@@ -3,3 +3,7 @@
 #define ARDUINO_UNO_R4
 
 #define CARD_CONFIG_LOADER
+
+#if defined(ARDUINO_UNO_R4)
+#define MQQT_SUPPORT_
+#endif

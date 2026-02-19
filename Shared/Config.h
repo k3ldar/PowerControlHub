@@ -36,14 +36,36 @@ struct LedConfig {
 
 struct SoundSignalConfig
 {
-    uint8_t goodPreset;
-    uint16_t good_toneHz;
+	uint8_t goodPreset;
+	uint16_t good_toneHz;
 	uint16_t good_durationMs;
 	uint8_t badPreset;
 	uint16_t bad_toneHz;
 	uint16_t bad_durationMs;
-    uint32_t bad_repeatMs;
+	uint32_t bad_repeatMs;
 } __attribute__((packed));
+
+#if defined(MQQT_SUPPORT)
+// MQTT Configuration
+constexpr uint8_t ConfigMqttBrokerLength = 64;
+constexpr uint8_t ConfigMqttUsernameLength = 32;
+constexpr uint8_t ConfigMqttPasswordLength = 32;
+constexpr uint8_t ConfigMqttDeviceIdLength = 32;
+constexpr uint16_t ConfigMqttDefaultPort = 1883;
+constexpr uint16_t ConfigMqttKeepAliveDefault = 60;
+
+struct MqttConfig
+{
+	bool enabled;
+	char broker[ConfigMqttBrokerLength];
+	uint16_t port;
+	char username[ConfigMqttUsernameLength];
+	char password[ConfigMqttPasswordLength];
+	char deviceId[ConfigMqttDeviceIdLength];
+	bool useHomeAssistantDiscovery;
+	uint16_t keepAliveInterval;
+} __attribute__((packed));
+#endif 
 
 // Layout:
 // - version (uint8_t)
@@ -96,10 +118,14 @@ struct Config {
 	char apIpAddress[MaxIpAddressLength]; // xxx.xxx.xxx.xxx + null
 #endif
 
-    uint8_t sdCardInitializeSpeed;
+	uint8_t sdCardInitializeSpeed;
 
-    LedConfig ledConfig;
+	LedConfig ledConfig;
 	SoundSignalConfig soundConfig;
 
-    uint16_t checksum;
+#if defined(MQQT_SUPPORT)
+	MqttConfig mqtt;
+#endif
+
+	uint16_t checksum;
 } __attribute__((packed));
