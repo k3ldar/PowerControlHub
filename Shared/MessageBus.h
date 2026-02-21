@@ -52,6 +52,10 @@ struct GpsSpeedUpdated {
     using Callback = std::function<void(double speedKmh, double course)>;
 };
 
+struct SystemMetricsUpdated {
+    using Callback = std::function<void()>;
+};
+
 #if defined(MQTT_SUPPORT)
 
 struct MqttConnected {

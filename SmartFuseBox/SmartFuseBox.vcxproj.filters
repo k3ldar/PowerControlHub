@@ -435,6 +435,9 @@
     <ClInclude Include="MQTTSensorHandler.h">
       <Filter>Header Files\MQTT</Filter>
     </ClInclude>
+    <ClInclude Include="SystemSensorHandler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="C20-C27_IMPLEMENTATION.md" />

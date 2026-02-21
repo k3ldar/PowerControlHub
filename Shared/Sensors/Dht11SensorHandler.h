@@ -118,6 +118,7 @@ public:
 		return "dht11";
 	}
 
+#if defined(MQTT_SUPPORT)
 	uint8_t getMqttChannelCount() const override
 	{
 		return 2;
@@ -143,4 +144,5 @@ public:
 			snprintf(buffer, size, "%u", static_cast<uint8_t>(_humidity));
 		}
 	}
+#endif
 };

@@ -137,6 +137,7 @@
     <ClInclude Include="MQTTClient.h" />
     <ClInclude Include="MQTTController.h" />
     <ClInclude Include="MQTTDefinitions.h" />
+    <ClInclude Include="SystemSensorHandler.h" />
     <ClInclude Include="ToneManager.h" />
     <ClInclude Include="LightSensorHandler.h" />
     <ClInclude Include="MessageBus.h" />

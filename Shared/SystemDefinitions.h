@@ -178,6 +178,7 @@ enum class SensorIdList : uint8_t
     Dht11Sensor = 0x1,
     LightSensor = 0x2,
     GpsSensor = 0x3,
+    SystemSensor = 0x4
 };
 
 struct CommandResult {

@@ -26,6 +26,7 @@
 #include "WaterSensorHandler.h"
 #include "Dht11SensorHandler.h"
 #include "LightSensorHandler.h"
+#include "SystemSensorHandler.h"
 #include <SensorManager.h>
 
 #include "BluetoothManager.h"
@@ -136,9 +137,12 @@ ConfigSyncManager configSyncManager(&commandMgrComputer, &commandMgrLink, &confi
 // computer command handlers
 ConfigCommandHandler configHandler(&wifiController, &configController);
 
+// system sensor (diagnostics exposed to HA via MQTT)
+SystemSensorHandler systemSensorHandler(&messageBus, &wifiController, &bluetoothController, &warningManager);
+
 // middleware
 BaseSensor* baseSensors[] = {
-	&waterSensorHandler, &dht11SensorHandler, &lightSensorHandler
+	&waterSensorHandler, &dht11SensorHandler, &lightSensorHandler, &systemSensorHandler
 };
 uint8_t baseSensorCount = sizeof(baseSensors) / sizeof(baseSensors[0]);
 SensorController sensorController(baseSensors, baseSensorCount);
@@ -230,6 +234,7 @@ void setup()
 
 	systemCommandHandler.setSdCardLogger(&sdCardLogger);
 	systemNetworkHandler.setSdCardLogger(&sdCardLogger);
+	systemSensorHandler.setSdCardLogger(&sdCardLogger);
 	soundController.configUpdated(config);
 	relayHandler.configUpdated(config);
 	sensorManager.setup();
@@ -289,6 +294,7 @@ void loop()
 
 	SystemCpuMonitor::startTask();
 	sensorManager.update(now);
+	systemSensorHandler.loopUpdate(now);
 	SystemCpuMonitor::endTask();
 
 	SystemCpuMonitor::startTask();

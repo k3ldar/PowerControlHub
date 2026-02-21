@@ -104,6 +104,13 @@ bool MQTTSensorHandler::begin()
         }
     }
 
+    _messageBus->subscribe<SystemMetricsUpdated>(
+        [this]()
+        {
+            this->markAllChannelsDirty();
+        }
+    );
+
     _messageBus->subscribe<MqttConnected>(
         [this]()
         {

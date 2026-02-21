@@ -111,6 +111,8 @@ public:
 		return "waterLevel";
 	}
 
+#if defined(MQTT_SUPPORT)
+
 	uint8_t getMqttChannelCount() const override
 	{
 		return 1;
@@ -127,4 +129,5 @@ public:
 		(void)channelIndex;
 		snprintf(buffer, size, "%u", static_cast<unsigned int>(_waterPumpQueue.average()));
 	}
+#endif
 };
