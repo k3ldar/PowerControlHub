@@ -13,6 +13,15 @@ enum class SensorType : uint8_t
 	Remote = 1,
 };
 
+struct MqttSensorChannel
+{
+	const char* name;
+	const char* slug;
+	const char* deviceClass;
+	const char* unit;
+	bool isBinary;
+};
+
 class BaseSensor : public BaseSensorHandler
 #if defined(FUSE_BOX_CONTROLLER)
 	, public JsonVisitor
@@ -26,4 +35,10 @@ public:
 	virtual const char* getSensorCommandId() const = 0;
 
 	virtual const char* getSensorName() const = 0;
+
+	virtual uint8_t getMqttChannelCount() const = 0;
+
+	virtual MqttSensorChannel getMqttChannel(uint8_t channelIndex) const = 0;
+
+	virtual void getMqttValue(uint8_t channelIndex, char* buffer, size_t size) const = 0;
 };

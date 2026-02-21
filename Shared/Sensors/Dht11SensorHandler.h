@@ -117,4 +117,30 @@ public:
 	{
 		return "dht11";
 	}
+
+	uint8_t getMqttChannelCount() const override
+	{
+		return 2;
+	}
+
+	MqttSensorChannel getMqttChannel(uint8_t channelIndex) const override
+	{
+		if (channelIndex == 0)
+		{
+			return { "Temperature", "temperature", "temperature", "\xc2\xb0""C", false };
+		}
+		return { "Humidity", "humidity", "humidity", "%", false };
+	}
+
+	void getMqttValue(uint8_t channelIndex, char* buffer, size_t size) const override
+	{
+		if (channelIndex == 0)
+		{
+			dtostrf(_celsius, 1, 1, buffer);
+		}
+		else
+		{
+			snprintf(buffer, size, "%u", static_cast<uint8_t>(_humidity));
+		}
+	}
 };

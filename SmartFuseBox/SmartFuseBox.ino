@@ -136,21 +136,20 @@ ConfigSyncManager configSyncManager(&commandMgrComputer, &commandMgrLink, &confi
 // computer command handlers
 ConfigCommandHandler configHandler(&wifiController, &configController);
 
-// MQTT instances
-#if defined(MQTT_SUPPORT)
-MQTTController mqttController(&messageBus, ConfigManager::getConfigPtr(), &commandMgrComputer);
-MQTTConfigCommandHandler mqttConfigHandler(&configController, &mqttController, &commandMgrComputer);
-MQTTRelayHandler mqttRelayHandler(&mqttController, &messageBus, &relayController, &commandMgrComputer);
-MQTTSensorHandler mqttSensorHandler(&mqttController, &messageBus, &commandMgrComputer);
-#endif
-
 // middleware
 BaseSensor* baseSensors[] = {
 	&waterSensorHandler, &dht11SensorHandler, &lightSensorHandler
 };
 uint8_t baseSensorCount = sizeof(baseSensors) / sizeof(baseSensors[0]);
-SensorController sensorController(baseSensors, sensorHandlerCount);
+SensorController sensorController(baseSensors, baseSensorCount);
 
+// MQTT instances
+#if defined(MQTT_SUPPORT)
+MQTTController mqttController(&messageBus, ConfigManager::getConfigPtr(), &commandMgrComputer);
+MQTTConfigCommandHandler mqttConfigHandler(&configController, &mqttController, &commandMgrComputer);
+MQTTRelayHandler mqttRelayHandler(&mqttController, &messageBus, &relayController, &commandMgrComputer);
+MQTTSensorHandler mqttSensorHandler(&mqttController, &messageBus, &sensorController, &commandMgrComputer);
+#endif
 
 // configure wifi support
 ConfigNetworkHandler configNetworkHandler(&configController, &wifiController);

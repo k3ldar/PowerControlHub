@@ -110,4 +110,21 @@ public:
 	{
 		return "waterLevel";
 	}
+
+	uint8_t getMqttChannelCount() const override
+	{
+		return 1;
+	}
+
+	MqttSensorChannel getMqttChannel(uint8_t channelIndex) const override
+	{
+		(void)channelIndex;
+		return { "Water Level", "water_level", nullptr, nullptr, false };
+	}
+
+	void getMqttValue(uint8_t channelIndex, char* buffer, size_t size) const override
+	{
+		(void)channelIndex;
+		snprintf(buffer, size, "%u", static_cast<unsigned int>(_waterPumpQueue.average()));
+	}
 };

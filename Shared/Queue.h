@@ -22,11 +22,11 @@ private:
     
 public:
     Queue(uint8_t capacity, T defaultValue = T());
-    bool isFull();
-    bool isEmpty();
-    void enqueue(T item);
-    T dequeue();
-    T average();
+	bool isFull() const;
+	bool isEmpty() const;
+	void enqueue(T item);
+	T dequeue();
+	T average() const;
 };
 
 // Implementation must be in header for templates
@@ -41,13 +41,13 @@ Queue<T>::Queue(uint8_t capacity, T defaultValue)
 }
 
 template<typename T>
-bool Queue<T>::isFull()
+bool Queue<T>::isFull() const
 {
     return (_size == _capacity);
 }
 
 template<typename T>
-bool Queue<T>::isEmpty()
+bool Queue<T>::isEmpty() const
 {
     return (_size == 0);
 }
@@ -91,7 +91,7 @@ T Queue<T>::dequeue()
 }
 
 template<typename T>
-T Queue<T>::average()
+T Queue<T>::average() const
 {
     if (isEmpty() || _front == nullptr)
 	{

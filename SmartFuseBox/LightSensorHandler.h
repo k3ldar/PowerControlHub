@@ -73,4 +73,21 @@ public:
 	{
 		return "LightSensor";
 	}
+
+	uint8_t getMqttChannelCount() const override
+	{
+		return 1;
+	}
+
+	MqttSensorChannel getMqttChannel(uint8_t channelIndex) const override
+	{
+		(void)channelIndex;
+		return { "Daylight", "light", "light", nullptr, true };
+	}
+
+	void getMqttValue(uint8_t channelIndex, char* buffer, size_t size) const override
+	{
+		(void)channelIndex;
+		snprintf(buffer, size, "%s", _isDaytime ? "ON" : "OFF");
+	}
 };
