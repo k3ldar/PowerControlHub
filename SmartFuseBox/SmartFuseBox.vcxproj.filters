@@ -208,6 +208,9 @@
     <ClCompile Include="MQTTSensorHandler.cpp">
       <Filter>Source Files\MQTT</Filter>
     </ClCompile>
+    <ClCompile Include="MQTTSystemHandler.cpp">
+      <Filter>Source Files\MQTT</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="__vm\.SmartFuseBox.vsarduino.h">
@@ -437,6 +440,9 @@
     </ClInclude>
     <ClInclude Include="SystemSensorHandler.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MQTTSystemHandler.h">
+      <Filter>Header Files\MQTT</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

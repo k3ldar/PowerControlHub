@@ -55,6 +55,7 @@
 #include "MQTTConfigCommandHandler.h"
 #include "MQTTRelayHandler.h"
 #include "MQTTSensorHandler.h"
+#include "MQTTSystemHandler.h"
 #endif
 
 #if defined(ARDUINO_UNO_R4) && defined(LED_MANAGER)
@@ -154,6 +155,7 @@ MQTTController mqttController(&messageBus, ConfigManager::getConfigPtr(), &comma
 MQTTConfigCommandHandler mqttConfigHandler(&configController, &mqttController, &commandMgrComputer);
 MQTTRelayHandler mqttRelayHandler(&mqttController, &messageBus, &relayController, &commandMgrComputer);
 MQTTSensorHandler mqttSensorHandler(&mqttController, &messageBus, &sensorController, &commandMgrComputer);
+MQTTSystemHandler mqttSystemHandler(&mqttController, &messageBus, &commandMgrComputer);
 #endif
 
 // configure wifi support
@@ -229,6 +231,7 @@ void setup()
 		// MQTT enabled in config, initialize handlers
 		mqttRelayHandler.begin();
 		mqttSensorHandler.begin();
+		mqttSystemHandler.begin();
 	}
 
 #endif
@@ -309,8 +312,18 @@ void loop()
 #if defined(MQTT_SUPPORT)
 	SystemCpuMonitor::startTask();
 	mqttController.update();
-	mqttRelayHandler.update(); 
+	SystemCpuMonitor::endTask();
+
+	SystemCpuMonitor::startTask();
+	mqttRelayHandler.update();
+	SystemCpuMonitor::endTask();
+
+	SystemCpuMonitor::startTask();
 	mqttSensorHandler.update();
+	SystemCpuMonitor::endTask();
+
+	SystemCpuMonitor::startTask();
+	mqttSystemHandler.update();
 	SystemCpuMonitor::endTask();
 #endif
 

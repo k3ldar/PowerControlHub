@@ -77,6 +77,7 @@
     <ClCompile Include="MQTTConfigCommandHandler.cpp" />
     <ClCompile Include="MQTTRelayHandler.cpp" />
     <ClCompile Include="MQTTSensorHandler.cpp" />
+    <ClCompile Include="MQTTSystemHandler.cpp" />
     <ClCompile Include="SDCardConfigLoader.cpp" />
     <ClCompile Include="MicroSdDriver.cpp" />
     <ClCompile Include="SdCardLogger.cpp" />
@@ -131,6 +132,7 @@
     <ClInclude Include="MQTTHandler.h" />
     <ClInclude Include="MQTTRelayHandler.h" />
     <ClInclude Include="MQTTSensorHandler.h" />
+    <ClInclude Include="MQTTSystemHandler.h" />
     <ClInclude Include="SdCardLogger.h" />
     <ClInclude Include="SensorDataRecord.h" />
     <ClInclude Include="ConfigCommandHandler.h" />
