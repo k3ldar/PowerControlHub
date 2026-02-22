@@ -5,6 +5,16 @@
 #include <string.h>
 #include <stdio.h>
 
+const char PROGMEM JsonBase[] = "{\"name\":\"%s\",\"state_topic\":\"home/%s/sensor/%s/state\"";
+const char PROGMEM JsonBinaryPayload[] = ",\"payload_on\":\"ON\",\"payload_off\":\"OFF\"";
+const char PROGMEM JsonDeviceClass[] = ",\"device_class\":\"%s\"";
+const char PROGMEM JsonUnit[] = ",\"unit_of_measurement\":\"%s\"";
+const char PROGMEM JsonFooter[] = ",\"unique_id\":\"%s_%s\",\"device\":{\"ids\":[\"%s\"],\"name\":\"Smart Fuse Box\",\"mf\":\"Simon Carter\",\"mdl\":\"SFB v1\"}}";
+const char PROGMEM DiscoveryTopicFormat[] = "%s/%s/%s/%s/config";
+const char PROGMEM StateTopicFormat[] = "home/%s/sensor/%s/state";
+const char PROGMEM EntityTypeBinarySensor[] = "binary_sensor";
+const char PROGMEM EntityTypeSensor[] = "sensor";
+
 MQTTSensorHandler::MQTTSensorHandler(MQTTController* mqttController, MessageBus* messageBus, SensorController* sensorController, SerialCommandManager* commandMgr)
     : MQTTHandler(mqttController, messageBus)
     , _config(nullptr)
@@ -243,7 +253,7 @@ void MQTTSensorHandler::publishSensorState(uint8_t channelIndex)
     char topic[MqttMaxTopicLength];
     char payload[32];
 
-    snprintf(topic, sizeof(topic), "home/%s/sensor/%s/state", _config->mqtt.deviceId, channel.slug);
+    snprintf_P(topic, sizeof(topic), StateTopicFormat, _config->mqtt.deviceId, channel.slug);
     entry.sensor->getMqttValue(entry.channelIndex, payload, sizeof(payload));
 
     if (_commandMgr != nullptr)
@@ -289,100 +299,35 @@ void MQTTSensorHandler::publishSensorDiscoveryConfig(uint8_t index)
     char topic[MqttMaxTopicLength];
     char payload[MqttMaxPayloadLength];
 
-    const char* entityType = channel.isBinary ? "binary_sensor" : "sensor";
+    const char* entityType = channel.isBinary ? EntityTypeBinarySensor : EntityTypeSensor;
 
-    snprintf(topic, sizeof(topic), "%s/%s/%s/%s/config",
+    snprintf_P(topic, sizeof(topic), DiscoveryTopicFormat,
         _config->mqtt.discoveryPrefix, entityType, _config->mqtt.deviceId, channel.slug);
+
+    int offset = snprintf_P(payload, sizeof(payload), JsonBase,
+        channel.name,
+        _config->mqtt.deviceId, channel.slug);
 
     if (channel.isBinary)
     {
-        if (channel.deviceClass != nullptr)
-        {
-            snprintf(payload, sizeof(payload),
-                "{\"name\":\"%s\","
-                "\"state_topic\":\"home/%s/sensor/%s/state\","
-                "\"device_class\":\"%s\","
-                "\"payload_on\":\"ON\","
-                "\"payload_off\":\"OFF\","
-                "\"unique_id\":\"%s_%s\","
-                "\"device\":{\"ids\":[\"%s\"],\"name\":\"Smart Fuse Box\",\"mf\":\"Simon Carter\",\"mdl\":\"SFB v1\"}}",
-                channel.name,
-                _config->mqtt.deviceId, channel.slug,
-                channel.deviceClass,
-                _config->mqtt.deviceId, channel.slug,
-                _config->mqtt.deviceId);
-        }
-        else
-        {
-            snprintf(payload, sizeof(payload),
-                "{\"name\":\"%s\","
-                "\"state_topic\":\"home/%s/sensor/%s/state\","
-                "\"payload_on\":\"ON\","
-                "\"payload_off\":\"OFF\","
-                "\"unique_id\":\"%s_%s\","
-                "\"device\":{\"ids\":[\"%s\"],\"name\":\"Smart Fuse Box\",\"mf\":\"Simon Carter\",\"mdl\":\"SFB v1\"}}",
-                channel.name,
-                _config->mqtt.deviceId, channel.slug,
-                _config->mqtt.deviceId, channel.slug,
-                _config->mqtt.deviceId);
-        }
+        offset += snprintf_P(payload + offset, sizeof(payload) - offset, JsonBinaryPayload);
     }
-    else if (channel.deviceClass != nullptr && channel.unit != nullptr)
+
+    if (channel.deviceClass != nullptr)
     {
-        snprintf(payload, sizeof(payload),
-            "{\"name\":\"%s\","
-            "\"state_topic\":\"home/%s/sensor/%s/state\","
-            "\"device_class\":\"%s\","
-            "\"unit_of_measurement\":\"%s\","
-            "\"unique_id\":\"%s_%s\","
-            "\"device\":{\"ids\":[\"%s\"],\"name\":\"Smart Fuse Box\",\"mf\":\"Simon Carter\",\"mdl\":\"SFB v1\"}}",
-            channel.name,
-            _config->mqtt.deviceId, channel.slug,
-            channel.deviceClass,
-            channel.unit,
-            _config->mqtt.deviceId, channel.slug,
-            _config->mqtt.deviceId);
+        offset += snprintf_P(payload + offset, sizeof(payload) - offset, JsonDeviceClass,
+            channel.deviceClass);
     }
-    else if (channel.deviceClass != nullptr)
+
+    if (channel.unit != nullptr)
     {
-        snprintf(payload, sizeof(payload),
-            "{\"name\":\"%s\","
-            "\"state_topic\":\"home/%s/sensor/%s/state\","
-            "\"device_class\":\"%s\","
-            "\"unique_id\":\"%s_%s\","
-            "\"device\":{\"ids\":[\"%s\"],\"name\":\"Smart Fuse Box\",\"mf\":\"Simon Carter\",\"mdl\":\"SFB v1\"}}",
-            channel.name,
-            _config->mqtt.deviceId, channel.slug,
-            channel.deviceClass,
-            _config->mqtt.deviceId, channel.slug,
-            _config->mqtt.deviceId);
+        offset += snprintf_P(payload + offset, sizeof(payload) - offset, JsonUnit,
+            channel.unit);
     }
-    else if (channel.unit != nullptr)
-    {
-        snprintf(payload, sizeof(payload),
-            "{\"name\":\"%s\","
-            "\"state_topic\":\"home/%s/sensor/%s/state\","
-            "\"unit_of_measurement\":\"%s\","
-            "\"unique_id\":\"%s_%s\","
-            "\"device\":{\"ids\":[\"%s\"],\"name\":\"Smart Fuse Box\",\"mf\":\"Simon Carter\",\"mdl\":\"SFB v1\"}}",
-            channel.name,
-            _config->mqtt.deviceId, channel.slug,
-            channel.unit,
-            _config->mqtt.deviceId, channel.slug,
-            _config->mqtt.deviceId);
-    }
-    else
-    {
-        snprintf(payload, sizeof(payload),
-            "{\"name\":\"%s\","
-            "\"state_topic\":\"home/%s/sensor/%s/state\","
-            "\"unique_id\":\"%s_%s\","
-            "\"device\":{\"ids\":[\"%s\"],\"name\":\"Smart Fuse Box\",\"mf\":\"Simon Carter\",\"mdl\":\"SFB v1\"}}",
-            channel.name,
-            _config->mqtt.deviceId, channel.slug,
-            _config->mqtt.deviceId, channel.slug,
-            _config->mqtt.deviceId);
-    }
+
+    snprintf_P(payload + offset, sizeof(payload) - offset, JsonFooter,
+        _config->mqtt.deviceId, channel.slug,
+        _config->mqtt.deviceId);
 
     client->publish(topic, payload, MqttQoS::AtMostOnce, true);
 }
