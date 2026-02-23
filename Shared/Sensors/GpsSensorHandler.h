@@ -54,6 +54,7 @@ private:
 	unsigned long _lastValidData;
 	unsigned long _lastTimeSync;
 	unsigned long _lastStatusUpdate;
+	unsigned long _lastFixTime;
 
 	double _prevLatitude;
 	double _prevLongitude;
@@ -242,6 +243,26 @@ private:
 		return R * c;
 	}
 
+	double calculateBearing(double lat1, double lon1, double lat2, double lon2)
+	{
+		double lat1Rad = lat1 * DEG_TO_RAD;
+		double lat2Rad = lat2 * DEG_TO_RAD;
+		double dLonRad = (lon2 - lon1) * DEG_TO_RAD;
+
+		double y = sin(dLonRad) * cos(lat2Rad);
+		double x = cos(lat1Rad) * sin(lat2Rad) -
+			sin(lat1Rad) * cos(lat2Rad) * cos(dLonRad);
+
+		double bearing = atan2(y, x) * RAD_TO_DEG;
+
+		if (bearing < 0.0)
+		{
+			bearing += 360.0;
+		}
+
+		return bearing;
+	}
+
 protected:
 	void initialize() override
 	{
@@ -249,6 +270,7 @@ protected:
 
 		_lastValidData = millis();
 		_lastTimeSync = 0;
+		_lastFixTime = 0;
 	}
 
 	unsigned long update() override
@@ -267,8 +289,9 @@ protected:
 
 		unsigned long now = millis();
 
-		// Check if we have a valid location fix
-		if (_gps->location.isValid())
+		// Check if we have a new location fix (isUpdated resets after read,
+		// ensuring we only process each GPS fix once at ~1Hz)
+		if (_gps->location.isUpdated())
 		{
 			_hasValidFix = true;
 			_lastValidData = now;
@@ -280,41 +303,59 @@ protected:
 
 			double newLat = _gps->location.lat();
 			double newLon = _gps->location.lng();
-			
-			// Calculate distance since last update
+
+			// Calculate speed and course from distance between readings
 			if (!_firstFix)
 			{
 				double segmentDistance = calculateDistance(_prevLatitude, _prevLongitude, newLat, newLon);
-				
-				// Only add if movement is reasonable (filter out GPS noise)
-				// Typical GPS accuracy is ~5m, so ignore movements < 10m
-				if (segmentDistance > 0.01) // 10 meters = 0.01 km
+
+				// Only update if movement is reasonable (filter out GPS noise)
+				if (segmentDistance > 0.0015)
 				{
 					_totalDistanceKm += segmentDistance;
+
+					// Calculate speed from distance and elapsed time
+					unsigned long timeDelta = now - _lastFixTime;
+					if (timeDelta > 0)
+					{
+						double hours = timeDelta / 3600000.0;
+						_speedKmh = segmentDistance / hours;
+					}
+
+					// Calculate course from bearing between positions
+					_courseDeg = calculateBearing(_prevLatitude, _prevLongitude, newLat, newLon);
+				}
+				else
+				{
+					// Not enough movement to determine speed/course
+					_speedKmh = 0.0;
 				}
 			}
 			else
 			{
 				_firstFix = false;
+				_speedKmh = 0.0;
 			}
-			
+
+			_lastFixTime = now;
+
 			// Store current position for next calculation
 			_prevLatitude = newLat;
 			_prevLongitude = newLon;
-			
+
 			// Update other stored values
 			_latitude = newLat;
 			_longitude = newLon;
 			_altitude = _gps->altitude.isValid() ? _gps->altitude.meters() : 0.0;
-			_speedKmh = _gps->speed.isValid() ? _gps->speed.kmph() : 0.0;
-			_courseDeg = _gps->course.isValid() ? _gps->course.deg() : 0.0;
 			_satellites = _gps->satellites.isValid() ? _gps->satellites.value() : 0;
 
-			if (_courseDeg >= 360.0) {
-				_courseDeg = fmod(_courseDeg, 359.9);  // Normalize to 0-359.99
+			if (_courseDeg >= 360.0)
+			{
+				_courseDeg = fmod(_courseDeg, 360.0);
 			}
-			else if (_courseDeg < 0.0) {
-				_courseDeg = 0.0;
+			else if (_courseDeg < 0.0)
+			{
+				_courseDeg += 360.0;
 			}
 
 			// Sync time from GPS periodically or if never synced
@@ -370,6 +411,7 @@ public:
 		_hasValidFix(false),
 		_lastValidData(0),
 		_lastStatusUpdate(0),
+		_lastFixTime(0),
 		_prevLatitude(0.0),
 		_prevLongitude(0.0),
 		_totalDistanceKm(0.0),

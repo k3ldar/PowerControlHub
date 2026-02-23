@@ -1,3 +1,4 @@
+#include "SmartFuseBox.h"
 #include <ArduinoBLE.h>
 #include <Arduino.h>
 #include <stdint.h>
