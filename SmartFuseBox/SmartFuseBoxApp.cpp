@@ -225,7 +225,6 @@ void SmartFuseBoxApp::loop()
     SystemCpuMonitor::startTask();
     _mqttSystemHandler.update();
     SystemCpuMonitor::endTask();
-    }
 #endif
 
     SystemCpuMonitor::startTask();

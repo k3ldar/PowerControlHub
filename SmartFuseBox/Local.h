@@ -25,6 +25,9 @@
 #define FUSE_BOX_CONTROLLER
 #define ARDUINO_UNO_R4
 
+/*
+* If you have an SD Card reader you can load the configuration from the Sd card at startup, or when a card is inserted.
+*/
 #define CARD_CONFIG_LOADER_
 
 #if defined(ARDUINO_UNO_R4)

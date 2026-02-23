@@ -33,14 +33,22 @@ private:
 			return RelayResult::Reserved;
 		}
 
-		_relayStatus[relayIndex] = isOn;
-		digitalWrite(_relays[relayIndex], isOn ? LOW : HIGH);
+		// Compute which relays actually change state so subscribers can be notified
+		uint8_t changedMask = 0;
+
+		// Primary relay
+		if (_relayStatus[relayIndex] != isOn)
+		{
+			_relayStatus[relayIndex] = isOn;
+			digitalWrite(_relays[relayIndex], isOn ? LOW : HIGH);
+			changedMask |= (1 << relayIndex);
+		}
 
 		Config* config = ConfigManager::getConfigPtr();
 
 		if (config != nullptr)
 		{
-			// Check for linked relays
+			// Check for linked relays and update only if their state changes
 			for (uint8_t i = 0; i < ConfigMaxLinkedRelays; i++)
 			{
 				if (config->linkedRelays[i][0] == relayIndex)
@@ -48,26 +56,21 @@ private:
 					uint8_t linkedRelay = config->linkedRelays[i][1];
 					if (linkedRelay < _relayCount)
 					{
-						_relayStatus[linkedRelay] = isOn;
-						digitalWrite(_relays[linkedRelay], isOn ? LOW : HIGH);
+						if (_relayStatus[linkedRelay] != isOn)
+						{
+							_relayStatus[linkedRelay] = isOn;
+							digitalWrite(_relays[linkedRelay], isOn ? LOW : HIGH);
+							changedMask |= (1 << linkedRelay);
+						}
 					}
 				}
 			}
 		}
 
-		if (_messageBus)
+		if (_messageBus && changedMask)
 		{
-			// Update LED matrix relay status
-			uint8_t relayBitmask = 0;
-			for (uint8_t i = 0; i < _relayCount && i < 8; i++)
-			{
-				if (_relayStatus[i])
-				{
-					relayBitmask |= (1 << i);
-				}
-			}
-
-			_messageBus->publish<RelayStatusChanged>(relayBitmask);
+			// Publish bitmask of relays that actually changed state
+			_messageBus->publish<RelayStatusChanged>(changedMask);
 		}
 
 		return RelayResult::Success;
