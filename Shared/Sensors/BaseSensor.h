@@ -32,6 +32,8 @@ class BaseSensor : public BaseSensorHandler
 #endif
 {
 public:
+	virtual ~BaseSensor() = default;
+
 	virtual SensorIdList getSensorId() const = 0;
 
 	virtual SensorType getSensorType() const = 0;

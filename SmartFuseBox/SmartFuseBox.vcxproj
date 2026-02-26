@@ -134,6 +134,7 @@
     <ClInclude Include="MQTTRelayHandler.h" />
     <ClInclude Include="MQTTSensorHandler.h" />
     <ClInclude Include="MQTTSystemHandler.h" />
+    <ClInclude Include="RemoteSensor.h" />
     <ClInclude Include="SdCardLogger.h" />
     <ClInclude Include="SensorDataRecord.h" />
     <ClInclude Include="ConfigCommandHandler.h" />

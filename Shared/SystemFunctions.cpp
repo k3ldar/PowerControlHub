@@ -6,7 +6,7 @@
 #include "esp_timer.h"
 #endif
 
-#if defined(ARDUINO_UNO_R4)
+#if defined(WIFI_SUPPORT)
 #include <WiFiS3.h>
 #endif
 
@@ -40,7 +40,7 @@ uint8_t SystemFunctions::GenerateDefaultPassword(char* buffer, size_t bufferSize
     if (bufferSize < 15)
         return BufferInvalid;
 
-#if defined(ARDUINO_UNO_R4)
+#if defined(WIFI_SUPPORT)
     uint8_t mac[6];
     WiFi.macAddress(mac);
 

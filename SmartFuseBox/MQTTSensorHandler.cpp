@@ -288,6 +288,7 @@ void MQTTSensorHandler::publishSensorDiscoveryConfig(uint8_t index)
     }
 
     MQTTClient* client = _mqttController->getClient();
+
     if (client == nullptr)
     {
         return;

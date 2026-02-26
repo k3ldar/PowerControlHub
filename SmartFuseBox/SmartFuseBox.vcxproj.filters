@@ -202,13 +202,7 @@
     <ClCompile Include="MQTTSystemHandler.cpp">
       <Filter>Source Files\MQTT</Filter>
     </ClCompile>
-    <ClCompile Include="SensorCommandHandler.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="SmartFuseBoxApp.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SensorCommandHandler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -399,13 +393,10 @@
     <ClInclude Include="MQTTSystemHandler.h">
       <Filter>Header Files\MQTT</Filter>
     </ClInclude>
-    <ClInclude Include="Dht11SensorHandler.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="SmartFuseBoxApp.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Dht11SensorHandler.h">
+    <ClInclude Include="RemoteSensor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

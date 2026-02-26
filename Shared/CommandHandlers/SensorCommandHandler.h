@@ -4,6 +4,7 @@
 #include "ConfigManager.h"
 #include "SerialCommandManager.h"
 #include "Local.h"
+#include "RemoteSensor.h"
 
 #if defined(FUSE_BOX_CONTROLLER)
 #include "SharedBaseCommandHandler.h"
@@ -43,6 +44,9 @@ private:
 	const char* _gpsDirection;
 	double _gpsDistance = 0;
     bool _lastHornActive = false;
+	RemoteSensor** _remoteSensors;
+	size_t _remoteSensorCount;
+
 public:
 #if defined(BOAT_CONTROL_PANEL)
     explicit SensorCommandHandler(BroadcastManager* broadcastManager, NextionControl* nextionControl, WarningManager* warningManager);
@@ -52,6 +56,8 @@ public:
 
     bool handleCommand(SerialCommandManager* sender, const char* command, const StringKeyValue params[], uint8_t paramCount) override;
     const char* const* supportedCommands(size_t& count) const override;
+
+	void setup(RemoteSensor* remoteSensors[], size_t remoteSensorCount);
 
 	// Getters
 	float getTemperature() const;

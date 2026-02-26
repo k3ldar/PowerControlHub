@@ -4,10 +4,11 @@
 #if defined(BOAT_CONTROL_PANEL)
 SensorCommandHandler::SensorCommandHandler(BroadcastManager* broadcastManager, 
 	NextionControl* nextionControl, WarningManager* warningManager)
-    : BaseBoatCommandHandler(broadcastManager, nextionControl, warningManager)
+    : BaseBoatCommandHandler(broadcastManager, nextionControl, warningManager), _remoteSensors(nullptr), _remoteSensorCount(0)
+
 #elif defined(FUSE_BOX_CONTROLLER)
 SensorCommandHandler::SensorCommandHandler(BroadcastManager* broadcastManager, WarningManager* warningManager)
-    : SharedBaseCommandHandler(broadcastManager, warningManager)
+    : SharedBaseCommandHandler(broadcastManager, warningManager), _remoteSensors(nullptr), _remoteSensorCount(0)
 #endif
 {
 }
@@ -236,8 +237,25 @@ void SensorCommandHandler::setHornActive(bool value)
 #endif
 }
 
+void SensorCommandHandler::setup(RemoteSensor* remoteSensors[], size_t remoteSensorCount)
+{
+    _remoteSensors = remoteSensors;
+	_remoteSensorCount = remoteSensorCount;
+}
+
 bool SensorCommandHandler::handleCommand(SerialCommandManager* sender, const char* command, const StringKeyValue params[], uint8_t paramCount)
 {
+    if (_remoteSensors != nullptr && _remoteSensorCount > 0)
+    {
+        for (size_t i = 0; i < _remoteSensorCount; i++)
+        {
+            if (_remoteSensors[i] && strcmp(_remoteSensors[i]->getSensorCommandId(), command) == 0)
+            {
+                _remoteSensors[i]->handleRemoteCommand(params, paramCount);
+            }
+        }
+    }
+
     // Handle query requests (no parameters) - return current sensor values
     if (paramCount == 0)
     {
