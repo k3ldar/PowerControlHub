@@ -52,6 +52,7 @@
 #endif
 
 #include "BaseSensor.h"
+#include "RemoteSensor.h"
 
 class SmartFuseBoxApp
 {
@@ -119,7 +120,7 @@ public:
         const uint8_t* relayPins, uint8_t relayCount);
 
     void setup(BaseSensorHandler** sensorHandlers, uint8_t sensorHandlerCount,
-        BaseSensor** baseSensors, uint8_t baseSensorCount);
+        RemoteSensor** remoteSensors, uint8_t remoteSensorCount);
     void loop();
 
     MessageBus* messageBus() { return &_messageBus; }

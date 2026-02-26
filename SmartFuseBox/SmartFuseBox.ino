@@ -64,17 +64,11 @@ RemoteSensor* remoteSensors[] = {
 constexpr uint8_t remoteSensorCount = sizeof(remoteSensors) / sizeof(remoteSensors[0]);
 
 
-// sensor manager
-BaseSensorHandler* sensorHandlers[] = {
+// sensor manager include all internal and remote sensors
+BaseSensorHandler* localSensors[] = {
 	&waterSensorHandler, &dht11SensorHandler, &lightSensorHandler, &systemSensorHandler, &gpsLatLonSensor
 };
-constexpr uint8_t sensorHandlerCount = sizeof(sensorHandlers) / sizeof(sensorHandlers[0]);
-
-// middleware
-BaseSensor* baseSensors[] = {
-	&waterSensorHandler,& dht11SensorHandler,& lightSensorHandler,& systemSensorHandler,& gpsLatLonSensor
-};
-constexpr uint8_t baseSensorCount = sizeof(baseSensors) / sizeof(baseSensors[0]);
+constexpr uint8_t sensorHandlerCount = sizeof(localSensors) / sizeof(localSensors[0]);
 
 void setup()
 {
@@ -87,15 +81,7 @@ void setup()
 	systemSensorHandler.setSdCardLogger(app.sdCardLogger());
 
 	// configure app
-	app.setup(sensorHandlers, sensorHandlerCount, baseSensors, baseSensorCount);
-
-	// configure remote sensors
-	SensorCommandHandler* sensorCommandHandler = app.sensorCommandHandler();
-
-	if (sensorCommandHandler)
-	{
-		sensorCommandHandler->setup(remoteSensors, remoteSensorCount);
-	}
+	app.setup(localSensors, sensorHandlerCount, remoteSensors, remoteSensorCount);
 }
 
 void loop()

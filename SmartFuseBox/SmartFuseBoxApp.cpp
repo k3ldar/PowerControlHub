@@ -66,7 +66,7 @@ SmartFuseBoxApp::SmartFuseBoxApp(SerialCommandManager* commandMgrComputer,
 }
 
 void SmartFuseBoxApp::setup(BaseSensorHandler** sensorHandlers, uint8_t sensorHandlerCount,
-    BaseSensor** baseSensors, uint8_t baseSensorCount)
+    RemoteSensor** remoteSensors, uint8_t remoteSensorCount)
 {
     DateTimeManager::setDateTime();
 
@@ -78,8 +78,26 @@ void SmartFuseBoxApp::setup(BaseSensorHandler** sensorHandlers, uint8_t sensorHa
         _warningManager.raiseWarning(WarningType::DefaultConfigurationFuseBox);
     }
 
+	if (remoteSensorCount > 0 && remoteSensors != nullptr)
+    {
+        _sensorCommandHandler.setup(remoteSensors, remoteSensorCount);
+    }
+
     // Create sensor management (needed before wifi/mqtt setup)
-    _sensorController = new SensorController(baseSensors, baseSensorCount);
+    // SensorController expects an array of BaseSensor* but setup() is passed
+    // BaseSensorHandler** (sensorHandlers). Upcast each handler to BaseSensor*
+    // and build a temporary array to pass to SensorController.
+    BaseSensor** baseSensors = nullptr;
+    if (sensorHandlers != nullptr && sensorHandlerCount > 0)
+    {
+        baseSensors = new BaseSensor*[sensorHandlerCount];
+        for (uint8_t i = 0; i < sensorHandlerCount; i++)
+        {
+            baseSensors[i] = static_cast<BaseSensor*>(sensorHandlers[i]);
+        }
+    }
+
+    _sensorController = new SensorController(baseSensors, sensorHandlerCount);
     _sensorManager = new SensorManager(sensorHandlers, sensorHandlerCount);
     _sensorNetworkHandler = new SensorNetworkHandler(_sensorController);
 
