@@ -1,4 +1,6 @@
 #include "Local.h"
+
+#if defined(MQTT_SUPPORT)
 #include "MQTTSensorHandler.h"
 #include "SystemDefinitions.h"
 #include <SerialCommandManager.h>
@@ -332,3 +334,4 @@ void MQTTSensorHandler::publishSensorDiscoveryConfig(uint8_t index)
 
     client->publish(topic, payload, MqttQoS::AtMostOnce, true);
 }
+#endif

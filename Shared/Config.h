@@ -45,7 +45,6 @@ struct SoundSignalConfig
 	uint32_t bad_repeatMs;
 } __attribute__((packed));
 
-#if defined(MQTT_SUPPORT)
 // MQTT Configuration
 constexpr uint8_t ConfigMqttBrokerLength = 64;
 constexpr uint8_t ConfigMqttUsernameLength = 32;
@@ -54,9 +53,6 @@ constexpr uint8_t ConfigMqttDeviceIdLength = 32;
 constexpr uint8_t ConfigMqttDiscoveryPrefixLength = 32;
 constexpr uint16_t ConfigMqttDefaultPort = 1883;
 constexpr uint16_t ConfigMqttKeepAliveDefault = 60;
-
-constexpr uint8_t AccessModeAP = 0;
-constexpr uint8_t AccessModeClient = 1;
 
 struct MqttConfig
 {
@@ -70,7 +66,12 @@ struct MqttConfig
 	uint16_t keepAliveInterval;
 	char discoveryPrefix[ConfigMqttDiscoveryPrefixLength];
 } __attribute__((packed));
-#endif
+
+
+constexpr uint8_t AccessModeAP = 0;
+constexpr uint8_t AccessModeClient = 1;
+
+
 
 // Layout:
 // - version (uint8_t)
@@ -112,7 +113,6 @@ struct Config {
 	char homePort[ConfigHomePortLength]; // 30 chars + null
 	int8_t timezoneOffset; // hours from UTC
 
-#if defined(ARDUINO_UNO_R4)
     bool bluetoothEnabled;
 	bool wifiEnabled;
 	uint8_t accessMode; // 0 = AP, 1 = Client
@@ -120,16 +120,13 @@ struct Config {
     char apPassword[MaxWiFiPasswordLength];
     uint16_t wifiPort;
 	char apIpAddress[MaxIpAddressLength]; // xxx.xxx.xxx.xxx + null
-#endif
 
 	uint8_t sdCardInitializeSpeed;
 
 	LedConfig ledConfig;
 	SoundSignalConfig soundConfig;
 
-#if defined(MQTT_SUPPORT)
 	MqttConfig mqtt;
-#endif
 
 	uint16_t checksum;
 } __attribute__((packed));

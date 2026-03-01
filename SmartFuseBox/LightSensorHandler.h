@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Local.h"
 #include "BaseSensor.h"
 
 constexpr unsigned long LightCheckMs = 30000;

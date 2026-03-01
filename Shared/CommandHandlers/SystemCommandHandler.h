@@ -1,28 +1,34 @@
 #pragma once
 
+#include "Local.h"
 #include "SharedBaseCommandHandler.h"
 #include "BroadcastManager.h"
 #include "SystemDefinitions.h"
 #include "SystemFunctions.h"
 #include "WarningManager.h"
-#include "Local.h"
 
-#if defined(ARDUINO_UNO_R4)
+#if defined(SD_CARD_SUPPORT)
 #include "SdCardLogger.h"
-#include "WifiController.h"
 #include "MicroSdDriver.h"
+#endif
+
+#include "WifiController.h"
+
+#if defined(MQTT_SUPPORT)
 #include "MQTTController.h"
 #endif
 
 class SystemCommandHandler : public SharedBaseCommandHandler
 {
 private:
-#if defined(ARDUINO_UNO_R4)
     WifiController* _wifiController = nullptr;
+
+#if defined(SD_CARD_SUPPORT)
     SdCardLogger* _sdCardLogger = nullptr;
+#endif
+
 #if defined(MQTT_SUPPORT)
     MQTTController* _mqttController = nullptr;
-#endif
 #endif
 
 public:
@@ -32,12 +38,13 @@ public:
     bool handleCommand(SerialCommandManager* sender, const char*, const StringKeyValue params[], uint8_t paramCount) override;
     const char* const* supportedCommands(size_t& count) const override;
 
-#if defined(ARDUINO_UNO_R4)
     void setWifiController(WifiController* wifiController);
+
+#if defined(SD_CARD_SUPPORT)
     void setSdCardLogger(SdCardLogger* sdCardLogger);
+#endif
 
 #if defined(MQTT_SUPPORT)
     void setMqttController(MQTTController* mqttController);
-#endif
 #endif
 };

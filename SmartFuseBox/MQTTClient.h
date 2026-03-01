@@ -2,6 +2,8 @@
 
 #include <Arduino.h>
 #include <WiFiS3.h>
+
+#include "Local.h"
 #include "MQTTDefinitions.h"
 
 // Forward declaration

@@ -31,15 +31,15 @@
  *   Remove the trailing underscore to activate it (e.g. `ARDUINO_R4_MINIMA`).
  *   This lets you keep all options visible without deleting them.
  *
- * ARDUINO_UNO_R4  – Arduino Uno R4 WiFi (u-blox NINA / ESP32-S3 radio module, BLE + WiFi).
- * ARDUINO_R4_MINIMA – Arduino Uno R4 Minima (no radio; disables WIFI_SUPPORT / BLUETOOTH_SUPPORT).
- * ESP32_NODE_32   – ESP32 NodeMCU-32 or compatible (WiFi + BLE via built-in radio).
+ * ARDUINO_UNO_R4		– Arduino Uno R4 WiFi (u-blox NINA / ESP32-S3 radio module, BLE + WiFi).
+ * ARDUINO_R4_MINIMA	– Arduino Uno R4 Minima (no radio; disables WIFI_SUPPORT / BLUETOOTH_SUPPORT).
+ * ESP32				– ESP32 NodeMCU-32 or compatible (WiFi + BLE via built-in radio).
  *
  * Sanity-check #error directives later in this file will catch multiple active selections.
  */
 #define ARDUINO_UNO_R4
 #define ARDUINO_R4_MINIMA_
-#define ESP32_NODE_32_
+#define ESP32_
 
 /*
 * Determines whether to include code related to the smart fuse box controller functionality. If you are using this code as a
@@ -51,21 +51,37 @@
 /*
 * Wifi is only available on certain boards (e.g. Arduino Uno R4). Define WIFI_SUPPORT to enable related code, but only if your board supports it.
 */
+#if defined(ARDUINO_UNO_R4) || defined(ESP32)
 #define WIFI_SUPPORT
+#endif
+
 
 /*
+ * SD card Support. Remove the trailing underscore to enable.
+ * When enabled the system will enabled SD Card support
+ * (see SdCard* constants below). This feature is experimental and disabled by default.
+ */
+#define SD_CARD_SUPPORT_
+
+#if defined(SD_CARD_SUPPORT)
+/*
  * SD card config loader. Remove the trailing underscore to enable.
+ * Only supported if SD_CARD_SUPPORT define is configured
  * When enabled the system reads `config.txt` from the SD card at boot (and on card-insert)
  * so settings can be changed without reflashing. Requires SD card SPI pins wired correctly
  * (see SdCard* constants below). This feature is experimental and disabled by default.
- */#define CARD_CONFIG_LOADER_
+ */
+#define CARD_CONFIG_LOADER
+#endif
+
 
 #if defined(WIFI_SUPPORT)
 
 /*
+* MQTT relies on WIFI_SUPPORT
 * If using with home assistant MQTT discovery, define MQTT_SUPPORT to include the MQTTController and related handlers.
 */
-#define MQTT_SUPPORT
+#define MQTT_SUPPORT_
 
 #endif
 
@@ -88,11 +104,13 @@ constexpr uint8_t LightSensorPin = D3;
 constexpr uint8_t WaterSensorActivePin = D8;
 constexpr uint8_t Dht11SensorPin = D9;
 
+#if defined(SD_CARD_SUPPORT)
 // SD card SPI pins (used by MicroSdDriver)
 constexpr uint8_t SdCardCsPin = D10;
 constexpr uint8_t SdCardMosiPin = D11;
 constexpr uint8_t SdCardMisoPin = D12;
 constexpr uint8_t SdCardSckPin = D13;
+#endif
 
 /* 
 * Number of relays in the hardware. Keep this in sync with `Relays` array. You MUST have at least 1 relay 
@@ -134,14 +152,6 @@ constexpr uint8_t Relays[ConfigRelayCount] = { Relay1, Relay2, Relay3, Relay4, R
 
 #if defined(ARDUINO_UNO_R4) && defined(WIFI_SUPPORT) && defined(BLUETOOTH_SUPPORT)
 #error "WIFI_SUPPORT and BLUETOOTH_SUPPORT cannot both be enabled on Arduino Uno R4. Disable one in Local.h."
-#endif
-
-// Normalise ESP32_NODE_32 board selection: the ESP32 Arduino core defines the
-// symbol `ESP32` internally, but only when compiled with that toolchain. If a
-// developer activates ESP32_NODE_32 here without the matching toolchain, this
-// block ensures the broader `ESP32` guard used elsewhere in the codebase is set.
-#if defined(ESP32_NODE_32) && !defined(ESP32)
-#define ESP32
 #endif
 
 #if defined(ARDUINO_UNO_R4) 

@@ -1,6 +1,8 @@
 #include "Local.h"
+
 #include "MQTTConfigCommandHandler.h"
 #include "MQTTController.h"
+
 #include "ConfigManager.h"
 #include "SystemFunctions.h"
 #include <SerialCommandManager.h>
@@ -26,6 +28,7 @@ bool MQTTConfigCommandHandler::processCommand(const char* command, const char* p
         return false;
     }
     
+#if defined(MQTT_SUPPORT)
     // M0 - MQTT Enabled
     if (strcmp(command, MqttConfigEnable) == 0)
     {
@@ -76,12 +79,18 @@ bool MQTTConfigCommandHandler::processCommand(const char* command, const char* p
     {
         return handleMqttDiscoveryPrefix(params);
     }
+#else
+    (void)command;
+    (void)params;
+#endif
 
     return false;
 }
 
 bool MQTTConfigCommandHandler::handleMqttEnable(const char* params)
 {
+#if defined(MQTT_SUPPORT)
+    return false;
     if (_config == nullptr)
     {
         return false;
@@ -97,10 +106,15 @@ bool MQTTConfigCommandHandler::handleMqttEnable(const char* params)
     
     _config->mqtt.enabled = enabled;
     return true;
+#else
+    (void)params;
+    return false;
+#endif
 }
 
 bool MQTTConfigCommandHandler::handleMqttBroker(const char* params)
 {
+#if defined(MQTT_SUPPORT)
     if (_config == nullptr)
     {
         return false;
@@ -116,10 +130,15 @@ bool MQTTConfigCommandHandler::handleMqttBroker(const char* params)
     _config->mqtt.broker[ConfigMqttBrokerLength - 1] = '\0';
 
     return true;
+#else
+    (void)params;
+    return false;
+#endif
 }
 
 bool MQTTConfigCommandHandler::handleMqttPort(const char* params)
 {
+#if defined(MQTT_SUPPORT)
     if (_config == nullptr)
     {
         return false;
@@ -139,10 +158,15 @@ bool MQTTConfigCommandHandler::handleMqttPort(const char* params)
     
     _config->mqtt.port = port;
     return true;
+#else
+    (void)params;
+    return false;
+#endif
 }
 
 bool MQTTConfigCommandHandler::handleMqttUsername(const char* params)
 {
+#if defined(MQTT_SUPPORT)
     if (_config == nullptr)
     {
         return false;
@@ -158,10 +182,15 @@ bool MQTTConfigCommandHandler::handleMqttUsername(const char* params)
     _config->mqtt.username[ConfigMqttUsernameLength - 1] = '\0';
 
     return true;
+#else
+    (void)params;
+    return false;
+#endif
 }
 
 bool MQTTConfigCommandHandler::handleMqttPassword(const char* params)
 {
+#if defined(MQTT_SUPPORT)
     if (_config == nullptr)
     {
         return false;
@@ -177,10 +206,15 @@ bool MQTTConfigCommandHandler::handleMqttPassword(const char* params)
     _config->mqtt.password[ConfigMqttPasswordLength - 1] = '\0';
 
     return true;
+#else
+    (void)params;
+    return false;
+#endif
 }
 
 bool MQTTConfigCommandHandler::handleMqttDeviceId(const char* params)
 {
+#if defined(MQTT_SUPPORT)
     if (_config == nullptr)
     {
         return false;
@@ -196,10 +230,15 @@ bool MQTTConfigCommandHandler::handleMqttDeviceId(const char* params)
     _config->mqtt.deviceId[ConfigMqttDeviceIdLength - 1] = '\0';
 
     return true;
+#else
+    (void)params;
+    return false;
+#endif
 }
 
 bool MQTTConfigCommandHandler::handleMqttHADiscovery(const char* params)
 {
+#if defined(MQTT_SUPPORT)
     if (_config == nullptr)
     {
         return false;
@@ -215,10 +254,15 @@ bool MQTTConfigCommandHandler::handleMqttHADiscovery(const char* params)
     
     _config->mqtt.useHomeAssistantDiscovery = enabled;
     return true;
+#else
+    (void)params;
+    return false;
+#endif
 }
 
 bool MQTTConfigCommandHandler::handleMqttKeepAlive(const char* params)
 {
+#if defined(MQTT_SUPPORT)
     if (_config == nullptr)
     {
         return false;
@@ -238,11 +282,16 @@ bool MQTTConfigCommandHandler::handleMqttKeepAlive(const char* params)
     
     _config->mqtt.keepAliveInterval = keepAlive;
     return true;
+#else
+    (void)params;
+    return false;
+#endif
 }
 
 bool MQTTConfigCommandHandler::handleMqttState(const char* params)
 {
     (void)params;
+#if defined(MQTT_SUPPORT)
 
     if (_config == nullptr)
     {
@@ -257,10 +306,14 @@ bool MQTTConfigCommandHandler::handleMqttState(const char* params)
 
     // Fallback to config enabled state if controller not available
     return _config->mqtt.enabled;
+#else
+    return false;
+#endif
 }
 
 bool MQTTConfigCommandHandler::handleMqttDiscoveryPrefix(const char* params)
 {
+#if defined(MQTT_SUPPORT)
     if (_config == nullptr)
     {
         return false;
@@ -276,6 +329,10 @@ bool MQTTConfigCommandHandler::handleMqttDiscoveryPrefix(const char* params)
     _config->mqtt.discoveryPrefix[ConfigMqttDiscoveryPrefixLength - 1] = '\0';
 
     return true;
+#else
+    (void)params;
+    return false;
+#endif
 }
 
 // ============================================================================

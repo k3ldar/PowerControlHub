@@ -1,6 +1,8 @@
 #pragma once
 
 #include <Arduino.h>
+
+#include "Local.h"
 #include "BaseCommandHandler.h"
 #include "ConfigController.h"
 #include "WifiController.h"
@@ -31,7 +33,9 @@ private:
 #endif
 
 public:
-	explicit ConfigCommandHandler(WifiController* wifiController, ConfigController* configController);
+	explicit ConfigCommandHandler(
+		WifiController* wifiController, 
+		ConfigController* configController);
 
 	void setConfigSyncManager(ConfigSyncManager* syncManager);
 	void setSdCardConfigLoader(SdCardConfigLoader* sdCardConfigLoader);

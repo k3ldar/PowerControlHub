@@ -37,6 +37,7 @@ bool MQTTRelayHandler::begin()
         }
     );
 
+#if defined(MQTT_SUPPORT)
     // Subscribe to MQTT connected event to re-subscribe and publish states
     _messageBus->subscribe<MqttConnected>(
         [this]()
@@ -68,6 +69,7 @@ bool MQTTRelayHandler::begin()
             this->onMessage(topic, payload);
         }
     );
+#endif
 
     return true;
 }

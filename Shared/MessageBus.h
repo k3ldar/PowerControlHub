@@ -2,6 +2,8 @@
 #include <functional>
 #include <vector>
 #include <stdint.h>
+
+#include "Local.h"
 #include "SystemDefinitions.h"
 
 struct WarningChanged {
@@ -24,6 +26,7 @@ struct WaterLevelUpdated {
     using Callback = std::function<void(uint16_t newWaterLevel, uint16_t averageWaterLevel)>;
 };
 
+#if defined(WIFI_SUPPORT)
 struct WifiConnectionStateChanged {
     using Callback = std::function<void(WifiConnectionState status)>;
 };
@@ -32,12 +35,13 @@ struct WifiSignalStrengthChanged {
     using Callback = std::function<void(uint16_t strength)>;
 };
 
-struct RelayStatusChanged {
-    using Callback = std::function<void(uint8_t status)>;
-};
-
 struct WifiServerProcessingRequestChanged {
     using Callback = std::function<void(const char* method, const char* path, const char* query, bool isProcessing)>;
+};
+#endif
+
+struct RelayStatusChanged {
+    using Callback = std::function<void(uint8_t status)>;
 };
 
 struct GpsLocationUpdated {

@@ -2,10 +2,7 @@
 #include "SystemCpuMonitor.h"
 #include "ConfigManager.h"
 #include "DateTimeManager.h"
-
-#if defined(ARDUINO_UNO_R4)
 #include "WifiController.h"
-#endif
 
 SystemCommandHandler::SystemCommandHandler(BroadcastManager* broadcaster, WarningManager* warningManager)
     : SharedBaseCommandHandler(broadcaster, warningManager)
@@ -75,7 +72,7 @@ bool SystemCommandHandler::handleCommand(SerialCommandManager* sender, const cha
         sendAckOk(sender, command, &param);
     }
 
-#if defined(ARDUINO_UNO_R4)
+#if defined(BLUETOOTH_SUPPORT)
 	else if (strcmp(command, SystemBluetoothStatus) == 0)
     {
 		Config* config = ConfigManager::getConfigPtr();
@@ -92,6 +89,8 @@ bool SystemCommandHandler::handleCommand(SerialCommandManager* sender, const cha
             sendAckOk(sender, command, &param);
         }
     }
+#endif
+
     else if (strcmp(command, SystemWifiStatus) == 0)
     {
         Config* config = ConfigManager::getConfigPtr();
@@ -126,7 +125,6 @@ bool SystemCommandHandler::handleCommand(SerialCommandManager* sender, const cha
             sendAckOk(sender, command, params, argCount);
         }
     }
-#endif
     else if (strcmp(command, SystemSetDateTime) == 0 && paramCount == 1)
     {
         bool success = false;
@@ -174,7 +172,7 @@ bool SystemCommandHandler::handleCommand(SerialCommandManager* sender, const cha
     {
         bool present = false;
 
-#if defined(ARDUINO_UNO_R4)
+#if defined(SD_CARD_SUPPORT)
         // Check SD card presence via MicroSdDriver
         MicroSdDriver& sdDriver = MicroSdDriver::getInstance();
         present = sdDriver.isCardPresent();
@@ -188,7 +186,7 @@ bool SystemCommandHandler::handleCommand(SerialCommandManager* sender, const cha
     {
         uint32_t fileSize = 0;
 
-#if defined(ARDUINO_UNO_R4)
+#if defined(SD_CARD_SUPPORT)
         if (_sdCardLogger)
         {
             fileSize = _sdCardLogger->getCurrentLogFileSize();
@@ -236,24 +234,21 @@ bool SystemCommandHandler::handleCommand(SerialCommandManager* sender, const cha
     return true;
 }
 
-#if defined(ARDUINO_UNO_R4)
-
+#if defined(SD_CARD_SUPPORT)
 void SystemCommandHandler::setSdCardLogger(SdCardLogger* sdCardLogger)
 {
     _sdCardLogger = sdCardLogger;
 }
+#endif
 
 void SystemCommandHandler::setWifiController(WifiController* wifiController)
 { 
     _wifiController = wifiController;
 }
-#endif
 
 #if defined(MQTT_SUPPORT)
-
 void SystemCommandHandler::setMqttController(MQTTController* mqttController)
 {
     _mqttController = mqttController;
 }
-
 #endif

@@ -54,8 +54,8 @@ constexpr char ConfigBoatType[] = "C7";
 constexpr char ConfigSoundRelayId[] = "C8";
 constexpr char ConfigSoundStartDelay[] = "C9";
 
-#if defined(ARDUINO_UNO_R4)
 constexpr char ConfigBluetoothEnable[] = "C10";
+
 constexpr char ConfigWifiEnable[] = "C11";
 constexpr char ConfigWifiMode[] = "C12";
 constexpr char ConfigWifiSSID[] = "C13";
@@ -63,7 +63,6 @@ constexpr char ConfigWifiPassword[] = "C14";
 constexpr char ConfigWifiPort[] = "C15";
 constexpr char ConfigWifiState[] = "C16";
 constexpr char ConfigWifiApIpAddress[] = "C17";
-#endif
 
 constexpr char ConfigDefaultRelayState[] = "C18";
 constexpr char ConfigLinkRelays[] = "C19";
@@ -80,8 +79,6 @@ constexpr char ConfigReloadFromSd[] = "C29";
 constexpr char ConfigExportToSd[] = "C30";
 constexpr char ConfigSdCardSpeed[] = "C31";
 
-#if defined(MQTT_SUPPORT)
-
 constexpr char MqttConfigEnable[] = "M0";
 constexpr char MqttConfigBroker[] = "M1";
 constexpr char MqttConfigPort[] = "M2";
@@ -92,8 +89,6 @@ constexpr char MqttConfigHADiscovery[] = "M6";
 constexpr char MqttConfigKeepAlive[] = "M7";
 constexpr char MqttConfigState[] = "M8";
 constexpr char MqttConfigDiscoveryPrefix[] = "M9";
-
-#endif
 
 constexpr char WarningsActive[] = "W0";
 constexpr char WarningsList[] = "W1";
@@ -148,7 +143,6 @@ constexpr uint8_t WarningControllerNotInitialised = 3;
 constexpr uint8_t InvalidCommandParameters = 100;
 
 
-#if defined(ARDUINO_UNO_R4)
 constexpr uint8_t MaxSSIDLength = 33; // 32 chars + null
 constexpr uint8_t MaxWiFiPasswordLength = 65; // 64 chars + null
 constexpr uint8_t MaxIpAddressLength = 16; // xxx.xxx.xxx.xxx + null
@@ -158,7 +152,6 @@ constexpr uint16_t DefaultWifiPort = 80;
 
 // WiFi Connection Quality Thresholds
 constexpr int8_t WeakSignalWarningRSSI = -80;  // dBm - warn user
-#endif
 
 constexpr const char* compassDirections[16] = {
     "N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE",
@@ -218,7 +211,8 @@ enum class WifiConnectionState : uint8_t
     Disconnected = 0,
     Connecting = 1,
     Connected = 2,
-    Failed = 3
+    Failed = 3,
+    Restarting = 4,
 };
 
 enum class ClientHandlingState : uint8_t

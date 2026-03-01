@@ -230,11 +230,13 @@ void MQTTController::onMqttConnected(bool connected)
         _connectedSince = millis();
         _reconnectCount++;
 
+#if defined(MQQT_SUPPORT)
         // Publish to MessageBus
         if (_messageBus != nullptr)
         {
             _messageBus->publish<MqttConnected>();
         }
+#endif
     }
     else
     {
@@ -250,7 +252,9 @@ void MQTTController::onMqttConnected(bool connected)
         // Publish to MessageBus
         if (_messageBus != nullptr)
         {
+#if defined(MQTT_SUPPORT)
             _messageBus->publish<MqttDisconnected>();
+#endif
         }
     }
 }
@@ -261,7 +265,12 @@ void MQTTController::onMqttMessage(const char* topic, const char* payload, uint1
     // Publish to MessageBus for routing
     if (_messageBus != nullptr)
     {
+#if defined(MQTT_SUPPORT)
         _messageBus->publish<MqttMessageReceived>(topic, payload);
+#else
+        (void)topic;
+        (void)payload;
+#endif
     }
 }
 

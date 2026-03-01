@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Local.h"
 #include "BaseSensor.h"
 #include "MessageBus.h"
 #include "SensorCommandHandler.h"
@@ -134,6 +135,7 @@ public:
     }
 
 #if defined(FUSE_BOX_CONTROLLER)
+
     void formatStatusJson(char* buffer, size_t size) override
     {
         if (!buffer || size == 0 || !_remoteParamsStorage)

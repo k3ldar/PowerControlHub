@@ -1,8 +1,9 @@
 #pragma once
 
 #include <Arduino.h>
-#include "ConfigManager.h"
+
 #include "Local.h"
+#include "ConfigManager.h"
 #include "SystemFunctions.h"
 
 #if defined(FUSE_BOX_CONTROLLER)

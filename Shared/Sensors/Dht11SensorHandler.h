@@ -3,6 +3,7 @@
 
 #include <dht11.h>
 
+#include "Local.h"
 #include "SystemDefinitions.h"
 #include "WarningManager.h"
 #include "WarningType.h"

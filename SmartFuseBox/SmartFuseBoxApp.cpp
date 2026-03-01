@@ -1,4 +1,3 @@
-
 #include "SmartFuseBoxApp.h"
 
 #include "SystemCpuMonitor.h"
@@ -6,7 +5,7 @@
 #include "ConfigManager.h"
 
 #if defined(CARD_CONFIG_LOADER)
-SmartFuseBox* SmartFuseBoxApp::_instance = nullptr;
+SmartFuseBoxApp* SmartFuseBoxApp::_instance = nullptr;
 #endif
 
 constexpr uint8_t DefaultDelay = 5;
@@ -15,37 +14,54 @@ SmartFuseBoxApp::SmartFuseBoxApp(SerialCommandManager* commandMgrComputer,
     SerialCommandManager* commandMgrLink,
     const uint8_t* relayPins, uint8_t relayCount)
     : _commandMgrComputer(commandMgrComputer),
-      _commandMgrLink(commandMgrLink),
-      _messageBus(),
-      _relayController(&_messageBus, relayPins, relayCount),
-      _soundController(),
-      _broadcastManager(commandMgrComputer, commandMgrLink),
-      _warningManager(commandMgrLink, HeartbeatIntervalMs, HeartbeatTimeoutMs),
-      _relayHandler(commandMgrComputer, commandMgrLink, &_relayController),
-      _soundHandler(commandMgrComputer, commandMgrLink, &_soundController),
-      _interceptDebugHandler(&_broadcastManager),
-      _sensorCommandHandler(&_broadcastManager, &_warningManager),
-      _warningCommandHandler(&_broadcastManager, &_warningManager),
-      _ackHandler(&_broadcastManager, &_warningManager),
-      _systemCommandHandler(&_broadcastManager, &_warningManager),
+    _commandMgrLink(commandMgrLink),
+    _messageBus(),
+    _relayController(&_messageBus, relayPins, relayCount),
+    _soundController(),
+    _broadcastManager(commandMgrComputer, commandMgrLink),
+    _warningManager(commandMgrLink, HeartbeatIntervalMs, HeartbeatTimeoutMs),
+    _relayHandler(commandMgrComputer, commandMgrLink, &_relayController),
+    _soundHandler(commandMgrComputer, commandMgrLink, &_soundController),
+    _interceptDebugHandler(&_broadcastManager),
+    _sensorCommandHandler(&_broadcastManager, &_warningManager),
+    _warningCommandHandler(&_broadcastManager, &_warningManager),
+    _ackHandler(&_broadcastManager, &_warningManager),
+    _systemCommandHandler(&_broadcastManager, &_warningManager),
 
 #if defined(BLUETOOTH_SUPPORT)
     _bluetoothController(&_systemCommandHandler, &_sensorCommandHandler, &_relayController, &_warningManager, commandMgrComputer),
 #endif
 
     _wifiController(&_messageBus, commandMgrComputer, &_warningManager),
-      _configController(&_soundController, &_bluetoothController, &_wifiController, &_relayController),
-      _configSyncManager(commandMgrComputer, commandMgrLink, &_configController, &_warningManager),
-      _configHandler(&_wifiController, &_configController),
-      _configNetworkHandler(&_configController, &_wifiController),
-      _relayNetworkHandler(&_relayController),
-      _soundNetworkHandler(&_soundController),
-      _warningNetworkHandler(&_warningManager),
-      _systemNetworkHandler(&_wifiController),
-      _sdCardLogger(&_sensorCommandHandler, &_warningManager),
-      _sensorManager(nullptr),
-      _sensorController(nullptr),
-      _sensorNetworkHandler(nullptr)
+
+#if defined(WIFI_SUPPORT) && !defined(BLUETOOTH_SUPPORT)
+    _configController(&_soundController, &_wifiController, &_relayController),
+#elif !defined(WIFI_SUPPORT) && defined(BLUETOOTH_SUPPORT)
+    _configController(&_soundController, &_bluetoothController, &_relayController),
+#elif defined(WIFI_SUPPORT) && defined(BLUETHOOTH_SUPPORT)
+    _configController(&_soundController, &_bluetoothController, &_wifiController, &_relayController),
+#elif !defined(WIFI_SUPPORT) && !defined(BLUETOOTH_SUPPORT)
+    _configController(&_soundController, &_relayController),
+#endif
+    _configSyncManager(commandMgrComputer, commandMgrLink, &_configController, &_warningManager),
+    _configHandler(
+          &_wifiController, 
+          &_configController)
+
+      ,_configNetworkHandler(&_configController, &_wifiController)
+      ,_relayNetworkHandler(&_relayController)
+      ,_soundNetworkHandler(&_soundController)
+      ,_warningNetworkHandler(&_warningManager)
+      ,_systemNetworkHandler(&_wifiController)
+
+#if defined(SD_CARD_SUPPORT)
+      , _sdCardLogger(&_sensorCommandHandler, &_warningManager)
+#endif
+
+      , _sensorManager(nullptr)
+      , _sensorController(nullptr)
+
+      , _sensorNetworkHandler(nullptr)
 
 #if defined(MQTT_SUPPORT)
       , _mqttController(&_messageBus, ConfigManager::getConfigPtr(), commandMgrComputer)
@@ -56,7 +72,7 @@ SmartFuseBoxApp::SmartFuseBoxApp(SerialCommandManager* commandMgrComputer,
 	  , _nextRunMqttMs(0)
 #endif
 
-#if defined(ARDUINO_UNO_R4) && defined(LED_MANAGER)
+#if defined(LED_MANAGER)
       , _ledManager(&_messageBus)
 #endif
 
@@ -103,6 +119,7 @@ void SmartFuseBoxApp::setup(BaseSensorHandler** sensorHandlers, uint8_t sensorHa
 
     _sensorController = new SensorController(baseSensors, sensorHandlerCount);
     _sensorManager = new SensorManager(sensorHandlers, sensorHandlerCount);
+
     _sensorNetworkHandler = new SensorNetworkHandler(_sensorController);
 
     _relayController.setup();
@@ -156,8 +173,11 @@ void SmartFuseBoxApp::setup(BaseSensorHandler** sensorHandlers, uint8_t sensorHa
 
 #endif
 
+#if defined(SD_CARD_SUPPORT)
     _systemCommandHandler.setSdCardLogger(&_sdCardLogger);
     _systemNetworkHandler.setSdCardLogger(&_sdCardLogger);
+#endif
+
     _soundController.configUpdated(config);
     _relayHandler.configUpdated(config);
     _sensorManager->setup();
@@ -166,6 +186,7 @@ void SmartFuseBoxApp::setup(BaseSensorHandler** sensorHandlers, uint8_t sensorHa
     _systemCommandHandler.setMqttController(&_mqttController);
 #endif
 
+#if defined(SD_CARD_SUPPORT)
     MicroSdDriver& microSdDriver = MicroSdDriver::getInstance();
     microSdDriver.setWarningManager(&_warningManager);
 
@@ -178,8 +199,9 @@ void SmartFuseBoxApp::setup(BaseSensorHandler** sensorHandlers, uint8_t sensorHa
 
     // Initialize SD card logger
     _sdCardLogger.initialize();
+#endif
 
-#if defined(ARDUINO_UNO_R4) && defined(LED_MANAGER)
+#if defined(LED_MANAGER)
     _ledManager.Initialize();
 #endif
 
@@ -228,9 +250,11 @@ void SmartFuseBoxApp::loop()
     SystemCpuMonitor::endTask();
 #endif
 
+#if defined(WIFI_SUPPORT)
     SystemCpuMonitor::startTask();
     _wifiController.update(now);
     SystemCpuMonitor::endTask();
+#endif
 
     // MQTT update (non-blocking, processes 1 packet per call)
 #if defined(MQTT_SUPPORT)
@@ -258,6 +282,7 @@ void SmartFuseBoxApp::loop()
     _configSyncManager.update(now);
     SystemCpuMonitor::endTask();
 
+#if defined(SD_CARD_SUPPORT)
     SystemCpuMonitor::startTask();
     MicroSdDriver& microSdDriver = MicroSdDriver::getInstance();
     microSdDriver.update(now);
@@ -266,6 +291,7 @@ void SmartFuseBoxApp::loop()
     SystemCpuMonitor::startTask();
     _sdCardLogger.update(now);
     SystemCpuMonitor::endTask();
+#endif
 
     SystemCpuMonitor::update();
 

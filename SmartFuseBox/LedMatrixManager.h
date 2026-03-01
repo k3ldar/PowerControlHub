@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Local.h"
 #include "new_Arduino_LED_Matrix.h"
 #include "MessageBus.h"
 

@@ -1,6 +1,6 @@
 #pragma once
 
-
+#include "Local.h"
 #include "ConfigManager.h"
 #include "BluetoothController.h"
 #include "SoundController.h"

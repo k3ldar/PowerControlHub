@@ -1,9 +1,11 @@
+#include "Local.h"
 #include "WifiServer.h"
 #include "SystemFunctions.h"
 
 
 constexpr char response400[] = "\"error\":\"Bad Request\",\"message\":\"The request will not process due to client error\"";
 constexpr char response404[] = "\"error\":\"Not Found\",\"message\":\"The requested resource was not found\"";
+constexpr uint8_t RestartDelay = 100;
 
 WifiServer::WifiServer(MessageBus* messageBus, SerialCommandManager* commandMgrComputer, WarningManager* warningManager, uint16_t port,
 	INetworkCommandHandler** handlers, uint8_t handlerCount, NetworkJsonVisitor** jsonVisitors, uint8_t jsonVisitorCount, IWifiRadio* radio)
@@ -159,7 +161,7 @@ void WifiServer::stopServer()
 {
 	if (_serverActive)
 	{
-		_radio.end();
+		_radio->end();
 		_serverActive = false;
 		sendDebug(F("HTTP server stopped"), F("WifiServer"));
 	}
@@ -1046,14 +1048,21 @@ void WifiServer::updateClientConnection()
 				
 				// Ensure clean state before reconnection
 				_radio->disconnect();
-				delay(100);
+				_restartTime = now + RestartDelay;
+				_connectionState = WifiConnectionState::Restarting;
+			}
+			break;
+		}
+		case WifiConnectionState::Restarting:
+			if (now > _restartTime)
+			{
 				_radio->beginClient(_ssid, _password);
 				_connectionState = WifiConnectionState::Connecting;
 				_connectionStartTime = now;
 				_lastConnectionAttempt = now;
 			}
+
 			break;
-		}
 	}
 }
 

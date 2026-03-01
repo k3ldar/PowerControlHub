@@ -21,12 +21,23 @@ LedMatrixManager::LedMatrixManager(MessageBus* messageBus)
 		messageBus->subscribe<WarningChanged>([this](uint32_t mask) {
 			this->UpdateWarningIndicators(mask);
 		});
+
+#if defined(WIFI_SUPPORT)		
 		messageBus->subscribe<WifiConnectionStateChanged>([this](WifiConnectionState status) {
 			this->UpdateConnectedState(status);
 		});
 		messageBus->subscribe<WifiSignalStrengthChanged>([this](uint16_t strength) {
 			this->UpdateSignalStrength(strength);
 		});
+		messageBus->subscribe<WifiServerProcessingRequestChanged>([this](const char* method, const char* path, const char* query, bool isProcessing) {
+			(void)method;
+			(void)path;
+			(void)query;
+			this->_ledFrame[7][2] = isProcessing ? LedOn : LedOff;
+			this->updateLed();
+		});
+#endif
+
 		messageBus->subscribe<RelayStatusChanged>([this](uint8_t status) {
 			this->setRelayStatus(status);
 		});
@@ -35,13 +46,6 @@ LedMatrixManager::LedMatrixManager(MessageBus* messageBus)
 		});
 		messageBus->subscribe<HumidityUpdated>([this](float newHumidity) {
 			this->SetHumidity(newHumidity);
-		});
-		messageBus->subscribe<WifiServerProcessingRequestChanged>([this](const char* method, const char* path, const char* query, bool isProcessing) {
-			(void)method;
-			(void)path;
-			(void)query;
-			this->_ledFrame[7][2] = isProcessing ? LedOn : LedOff;
-			this->updateLed();
 		});
 	}
 }

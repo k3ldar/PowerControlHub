@@ -2,6 +2,7 @@
 
 #include <SensorManager.h>
 #include "LoggingSupport.h"
+#include "Local.h"
 
 #if defined(FUSE_BOX_CONTROLLER)
 #include "JsonVisitor.h"

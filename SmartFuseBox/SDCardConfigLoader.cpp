@@ -1,3 +1,4 @@
+#include "Local.h"
 #include "SDCardConfigLoader.h"
 #include "ConfigManager.h"
 #include <string.h>
@@ -155,12 +156,13 @@ bool SdCardConfigLoader::applyConfigCommand(const char* line)
         uint16_t delay = atoi(params[0].value);
         result = _configController->setsoundDelayStart(delay);
     }
-#if defined(ARDUINO_UNO_R4)
+#if defined(BLUETOOTH_SUPPORT)
     else if (strcmp(command, "C10") == 0 && paramCount >= 1)
     {
         bool enabled = (atoi(params[0].value) != 0);
         result = _configController->setBluetoothEnabled(enabled);
     }
+#endif
     else if (strcmp(command, "C11") == 0 && paramCount >= 1)
     {
         bool enabled = (atoi(params[0].value) != 0);
@@ -207,7 +209,6 @@ bool SdCardConfigLoader::applyConfigCommand(const char* line)
             result = _configController->setWifiIpAddress(ip);
         }
     }
-#endif
     else if (strcmp(command, "C18") == 0 && paramCount >= 1)
     {
         uint8_t relay = static_cast<uint8_t>(atoi(params[0].key));
@@ -597,7 +598,6 @@ bool SdCardConfigLoader::exportConfigToSd()
     configFile->print("C9:v=");
     configFile->println(config->soundStartDelayMs);
 
-#if defined(ARDUINO_UNO_R4)
     // C10 - Bluetooth enabled
     configFile->print("C10:v=");
     configFile->println(config->bluetoothEnabled ? "1" : "0");
@@ -625,7 +625,6 @@ bool SdCardConfigLoader::exportConfigToSd()
     // C17 - WiFi AP IP
     configFile->print("C17:");
     configFile->println(config->apIpAddress);
-#endif
 
     // C18 - Default relay states
     for (uint8_t i = 0; i < ConfigRelayCount; i++)

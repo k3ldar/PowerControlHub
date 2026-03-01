@@ -1,4 +1,6 @@
 #include "Local.h"
+
+#if defined(MQTT_SUPPORT)
 #include "MQTTSystemHandler.h"
 #include "ConfigManager.h"
 #include "DateTimeManager.h"
@@ -195,3 +197,4 @@ void MQTTSystemHandler::handleTimeUpdate(const char* payload)
         _commandMgr->sendDebug(buf, F("MQTT System"));
     }
 }
+#endif

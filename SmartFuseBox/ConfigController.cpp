@@ -2,7 +2,7 @@
 #include "SystemDefinitions.h"
 #include "RelayController.h"
 
-#if defined(ARDUINO_UNO_R4)
+#if defined(FUSE_BOX_CONTROLLER)
 // from NextionIds.h
 constexpr uint8_t ImageButtonColorBlue = 2;
 constexpr uint8_t ImageButtonColorYellow = 7;
@@ -10,17 +10,22 @@ constexpr uint8_t ImageButtonColorYellow = 7;
 #endif
 
 
-ConfigController::ConfigController(SoundController* soundController,
+ConfigController::ConfigController(SoundController* soundController, 
 #if defined(BLUETOOTH_SUPPORT)
-	BluetoothController* bluetoothController, 
+	BluetoothController* bluetoothController,
 #endif
 	WifiController* wifiController,
 	RelayController* relayController)
 	: _soundController(soundController),
-	  _bluetoothController(bluetoothController),
-	  _wifiController(wifiController),
-	  _relayController(relayController),
-	  _config(nullptr)
+#if defined(BLUETOOTH_SUPPORT)
+	_bluetoothController(bluetoothController),
+#else
+	_bluetoothController(nullptr),
+#endif
+
+	_wifiController(wifiController),
+	_relayController(relayController),
+	_config(nullptr)
 {
 	_config = ConfigManager::getConfigPtr();
 }

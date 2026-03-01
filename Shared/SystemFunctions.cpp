@@ -1,6 +1,6 @@
+#include "Local.h"
 #include "SystemFunctions.h"
 #include "SystemDefinitions.h"
-#include "Local.h"
 
 #if defined(ESP32)
 #include "esp_timer.h"

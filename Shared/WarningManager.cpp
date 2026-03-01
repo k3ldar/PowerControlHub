@@ -1,6 +1,6 @@
 #include "WarningManager.h"
+
 #if defined(BOAT_CONTROL_PANEL)
-#include "Local.h"
 #include "ToneManager.h"
 #include "DateTimeManager.h"
 #endif

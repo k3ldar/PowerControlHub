@@ -1,14 +1,23 @@
 #pragma once
 
+#include "Local.h"
 #include "BaseSensor.h"
 #include "MessageBus.h"
+
 #include "WifiController.h"
+
+#if defined(BLUETOOTH_SUPPORT)
 #include "BluetoothController.h"
+#endif
+
 #include "WarningManager.h"
 #include "SystemFunctions.h"
 #include "SystemCpuMonitor.h"
 #include "SystemDefinitions.h"
+
+#if defined(SD_CARD_SUPPORT)
 #include "SdCardLogger.h"
+#endif
 
 constexpr unsigned long SystemSensorUpdateIntervalMs = 2500;
 
@@ -25,10 +34,18 @@ class SystemSensorHandler : public BaseSensor
 {
 private:
 	MessageBus* _messageBus;
+
 	WifiController* _wifiController;
+
+#if defined(BLUETOOTH_SUPPORT)
 	BluetoothController* _bluetoothController;
+#endif
+
 	WarningManager* _warningManager;
+
+#if defined(SD_CARD_SUPPORT)
 	SdCardLogger* _sdCardLogger;
+#endif
 
 	static uint8_t countActiveWarnings(uint32_t mask)
 	{
@@ -50,19 +67,33 @@ protected:
 	}
 
 public:
-	SystemSensorHandler(MessageBus* messageBus, WifiController* wifiController,
-		BluetoothController* bluetoothController, WarningManager* warningManager)
+	SystemSensorHandler(MessageBus* messageBus, 
+		WifiController* wifiController,
+
+#if defined(BLUETOOTH_SUPPORT)
+		BluetoothController* bluetoothController,
+#endif
+		WarningManager* warningManager)
 		: _messageBus(messageBus),
 		_wifiController(wifiController),
+
+#if defined(BLUETOOTH_SUPPORT)
 		_bluetoothController(bluetoothController),
-		_warningManager(warningManager),
-		_sdCardLogger(nullptr)
+#endif
+
+		_warningManager(warningManager)
+
+#if defined(SD_CARD_SUPPORT)
+		, _sdCardLogger(nullptr)
+#endif
 	{}
 
+#if defined(SD_CARD_SUPPORT)
 	void setSdCardLogger(SdCardLogger* sdCardLogger)
 	{
 		_sdCardLogger = sdCardLogger;
 	}
+#endif
 
 	void formatStatusJson(char* buffer, size_t size) override
 	{
@@ -90,6 +121,7 @@ public:
 		return "system";
 	}
 
+#if defined(MQTT_SUPPORT)
 	uint8_t getMqttChannelCount() const override
 	{
 		return 7;
@@ -123,8 +155,10 @@ public:
 				break;
 
 			case 2:
+#if defined(BLUETOOTH_SUPPORT)
 				snprintf(buffer, size, "%s",
 					(_bluetoothController && _bluetoothController->isEnabled()) ? "ON" : "OFF");
+#endif
 				break;
 
 			case 3:
@@ -157,4 +191,5 @@ public:
 				break;
 		}
 	}
+#endif
 };

@@ -1,3 +1,4 @@
+#include <Arduino.h>
 #include "ConfigCommandHandler.h"
 #include "ConfigSyncManager.h"
 #include "SdCardConfigLoader.h"
@@ -6,14 +7,16 @@
 #include "MQTTConfigCommandHandler.h"
 #endif
 
-#if defined(ARDUINO_UNO_R4)
+#if defined(BLUETOOTH_SUPPORT)
 #include "BluetoothController.h"
-#include <Arduino.h>
 #endif
 
 
-ConfigCommandHandler::ConfigCommandHandler(WifiController* wifiController, ConfigController* configController)
-	: _wifiController(wifiController),
+ConfigCommandHandler::ConfigCommandHandler(
+    WifiController* wifiController, 
+    ConfigController* configController)
+	:
+    _wifiController(wifiController),
 	  _configController(configController),
 	  _configSyncManager(nullptr),
 	  _sdCardConfigLoader(nullptr)
@@ -106,7 +109,7 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
         snprintf(buffer, sizeof(buffer), "v=%d", static_cast<uint8_t>(config->soundStartDelayMs));
         sender->sendCommand(ConfigSoundStartDelay, buffer);
 
-#if defined(ARDUINO_UNO_R4)
+#if defined(BLUETOOTH_SUPPORT)
 		// C10 Bluetooth enable
         snprintf(buffer, sizeof(buffer), "v=%s", (config->bluetoothEnabled ? "1" : "0"));
         sender->sendCommand(ConfigBluetoothEnable, buffer);
@@ -340,7 +343,7 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
             result = ConfigResult::InvalidParameter;
         }
     }
-#if defined(ARDUINO_UNO_R4)
+#if defined(BLUETOOTH_SUPPORT)
 	else if (strcmp(command, ConfigBluetoothEnable) == 0)
     {
         // Expect "C10:v=<0|1>"
@@ -909,10 +912,10 @@ const char* const* ConfigCommandHandler::supportedCommands(size_t& count) const
         ConfigSaveSettings, ConfigGetSettings, ConfigResetSettings, 
         ConfigRename, ConfigRenameRelay, ConfigMapHomeButton, ConfigSetButtonColor,
         ConfigBoatType, ConfigSoundRelayId, ConfigSoundStartDelay,
-#if defined(ARDUINO_UNO_R4)
+#if defined(BLUETOOTH_SUPPORT)
         ConfigBluetoothEnable, ConfigWifiEnable, ConfigWifiMode, ConfigWifiSSID, 
-        ConfigWifiPassword, ConfigWifiPort, ConfigWifiState, ConfigWifiApIpAddress,
 #endif
+        ConfigWifiPassword, ConfigWifiPort, ConfigWifiState, ConfigWifiApIpAddress,
 #if defined(MQTT_SUPPORT)
         MqttConfigEnable, MqttConfigBroker, MqttConfigPort, MqttConfigUsername,
         MqttConfigPassword, MqttConfigDeviceId, MqttConfigHADiscovery, MqttConfigKeepAlive,

@@ -1,5 +1,6 @@
 #include <EEPROM.h>
 
+#include "Local.h"
 #include "ConfigManager.h"
 #include "SystemFunctions.h"
 
@@ -133,8 +134,8 @@ void ConfigManager::resetToDefaults()
 	strncpy(_cfg.homePort, "Unknown", ConfigHomePortLength - 1);
 	_cfg.timezoneOffset = 0; // UTC
 
-#if defined(ARDUINO_UNO_R4)
-	_cfg.bluetoothEnabled = false;
+    _cfg.bluetoothEnabled = false;
+
 	_cfg.wifiEnabled = true;
 	_cfg.accessMode = AccessModeAP; // 0 = AP, 1 = Client
 	strncpy(_cfg.apSSID, "SmartFuseBox", sizeof(_cfg.apSSID) - 1);
@@ -144,6 +145,9 @@ void ConfigManager::resetToDefaults()
 	_cfg.wifiPort = DefaultWifiPort;
 	strncpy(_cfg.apIpAddress, DefaultApIpAddress, sizeof(_cfg.apIpAddress) - 1);
 	_cfg.apIpAddress[sizeof(_cfg.apIpAddress) - 1] = '\0';
+
+#if defined(WIFI_SUPPORT)
+    _cfg.wifiEnabled = false;
 #endif
 
 #if defined(MQTT_SUPPORT)
@@ -160,6 +164,8 @@ void ConfigManager::resetToDefaults()
 	_cfg.mqtt.keepAliveInterval = ConfigMqttKeepAliveDefault;
 	strncpy(_cfg.mqtt.discoveryPrefix, "homeassistant", ConfigMqttDiscoveryPrefixLength - 1);
 	_cfg.mqtt.discoveryPrefix[ConfigMqttDiscoveryPrefixLength - 1] = '\0';
+#else
+    _cfg.mqtt.enabled = false;
 #endif
 
     _cfg.sdCardInitializeSpeed = 4;

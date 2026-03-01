@@ -1,5 +1,6 @@
-// SmartFuseBox.h
 #pragma once
+
+#include "Local.h"
 
 #include <SerialCommandManager.h>
 #include <SensorManager.h>
@@ -27,7 +28,6 @@
 #include "ConfigController.h"
 #include "ConfigSyncManager.h"
 #include "SensorController.h"
-
 #include "ConfigNetworkHandler.h"
 #include "RelayNetworkHandler.h"
 #include "SoundNetworkHandler.h"
@@ -35,8 +35,11 @@
 #include "SensorNetworkHandler.h"
 #include "WarningNetworkHandler.h"
 
+#if defined(SD_CARD_SUPPORT)
 #include "SdCardLogger.h"
 #include "MicroSdDriver.h"
+#include "SDCardConfigLoader.h"
+#endif
 
 #if defined(MQTT_SUPPORT)
 #include "MQTTController.h"
@@ -46,12 +49,8 @@
 #include "MQTTSystemHandler.h"
 #endif
 
-#if defined(ARDUINO_UNO_R4) && defined(LED_MANAGER)
+#if defined(LED_MANAGER)
 #include "LedMatrixManager.h"
-#endif
-
-#if defined(CARD_CONFIG_LOADER)
-#include "SDCardConfigLoader.h"
 #endif
 
 #include "BaseSensor.h"
@@ -92,10 +91,13 @@ private:
     WarningNetworkHandler _warningNetworkHandler;
     SystemNetworkHandler _systemNetworkHandler;
 
+#if defined(SD_CARD_SUPPORT)
     SdCardLogger _sdCardLogger;
+#endif
 
     SensorManager* _sensorManager;
     SensorController* _sensorController;
+
     SensorNetworkHandler* _sensorNetworkHandler;
 
 #if defined(MQTT_SUPPORT)
@@ -107,13 +109,13 @@ private:
     unsigned long _nextRunMqttMs;
 #endif
 
-#if defined(ARDUINO_UNO_R4) && defined(LED_MANAGER)
+#if defined(LED_MANAGER)
     LedMatrixManager _ledManager;
 #endif
 
 #if defined(CARD_CONFIG_LOADER)
     SdCardConfigLoader _sdCardConfigLoader;
-    static SmartFuseBox* _instance;
+    static SmartFuseBoxApp* _instance;
     static void onSdCardReadyCallback(bool isNewCard);
 #endif
 
@@ -136,12 +138,15 @@ public:
     BroadcastManager* broadcastManager() { return &_broadcastManager; }
     WarningManager* warningManager() { return &_warningManager; }
     SensorCommandHandler* sensorCommandHandler() { return &_sensorCommandHandler; }
+
     WifiController* wifiController() { return &_wifiController; }
 
 #if defined(BLUETOOTH_SUPPORT)
     BluetoothController* bluetoothController() { return &_bluetoothController; }
 #endif
 
+#if defined(SD_CARD_SUPPORT)
     SdCardLogger* sdCardLogger() { return &_sdCardLogger; }
+#endif
 };
 

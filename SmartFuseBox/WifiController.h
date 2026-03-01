@@ -3,6 +3,7 @@
 #include <Arduino.h>
 #include <SerialCommandManager.h>
 
+#include "Local.h"
 #include "INetworkCommandHandler.h"
 #include "WifiServer.h"
 #include "WifiRadioBridge.h"

@@ -1,6 +1,6 @@
 #pragma once
 
-
+#include "Local.h"
 #include "Queue.h"
 #include "SmartFuseBoxConstants.h"
 #include "WarningType.h"

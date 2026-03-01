@@ -13,6 +13,14 @@ constexpr uint8_t MaximumPathLength = 128;
 constexpr uint8_t MaxConcurrentClients = 2;
 constexpr uint8_t MaxPersistentClients = 1;
 
+static constexpr unsigned long ConnectionRetryIntervalMs = 10000;
+static constexpr unsigned long ConnectionTimeoutMs = 10000;
+static constexpr unsigned long ConnectionCheckIntervalMs = 500;
+static constexpr unsigned long ClientReadTimeoutMs = 2500;
+static constexpr unsigned long RSSICheckIntervalMs = 5000;
+static constexpr unsigned long BackoffIntervalMs = 60000;
+static constexpr uint8_t MaxConsecutiveFailures = 3;
+
 class WifiServer : public SingleLoggerSupport
 {
 private:
@@ -24,12 +32,6 @@ private:
 	uint16_t _port;
 	bool _initialized;
 	WarningManager* _warningManager;
-	
-	// AP mode settings
-	char _ssid[MaxSSIDLength];
-	char _password[MaxWiFiPasswordLength];
-	char _ipAddress[MaxIpAddressLength];
-
 
 	// Network command handlers
 	INetworkCommandHandler** _handlers;
@@ -44,15 +46,15 @@ private:
 	unsigned long _connectionStartTime;
 	uint8_t _consecutiveFailures;
 	int8_t _lastRSSI;
-	IWifiRadio* _radio;
-	static constexpr unsigned long ConnectionRetryIntervalMs = 10000;
-	static constexpr unsigned long ConnectionTimeoutMs = 10000;
-	static constexpr unsigned long ConnectionCheckIntervalMs = 500;
-	static constexpr unsigned long ClientReadTimeoutMs = 2500;
-	static constexpr unsigned long RSSICheckIntervalMs = 5000;
-	static constexpr unsigned long BackoffIntervalMs = 60000;
-	static constexpr uint8_t MaxConsecutiveFailures = 3;
 	unsigned long _lastRSSICheck;
+	IWifiRadio* _radio;
+	unsigned long _restartTime;
+	// AP mode settings
+	char _ssid[MaxSSIDLength];
+	char _password[MaxWiFiPasswordLength];
+	char _ipAddress[MaxIpAddressLength];
+
+
 	static constexpr unsigned long PersistentTimeoutMs = 30000;
 
 	struct ActiveClient

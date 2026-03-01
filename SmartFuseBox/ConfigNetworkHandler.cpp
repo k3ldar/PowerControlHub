@@ -1,3 +1,4 @@
+#include "Local.h"
 #include "ConfigNetworkHandler.h"
 #include "ConfigManager.h"
 #include "DateTimeManager.h"
@@ -18,6 +19,7 @@ CommandResult ConfigNetworkHandler::handleRequest(const char* method,
 {
 	(void)method;
 	(void)bufferSize;
+	(void)responseBuffer;
 	ConfigResult result;
 	if (strcmp(command, ConfigSaveSettings) == 0)
 	{
@@ -120,7 +122,7 @@ CommandResult ConfigNetworkHandler::handleRequest(const char* method,
             result = ConfigResult::InvalidParameter;
         }
     }
-#if defined(ARDUINO_UNO_R4)
+#if defined(BLUETOOTH_SUPPORT)
     else if (strcmp(command, ConfigBluetoothEnable) == 0)
     {
         // Expect "C10:v=<0|1>"
@@ -510,11 +512,13 @@ void ConfigNetworkHandler::formatStatusJson(WiFiClient* client)
 	client->print(static_cast<uint16_t>(config->soundStartDelayMs));
 	client->print(",");
 
-#if defined(ARDUINO_UNO_R4)
+#if defined(BLUETOOTH_SUPPORT)
+
 	// Bluetooth, WiFi, SSID, Password, Port, AccessMode
 	client->print("\"bluetoothEnabled\":");
 	client->print(config->bluetoothEnabled ? "true" : "false");
 	client->print(",");
+#endif
 
 	client->print("\"wifiEnabled\":");
 	client->print(config->wifiEnabled ? "true" : "false");
@@ -555,7 +559,6 @@ void ConfigNetworkHandler::formatStatusJson(WiFiClient* client)
 		client->print(config->apIpAddress);
 	}
 	client->print("\",");
-#endif
 
 	// Default relay states
 	client->print("\"defaultRelayStates\":[");
