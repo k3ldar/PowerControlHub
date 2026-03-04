@@ -2,6 +2,10 @@
 // 
 // 
 
+#include "Local.h"
+
+#if defined(SD_CARD_SUPPORT)
+
 #include "MicroSdDriver.h"
 #include "WarningManager.h"
 #include <SPI.h>
@@ -534,3 +538,4 @@ void MicroSdDriver::checkFreeSpaceWarning()
     }
 }
 
+#endif

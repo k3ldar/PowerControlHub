@@ -2,7 +2,11 @@
 #include "ConfigCommandHandler.h"
 #include "ConfigController.h"
 #include "ConfigSyncManager.h"
+#include "SystemFunctions.h"
+
+#if defined(SD_CARD_SUPPORT)
 #include "SdCardConfigLoader.h"
+#endif
 
 #if defined(MQTT_SUPPORT)
 #include "MQTTConfigCommandHandler.h"
@@ -10,13 +14,15 @@
 
 
 ConfigCommandHandler::ConfigCommandHandler(
-    IWifiController* wifiController, 
-    ConfigController* configController)
+	IWifiController* wifiController, 
+	ConfigController* configController)
 	:
-    _wifiController(wifiController),
+	_wifiController(wifiController),
 	  _configController(configController),
-	  _configSyncManager(nullptr),
-	  _sdCardConfigLoader(nullptr)
+	  _configSyncManager(nullptr)
+#if defined(SD_CARD_SUPPORT)
+	, _sdCardConfigLoader(nullptr)
+#endif
 #if defined(MQTT_SUPPORT)
 	  , _mqttConfigHandler(nullptr)
 	  , _mqttController(nullptr)
@@ -658,7 +664,7 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
     }
     else if (strcmp(command, ConfigReloadFromSd) == 0)
     {
-        // C29 - Reload config from SD card
+#if defined(SD_CARD_SUPPORT)
         if (_sdCardConfigLoader)
         {
             if (_sdCardConfigLoader->reloadConfigFromSd())
@@ -676,10 +682,14 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
             sendAckErr(sender, command, F("SD config loader not available"));
             return true;
         }
-        }
+#else
+        sendAckErr(sender, command, F("SD card not supported"));
+        return true;
+#endif
+    }
     else if (strcmp(command, ConfigExportToSd) == 0)
     {
-        // C30 - Export current config to SD card
+#if defined(SD_CARD_SUPPORT)
         if (_sdCardConfigLoader)
         {
             if (_sdCardConfigLoader->exportConfigToSd())
@@ -697,11 +707,14 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
             sendAckErr(sender, command, F("SD config loader not available"));
             return true;
         }
+#else
+        sendAckErr(sender, command, F("SD card not supported"));
+        return true;
+#endif
     }
     else if (strcmp(command, ConfigSdCardSpeed) == 0)
     {
-        // C31 - Set SD card initialize speed
-        // Format: C31:v=4 (or 8, 12, 16, 20, 24)
+#if defined(SD_CARD_SUPPORT)
         if (paramCount >= 1)
         {
             uint8_t speedMhz = static_cast<uint8_t>(atoi(params[0].value));
@@ -711,6 +724,10 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
         {
             result = ConfigResult::InvalidParameter;
         }
+#else
+        sendAckErr(sender, command, F("SD card not supported"));
+        return true;
+#endif
     }
 #if defined(MQTT_SUPPORT)
     else if (command[0] == 'M' && strlen(command) >= 2)
@@ -894,10 +911,12 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
     return true;
 }
 
+#if defined(SD_CARD_SUPPORT)
 void ConfigCommandHandler::setSdCardConfigLoader(SdCardConfigLoader* sdCardConfigLoader)
 {
     _sdCardConfigLoader = sdCardConfigLoader;
 }
+#endif
 
 const char* const* ConfigCommandHandler::supportedCommands(size_t& count) const
 {
@@ -915,7 +934,10 @@ const char* const* ConfigCommandHandler::supportedCommands(size_t& count) const
         ConfigDefaultRelayState, ConfigLinkRelays,
         ConfigTimeZoneOffset, ConfigMmsi, ConfigCallSign, ConfigHomePort,
         ConfigLedColor, ConfigLedBrightness, ConfigLedAutoSwitch, ConfigLedEnable,
-        ControlPanelTones, ConfigReloadFromSd, ConfigExportToSd, ConfigSdCardSpeed
+        ControlPanelTones,
+#if defined(SD_CARD_SUPPORT)
+        ConfigReloadFromSd, ConfigExportToSd, ConfigSdCardSpeed
+#endif
     };
     count = sizeof(cmds) / sizeof(cmds[0]);
     return cmds;

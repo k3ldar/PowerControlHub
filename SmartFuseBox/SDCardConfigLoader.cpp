@@ -1,4 +1,7 @@
 #include "Local.h"
+
+#if defined(SD_CARD_SUPPORT)
+
 #include "SDCardConfigLoader.h"
 #include "ConfigManager.h"
 #include <string.h>
@@ -754,3 +757,5 @@ void SdCardConfigLoader::onSdCardReady(bool isNewCard)
         }
     }
 }
+
+#endif

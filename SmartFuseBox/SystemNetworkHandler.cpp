@@ -5,15 +5,17 @@
 #include "DateTimeManager.h"
 #include "SystemFunctions.h"
 
-#if defined(FUSE_BOX_CONTROLLER)
+#if defined(SD_CARD_SUPPORT)
 #include "MicroSdDriver.h"
 #endif
 
 constexpr uint8_t UptimeBufferLength = 15;
 
 SystemNetworkHandler::SystemNetworkHandler(WifiController* wifiController)
-	: _wifiController(wifiController),
-      _sdCardLogger(nullptr)
+	: _wifiController(wifiController)
+#if defined(SD_CARD_SUPPORT)
+	, _sdCardLogger(nullptr)
+#endif
 {
 }
 
@@ -64,12 +66,14 @@ void SystemNetworkHandler::formatStatusJson(char* buffer, size_t size)
 	bool sdPresent = false;
 	uint32_t logSize = 0;
 
+#if defined(SD_CARD_SUPPORT)
 	if (_sdCardLogger)
 	{
 		MicroSdDriver& sdDriver = MicroSdDriver::getInstance();
 		sdPresent = sdDriver.isCardPresent();
 		logSize = _sdCardLogger->getCurrentLogFileSize();
 	}
+#endif
 
 	char uptime[UptimeBufferLength];
 	TimeParts timeParts = SystemFunctions::msToTimeParts(SystemFunctions::millis64());

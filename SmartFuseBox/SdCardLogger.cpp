@@ -1,3 +1,7 @@
+#include "Local.h"
+
+#if defined(SD_CARD_SUPPORT)
+
 #include "SdCardLogger.h"
 #include "DateTimeManager.h"
 #include "SmartFuseBoxConstants.h"
@@ -468,3 +472,4 @@ void SdCardLogger::releaseSDCard()
     // Close the current file (already done by flush, but ensure it)
     closeCurrentFile();
 }
+#endif

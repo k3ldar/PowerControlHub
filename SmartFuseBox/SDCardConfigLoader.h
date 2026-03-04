@@ -1,5 +1,9 @@
 #pragma once
 
+#include "Local.h"
+
+#if defined(SD_CARD_SUPPORT)
+
 #include <Arduino.h>
 #include <SerialCommandManager.h>
 #include "ConfigController.h"
@@ -141,3 +145,5 @@ public:
      */
     void onSdCardReady(bool isNewCard);
 };
+
+#endif

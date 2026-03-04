@@ -1,5 +1,9 @@
 #pragma once
 
+#include "Local.h"
+
+#if defined(SD_CARD_SUPPORT)
+
 #include <Arduino.h>
 #include <SdFat.h>
 #include <stdint.h>
@@ -183,3 +187,5 @@ public:
      */
     void releaseSDCard();
 };
+
+#endif
