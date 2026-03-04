@@ -8,10 +8,11 @@
 // Static instance pointer for callbacks
 MQTTController* MQTTController::_instance = nullptr;
 
-MQTTController::MQTTController(MessageBus* messageBus, Config* config, SerialCommandManager* commandMgr)
+MQTTController::MQTTController(MessageBus* messageBus, Config* config, IWifiRadio* wifiRadio, SerialCommandManager* commandMgr)
     : _mqttClient(nullptr)
     , _messageBus(messageBus)
     , _config(config)
+    , _wifiRadio(wifiRadio)
     , _retryCount(0)
     , _lastRetryTime(0)
     , _isEnabled(false)
@@ -49,7 +50,7 @@ bool MQTTController::begin()
     // Create MQTT client
     if (_mqttClient == nullptr)
     {
-        _mqttClient = new MQTTClient();
+        _mqttClient = new MQTTClient(_wifiRadio);
     }
 
     // Configure client from config

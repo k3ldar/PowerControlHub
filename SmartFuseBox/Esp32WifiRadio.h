@@ -108,6 +108,11 @@ public:
         }
         return nullptr;
     }
+
+    IWifiClient* createClient() override
+    {
+        return new Esp32WifiClient();
+    }
 };
 
 #endif

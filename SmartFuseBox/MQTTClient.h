@@ -1,18 +1,18 @@
 #pragma once
 
 #include <Arduino.h>
-#include <WiFiS3.h>
-
-#include "Local.h"
+#include "IWifiClient.h"
 #include "MQTTDefinitions.h"
 
-// Forward declaration
+// Forward declarations
 class SerialCommandManager;
+class IWifiRadio;
 
 class MQTTClient
 {
 private:
-    WiFiClient* _wifiClient;
+    IWifiClient* _wifiClient;
+    IWifiRadio* _wifiRadio;
     MqttConnectionState _state;
     MqttError _lastError;
     
@@ -86,8 +86,9 @@ private:
     void raiseEvent(MqttEvent event, uint8_t errorCode = 0);
 
 public:
-    MQTTClient();
-    
+    explicit MQTTClient(IWifiRadio* wifiRadio = nullptr);
+    ~MQTTClient();
+
     // Configuration
     void setBroker(const char* broker, uint16_t port);
     void setCredentials(const char* username, const char* password);

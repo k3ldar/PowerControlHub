@@ -45,7 +45,14 @@ public:
     void flush() override
     {
     }
-    
+
+    int connect(const char* host, uint16_t port) override
+    {
+        (void)host;
+        (void)port;
+        return 0;
+    }
+
     size_t print(const char* str) override
     {
         (void)str;

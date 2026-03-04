@@ -30,4 +30,5 @@ public:
     virtual void beginServer(uint16_t port) = 0;
     virtual void endServer() = 0;
     virtual IWifiClient* available() = 0;
+    virtual IWifiClient* createClient() = 0;
 };

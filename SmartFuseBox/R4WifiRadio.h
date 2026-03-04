@@ -106,6 +106,11 @@ public:
         }
         return nullptr;
     }
+
+    IWifiClient* createClient() override
+    {
+        return new R4WifiClient();
+    }
 };
 
 #endif

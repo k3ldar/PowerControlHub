@@ -2,6 +2,7 @@
 
 #include "MQTTClient.h"
 #include "MessageBus.h"
+#include "IWifiRadio.h"
 
 // Forward declarations
 struct Config;
@@ -13,6 +14,7 @@ private:
     MQTTClient* _mqttClient;
     MessageBus* _messageBus;
     Config* _config;
+    IWifiRadio* _wifiRadio;
     
     // Connection management
     uint8_t _retryCount;
@@ -39,7 +41,7 @@ private:
     static MQTTController* _instance;
 
 public:
-    MQTTController(MessageBus* messageBus, Config* config, SerialCommandManager* commandMgr = nullptr);
+    MQTTController(MessageBus* messageBus, Config* config, IWifiRadio* wifiRadio, SerialCommandManager* commandMgr = nullptr);
     ~MQTTController();
     
     // Lifecycle

@@ -60,7 +60,12 @@ public:
     {
         _client.flush();
     }
-    
+
+    int connect(const char* host, uint16_t port) override
+    {
+        return _client.connect(host, port);
+    }
+
     size_t print(const char* str) override
     {
         return _client.print(str);

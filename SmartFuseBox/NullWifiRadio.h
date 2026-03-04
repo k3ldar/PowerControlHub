@@ -72,4 +72,9 @@ public:
     {
         return nullptr;
     }
+
+    IWifiClient* createClient() override
+    {
+        return new NullWifiClient();
+    }
 };

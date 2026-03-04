@@ -103,6 +103,14 @@ constexpr uint8_t MqttPublishFlagQoS1 = 0x02;
 constexpr uint8_t MqttPublishFlagQoS2 = 0x04;
 constexpr uint8_t MqttPublishFlagDup = 0x08;
 
+// MQTT Subscribe/Unsubscribe Flags
+constexpr uint8_t MqttSubscribeFlags = 0x02;  // QoS 1 for SUBSCRIBE
+constexpr uint8_t MqttUnsubscribeFlags = 0x02;  // QoS 1 for UNSUBSCRIBE
+
+// MQTT Remaining Length Encoding
+constexpr uint8_t MqttLengthContinuationBit = 0x80;
+constexpr uint8_t MqttLengthValueMask = 0x7F;
+
 // MQTT Packet Identifier
 constexpr uint16_t MqttPacketIdMin = 1;
 constexpr uint16_t MqttPacketIdMax = 65535;

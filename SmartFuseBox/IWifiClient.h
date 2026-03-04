@@ -15,7 +15,9 @@ public:
     virtual size_t write(uint8_t b) = 0;
     virtual void stop() = 0;
     virtual void flush() = 0;
-    
+
+    virtual int connect(const char* host, uint16_t port) = 0;
+
     virtual size_t print(const char* str) = 0;
     virtual size_t print(const __FlashStringHelper* str) = 0;
     virtual size_t print(char c) = 0;

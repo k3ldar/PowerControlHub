@@ -220,6 +220,11 @@ public:
 		return _wifiServer;
 	}
 
+	IWifiRadio* getRadio()
+	{
+		return &_radio;
+	}
+
 	void registerJsonVisitors(NetworkJsonVisitor** jsonVisitors, uint8_t jsonVisitorCount) override
 	{
 		// owned by caller so no need to clean up

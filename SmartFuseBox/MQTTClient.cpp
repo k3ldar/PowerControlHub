@@ -1,10 +1,11 @@
-#include "Local.h"
 #include "MQTTClient.h"
+#include "IWifiRadio.h"
 #include <SerialCommandManager.h>
 #include <string.h>
 
-MQTTClient::MQTTClient()
+MQTTClient::MQTTClient(IWifiRadio* wifiRadio)
     : _wifiClient(nullptr)
+    , _wifiRadio(wifiRadio)
     , _state(MqttConnectionState::Disconnected)
     , _lastError(MqttError::None)
     , _port(1883)
@@ -28,6 +29,16 @@ MQTTClient::MQTTClient()
     _username[0] = '\0';
     _password[0] = '\0';
     resetBuffers();
+}
+
+MQTTClient::~MQTTClient()
+{
+    if (_wifiClient != nullptr)
+    {
+        _wifiClient->stop();
+        delete _wifiClient;
+        _wifiClient = nullptr;
+    }
 }
 
 void MQTTClient::setBroker(const char* broker, uint16_t port)
@@ -113,7 +124,17 @@ bool MQTTClient::connect()
     // Create WiFiClient if needed
     if (_wifiClient == nullptr)
     {
-        _wifiClient = new WiFiClient();
+        if (_wifiRadio == nullptr)
+        {
+            setError(MqttError::InvalidParameter);
+            return false;
+        }
+        _wifiClient = _wifiRadio->createClient();
+        if (_wifiClient == nullptr)
+        {
+            setError(MqttError::NetworkError);
+            return false;
+        }
     }
 
     // Attempt TCP connection
@@ -442,7 +463,7 @@ uint8_t MQTTClient::encodeRemainingLength(uint8_t* buffer, uint32_t length)
         length /= 128;
         if (length > 0)
         {
-            byte |= 0x80;
+            byte |= MqttLengthContinuationBit;
         }
         buffer[bytes++] = byte;
     } while (length > 0);
@@ -460,10 +481,10 @@ uint32_t MQTTClient::decodeRemainingLength(const uint8_t* buffer, uint8_t* bytes
     do
     {
         encodedByte = buffer[*bytes];
-        value += (encodedByte & 127) * multiplier;
+        value += (encodedByte & MqttLengthValueMask) * multiplier;
         multiplier *= 128;
         (*bytes)++;
-    } while ((encodedByte & 128) != 0);
+    } while ((encodedByte & MqttLengthContinuationBit) != 0);
     
     return value;
 }
@@ -528,7 +549,7 @@ bool MQTTClient::readPacket()
             _rxBuffer[_rxBufferPos++] = (uint8_t)byte;
 
             // Check if this is the last length byte (MSB clear)
-            if ((byte & 0x80) == 0)
+            if ((byte & MqttLengthContinuationBit) == 0)
             {
                 uint8_t lengthBytes;
                 _rxPacketLength = decodeRemainingLength(_rxBuffer + 1, &lengthBytes);
@@ -765,7 +786,7 @@ uint16_t MQTTClient::buildSubscribePacket(uint8_t* buffer, uint16_t bufferSize,
     uint16_t pos = 0;
     
     // Fixed header
-    buffer[pos++] = static_cast<uint8_t>(MqttPacketType::Subscribe) | 0x02; // QoS 1 for SUBSCRIBE
+    buffer[pos++] = static_cast<uint8_t>(MqttPacketType::Subscribe) | MqttSubscribeFlags;
     
     // Reserve space for remaining length
     uint16_t remainingLengthPos = pos;
@@ -816,7 +837,7 @@ uint16_t MQTTClient::buildUnsubscribePacket(uint8_t* buffer, uint16_t bufferSize
     uint16_t pos = 0;
 
     // Fixed header
-    buffer[pos++] = static_cast<uint8_t>(MqttPacketType::Unsubscribe) | 0x02; // QoS 1 for UNSUBSCRIBE
+    buffer[pos++] = static_cast<uint8_t>(MqttPacketType::Unsubscribe) | MqttUnsubscribeFlags;
 
     // Reserve space for remaining length
     uint16_t remainingLengthPos = pos;

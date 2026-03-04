@@ -50,7 +50,7 @@ SmartFuseBoxApp::SmartFuseBoxApp(SerialCommandManager* commandMgrComputer,
       , _sensorController(nullptr)
 
 #if defined(MQTT_SUPPORT)
-      , _mqttController(&_messageBus, ConfigManager::getConfigPtr(), commandMgrComputer)
+      , _mqttController(&_messageBus, ConfigManager::getConfigPtr(), _wifiController.getRadio(), commandMgrComputer)
       , _mqttConfigHandler(&_configController, &_mqttController, commandMgrComputer)
       , _mqttRelayHandler(&_mqttController, &_messageBus, &_relayController, commandMgrComputer)
       , _mqttSensorHandler(nullptr)
