@@ -230,7 +230,7 @@ void MQTTController::onMqttConnected(bool connected)
         _connectedSince = millis();
         _reconnectCount++;
 
-#if defined(MQQT_SUPPORT)
+#if defined(MQTT_SUPPORT)
         // Publish to MessageBus
         if (_messageBus != nullptr)
         {
