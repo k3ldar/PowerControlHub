@@ -935,9 +935,7 @@ const char* const* ConfigCommandHandler::supportedCommands(size_t& count) const
         ConfigTimeZoneOffset, ConfigMmsi, ConfigCallSign, ConfigHomePort,
         ConfigLedColor, ConfigLedBrightness, ConfigLedAutoSwitch, ConfigLedEnable,
         ControlPanelTones,
-#if defined(SD_CARD_SUPPORT)
         ConfigReloadFromSd, ConfigExportToSd, ConfigSdCardSpeed
-#endif
     };
     count = sizeof(cmds) / sizeof(cmds[0]);
     return cmds;

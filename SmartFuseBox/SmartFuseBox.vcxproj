@@ -86,7 +86,6 @@
     <ClCompile Include="MQTTHandler.cpp" />
     <ClCompile Include="SmartFuseBoxApp.cpp" />
     <ClCompile Include="ToneManager.cpp" />
-    <ClCompile Include="SensorCommandHandler.cpp" />
     <ClCompile Include="BluetoothManager.cpp" />
     <ClCompile Include="BluetoothRelayService.cpp" />
     <ClCompile Include="BluetoothSensorService.cpp" />
@@ -105,7 +104,6 @@
     <ClCompile Include="SystemCommandHandler.cpp" />
     <ClCompile Include="SystemNetworkHandler.cpp" />
     <ClCompile Include="WarningCommandHandler.cpp" />
-    <ClCompile Include="SensorCommandHandler.cpp" />
     <ClCompile Include="WarningManager.cpp" />
     <ClCompile Include="BroadcastManager.cpp" />
     <ClCompile Include="ConfigManager.cpp" />
@@ -165,7 +163,6 @@
     <ClInclude Include="NetworkJsonVisitor.h" />
     <ClInclude Include="new_Arduino_LED_Matrix.h" />
     <ClInclude Include="ConfigSyncManager.h" />
-    <ClInclude Include="Dht11SensorHandler.h" />
     <ClInclude Include="SystemDefinitions.h" />
     <ClInclude Include="DateTimeManager.h" />
     <ClInclude Include="INetworkCommandHandler.h" />
@@ -195,7 +192,6 @@
     <ClInclude Include="WarningNetworkHandler.h" />
     <ClInclude Include="WarningType.h" />
     <ClInclude Include="AckCommandHandler.h" />
-    <ClInclude Include="Dht11SensorHandler.h" />
     <ClInclude Include="Local.h" />
     <ClInclude Include="Config.h" />
     <ClInclude Include="SoundCommandHandler.h" />
