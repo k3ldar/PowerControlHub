@@ -2,7 +2,10 @@
 #include "SystemCpuMonitor.h"
 #include "ConfigManager.h"
 #include "DateTimeManager.h"
+#if defined(WIFI_SUPPORT)
 #include "WifiController.h"
+#endif
+
 
 SystemCommandHandler::SystemCommandHandler(BroadcastManager* broadcaster, WarningManager* warningManager)
     : SharedBaseCommandHandler(broadcaster, warningManager)
@@ -87,6 +90,7 @@ bool SystemCommandHandler::handleCommand(SerialCommandManager* sender, const cha
             sendAckOk(sender, command, &param);
         }
     }
+#if defined(WIFI_SUPPORT)
     else if (strcmp(command, SystemWifiStatus) == 0)
     {
         Config* config = ConfigManager::getConfigPtr();
@@ -121,6 +125,7 @@ bool SystemCommandHandler::handleCommand(SerialCommandManager* sender, const cha
             sendAckOk(sender, command, params, argCount);
         }
     }
+#endif
     else if (strcmp(command, SystemSetDateTime) == 0 && paramCount == 1)
     {
         bool success = false;
@@ -237,10 +242,12 @@ void SystemCommandHandler::setSdCardLogger(SdCardLogger* sdCardLogger)
 }
 #endif
 
+#if defined(WIFI_SUPPORT)
 void SystemCommandHandler::setWifiController(WifiController* wifiController)
 { 
     _wifiController = wifiController;
 }
+#endif
 
 #if defined(MQTT_SUPPORT)
 void SystemCommandHandler::setMqttController(MQTTController* mqttController)

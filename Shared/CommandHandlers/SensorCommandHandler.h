@@ -1,12 +1,11 @@
 #pragma once
 
 #include <Arduino.h>
-#include "ConfigManager.h"
 #include "SerialCommandManager.h"
 #include "Local.h"
-#include "RemoteSensor.h"
 
 #if defined(FUSE_BOX_CONTROLLER)
+#include "RemoteSensor.h"
 #include "SharedBaseCommandHandler.h"
 #endif
 
@@ -44,8 +43,10 @@ private:
 	const char* _gpsDirection;
 	double _gpsDistance = 0;
     bool _lastHornActive = false;
+#if defined(FUSE_BOX_CONTROLLER)
 	RemoteSensor** _remoteSensors;
 	size_t _remoteSensorCount;
+#endif
 
 public:
 #if defined(BOAT_CONTROL_PANEL)
@@ -57,7 +58,10 @@ public:
     bool handleCommand(SerialCommandManager* sender, const char* command, const StringKeyValue params[], uint8_t paramCount) override;
     const char* const* supportedCommands(size_t& count) const override;
 
+#if defined(FUSE_BOX_CONTROLLER)
 	void setup(RemoteSensor* remoteSensors[], size_t remoteSensorCount);
+#endif
+
 
 	// Getters
 	float getTemperature() const;

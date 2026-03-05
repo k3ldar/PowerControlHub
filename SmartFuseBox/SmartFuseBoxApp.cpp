@@ -5,6 +5,8 @@
 #include "ConfigManager.h"
 
 #if defined(CARD_CONFIG_LOADER)
+#include "SDCardConfigLoader.h"
+
 SmartFuseBoxApp* SmartFuseBoxApp::_instance = nullptr;
 #endif
 

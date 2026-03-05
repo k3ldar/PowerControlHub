@@ -138,6 +138,7 @@
     <ClInclude Include="RelaySettingsPage.h" />
     <ClInclude Include="RgbLedFade.h" />
     <ClInclude Include="RtcDS1302Driver.h" />
+    <ClInclude Include="ScreenDemoHandler.h" />
     <ClInclude Include="SettingsPage.h" />
     <ClInclude Include="SunCalculator.h" />
     <ClInclude Include="SystemDefinitions.h" />

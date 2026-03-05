@@ -21,7 +21,7 @@ SdCardConfigLoader::SdCardConfigLoader(SerialCommandManager* computerSerial,
 bool SdCardConfigLoader::checkSdCard()
 {
     MicroSdDriver& sdDriver = MicroSdDriver::getInstance();
-    return sdDriver.isReady();
+    return sdDriver.getInitState() == MicroSdInitState::Initialized && sdDriver.isCardPresent(false);
 }
 
 bool SdCardConfigLoader::configFileExists()
@@ -49,6 +49,11 @@ bool SdCardConfigLoader::applyConfigCommand(const char* line)
     {
         *end = '\0';
         end--;
+    }
+
+    if (buffer[0] == '\0')
+    {
+        return true;
     }
 
     // Parse command using SerialCommandManager's parser
@@ -174,41 +179,22 @@ bool SdCardConfigLoader::applyConfigCommand(const char* line)
         uint8_t mode = atoi(params[0].value);
         result = _configController->setWifiAccessMode(mode);
     }
-    else if (strcmp(command, "C13") == 0 && paramCount >= 1)
+    else if (strcmp(command, "C13") == 0 && colonPos != nullptr)
     {
-        // For C13, the entire string after : is the SSID (no v= prefix in file)
-        // We need to find original param value from line
-        const char* ssid = strchr(line, ':');
-        if (ssid)
-        {
-            ssid++; // Skip the colon
-            result = _configController->setWifiSsid(ssid);
-        }
+        result = _configController->setWifiSsid(colonPos + 1);
     }
-    else if (strcmp(command, "C14") == 0 && paramCount >= 1)
+    else if (strcmp(command, "C14") == 0 && colonPos != nullptr)
     {
-        // For C14, the entire string after : is the password
-        const char* password = strchr(line, ':');
-        if (password)
-        {
-            password++; // Skip the colon
-            result = _configController->setWifiPassword(password);
-        }
+        result = _configController->setWifiPassword(colonPos + 1);
     }
     else if (strcmp(command, "C15") == 0 && paramCount >= 1)
     {
         uint16_t port = atoi(params[0].value);
         result = _configController->setWifiPort(port);
     }
-    else if (strcmp(command, "C17") == 0 && paramCount >= 1)
+    else if (strcmp(command, "C17") == 0 && colonPos != nullptr)
     {
-        // For C17, the entire string after : is the IP address
-        const char* ip = strchr(line, ':');
-        if (ip)
-        {
-            ip++; // Skip the colon
-            result = _configController->setWifiIpAddress(ip);
-        }
+        result = _configController->setWifiIpAddress(colonPos + 1);
     }
     else if (strcmp(command, "C18") == 0 && paramCount >= 1)
     {
@@ -235,22 +221,15 @@ bool SdCardConfigLoader::applyConfigCommand(const char* line)
         int8_t offset = static_cast<int8_t>(atoi(params[0].value));
         result = _configController->setTimezoneOffset(offset);
     }
-    else if (strcmp(command, "C21") == 0 && paramCount >= 1)
+    else if (strcmp(command, "C21") == 0 && colonPos != nullptr)
     {
-        const char* mmsi = strchr(line, ':');
-        if (mmsi)
-        {
-            mmsi++; // Skip the colon
-            result = _configController->setMmsi(mmsi);
-        }
+        result = _configController->setMmsi(colonPos + 1);
     }
     else if (strcmp(command, "C22") == 0)
     {
-        const char* callSign = strchr(line, ':');
-        if (callSign && *(callSign + 1) != '\0')
+        if (colonPos != nullptr && *(colonPos + 1) != '\0')
         {
-            callSign++; // Skip the colon
-            result = _configController->setCallSign(callSign);
+            result = _configController->setCallSign(colonPos + 1);
         }
         else
         {
@@ -259,11 +238,9 @@ bool SdCardConfigLoader::applyConfigCommand(const char* line)
     }
     else if (strcmp(command, "C23") == 0)
     {
-        const char* homePort = strchr(line, ':');
-        if (homePort && *(homePort + 1) != '\0')
+        if (colonPos != nullptr && *(colonPos + 1) != '\0')
         {
-            homePort++; // Skip the colon
-            result = _configController->setHomePort(homePort);
+            result = _configController->setHomePort(colonPos + 1);
         }
         else
         {
@@ -408,15 +385,15 @@ bool SdCardConfigLoader::loadConfigFromSd()
 
     if (!checkSdCard())
     {
+        sdDriver.releaseExclusiveAccess();
         logInfo("SD card not present or not accessible");
-
         return false;
     }
 
     if (!configFileExists())
     {
+        sdDriver.releaseExclusiveAccess();
         logInfo("Config file not found on SD card");
-
         return false;
     }
 
@@ -529,7 +506,7 @@ bool SdCardConfigLoader::exportConfigToSd()
     }
 
     FsFile* configFile = sdDriver.openFile(MicroSdFileHandle::ConfigLoader,
-                                           SD_CONFIG_FILENAME, O_WRONLY | O_CREAT);
+                                           SD_CONFIG_FILENAME, O_WRONLY | O_CREAT | O_TRUNC);
     if (!configFile)
     {
         sdDriver.releaseExclusiveAccess();

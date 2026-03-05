@@ -1,3 +1,4 @@
+#include "ScreenDemoHandler.h"
 #include "Local.h"
 #include <Arduino.h>
 #include <SerialCommandManager.h>
@@ -51,6 +52,9 @@
 #include "RgbLedFade.h"
 
 #include "GpsSensorHandler.h"
+
+// include
+#include "ScreenDemoHandler.h"
 
 #if defined(ARDUINO_MEGA2560)
 #define NEXTION_SERIAL Serial1
@@ -120,6 +124,9 @@ BaseDisplayPage* displayPages[] = { &splashPage, &homePage, &warningPage, &relay
     &aboutPage };
 NextionControl nextion(&NEXTION_SERIAL, displayPages, sizeof(displayPages) / sizeof(displayPages[0]));
 
+// global instance, after nextion declaration
+ScreenDemoHandler screenDemoHandler(&nextion, sizeof(displayPages) / sizeof(displayPages[0]));
+
 // link command handlers
 InterceptDebugHandler interceptDebugHandler(&broadcastManager);
 SensorCommandHandler sensorCommandHandler(&broadcastManager, &nextion, &warningManager);
@@ -165,7 +172,7 @@ void setup()
     commandMgrLink.registerHandlers(linkHandlers, linkHandlerCount);
 
     ISerialCommandHandler* computerHandlers[] = { &configHandler, &ackHandler, &sensorCommandHandler, 
-        &warningCommandHandler, &systemCommandHandler };
+        &warningCommandHandler, &systemCommandHandler, &screenDemoHandler };
     size_t computerHandlerCount = sizeof(computerHandlers) / sizeof(computerHandlers[0]);
     commandMgrComputer.registerHandlers(computerHandlers, computerHandlerCount);
 

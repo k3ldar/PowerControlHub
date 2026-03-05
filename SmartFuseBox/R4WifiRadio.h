@@ -60,7 +60,6 @@ public:
             case WL_IDLE_STATUS:
             case WL_SCAN_COMPLETED:
                 return WifiConnectionState::Connecting;
-            case WL_NO_SHIELD:
             case WL_NO_MODULE:
             case WL_CONNECT_FAILED:
             case WL_CONNECTION_LOST:

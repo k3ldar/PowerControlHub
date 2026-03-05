@@ -153,7 +153,7 @@ public:
     
     operator bool() const override
     {
-        return _client;
+        return const_cast<WiFiClient&>(_client);
     }
 };
 #endif
