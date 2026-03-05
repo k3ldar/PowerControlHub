@@ -300,7 +300,10 @@ void SmartFuseBoxApp::configureWifiSupport(Config* config)
     _wifiController.registerJsonVisitors(jsonVisitors, jsonVisitorCount);
 
     _wifiController.applyConfig(config);
+
+#if defined(WIFI_SUPPORT)
     _systemCommandHandler.setWifiController(&_wifiController);
+#endif
 }
 
 void SmartFuseBoxApp::configureBluetoothSupport(Config* config)

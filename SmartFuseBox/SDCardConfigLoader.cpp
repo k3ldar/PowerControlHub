@@ -21,7 +21,7 @@ SdCardConfigLoader::SdCardConfigLoader(SerialCommandManager* computerSerial,
 bool SdCardConfigLoader::checkSdCard()
 {
     MicroSdDriver& sdDriver = MicroSdDriver::getInstance();
-    return sdDriver.getInitState() == MicroSdInitState::Initialized && sdDriver.isCardPresent(false);
+    return sdDriver.getInitState() == MicroSdInitState::Initialized && sdDriver.isCardPresent(true);
 }
 
 bool SdCardConfigLoader::configFileExists()
@@ -45,7 +45,7 @@ bool SdCardConfigLoader::applyConfigCommand(const char* line)
 
     // Trim whitespace and newlines
     char* end = buffer + strlen(buffer) - 1;
-    while (end > buffer && (*end == '\r' || *end == '\n' || *end == ' ' || *end == '\t'))
+    while (end >= buffer && (*end == '\r' || *end == '\n' || *end == ' ' || *end == '\t'))
     {
         *end = '\0';
         end--;

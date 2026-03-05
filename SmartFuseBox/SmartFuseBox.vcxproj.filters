@@ -411,9 +411,6 @@
     <ClInclude Include="Dht11SensorHandler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Dht11SensorHandler.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="NullWifiRadio.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -430,9 +427,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="NullWifiClient.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Dht11SensorHandler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="IWifiRadio.h">

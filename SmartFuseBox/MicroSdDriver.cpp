@@ -118,6 +118,11 @@ FsFile* MicroSdDriver::openFile(MicroSdFileHandle handle, const char* fileName, 
         return nullptr;
     }
 
+    if (_exclusiveAccessActive && handle != MicroSdFileHandle::ConfigLoader)
+    {
+        return nullptr;
+    }
+
     // Check if file is already open with this handle
     SdFileInfo* fileInfo = findFileInfo(handle);
     if (fileInfo != nullptr && fileInfo->isOpen)

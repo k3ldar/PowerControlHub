@@ -71,7 +71,7 @@
  * so settings can be changed without reflashing. Requires SD card SPI pins wired correctly
  * (see SdCard* constants below). This feature is experimental and disabled by default.
  */
-#define CARD_CONFIG_LOADER
+#define CARD_CONFIG_LOADER_
 #endif
 
 

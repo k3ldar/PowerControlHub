@@ -5,6 +5,9 @@
 #include <BaseCommandHandler.h>
 #include <NextionControl.h>
 #include "NextionIds.h"
+#include "Local.h"
+
+#if defined(SCREEN_DEMO_SUPPORT)
 
 constexpr char ScreenDemoCommand[] = "SCRNDMO";
 constexpr uint16_t DefaultDemoIntervalMs = 6000;
@@ -67,4 +70,4 @@ public:
     }
 };
 
-
+#endif

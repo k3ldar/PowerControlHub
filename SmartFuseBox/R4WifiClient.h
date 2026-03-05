@@ -151,9 +151,9 @@ public:
         return _client.println();
     }
     
-    operator bool() const override
+    operator bool() override
     {
-        return const_cast<WiFiClient&>(_client);
+        return _client;
     }
 };
 #endif

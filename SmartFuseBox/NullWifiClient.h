@@ -164,7 +164,7 @@ public:
         return 0;
     }
     
-    operator bool() const override
+    operator bool() override
     {
         return false;
     }
