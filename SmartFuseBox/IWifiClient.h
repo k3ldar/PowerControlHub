@@ -37,5 +37,5 @@ public:
     virtual size_t println(unsigned long n, int base = DEC) = 0;
     virtual size_t println() = 0;
 
-    virtual operator bool() const = 0;
+    virtual operator bool() = 0;
 };

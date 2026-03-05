@@ -106,6 +106,12 @@ void SdCardLogger::update(unsigned long now)
 
 bool SdCardLogger::writeRecordsToCard(uint8_t maxRecords)
 {
+    if (_currentFile != nullptr && !_currentFile->isOpen())
+    {
+        _currentFile = nullptr;
+        _fileOpen = false;
+    }
+
     uint8_t recordsWritten = 0;
 
     // Open or create file if needed

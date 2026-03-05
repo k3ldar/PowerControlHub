@@ -113,7 +113,12 @@ bool MicroSdDriver::isCardPresent(bool forceCheck)
 
 FsFile* MicroSdDriver::openFile(MicroSdFileHandle handle, const char* fileName, oflag_t oflag)
 {
-    if (!isValidHandle(handle) || fileName == nullptr || _initState != MicroSdInitState::Initialized || _exclusiveAccessActive)
+    if (!isValidHandle(handle) || fileName == nullptr || _initState != MicroSdInitState::Initialized)
+    {
+        return nullptr;
+    }
+
+    if (_exclusiveAccessActive && handle != MicroSdFileHandle::ConfigLoader)
     {
         return nullptr;
     }
@@ -240,7 +245,7 @@ bool MicroSdDriver::fileExists(const char* fileName)
 
 bool MicroSdDriver::deleteFile(const char* fileName)
 {
-    if (_initState != MicroSdInitState::Initialized || fileName == nullptr || _exclusiveAccessActive)
+    if (_initState != MicroSdInitState::Initialized || fileName == nullptr)
     {
         return false;
     }

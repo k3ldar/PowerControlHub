@@ -333,6 +333,9 @@
     <ClInclude Include="RtcDS1302Driver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ScreenDemoHandler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Commands.md" />

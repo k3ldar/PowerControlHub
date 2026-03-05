@@ -52,7 +52,7 @@
 * Wifi is only available on certain boards (e.g. Arduino Uno R4). Define WIFI_SUPPORT to enable related code, but only if your board supports it.
 */
 #if defined(ARDUINO_UNO_R4) || defined(ESP32)
-#define WIFI_SUPPORT_
+#define WIFI_SUPPORT
 #endif
 
 
@@ -61,7 +61,7 @@
  * When enabled the system will enabled SD Card support
  * (see SdCard* constants below). This feature is experimental and disabled by default.
  */
-#define SD_CARD_SUPPORT_
+#define SD_CARD_SUPPORT
 
 #if defined(SD_CARD_SUPPORT)
 /*
@@ -71,7 +71,7 @@
  * so settings can be changed without reflashing. Requires SD card SPI pins wired correctly
  * (see SdCard* constants below). This feature is experimental and disabled by default.
  */
-#define CARD_CONFIG_LOADER
+#define CARD_CONFIG_LOADER_
 #endif
 
 

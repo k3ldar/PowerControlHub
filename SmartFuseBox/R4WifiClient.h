@@ -151,7 +151,7 @@ public:
         return _client.println();
     }
     
-    operator bool() const override
+    operator bool() override
     {
         return _client;
     }

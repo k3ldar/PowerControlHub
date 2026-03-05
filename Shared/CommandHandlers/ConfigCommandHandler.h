@@ -4,6 +4,7 @@
 
 #include "BaseCommandHandler.h"
 #include "IWifiController.h"
+#include "Local.h"
 
 // Forward declarations
 class ConfigController;
