@@ -74,6 +74,8 @@
     <ProjectCapability Include="VisualMicroLinux" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="SchedulerCommandHandler.cpp" />
+    <ClCompile Include="SchedulerNetworkHandler.cpp" />
     <ClCompile Include="SensorCommandHandler.cpp" />
     <ClCompile Include="MQTTConfigCommandHandler.cpp" />
     <ClCompile Include="MQTTRelayHandler.cpp" />
@@ -146,6 +148,8 @@
     <ClInclude Include="R4WifiClient.h" />
     <ClInclude Include="R4WifiRadio.h" />
     <ClInclude Include="RemoteSensor.h" />
+    <ClInclude Include="SchedulerCommandHandler.h" />
+    <ClInclude Include="SchedulerNetworkHandler.h" />
     <ClInclude Include="SdCardLogger.h" />
     <ClInclude Include="SensorDataRecord.h" />
     <ClInclude Include="ConfigCommandHandler.h" />

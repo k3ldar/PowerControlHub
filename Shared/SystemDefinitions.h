@@ -91,6 +91,16 @@ constexpr char MqttConfigKeepAlive[] = "M7";
 constexpr char MqttConfigState[] = "M8";
 constexpr char MqttConfigDiscoveryPrefix[] = "M9";
 
+#if defined(SCHEDULER_SUPPORT)
+constexpr char TimerListEvents[] = "T0";
+constexpr char TimerGetEvent[] = "T1";
+constexpr char TimerSetEvent[] = "T2";
+constexpr char TimerDeleteEvent[] = "T3";
+constexpr char TimerEnableEvent[] = "T4";
+constexpr char TimerClearAll[] = "T5";
+constexpr char TimerTriggerNow[] = "T6";
+#endif
+
 constexpr char WarningsActive[] = "W0";
 constexpr char WarningsList[] = "W1";
 constexpr char WarningStatus[] = "W2";

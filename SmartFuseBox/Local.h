@@ -50,7 +50,14 @@
 #elif defined(ESP32)
 #define EEPROM_CAPACITY_BYTES 16384
 #else
-#define EEPROM_CAPACITY_BYTES 1024   // conservative default (e.g. Uno R3) — add new boards above this line
+// maximum 6 events to save eeprom size
+#define MAXIMUM_EVENTS 6
+#define EEPROM_CAPACITY_BYTES 1024   
+#endif
+
+#if !defined(MAXIMUM_EVENTS)
+//default events
+#define MAXIMUM_EVENTS 20
 #endif
 
 /*
@@ -58,7 +65,7 @@
  * the base config (~681 bytes) plus scheduler storage (~491 bytes for 20 events).
  * Do not define or undefine manually.
  */
-#if EEPROM_CAPACITY_BYTES >= 2048
+#if EEPROM_CAPACITY_BYTES >= 1024
 #define SCHEDULER_SUPPORT
 #endif
 

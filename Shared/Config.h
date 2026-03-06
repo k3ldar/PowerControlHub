@@ -106,7 +106,7 @@ enum class SchedulerActionType : uint8_t
 	AllRelaysOff = 0x06,
 };
 
-constexpr uint8_t ConfigMaxScheduledEvents = 10;
+constexpr uint8_t ConfigMaxScheduledEvents = MAXIMUM_EVENTS;
 constexpr uint8_t ConfigSchedulerPayloadSize = 4;
 constexpr uint8_t ConfigScheduleEventReserved = 8;
 constexpr uint8_t ConfigSchedulerReservedSize = 10;
@@ -125,6 +125,7 @@ struct ScheduledEvent
 
 struct SchedulerSettings
 {
+	bool isEnabled;
 	uint8_t eventCount;
 	ScheduledEvent events[ConfigMaxScheduledEvents];
 	uint8_t reserved[ConfigSchedulerReservedSize];  // reserved for future scheduler-level settings

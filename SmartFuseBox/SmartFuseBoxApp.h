@@ -19,6 +19,7 @@
 #include "AckCommandHandler.h"
 #include "SystemCommandHandler.h"
 #include "ConfigCommandHandler.h"
+#include "SchedulerCommandHandler.h"
 #include "BluetoothRadioBridge.h"
 #include "IBluetoothRadio.h"
 #include "WifiController.h"
@@ -32,6 +33,7 @@
 #include "SystemNetworkHandler.h"
 #include "SensorNetworkHandler.h"
 #include "WarningNetworkHandler.h"
+#include "SchedulerNetworkHandler.h"
 
 #if defined(SD_CARD_SUPPORT)
 #include "SdCardLogger.h"
