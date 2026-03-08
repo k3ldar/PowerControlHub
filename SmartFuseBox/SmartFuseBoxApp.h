@@ -32,6 +32,7 @@
 #include "SystemNetworkHandler.h"
 #include "SensorNetworkHandler.h"
 #include "WarningNetworkHandler.h"
+#include "SchedulerNetworkHandler.h"
 
 #if defined(SD_CARD_SUPPORT)
 #include "SdCardLogger.h"
@@ -45,6 +46,11 @@
 #include "MQTTRelayHandler.h"
 #include "MQTTSensorHandler.h"
 #include "MQTTSystemHandler.h"
+#endif
+
+#if defined(SCHEDULER_SUPPORT)
+#include "SchedulerCommandHandler.h"
+#include "ScheduleController.h"
 #endif
 
 #if defined(LED_MANAGER)
@@ -74,6 +80,7 @@ private:
     AckCommandHandler _ackHandler;
     SystemCommandHandler _systemCommandHandler;
 
+
     PlatformBluetoothRadio _bluetoothController;
     WifiController _wifiController;
 
@@ -102,6 +109,12 @@ private:
     MQTTSensorHandler* _mqttSensorHandler;
     MQTTSystemHandler _mqttSystemHandler;
     unsigned long _nextRunMqttMs;
+#endif
+
+#if defined(SCHEDULER_SUPPORT)
+	SchedulerCommandHandler _schedulerCommandHandler;
+	SchedulerNetworkHandler _schedulerNetworkHandler;
+	ScheduleController _scheduleController;
 #endif
 
 #if defined(LED_MANAGER)

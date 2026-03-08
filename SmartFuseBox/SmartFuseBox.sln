@@ -23,6 +23,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{B2F18220-A
 		..\Docs\MessageBus.md = ..\Docs\MessageBus.md
 		..\README.md = ..\README.md
 		..\Docs\RestApi.md = ..\Docs\RestApi.md
+		..\Docs\ScheduleEvents.md = ..\Docs\ScheduleEvents.md
 		..\Docs\Sensors.md = ..\Docs\Sensors.md
 		..\SETUP.md = ..\SETUP.md
 		..\Docs\Warnings.md = ..\Docs\Warnings.md

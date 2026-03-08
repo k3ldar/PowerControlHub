@@ -71,6 +71,67 @@ struct MqttConfig
 constexpr uint8_t AccessModeAP = 0;
 constexpr uint8_t AccessModeClient = 1;
 
+#if defined(SCHEDULER_SUPPORT)
+
+enum class TriggerType : uint8_t
+{
+	None      = 0x00,
+	TimeOfDay = 0x01,  // triggerPayload[0]=hour, [1]=minute
+	Sunrise   = 0x02,  // triggerPayload[0..1]=int16 offset minutes before/after
+	Sunset    = 0x03,  // triggerPayload[0..1]=int16 offset minutes before/after
+	Interval  = 0x04,  // triggerPayload[0..1]=uint16 interval minutes
+	DayOfWeek = 0x05,  // triggerPayload[0]=bitmask (bit0=Mon .. bit6=Sun)
+	Date      = 0x06,  // triggerPayload[0]=day, [1]=month
+};
+
+enum class ConditionType : uint8_t
+{
+	None       = 0x00,
+	TimeWindow = 0x01,  // conditionPayload[0]=start_hour, [1]=start_min, [2]=end_hour, [3]=end_min
+	DayOfWeek  = 0x02,  // conditionPayload[0]=bitmask (bit0=Mon .. bit6=Sun)
+	IsDark     = 0x03,  // no payload (computed from sunrise/sunset)
+	IsDaylight = 0x04,  // no payload (computed from sunrise/sunset)
+	RelayIsOn  = 0x05,  // conditionPayload[0]=relay index
+	RelayIsOff = 0x06,  // conditionPayload[0]=relay index
+};
+
+enum class SchedulerActionType : uint8_t
+{
+	None         = 0x00,
+	RelayOn      = 0x01,  // actionPayload[0]=relay index
+	RelayOff     = 0x02,  // actionPayload[0]=relay index
+	RelayToggle  = 0x03,  // actionPayload[0]=relay index
+	RelayPulse   = 0x04,  // actionPayload[0]=relay index, [1..2]=uint16 duration seconds
+	AllRelaysOn  = 0x05,
+	AllRelaysOff = 0x06,
+};
+
+constexpr uint8_t ConfigMaxScheduledEvents = MAXIMUM_EVENTS;
+constexpr uint8_t ConfigSchedulerPayloadSize = 4;
+constexpr uint8_t ConfigScheduleEventReserved = 8;
+constexpr uint8_t ConfigSchedulerReservedSize = 10;
+
+struct ScheduledEvent
+{
+	bool enabled;
+	TriggerType triggerType;
+	uint8_t triggerPayload[ConfigSchedulerPayloadSize];
+	ConditionType conditionType;
+	uint8_t conditionPayload[ConfigSchedulerPayloadSize];
+	SchedulerActionType actionType;
+	uint8_t actionPayload[ConfigSchedulerPayloadSize];
+	uint8_t reserved[ConfigScheduleEventReserved];
+} __attribute__((packed));
+
+struct SchedulerSettings
+{
+	bool isEnabled;
+	uint8_t eventCount;
+	ScheduledEvent events[ConfigMaxScheduledEvents];
+	uint8_t reserved[ConfigSchedulerReservedSize];  // reserved for future scheduler-level settings
+} __attribute__((packed));
+
+#endif // SCHEDULER_SUPPORT
 
 
 // Layout:
@@ -86,7 +147,12 @@ constexpr uint8_t AccessModeClient = 1;
 //
 // Keep struct packed and stable. Increase 'VERSION' when you change layout.
 // Packed POD for persistent configuration.
+#if defined(SCHEDULER_SUPPORT)
+constexpr uint8_t ConfigVersion = 2;
+#else
 constexpr uint8_t ConfigVersion = 1;
+#endif
+
 constexpr uint8_t ConfigHomeButtons = 4;
 constexpr uint8_t ConfigMaxNameLength = 31; // max characters (inc null)
 constexpr uint8_t ConfigShortRelayNameLength = 6; // max characters (inc null) - for home page
@@ -129,5 +195,11 @@ struct Config {
 
 	MqttConfig mqtt;
 
+	#if defined(SCHEDULER_SUPPORT)
+	SchedulerSettings scheduler;
+#endif
+
 	uint16_t checksum;
 } __attribute__((packed));
+
+static_assert(sizeof(Config) <= EEPROM_CAPACITY_BYTES, "Config struct exceeds EEPROM capacity for this board. Reduce features or increase EEPROM capacity.");

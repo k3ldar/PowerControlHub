@@ -240,6 +240,105 @@ Returns JSON formatted response with sound status and active sound if any.
 ------
 
 
+## Timer / Scheduler Commands (SFB)
+These commands manage scheduled events stored in EEPROM. Only available on boards with `SCHEDULER_SUPPORT` enabled (requires ≥ 1KB EEPROM). Up to 20 events can be stored, if EEPROM is < 1KB only 6 events can be stored. Each event has a **trigger** (what fires it), an optional **condition** (a guard that must be true), and an **action** (what happens).
+
+| Command | Example | Purpose |
+|---|---|---|
+| `T0` — List events | `T0` | Returns the total event count and the enabled state of every slot. Response: `T0:count=3;s=1,0,1,0,...` where `s` is a comma-separated list of enabled states for all 20 slots. |
+| `T1` — Get event | `T1:v=2` | Returns full detail of event at index `v` (0..19) using the same format as `T2`. Returns error if slot is empty. |
+| `T2` — Set event | `T2:i=0;e=1;t=1,18,30,0,0;c=0,0,0,0,0;a=2,2,0,0,0` | Add or update the event at index `i` (0..19). Param format: `i=<index>;e=<enabled>;t=<type,b0,b1,b2,b3>;c=<type,b0,b1,b2,b3>;a=<type,b0,b1,b2,b3>`. Each of `t`, `c`, `a` is a comma-separated list where the first value is the type enum and the remaining four are the payload bytes. Save with `C0` to persist to EEPROM. |
+| `T3` — Delete event | `T3:v=2` | Clears the event at index `v` (0..19) and marks the slot as empty. Save with `C0` to persist. |
+| `T4` — Enable / disable | `T4:i=2;v=1` | Enable (`v=1`) or disable (`v=0`) the event at index `i` without deleting it. Save with `C0` to persist. |
+| `T5` — Clear all | `T5` | Removes all 20 scheduled events. Save with `C0` to persist. |
+| `T6` — Trigger now | `T6:v=2` | Immediately executes the action of the event at index `v`, bypassing trigger and condition checks. Useful for testing. Does not affect enabled state. |
+
+**Parameter format for `t`, `c`, `a`:** Each is a 5-value comma-separated string: `<type>,<b0>,<b1>,<b2>,<b3>`. The first value is the type enum; the four byte values are the payload interpreted according to that type. This compact format keeps the total parameter count within the system limit of 5.
+
+---
+
+### Trigger Types (`t` first value)
+Relay indices are 0-based (0..`RELAY_COUNT-1`). Multi-byte values use little-endian byte order (low byte first).
+
+| Type | Name | Payload bytes b0..b3 |
+|---|---|---|
+| `0` | None | Unused — event never fires automatically |
+| `1` | TimeOfDay | `b0`=hour (0–23), `b1`=minute (0–59), `b2..b3`=unused |
+| `2` | Sunrise | `b0..b1`=int16 offset minutes (positive=after, negative=before), `b2..b3`=unused |
+| `3` | Sunset | `b0..b1`=int16 offset minutes (positive=after, negative=before), `b2..b3`=unused |
+| `4` | Interval | `b0..b1`=uint16 interval in minutes, `b2..b3`=unused |
+| `5` | DayOfWeek | `b0`=bitmask (bit0=Mon, bit1=Tue, bit2=Wed, bit3=Thu, bit4=Fri, bit5=Sat, bit6=Sun), `b1..b3`=unused |
+| `6` | Date | `b0`=day (1–31), `b1`=month (1–12), `b2..b3`=unused |
+
+**DayOfWeek bitmask examples:** Mon–Fri = `31`, weekends = `96`, all days = `127`, Monday only = `1`
+
+---
+
+### Condition Types (`c` first value)
+Evaluated at trigger time. If the condition is not met the action is skipped. Use `c=0,0,0,0,0` for no condition.
+
+| Type | Name | Payload bytes b0..b3 |
+|---|---|---|
+| `0` | None | Unused — action always fires when trigger matches |
+| `1` | TimeWindow | `b0`=start_hour, `b1`=start_min, `b2`=end_hour, `b3`=end_min |
+| `2` | DayOfWeek | `b0`=bitmask (same bit layout as trigger DayOfWeek), `b1..b3`=unused |
+| `3` | IsDark | Unused — true when current time is between sunset and sunrise |
+| `4` | IsDaylight | Unused — true when current time is between sunrise and sunset |
+| `5` | RelayIsOn | `b0`=relay index (0..`RELAY_COUNT-1`), `b1..b3`=unused |
+| `6` | RelayIsOff | `b0`=relay index (0..`RELAY_COUNT-1`), `b1..b3`=unused |
+
+---
+
+### Action Types (`a` first value)
+
+| Type | Name | Payload bytes b0..b3 |
+|---|---|---|
+| `0` | None | Unused — trigger fires but nothing happens |
+| `1` | RelayOn | `b0`=relay index, `b1..b3`=unused |
+| `2` | RelayOff | `b0`=relay index, `b1..b3`=unused |
+| `3` | RelayToggle | `b0`=relay index, `b1..b3`=unused |
+| `4` | RelayPulse | `b0`=relay index, `b1..b2`=uint16 duration seconds (little-endian), `b3`=unused |
+| `5` | AllRelaysOn | Unused |
+| `6` | AllRelaysOff | Unused |
+
+---
+
+### Examples
+
+**"At 18:30 turn Relay 3 off"** (relay index 2, 0-based):
+```
+T2:i=0;e=1;t=1,18,30,0,0;c=0,0,0,0,0;a=2,2,0,0,0
+C0
+```
+
+**"10 minutes after sunset turn Relay 2 on"** (relay index 1, offset +10 min):
+```
+T2:i=1;e=1;t=3,10,0,0,0;c=0,0,0,0,0;a=1,1,0,0,0
+C0
+```
+
+**"At sunrise, only on weekdays, toggle Relay 1"** (relay index 0, Mon–Fri bitmask=31):
+```
+T2:i=2;e=1;t=2,0,0,0,0;c=2,31,0,0,0;a=3,0,0,0,0
+C0
+```
+
+**"Every 30 minutes, pulse Relay 5 for 10 seconds"** (relay index 4, interval=30 min, duration=10 sec):
+```
+T2:i=3;e=1;t=4,30,0,0,0;c=0,0,0,0,0;a=4,4,10,0,0
+C0
+```
+
+Common error responses: `Scheduler not supported`, `Index out of range`, `Missing params`, `Invalid trigger type`, `Invalid condition type`, `Invalid action type`, `Invalid enabled value (0 or 1)`, `Slot is empty`.
+
+### Wifi Timer Commands (SFB)
+Route: /api/timer/{command}
+Example: Get all events = /api/timer/T0
+Returns JSON formatted response with event data.
+
+------
+
+
 ## Please Note
 - All commands and parameters are case-sensitive.
 - Commands must be sent in the exact format as specified, including any required delimiters.

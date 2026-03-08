@@ -38,23 +38,70 @@ bool ConfigManager::load()
     // Read raw bytes
     EEPROM.get(0, _cfg);
 
-    // Quick checks
+    // Step up through every known version in sequence.
+    // Each migration bumps _cfg.version by one, so a device that has missed
+    // multiple releases will chain through all intermediate steps automatically.
+    bool migrated = false;
+    while (_cfg.version < ConfigVersion)
+    {
+#if defined(SCHEDULER_SUPPORT)
+        if (_cfg.version == 1)
+        {
+            migrateV1toV2();
+            migrated = true;
+        }
+        else
+#endif
+        {
+            // Version is below the oldest known migration (e.g. 0x00 on some blank boards).
+            // Cannot migrate safely — reset and persist clean defaults.
+            resetToDefaults();
+            save();
+            return false;
+        }
+    }
+
+    // Version is above ConfigVersion (future firmware downgraded, or 0xFF on a fresh board)
     if (_cfg.version != ConfigVersion)
     {
         resetToDefaults();
+        save();
         return false;
+    }
+
+    // Migration succeeded — persist the upgraded config and skip the checksum check
+    // (the old checksum is no longer valid for the new layout).
+    if (migrated)
+    {
+        save();
+        return true;
     }
 
     uint16_t expected = calcChecksum(_cfg);
     if (expected != _cfg.checksum)
     {
-        // corrupted: reset to defaults
+        // corrupted: reset to defaults and persist
         resetToDefaults();
+        save();
         return false;
     }
 
     return true;
 }
+
+#if defined(SCHEDULER_SUPPORT)
+void ConfigManager::migrateV1toV2()
+{
+    // V1 -> V2: SchedulerSettings was appended immediately before checksum.
+    // Every V1 field occupies the same byte position in V2, so no data moves are needed.
+    // The first two bytes of scheduler overlap where the V1 checksum was written;
+    // the remainder of scheduler extends into EEPROM that V1 never touched.
+    // Zero the entire scheduler section so all events start disabled and the
+    // reserved bytes are clean before the new checksum is calculated by save().
+    memset(&_cfg.scheduler, 0x00, sizeof(_cfg.scheduler));
+    _cfg.version = ConfigVersion;
+}
+#endif // SCHEDULER_SUPPORT
 
 bool ConfigManager::save()
 {
