@@ -64,6 +64,12 @@
     <Filter Include="Header Files\Abstractions">
       <UniqueIdentifier>{5dee2cac-51d8-47ae-aa48-8d1c8c895b82}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Scheduler">
+      <UniqueIdentifier>{f5e88426-01b4-4b58-86e2-4351e40fb19d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Scheduler">
+      <UniqueIdentifier>{7e859e50-9303-4ac2-b6cf-67c4d02f2121}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="SmartFuseBox.ino" />
@@ -206,6 +212,15 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="SensorCommandHandler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SchedulerCommandHandler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SchedulerNetworkHandler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ScheduleController.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -408,9 +423,6 @@
     <ClInclude Include="R4WifiRadio.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Dht11SensorHandler.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="NullWifiRadio.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -440,6 +452,15 @@
     </ClInclude>
     <ClInclude Include="IBluetoothRadio.h">
       <Filter>Header Files\Abstractions</Filter>
+    </ClInclude>
+    <ClInclude Include="SchedulerCommandHandler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SchedulerNetworkHandler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ScheduleController.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

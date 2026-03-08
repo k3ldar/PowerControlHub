@@ -60,6 +60,11 @@ SmartFuseBoxApp::SmartFuseBoxApp(SerialCommandManager* commandMgrComputer,
 	  , _nextRunMqttMs(0)
 #endif
 
+#if defined(SCHEDULER_SUPPORT)
+      , _schedulerCommandHandler(&_relayController)
+      , _scheduleController(&_relayController, &_messageBus)
+#endif
+
 #if defined(LED_MANAGER)
       , _ledManager(&_messageBus)
 #endif
@@ -116,11 +121,13 @@ void SmartFuseBoxApp::setup(BaseSensorHandler** sensorHandlers, uint8_t sensorHa
     _relayHandler.setup();
 
     // serial command handlers
-    ISerialCommandHandler* linkHandlers[] = { &_relayHandler, &_soundHandler, &_configHandler, &_ackHandler, &_systemCommandHandler, &_warningCommandHandler, &_sensorCommandHandler };
+    ISerialCommandHandler* linkHandlers[] = { &_relayHandler, &_soundHandler, &_configHandler, &_ackHandler,
+        &_systemCommandHandler, &_warningCommandHandler, &_sensorCommandHandler, &_schedulerCommandHandler };
     size_t linkHandlerCount = sizeof(linkHandlers) / sizeof(linkHandlers[0]);
     _commandMgrLink->registerHandlers(linkHandlers, linkHandlerCount);
 
-    ISerialCommandHandler* computerHandlers[] = { &_relayHandler, &_soundHandler, &_configHandler, &_ackHandler, &_systemCommandHandler, &_warningCommandHandler, &_sensorCommandHandler };
+    ISerialCommandHandler* computerHandlers[] = { &_relayHandler, &_soundHandler, &_configHandler, &_ackHandler,
+        &_systemCommandHandler, &_warningCommandHandler, &_sensorCommandHandler, &_schedulerCommandHandler };
     size_t computerHandlerCount = sizeof(computerHandlers) / sizeof(computerHandlers[0]);
     _commandMgrComputer->registerHandlers(computerHandlers, computerHandlerCount);
 
@@ -201,6 +208,10 @@ void SmartFuseBoxApp::setup(BaseSensorHandler** sensorHandlers, uint8_t sensorHa
 
     // indicate system initialized
     _commandMgrComputer->sendCommand(SystemInitialized, "");
+
+#if defined(SCHEDULER_SUPPORT)
+    _scheduleController.begin();
+#endif
 }
 
 void SmartFuseBoxApp::loop()
@@ -263,6 +274,12 @@ void SmartFuseBoxApp::loop()
     _configSyncManager.update(now);
     SystemCpuMonitor::endTask();
 
+#if defined(SCHEDULER_SUPPORT)
+    SystemCpuMonitor::startTask();
+    _scheduleController.update(now);
+    SystemCpuMonitor::endTask();
+#endif
+
 #if defined(SD_CARD_SUPPORT)
     SystemCpuMonitor::startTask();
     MicroSdDriver& microSdDriver = MicroSdDriver::getInstance();
@@ -283,7 +300,11 @@ void SmartFuseBoxApp::configureWifiSupport(Config* config)
 {
     // network command handlers
     INetworkCommandHandler* networkHandlers[] = { &_relayNetworkHandler, &_soundNetworkHandler, &_warningNetworkHandler,
-        &_systemNetworkHandler, _sensorNetworkHandler, &_configNetworkHandler };
+        &_systemNetworkHandler, _sensorNetworkHandler, &_configNetworkHandler,
+#if defined(SCHEDULER_SUPPORT)
+        &_schedulerNetworkHandler,
+#endif
+    };
     size_t networkHandlerCount = sizeof(networkHandlers) / sizeof(networkHandlers[0]);
     _wifiController.registerHandlers(networkHandlers, networkHandlerCount);
 
@@ -295,6 +316,9 @@ void SmartFuseBoxApp::configureWifiSupport(Config* config)
         &_soundNetworkHandler,
         &_warningNetworkHandler,
         _sensorNetworkHandler,
+#if defined(SCHEDULER_SUPPORT)
+        &_schedulerNetworkHandler,
+#endif
     };
     uint8_t jsonVisitorCount = sizeof(jsonVisitors) / sizeof(jsonVisitors[0]);
     _wifiController.registerJsonVisitors(jsonVisitors, jsonVisitorCount);
