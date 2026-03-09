@@ -64,7 +64,7 @@ uint8_t SystemFunctions::GenerateDefaultPassword(char* buffer, size_t bufferSize
     snprintf_P(buffer, bufferSize, PSTR("sfb-%02X%02X%02X"), mac[3], mac[4], mac[5]);
 #else
     randomSeed(analogRead(A0) + analogRead(A1) + millis());
-    uint32_t storedID = random(PasswordRandomMin, MaxUint32Value);
+    uint32_t storedID = static_cast<uint32_t>(random(PasswordRandomMin, LONG_MAX));
 
     snprintf_P(buffer, bufferSize, PSTR("sfb-%08lX"), (unsigned long)storedID);
 #endif

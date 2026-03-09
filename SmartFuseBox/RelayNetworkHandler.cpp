@@ -109,6 +109,9 @@ CommandResult RelayNetworkHandler::handleRequest(const char* method,
 
 void RelayNetworkHandler::formatStatusJson(char* buffer, size_t size)
 {
+	if (!buffer || size == 0)
+		return;
+
 	// Simple JSON formatting without library (to save memory)
 	int written = snprintf(buffer, size, "\"relays\":[");
 

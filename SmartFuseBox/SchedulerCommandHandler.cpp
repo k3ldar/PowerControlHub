@@ -369,6 +369,11 @@ bool SchedulerCommandHandler::executeAction(SerialCommandManager* sender, const 
         case SchedulerActionType::RelayToggle:
         {
             CommandResult current = _relayController->getRelayStatus(event.actionPayload[0]);
+            if (current.status == DefaultValue)
+            {
+                sendAckErr(sender, command, F("Relay operation failed"));
+                return false;
+            }
             CommandResult result = _relayController->setRelayState(event.actionPayload[0], current.status == 0);
             if (!result.success)
             {
