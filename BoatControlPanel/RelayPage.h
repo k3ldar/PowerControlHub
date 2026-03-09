@@ -27,7 +27,8 @@
 #include "BoatControlPanelConstants.h"
 
 
-class RelayPage : public BaseBoatPage {
+class RelayPage : public BaseBoatPage
+{
 private:
     unsigned long _lastRefreshTime = 0;
     bool _buttonOn[ConfigRelayCount] = { false, false, false, false, false, false, false, false };

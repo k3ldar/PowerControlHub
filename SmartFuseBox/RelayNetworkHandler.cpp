@@ -111,15 +111,26 @@ void RelayNetworkHandler::formatStatusJson(char* buffer, size_t size)
 {
 	// Simple JSON formatting without library (to save memory)
 	int written = snprintf(buffer, size, "\"relays\":[");
-	
+
+	if (written < 0 || written >= static_cast<int>(size))
+	{
+		buffer[size - 1] = '\0';
+		return;
+	}
+
 	for (uint8_t i = 0; i < _relayController->getRelayCount(); i++)
 	{
 		CommandResult result = _relayController->getRelayStatus(i);
-		written += snprintf(buffer + written, size - written, 
-						  "%d%s", result.status, 
-						  (i < _relayController->getRelayCount() - 1) ? "," : "");
+		int n = snprintf(buffer + written, size - written,
+						"%d%s", result.status,
+						(i < _relayController->getRelayCount() - 1) ? "," : "");
+
+		if (n < 0 || written + n >= static_cast<int>(size))
+			break;
+
+		written += n;
 	}
-	
+
 	snprintf(buffer + written, size - written, "]");
 }
 

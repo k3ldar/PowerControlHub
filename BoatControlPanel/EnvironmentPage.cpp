@@ -72,6 +72,7 @@ void EnvironmentPage::begin()
 
 void EnvironmentPage::refresh(unsigned long now)
 {
+    (void)now;
 
 }
 

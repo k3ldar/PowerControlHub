@@ -100,6 +100,7 @@ void SettingsPage::begin()
 
 void SettingsPage::refresh(unsigned long now)
 {
+	(void)now;
     //nothing to refresh currently
 }
 

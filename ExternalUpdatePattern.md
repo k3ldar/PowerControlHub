@@ -25,7 +25,8 @@ virtual void handleExternalUpdate(uint8_t updateType, const void* data);
 
 Define update types using an enum class:
 ```cpp
-enum class HomePageUpdateType : uint8_t {
+enum class HomePageUpdateType : uint8_t
+{
     None = 0x00,
     RelayState = 0x01,
     CompassTemperature = 0x02
@@ -103,7 +104,8 @@ With `uint8_t` (256 values):
 You can organize update types by page range:
 ```cpp
 // HomePage: 0x10-0x1F (16 values)
-enum class HomePageUpdateType : uint8_t {
+enum class HomePageUpdateType : uint8_t
+{
     None = 0x00,
     RelayState = 0x10,
     CompassTemp = 0x11,
@@ -111,13 +113,15 @@ enum class HomePageUpdateType : uint8_t {
 };
 
 // SettingsPage: 0x20-0x2F (16 values)
-enum class SettingsPageUpdateType : uint8_t {
+enum class SettingsPageUpdateType : uint8_t
+{
     ConfigSaved = 0x20,
     CalibrationUpdate = 0x21
 };
 
 // DiagnosticsPage: 0x30-0x3F (16 values)
-enum class DiagnosticsPageUpdateType : uint8_t {
+enum class DiagnosticsPageUpdateType : uint8_t
+{
     ErrorLog = 0x30,
     SystemStatus = 0x31
 };
@@ -129,7 +133,8 @@ This provides 16 ranges of 16 values each = 256 total values.
 
 1. **Define the update type** (HomePage.h):
 ```cpp
-enum class HomePageUpdateType : uint8_t {
+enum class HomePageUpdateType : uint8_t
+{
     None = 0x00,
     RelayState = 0x01,
     CompassTemperature = 0x02,
@@ -139,7 +144,8 @@ enum class HomePageUpdateType : uint8_t {
 
 2. **Define the data structure** (HomePage.h):
 ```cpp
-struct GPSUpdate {
+struct GPSUpdate
+{
     float latitude;
     float longitude;
     uint32_t timestamp;

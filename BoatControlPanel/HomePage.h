@@ -26,7 +26,8 @@
 #include "NextionIds.h"
 #include "BoatControlPanelConstants.h"
 
-class HomePage : public BaseBoatPage {
+class HomePage : public BaseBoatPage
+{
 private:
 	unsigned long _lastRefreshTime = 0;
     float _lastTemp = NAN;

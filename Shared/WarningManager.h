@@ -64,7 +64,8 @@ class ToneManager;
  * }
  * @endcode
  */
-class WarningManager {
+class WarningManager
+{
 private:
 	SerialCommandManager* _commandMgr;      // For sending heartbeat commands
 #if defined(BOAT_CONTROL_PANEL)

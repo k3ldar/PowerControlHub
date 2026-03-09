@@ -47,6 +47,12 @@ CommandResult SchedulerNetworkHandler::handleRequest(const char* method,
             "\"success\":true,\"schedule\":{\"count\":%u,\"slots\":[",
             cfg->scheduler.eventCount);
 
+        if (written < 0 || written >= static_cast<int>(bufferSize))
+        {
+            formatJsonResponse(responseBuffer, bufferSize, false, "Buffer overflow");
+            return CommandResult::error(BufferOverflow);
+        }
+
         for (uint8_t i = 0; i < ConfigMaxScheduledEvents; ++i)
         {
             int n = snprintf(responseBuffer + written, bufferSize - written,
@@ -127,6 +133,9 @@ void SchedulerNetworkHandler::formatStatusJson(char* buffer, size_t size)
     int written = snprintf(buffer, size,
         "\"schedule\":{\"count\":%u,\"slots\":[",
         cfg->scheduler.eventCount);
+
+    if (written < 0 || written >= static_cast<int>(size))
+        return;
 
     for (uint8_t i = 0; i < ConfigMaxScheduledEvents; ++i)
     {

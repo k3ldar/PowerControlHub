@@ -345,24 +345,50 @@ bool SchedulerCommandHandler::executeAction(SerialCommandManager* sender, const 
     switch (event.actionType)
     {
         case SchedulerActionType::RelayOn:
-            _relayController->setRelayState(event.actionPayload[0], true);
+        {
+            CommandResult result = _relayController->setRelayState(event.actionPayload[0], true);
+            if (!result.success)
+            {
+                sendAckErr(sender, command, F("Relay operation failed"));
+                return false;
+            }
             return true;
+        }
 
         case SchedulerActionType::RelayOff:
-            _relayController->setRelayState(event.actionPayload[0], false);
+        {
+            CommandResult result = _relayController->setRelayState(event.actionPayload[0], false);
+            if (!result.success)
+            {
+                sendAckErr(sender, command, F("Relay operation failed"));
+                return false;
+            }
             return true;
+        }
 
         case SchedulerActionType::RelayToggle:
         {
-            CommandResult result = _relayController->getRelayStatus(event.actionPayload[0]);
-            _relayController->setRelayState(event.actionPayload[0], result.status == 0);
+            CommandResult current = _relayController->getRelayStatus(event.actionPayload[0]);
+            CommandResult result = _relayController->setRelayState(event.actionPayload[0], current.status == 0);
+            if (!result.success)
+            {
+                sendAckErr(sender, command, F("Relay operation failed"));
+                return false;
+            }
             return true;
         }
 
         case SchedulerActionType::RelayPulse:
+        {
             // Pulse duration is managed by the runtime scheduler; T6 performs the on transition only
-            _relayController->setRelayState(event.actionPayload[0], true);
+            CommandResult result = _relayController->setRelayState(event.actionPayload[0], true);
+            if (!result.success)
+            {
+                sendAckErr(sender, command, F("Relay operation failed"));
+                return false;
+            }
             return true;
+        }
 
         case SchedulerActionType::AllRelaysOn:
             _relayController->turnAllRelaysOn();

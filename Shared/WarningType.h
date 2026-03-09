@@ -31,7 +31,8 @@
  * - 0-19: System warnings
  * - 20-31: Sensor warnings
  */
-enum class WarningType : uint32_t {
+enum class WarningType : uint32_t
+{
     None = 0x00,                                      // No warning
 
     // System warnings (bits 0-19)

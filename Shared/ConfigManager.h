@@ -19,7 +19,8 @@
 #include <Arduino.h>
 #include "Config.h"
 
-class ConfigManager {
+class ConfigManager
+{
 public:
     // Call once at startup (handles any board-specific init)
     static void begin();

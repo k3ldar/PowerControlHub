@@ -26,7 +26,8 @@
 #include "BoatControlPanelConstants.h"
 
 
-class SoundOtherPage : public BaseBoatPage {
+class SoundOtherPage : public BaseBoatPage
+{
 private:
     unsigned long _lastRefreshTime = 0;
 

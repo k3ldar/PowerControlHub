@@ -82,6 +82,7 @@ void VhfRadioPage::begin()
 
 void VhfRadioPage::refresh(unsigned long now)
 {
+    (void)now;
 	//nothing to refresh currently
 }
 

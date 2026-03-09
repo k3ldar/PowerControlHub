@@ -20,7 +20,8 @@
 #include <SerialCommandManager.h>
 #include "BroadcastManager.h"
 
-class InterceptDebugHandler : public ISerialCommandHandler {
+class InterceptDebugHandler : public ISerialCommandHandler
+{
 private:
     BroadcastManager* _broadcastManager;
 public:

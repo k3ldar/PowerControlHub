@@ -99,6 +99,7 @@ void RelaySettingsPage::begin()
 
 void RelaySettingsPage::refresh(unsigned long now)
 {
+    (void)now;
     //nothing to refresh currently
 }
 

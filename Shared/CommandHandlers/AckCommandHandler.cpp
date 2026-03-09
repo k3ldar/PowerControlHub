@@ -42,6 +42,8 @@ AckCommandHandler::AckCommandHandler(BroadcastManager* broadcastManager, Warning
 #if defined(BOAT_CONTROL_PANEL)
 bool AckCommandHandler::processHeartbeatAck(SerialCommandManager* sender, const char* key, const char* value)
 {
+	(void)sender;
+
     // Check for heartbeat acknowledgement (F0=ok)
     if (strcmp(key, SystemHeartbeatCommand) != 0 || strcmp(value, AckSuccess) != 0)
         return false;

@@ -28,7 +28,8 @@ struct TimeParts
     uint16_t milliseconds;
 };
 
-class SystemFunctions {
+class SystemFunctions
+{
 public:
 	/**
 	* @brief Estimate free memory (RAM) available.

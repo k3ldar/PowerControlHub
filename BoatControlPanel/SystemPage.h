@@ -26,7 +26,8 @@
 #include "NextionIds.h"
 #include "BoatControlPanelConstants.h"
 
-class SystemPage : public BaseBoatPage {
+class SystemPage : public BaseBoatPage
+{
 private:
     unsigned long _lastRefreshTime = 0;
 	uint8_t _lastFuseBoxCpu = MaxUint8Value;
