@@ -20,6 +20,7 @@
 #include "Local.h"
 #include "BaseSensor.h"
 #include "Queue.h"
+#include "RelayController.h"
 
 constexpr unsigned long LightCheckMs = 30000;
 constexpr uint8_t LightQueueCapacity = 10;

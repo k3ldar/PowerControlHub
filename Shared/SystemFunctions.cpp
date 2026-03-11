@@ -19,8 +19,8 @@
 #include "SystemFunctions.h"
 #include "SystemDefinitions.h"
 
-#if !defined(LONG_MAX)
-#define LONG_MAX 0x7FFFFFFF
+#if !defined(WIFI_SUPPORT)
+#include <limits.h>
 #endif
 
 #if defined(ESP32)

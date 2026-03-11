@@ -501,6 +501,7 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
                 sendAckErr(sender, command, F("MMSI must be 9 digits"), &params[0]);
                 return true;
             }
+
             strncpy(cfg->mMSI, params[0].value, ConfigMmsiLength - 1);
             cfg->mMSI[ConfigMmsiLength - 1] = '\0';
             sendAckOk(sender, command, &params[0]);
@@ -979,8 +980,16 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
             if (paramCount == 1)
             {
                 uint16_t threshold = static_cast<uint16_t>(strtoul(params[0].value, nullptr, 0));
-                cfg->lightSensor.daytimeThreshold = threshold;
-                sendAckOk(sender, command, &params[0]);
+
+                if (threshold > 1023)
+                {
+                    sendAckErr(sender, command, F("Threshold must be 0-1023"), &params[0]);
+                }
+                else
+                {
+                    cfg->lightSensor.daytimeThreshold = threshold;
+                    sendAckOk(sender, command, &params[0]);
+                }
             }
             else
             {
