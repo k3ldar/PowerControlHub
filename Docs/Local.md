@@ -131,8 +131,8 @@ Default pin assignments for the example sensors. Change these to match your wiri
 | Constant | Default | Connected to |
 |---|---|---|
 | `WaterSensorPin` | `A0` | Water level sensor analog output |
-| `LightSensorAnalogPin` | `A1` | LDR analog output (available but not currently read by `LightSensorHandler`) |
-| `LightSensorPin` | `D3` | LDR digital output — `LOW` = daytime |
+| `LightSensorAnalogPin` | `A1` | LDR analog output — read every poll and averaged over a rolling queue of 10 samples |
+| `LightSensorPin` | `D3` | LDR digital pin — initialised as `INPUT`; analog reading is now the primary detection source |
 | `WaterSensorActivePin` | `D8` | Water sensor power pin — pulsed `HIGH` before each reading to reduce corrosion |
 | `Dht11SensorPin` | `D9` | DHT11 data line |
 

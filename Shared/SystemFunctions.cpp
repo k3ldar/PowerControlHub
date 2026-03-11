@@ -19,6 +19,10 @@
 #include "SystemFunctions.h"
 #include "SystemDefinitions.h"
 
+#if !defined(WIFI_SUPPORT)
+#include <limits.h>
+#endif
+
 #if defined(ESP32)
 #include "esp_timer.h"
 #endif

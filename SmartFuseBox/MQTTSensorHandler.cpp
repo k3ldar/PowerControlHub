@@ -42,6 +42,8 @@ MQTTSensorHandler::MQTTSensorHandler(MQTTController* mqttController, MessageBus*
     , _tempChannelIdx(-1)
     , _humidityChannelIdx(-1)
     , _lightChannelIdx(-1)
+    , _lightLevelChannelIdx(-1)
+    , _avgLightLevelChannelIdx(-1)
     , _waterChannelIdx(-1)
     , _discoveryPending(false)
     , _discoveryIndex(0)
@@ -76,9 +78,9 @@ bool MQTTSensorHandler::begin()
     );
 
     _messageBus->subscribe<LightSensorUpdated>(
-        [this](bool isDaytime)
+        [this](bool isDaytime, uint16_t lightLevel, uint16_t averageLightLevel)
         {
-            this->onLightSensorUpdated(isDaytime);
+            this->onLightSensorUpdated(isDaytime, lightLevel, averageLightLevel);
         }
     );
 
@@ -116,6 +118,14 @@ bool MQTTSensorHandler::begin()
             else if (strcmp(slug, "light") == 0)
             {
                 _lightChannelIdx = static_cast<int8_t>(newIdx);
+            }
+            else if (strcmp(slug, "light_level") == 0)
+            {
+                _lightLevelChannelIdx = static_cast<int8_t>(newIdx);
+            }
+            else if (strcmp(slug, "avg_light_level") == 0)
+            {
+                _avgLightLevelChannelIdx = static_cast<int8_t>(newIdx);
             }
             else if (strcmp(slug, "water_level") == 0)
             {
@@ -230,13 +240,20 @@ void MQTTSensorHandler::onHumidityUpdated(uint8_t humidity)
     }
 }
 
-void MQTTSensorHandler::onLightSensorUpdated(bool isDaytime)
+void MQTTSensorHandler::onLightSensorUpdated(bool isDaytime, uint16_t lightLevel, uint16_t averageLightLevel)
 {
     (void)isDaytime;
+    (void)lightLevel;
+    (void)averageLightLevel;
+
     if (_lightChannelIdx >= 0)
-    {
         publishSensorState(static_cast<uint8_t>(_lightChannelIdx));
-    }
+
+    if (_lightLevelChannelIdx >= 0)
+        publishSensorState(static_cast<uint8_t>(_lightLevelChannelIdx));
+
+    if (_avgLightLevelChannelIdx >= 0)
+        publishSensorState(static_cast<uint8_t>(_avgLightLevelChannelIdx));
 }
 
 void MQTTSensorHandler::onWaterLevelUpdated(uint16_t waterLevel, uint16_t averageWaterLevel)

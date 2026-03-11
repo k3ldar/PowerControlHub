@@ -66,11 +66,41 @@ All sensors inherit from `BaseSensor` and are registered with `SensorController`
 |---|---|
 | **Class** | `LightSensorHandler` |
 | **Sensor ID** | `SensorIdList::LightSensor` (`0x2`) |
-| **Digital Pin** | `LightSensorPin` (`D3`) |
-| **Analog Pin** | `LightSensorAnalogPin` (`A1`) |
+| **Digital Pin** | `LightSensorPin` (`D3`) — kept for `pinMode` initialisation |
+| **Analog Pin** | `LightSensorAnalogPin` (`A1`) — primary reading source |
 | **Poll Interval** | 30 000 ms |
+| **Averaging** | Rolling queue of 10 readings (`LightQueueCapacity`) |
+| **Debounce** | 3 consecutive agreeing readings required (`DaytimeConfirmReadings`) |
 
-The digital pin is read in `INPUT` mode: `LOW` = daytime (light detected), `HIGH` = night.
+#### Detection Logic
+
+Each poll reads the raw ADC value from the analog pin (0 – 1023) and enqueues it into a rolling `Queue<uint16_t>`. The queue automatically discards the oldest reading when full, giving a sliding average over the last 10 samples (≈ 5 minutes at the default poll interval).
+
+The averaged value is compared against the configurable `daytimeThreshold` (default 512, stored in `Config.lightSensor.daytimeThreshold`):
+
+- `average > threshold` → **daytime** candidate
+- `average ≤ threshold` → **night** candidate
+
+A candidate must be consistent for **3 consecutive polls** before `_isDaytime` changes state. This prevents rapid relay switching caused by transient light fluctuations at dusk and dawn.
+
+#### Night Relay
+
+If `Config.lightSensor.nightRelayIndex` is set to a valid relay index (0 – 7), that relay is automatically switched:
+
+- **ON** when night is confirmed
+- **OFF** when daytime is confirmed
+- Driven to the correct initial state during `initialize()`
+
+Set to `0xFF` (default) to disable automatic relay control.
+
+#### Configuration (`Config.lightSensor`)
+
+| Field | Type | Default | Description |
+|---|---|---|---|
+| `nightRelayIndex` | `uint8_t` | `0xFF` | Relay to drive on night/day transitions. `0xFF` = none |
+| `daytimeThreshold` | `uint16_t` | `512` | ADC threshold (0 – 1023). Readings above this are treated as daytime |
+
+Configure via serial commands `C32` / `C33`, or through the **Relay Settings** page on the Boat Control Panel (night relay only; threshold via serial).
 
 **Serial Commands**
 
@@ -78,20 +108,29 @@ The digital pin is read in `INPUT` mode: `LOW` = daytime (light detected), `HIGH
 |---|---|---|
 | Light Sensor | `S9` | `1` = daytime, `0` = night |
 
+**Config Commands**
+
+| Command | ID | Format | Description |
+|---|---|---|---|
+| Night Relay | `C32` | `v=<0-7\|255>` | Set night relay index; `255` = none |
+| Daytime Threshold | `C33` | `v=<0-1023>` | Set ADC daytime threshold |
+
 **MQTT Channels**
 
-| Channel | Slug | Device Class | Unit | Binary |
-|---|---|---|---|---|
-| Daylight | `light` | `light` | — | Yes (`ON` / `OFF`) |
+| Index | Channel | Slug | Device Class | Unit | Binary |
+|---|---|---|---|---|---|
+| 0 | Daylight | `light` | `light` | — | Yes (`ON` / `OFF`) |
+| 1 | Light Level | `light_level` | — | — | No |
+| 2 | Avg Light Level | `avg_light_level` | — | — | No |
 
 **Messages Published (MessageBus)**
 
-- `LightSensorUpdated` – fired on every poll with the current daytime boolean.
+- `LightSensorUpdated(bool isDayTime, uint16_t lightLevel, uint16_t averageLightLevel)` – fired on every poll with the confirmed day/night state, the raw ADC reading, and the current rolling average.
 
 **JSON Status Fragment**
 
 ```json
-{ "isDaytime": true }
+{ "isDaytime": true, "lightLevel": 620, "avgLightLevel": 587 }
 ```
 
 ---

@@ -178,7 +178,9 @@ void ConfigManager::resetToDefaults()
 
 	_cfg.vesselType = VesselType::Motor;
 	_cfg.hornRelayIndex = 0xFF; // none
-	_cfg.soundStartDelayMs = 500; // 500ms
+    _cfg.lightSensor.nightRelayIndex = 0xFF; // none
+    _cfg.lightSensor.daytimeThreshold = 512;
+    _cfg.soundStartDelayMs = 500; // 500ms
 	
     // default relay states
 	for (uint8_t i = 0; i < ConfigRelayCount; ++i)

@@ -65,6 +65,9 @@ constexpr uint8_t relayAssociate2 = 4;
 //page allowing users to select custom colors for each relay button that is on
 constexpr uint8_t relayColorSelection = 5;
 
+// page allowing user to select night relay 
+constexpr uint8_t relayNightRelay = 6;
+
 RelaySettingsPage::RelaySettingsPage(Stream* serialPort,
     WarningManager* warningMgr,
     SerialCommandManager* commandMgrLink,
@@ -347,7 +350,34 @@ void RelaySettingsPage::loadConfigPage()
 
             break;
         }
+        case relayNightRelay:
+        {
+            sendValue(FPSTR(SettingsRelaySetupId), relayNightRelay);
 
+            uint8_t nightRelayIdx = config->lightSensor.nightRelayIndex;
+
+            for (uint8_t i = 0; i < ConfigRelayCount; i++)
+            {
+                uint16_t buttonColor = (nightRelayIdx == i) ? ButtonSelected : ButtonNotSelected;
+                const char* buttonName = reinterpret_cast<const char*>(pgm_read_ptr(&SettingRelayButtons[i]));
+                setComponentProperty(reinterpret_cast<const __FlashStringHelper*>(buttonName),
+                    FPSTR(PropertyButtonColor), buttonColor);
+            }
+
+            if (nightRelayIdx < ConfigRelayCount)
+            {
+                _externalData[0] = '0' + nightRelayIdx;
+                _externalData[1] = '\0';
+            }
+            else
+            {
+                _externalData[0] = '\0';
+            }
+
+            sendText(FPSTR(SettingSelectedText), _externalData);
+
+            break;
+        }
         default:
             ConfigManager::save();
             setPage(PageAbout);
@@ -617,6 +647,27 @@ bool RelaySettingsPage::validateExternalData()
                 config->buttonImage[i] = imageId;
             }
 
+            result = true;
+            break;
+        }
+
+        case relayNightRelay:
+        {
+            if (strlen(_externalData) == 0)
+            {
+                config->lightSensor.nightRelayIndex = 0xFF;
+                result = true;
+                break;
+            }
+
+            if (strlen(_externalData) != 1 ||
+                _externalData[0] < '0' || _externalData[0] > '7')
+            {
+                sendText(FPSTR(SettingsError), F("Select 0 or 1 relay"));
+                return false;
+            }
+
+            config->lightSensor.nightRelayIndex = _externalData[0] - '0';
             result = true;
             break;
         }

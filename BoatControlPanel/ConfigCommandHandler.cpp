@@ -501,6 +501,7 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
                 sendAckErr(sender, command, F("MMSI must be 9 digits"), &params[0]);
                 return true;
             }
+
             strncpy(cfg->mMSI, params[0].value, ConfigMmsiLength - 1);
             cfg->mMSI[ConfigMmsiLength - 1] = '\0';
             sendAckOk(sender, command, &params[0]);
@@ -698,6 +699,14 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
             cfg->soundConfig.badPreset,
             cfg->soundConfig.bad_repeatMs);
         sender->sendCommand(ControlPanelTones, buffer);
+
+        // C32 Light sensor night relay
+        snprintf_P(buffer, sizeof(buffer), PSTR("v=%u"), cfg->lightSensor.nightRelayIndex);
+        sender->sendCommand(ConfigLightSensorNightRelay, buffer);
+
+        // C33 Light sensor daytime threshold
+        snprintf_P(buffer, sizeof(buffer), PSTR("v=%u"), cfg->lightSensor.daytimeThreshold);
+        sender->sendCommand(ConfigLightSensorThreshold, buffer);
 
         sendAckOk(sender, command);
     }
@@ -945,6 +954,47 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
             }
 
             sendAckOk(sender, command);
+        }
+        else if (strcmp(command, ConfigLightSensorNightRelay) == 0)
+        {
+            if (paramCount == 1)
+            {
+                uint8_t relay = static_cast<uint8_t>(strtoul(params[0].value, nullptr, 0));
+
+                if (relay >= ConfigRelayCount && relay != DefaultValue)
+                {
+                    sendAckErr(sender, command, F("Relay out of range (or 255 to clear)"), &params[0]);
+                    return true;
+                }
+
+                cfg->lightSensor.nightRelayIndex = relay;
+                sendAckOk(sender, command, &params[0]);
+            }
+            else
+            {
+                sendAckErr(sender, command, F("Missing param"));
+            }
+        }
+        else if (strcmp(command, ConfigLightSensorThreshold) == 0)
+        {
+            if (paramCount == 1)
+            {
+                uint16_t threshold = static_cast<uint16_t>(strtoul(params[0].value, nullptr, 0));
+
+                if (threshold > 1023)
+                {
+                    sendAckErr(sender, command, F("Threshold must be 0-1023"), &params[0]);
+                }
+                else
+                {
+                    cfg->lightSensor.daytimeThreshold = threshold;
+                    sendAckOk(sender, command, &params[0]);
+                }
+            }
+            else
+            {
+                sendAckErr(sender, command, F("Missing param"));
+            }
         }
         else
         {
