@@ -45,6 +45,8 @@ private:
     int8_t _tempChannelIdx;
     int8_t _humidityChannelIdx;
     int8_t _lightChannelIdx;
+    int8_t _lightLevelChannelIdx;
+    int8_t _avgLightLevelChannelIdx;
     int8_t _waterChannelIdx;
 
     // Discovery state
@@ -59,7 +61,7 @@ private:
     void publishSensorDiscoveryConfig(uint8_t index);
     void onTemperatureUpdated(float temperature);
     void onHumidityUpdated(uint8_t humidity);
-    void onLightSensorUpdated(bool isDaytime);
+    void onLightSensorUpdated(bool isDaytime, uint16_t lightLevel, uint16_t averageLightLevel);
     void onWaterLevelUpdated(uint16_t waterLevel, uint16_t averageWaterLevel);
 
 public:

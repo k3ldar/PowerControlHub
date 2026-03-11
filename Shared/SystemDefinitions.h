@@ -96,6 +96,8 @@ constexpr char ControlPanelTones[] = "C28";
 constexpr char ConfigReloadFromSd[] = "C29";
 constexpr char ConfigExportToSd[] = "C30";
 constexpr char ConfigSdCardSpeed[] = "C31";
+constexpr char ConfigLightSensorNightRelay[] = "C32";
+constexpr char ConfigLightSensorThreshold[] = "C33";
 
 constexpr char MqttConfigEnable[] = "M0";
 constexpr char MqttConfigBroker[] = "M1";

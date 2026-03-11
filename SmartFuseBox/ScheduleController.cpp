@@ -66,8 +66,10 @@ void ScheduleController::begin()
     if (!_messageBus)
         return;
 
-    _messageBus->subscribe<LightSensorUpdated>([this](bool isDayTime)
+    _messageBus->subscribe<LightSensorUpdated>([this](bool isDayTime, uint16_t lightLevel, uint16_t averageLightLevel)
     {
+        (void)lightLevel;
+        (void)averageLightLevel;
         _isDayTime = isDayTime;
     });
 

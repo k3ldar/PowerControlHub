@@ -62,6 +62,14 @@ struct SoundSignalConfig
 	uint32_t bad_repeatMs;
 } __attribute__((packed));
 
+
+struct LightSensorConfig
+{
+	uint8_t nightRelayIndex;    // 0..7 or 0xFF = none
+	uint16_t daytimeThreshold;  // 0..1023 ADC threshold
+} __attribute__((packed));
+
+
 // MQTT Configuration
 constexpr uint8_t ConfigMqttBrokerLength = 64;
 constexpr uint8_t ConfigMqttUsernameLength = 32;
@@ -211,6 +219,8 @@ struct Config {
 	SoundSignalConfig soundConfig;
 
 	MqttConfig mqtt;
+
+	LightSensorConfig lightSensor;
 
 	#if defined(SCHEDULER_SUPPORT)
 	SchedulerSettings scheduler;

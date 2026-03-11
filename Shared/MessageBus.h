@@ -39,7 +39,7 @@ struct HumidityUpdated
 
 struct LightSensorUpdated
 {
-    using Callback = std::function<void(bool isDayTime)>;
+    using Callback = std::function<void(bool isDayTime, uint16_t lightLevel, uint16_t averageLightLevel)>;
 };
 
 struct WaterLevelUpdated

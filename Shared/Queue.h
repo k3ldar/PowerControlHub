@@ -75,9 +75,11 @@ bool Queue<T>::isEmpty() const
 template<typename T>
 void Queue<T>::enqueue(T item)
 {
-    if (isFull())
-        return;
-	
+	if (isFull())
+	{
+		dequeue();
+	}
+
    _size++;
 	QItem<T>* temp = new QItem<T>(item);
 	

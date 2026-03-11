@@ -262,7 +262,15 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
 		snprintf(buffer, sizeof(buffer), "v=%u", config->sdCardInitializeSpeed);
 		sender->sendCommand(ConfigSdCardSpeed, buffer);
 
-		result = ConfigResult::Success;
+        // C32 Light sensor night relay
+        snprintf(buffer, sizeof(buffer), "v=%d", config->lightSensor.nightRelayIndex);
+        sender->sendCommand(ConfigLightSensorNightRelay, buffer);
+
+        // C33 Light sensor daytime threshold
+        snprintf(buffer, sizeof(buffer), "v=%u", config->lightSensor.daytimeThreshold);
+        sender->sendCommand(ConfigLightSensorThreshold, buffer);
+
+        result = ConfigResult::Success;
     }
     else if (strcmp(command, ConfigResetSettings) == 0)
     {
@@ -746,6 +754,30 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
         return true;
 #endif
     }
+    else if (strcmp(command, ConfigLightSensorNightRelay) == 0)
+    {
+        if (paramCount == 1)
+        {
+            uint8_t relay = static_cast<uint8_t>(strtoul(params[0].value, nullptr, 0));
+            result = _configController->setLightSensorNightRelay(relay);
+        }
+        else
+        {
+            result = ConfigResult::InvalidParameter;
+        }
+        }
+    else if (strcmp(command, ConfigLightSensorThreshold) == 0)
+    {
+        if (paramCount == 1)
+        {
+            uint16_t threshold = static_cast<uint16_t>(atoi(params[0].value));
+            result = _configController->setLightSensorThreshold(threshold);
+        }
+        else
+        {
+            result = ConfigResult::InvalidParameter;
+        }
+        }
 #if defined(MQTT_SUPPORT)
     else if (command[0] == 'M' && strlen(command) >= 2)
     {

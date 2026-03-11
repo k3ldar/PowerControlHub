@@ -19,6 +19,10 @@
 #include "SystemFunctions.h"
 #include "SystemDefinitions.h"
 
+#if !defined(LONG_MAX)
+#define LONG_MAX 0x7FFFFFFF
+#endif
+
 #if defined(ESP32)
 #include "esp_timer.h"
 #endif

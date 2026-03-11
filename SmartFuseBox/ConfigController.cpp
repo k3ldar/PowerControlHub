@@ -612,3 +612,25 @@ ConfigResult ConfigController::setSdCardInitializeSpeed(const uint8_t speedMhz)
 	_config->sdCardInitializeSpeed = speedMhz;
 	return ConfigResult::Success;
 }
+
+// C32: Set light sensor night relay
+ConfigResult ConfigController::setLightSensorNightRelay(const uint8_t relayIndex)
+{
+    if (_config == nullptr)
+        return ConfigResult::InvalidConfig;
+
+    if (relayIndex >= ConfigRelayCount && relayIndex != DefaultValue)
+        return ConfigResult::InvalidRelay;
+
+    _config->lightSensor.nightRelayIndex = relayIndex;
+    return ConfigResult::Success;
+}
+
+ConfigResult ConfigController::setLightSensorThreshold(const uint16_t threshold)
+{
+    if (_config == nullptr)
+        return ConfigResult::InvalidConfig;
+
+    _config->lightSensor.daytimeThreshold = threshold;
+    return ConfigResult::Success;
+}

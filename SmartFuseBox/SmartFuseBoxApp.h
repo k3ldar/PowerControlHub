@@ -160,6 +160,7 @@ public:
     BroadcastManager* broadcastManager() { return &_broadcastManager; }
     WarningManager* warningManager() { return &_warningManager; }
     SensorCommandHandler* sensorCommandHandler() { return &_sensorCommandHandler; }
+    RelayController* relayController() { return &_relayController; }
 
     IWifiController* wifiController() 
     {
