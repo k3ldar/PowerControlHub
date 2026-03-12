@@ -30,8 +30,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{B2F18220-A
 		..\Wifi.md = ..\Wifi.md
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "MQTT", "MQTT", "{F43F9589-9B50-479E-8B2E-F29ED8545D1C}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|ARM = Debug|ARM
@@ -55,9 +53,6 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		{F43F9589-9B50-479E-8B2E-F29ED8545D1C} = {B2F18220-A117-4398-ABED-D0C31F1F5844}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {5EE35FDC-6C73-4441-9902-170DFD608301}

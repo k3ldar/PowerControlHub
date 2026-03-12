@@ -1,4 +1,4 @@
-[📋 Setup Guide](Docs/SETUP.md) | [🔧 Local.h Reference](Docs/Local.md) | [🔬 Sensor Reference](Docs/Sensors.md) | [🔩 Bill of Materials](Docs/BOM.md)
+[📋 Setup Guide](Docs/SETUP.md) | [📋 Commands](Docs/commands.md) | [🔧 Local.h Reference](Docs/Local.md) | [🔬 Sensor Reference](Docs/Sensors.md) | [🔩 Bill of Materials](Docs/BOM.md)
 # SmartFuseBox ⚡
 
 A modular, Arduino-powered **12V power distribution and control system** designed for boats and other off-grid applications.  
