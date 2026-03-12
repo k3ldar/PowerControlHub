@@ -4,5 +4,5 @@
 *.ino text eol=crlf
 *.md  text eol=crlf
 
-SmartFuseBox/SmartFuseBox/Local.h merge=ours
-SmartFuseBox/SmartFuseBox/SmartFuseBox.ino merge=ours
+SmartFuseBox/Local.h merge=ours
+SmartFuseBox/SmartFuseBox.ino merge=ours
