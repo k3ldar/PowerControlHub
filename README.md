@@ -1,3 +1,4 @@
+| [📋 Setup Guide](Docs/SETUP.md) | [🔧 Local.h Reference](Docs/Local.md) | [🔬 Sensor Reference](Docs/Sensors.md) | [🔩 Bill of Materials](Docs/BOM.md) |
 # SmartFuseBox ⚡
 
 A modular, Arduino-powered **12V power distribution and control system** designed for boats and other off-grid applications.  
@@ -96,7 +97,7 @@ The SFB firmware is built around `SmartFuseBoxApp`, which owns all subsystems an
 
 ## 🚀 Quick Start
 
-1. **Read the setup guide** → [SETUP.md](SETUP.md) — covers prerequisites, symlinks, and building.
+1. **Read the setup guide** → [Docs/SETUP.md](Docs/SETUP.md) — covers prerequisites, symlinks, and building.
 2. **Configure your board** → edit `Local.h` to select your board, set pin numbers, relay count, and enable features such as `MQTT_SUPPORT` or `WIFI_SUPPORT`.
 3. **Flash the SFB sketch** → open `SmartFuseBox/SmartFuseBox.ino` in the Arduino IDE and upload.
 4. **Configure WiFi** → send serial commands (`C11:v=1`, `C13:YourSSID`, `C14:YourPassword`) or use the BCP touchscreen.
@@ -104,45 +105,12 @@ The SFB firmware is built around `SmartFuseBoxApp`, which owns all subsystems an
 
 ---
 
-## 📚 Documentation
+## 🗂️ Documentation
 
-| Document | Description |
-|---|---|
-| [SETUP.md](SETUP.md) | Build environment setup, symlinks, and prerequisites |
-| [Docs/Architecture.md](Docs/Architecture.md) | Full system architecture, subsystem breakdown, serial protocol |
-| [Docs/Sensors.md](Docs/Sensors.md) | Sensor reference — hardware, pins, MQTT channels, how to add new sensors |
-| [Commands.md](Commands.md) | Complete serial command reference (F\*, R\*, S\*, C\*, H\*, W\*, M\*) |
-| [Wifi.md](Wifi.md) | WiFi architecture, HTTP REST API, connection state machine |
-| [CONFIG_SYNC_README.md](CONFIG_SYNC_README.md) | Config synchronisation between SFB and BCP |
-| [BOM.md](BOM.md) | Bill of materials — hardware, fasteners, 3D-printed parts |
+| 🚀 Getting Started | ⚙️ Configuration | 📡 Connectivity |
+|:---:|:---:|:---:|
+| [📋 Setup Guide](Docs/SETUP.md) | [🔧 Local.h Reference](Docs/Local.md) | [📶 WiFi Architecture](Docs/Wifi.md) |
+| [🔩 Bill of Materials](Docs/BOM.md) | [📅 Scheduled Events](Docs/ScheduleEvents.md) | [📡 Bluetooth BLE](Docs/BluetoothBle.md) |
+| [🔬 Sensor Reference](Docs/Sensors.md) | [⚠️ Warning System](Docs/Warnings.md) | [🗃️ Message Bus](Docs/MessageBus.md) |
 
 ---
-
-## 🚤 Use Cases
-
-- **Marine upgrades** — modernize older boats with modular, safe wiring and remote monitoring.
-- **Off-grid projects** — camper vans, RVs, or solar-powered cabins needing fused relay control.
-- **DIY automation** — any 12V system that benefits from wireless control and Home Assistant integration.
-
----
-
-## 📦 Roadmap
-
-- [ ] Publish STL files for the 3D-printed enclosure.
-- [ ] Add CAN bus or RS485 support for longer cable runs.
-- [ ] WebSocket support for real-time bidirectional updates.
-- [ ] mDNS / Bonjour for automatic device discovery without hardcoded IPs.
-- [ ] OTA firmware updates via WiFi.
-
----
-
-## 🤝 Contributing
-
-Contributions, ideas, and improvements are welcome!  
-If you’ve built something similar or adapted SmartFuseBox for your own project, feel free to open an issue or share your setup.
-
----
-
-## 📜 License
-
-GNU General Public License v3.0 (GPLv3) — see [LICENSE](LICENSE) for details.
