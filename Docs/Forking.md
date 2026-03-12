@@ -22,7 +22,7 @@ when pulling upstream changes.
 
 | File | Purpose |
 |---|---|
-| `SmartFuseBox/SmartFuseBox/BoardConfig.h` | EEPROM table, derived flags, board validation guards |
+| `SmartFuseBox/BoardConfig.h` | EEPROM table, derived flags, board validation guards |
 
 `BoardConfig.h` is included at the bottom of `Local.h` and provides all derived capability
 flags (`WIFI_SUPPORT`, `SCHEDULER_SUPPORT`, etc.) and `#error` guards based on your board
