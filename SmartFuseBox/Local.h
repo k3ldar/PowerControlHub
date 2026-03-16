@@ -85,8 +85,8 @@ constexpr unsigned long serialInitTimeoutMs = 300;
 #if defined(ESP32)
 // ESP32 NodeMCU-32S — adjust to your actual sensor wiring.
 // ADC1 pins are safe; ADC2 pins (0,2,4,12-15,25-27) conflict with WiFi when active.
-constexpr uint8_t WaterSensorPin = 34;       // ADC1, input-only, safe
-constexpr uint8_t WaterSensorActivePin = 35; // ADC1, input-only, safe
+constexpr uint8_t WaterSensorPin = 34;       // ADC1, input-only, safe for analog read
+constexpr uint8_t WaterSensorActivePin = 21; // GPIO21, output-capable, used to drive sensor power/enable
 constexpr uint8_t Dht11SensorPin = 4;
 constexpr uint8_t LightSensorPin = 36;       // ADC1 (VP), input-only, safe
 constexpr bool LightSensorIsDigital = false;
