@@ -66,7 +66,7 @@
 #endif
 
 // MQTT home-assistant discovery (requires WIFI_SUPPORT — enforced in BoardConfig.h)
-#define MQTT_SUPPORT
+#define MQTT_SUPPORT_
 
 // Bluetooth BLE (mutually exclusive with WIFI_SUPPORT on Arduino Uno R4)
 #define BLUETOOTH_SUPPORT_
