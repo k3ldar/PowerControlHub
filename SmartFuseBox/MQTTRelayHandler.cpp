@@ -377,8 +377,16 @@ void MQTTRelayHandler::publishRelayDiscoveryConfig(uint8_t relayIndex)
     // Build discovery topic: <discoveryPrefix>/switch/<device_id>/<object_id>/config
     // Use a single-segment object_id (relay_<index>) so Home Assistant can parse it
     char topic[MqttMaxTopicLength];
-    snprintf(topic, sizeof(topic), "%s/switch/%s/relay_%u/config",
+    int topicLen = snprintf(topic, sizeof(topic), "%s/switch/%s/relay_%u/config",
         _config->mqtt.discoveryPrefix, _config->mqtt.deviceId, relayIndex);
+    if (topicLen < 0 || topicLen >= static_cast<int>(sizeof(topic)))
+    {
+        if (_commandMgr != nullptr)
+        {
+            _commandMgr->sendError(F("Discovery topic truncated"), F("MQTT Relay"));
+        }
+        return;
+    }
 
     // Build JSON payload
     // Note: Keep this simple to avoid buffer overflow - max ~512 bytes
@@ -388,7 +396,7 @@ void MQTTRelayHandler::publishRelayDiscoveryConfig(uint8_t relayIndex)
     const char* relayName = _config->relayLongNames[relayIndex];
 
     // Build minimal JSON discovery payload
-    snprintf(payload, sizeof(payload),
+    int payloadLen = snprintf(payload, sizeof(payload),
         "{\"name\":\"%s\","
         "\"state_topic\":\"home/%s/relay/%u/state\","
         "\"command_topic\":\"home/%s/relay/%u/set\","
@@ -404,7 +412,15 @@ void MQTTRelayHandler::publishRelayDiscoveryConfig(uint8_t relayIndex)
         _config->mqtt.deviceId, relayIndex,
         _config->mqtt.deviceId
     );
+    if (payloadLen < 0 || payloadLen >= static_cast<int>(sizeof(payload)))
+    {
+        if (_commandMgr != nullptr)
+        {
+            _commandMgr->sendError(F("Discovery payload truncated"), F("MQTT Relay"));
+        }
+        return;
+    }
 
-    // Publish with retain flag so HA can discover even if it restarts
+    // Publish with retain flag
     client->publish(topic, payload, MqttQoS::AtMostOnce, true);
 }

@@ -75,7 +75,7 @@ public:
     
     void flush() override
     {
-        _client.flush();
+        _client.clear();
     }
 
     int connect(const char* host, uint16_t port) override
@@ -168,7 +168,7 @@ public:
         return _client.println();
     }
     
-    operator bool() const override
+    operator bool() override
     {
         return _client;
     }

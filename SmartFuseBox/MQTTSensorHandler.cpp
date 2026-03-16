@@ -338,8 +338,16 @@ void MQTTSensorHandler::publishSensorDiscoveryConfig(uint8_t index)
 
     const char* entityType = channel.isBinary ? EntityTypeBinarySensor : EntityTypeSensor;
 
-    snprintf_P(topic, sizeof(topic), DiscoveryTopicFormat,
+    int topicLen = snprintf_P(topic, sizeof(topic), DiscoveryTopicFormat,
         _config->mqtt.discoveryPrefix, entityType, _config->mqtt.deviceId, channel.slug);
+    if (topicLen < 0 || topicLen >= static_cast<int>(sizeof(topic)))
+    {
+        if (_commandMgr != nullptr)
+        {
+            _commandMgr->sendError(F("Discovery topic truncated"), F("MQTT Sensor"));
+        }
+        return;
+    }
 
     // payload[512]
     size_t offset = 0;

@@ -19,6 +19,7 @@
 #include "SmartFuseBoxConstants.h"
 #include "MessageBus.h"
 
+#if defined(LED_MANAGER)
 LedMatrixManager::LedMatrixManager(MessageBus* messageBus)
 	: _messageBus(messageBus),
 	_nextLedUpdate(0),
@@ -381,3 +382,4 @@ void LedMatrixManager::UpdateWarningIndicators(uint32_t warningMask)
 
 	updateLed();
 }
+#endif

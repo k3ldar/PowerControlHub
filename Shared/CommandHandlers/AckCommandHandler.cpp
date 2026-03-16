@@ -179,7 +179,7 @@ bool AckCommandHandler::handleCommand(SerialCommandManager* sender, const char* 
 
     if (strcmp(params[0].value, AckSuccess) != 0)
     {
-        char debugMsg[100];
+        char debugMsg[120];
         snprintf_P(debugMsg, sizeof(debugMsg), PSTR("ACK indicates failure: key='%s', val='%s'"), params[0].key, params[0].value);
         _broadcaster->sendDebug(debugMsg, AckCommand);
         return false;

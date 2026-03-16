@@ -35,8 +35,6 @@ CommandResult ConfigNetworkHandler::handleRequest(const char* method,
 	size_t bufferSize)
 {
 	(void)method;
-	(void)bufferSize;
-	(void)responseBuffer;
 	ConfigResult result;
 	if (strcmp(command, ConfigSaveSettings) == 0)
 	{
@@ -225,8 +223,8 @@ CommandResult ConfigNetworkHandler::handleRequest(const char* method,
 			state = static_cast<uint8_t>(_wifiController->getServer()->getConnectionState());
 		}
 
-		snprintf(responseBuffer, sizeof(responseBuffer), "v=%d", state);
-		result = ConfigResult::Success;
+		int len = snprintf(responseBuffer, bufferSize, "v=%d", state);
+		result = (len > 0 && len < static_cast<int>(bufferSize)) ? ConfigResult::Success : ConfigResult::InvalidParameter;
 	}
 	else if (strcmp(command, ConfigWifiApIpAddress) == 0)
 	{

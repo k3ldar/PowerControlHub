@@ -17,8 +17,8 @@
  */
 #pragma once
 
+#if defined(LED_MANAGER)
 #include "Local.h"
-#include "new_Arduino_LED_Matrix.h"
 #include "MessageBus.h"
 
 constexpr auto LedUpdateFrequency = 500;
@@ -95,3 +95,4 @@ public:
 	void StartupSequence();
 	void ShutdownSequence();
 };
+#endif

@@ -25,11 +25,10 @@
 #include "INetworkCommandHandler.h"
 #include "WarningManager.h"
 #include "MessageBus.h"
+#include "Local.h"
 
 constexpr uint16_t MaximumRequestSize = 512;   // GET-only API, typical request ~200 bytes
 constexpr uint8_t MaximumPathLength = 128;
-constexpr uint8_t MaxConcurrentClients = 2;
-constexpr uint8_t MaxPersistentClients = 1;
 
 static constexpr unsigned long ConnectionRetryIntervalMs = 10000;
 static constexpr unsigned long ConnectionTimeoutMs = 10000;
