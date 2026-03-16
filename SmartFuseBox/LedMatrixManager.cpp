@@ -15,10 +15,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
+#include "Local.h"
 #include "LedMatrixManager.h"
 #include "SmartFuseBoxConstants.h"
 #include "MessageBus.h"
 
+#if defined(LED_MANAGER)
 LedMatrixManager::LedMatrixManager(MessageBus* messageBus)
 	: _messageBus(messageBus),
 	_nextLedUpdate(0),
@@ -381,3 +383,4 @@ void LedMatrixManager::UpdateWarningIndicators(uint32_t warningMask)
 
 	updateLed();
 }
+#endif

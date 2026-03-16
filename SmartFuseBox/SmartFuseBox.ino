@@ -70,8 +70,8 @@ WaterSensorHandler waterSensorHandler(app.messageBus(), app.broadcastManager(),
 Dht11SensorHandler dht11SensorHandler(app.messageBus(), app.broadcastManager(),
 	app.sensorCommandHandler(), app.warningManager(), Dht11SensorPin);
 LightSensorHandler lightSensorHandler(app.messageBus(), app.broadcastManager(),
-	app.sensorCommandHandler(), app.warningManager(), LightSensorPin, 
-	LightSensorAnalogPin, app.relayController(), true);
+	app.sensorCommandHandler(), app.relayController(), 
+	LightSensorPin, LightSensorIsDigital);
 SystemSensorHandler systemSensorHandler(app.messageBus(), 
 	app.wifiController(),
 	app.bluetoothController(),

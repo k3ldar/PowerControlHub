@@ -313,10 +313,17 @@ bool MQTTClient::update()
         {
             if (_commandMgr != nullptr)
             {
-                char buf[64];
-                snprintf(buf, sizeof(buf), "Keep-alive timeout: no packet for %lums (threshold=%lums)",
+                char buf[80];
+                int len = snprintf(buf, sizeof(buf), "Keep-alive timeout: no packet for %lums (threshold=%lums)",
                     timeSinceLastReceive, keepAliveMs + MqttPingTimeout);
-                _commandMgr->sendError(buf, F("MQTT Client"));
+                if (len > 0 && len < static_cast<int>(sizeof(buf)))
+                {
+                    _commandMgr->sendError(buf, F("MQTT Client"));
+                }
+                else
+                {
+                    _commandMgr->sendError(F("Keep-alive timeout (msg truncated)"), F("MQTT Client"));
+                }
             }
             raiseEvent(MqttEvent::KeepAliveTimeout);
             setError(MqttError::Timeout);

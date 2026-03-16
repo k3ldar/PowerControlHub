@@ -131,7 +131,7 @@ bool MQTTSystemHandler::subscribe()
 
     if (_commandMgr != nullptr)
     {
-        char buf[150];
+        char buf[164];
         snprintf(buf, sizeof(buf), "Attempting to subscribe to: %s", _timeTopic);
         _commandMgr->sendDebug(buf, F("MQTT System"));
     }
@@ -143,7 +143,7 @@ bool MQTTSystemHandler::subscribe()
         _isSubscribed = true;
         if (_commandMgr != nullptr)
         {
-            char buf[150];
+            char buf[164];
             snprintf(buf, sizeof(buf), "Successfully subscribed to: %s", _timeTopic);
             _commandMgr->sendDebug(buf, F("MQTT System"));
         }
@@ -152,7 +152,7 @@ bool MQTTSystemHandler::subscribe()
     {
         if (_commandMgr != nullptr)
         {
-            char buf[150];
+            char buf[164];
             snprintf(buf, sizeof(buf), "Failed to subscribe to topic: %s", _timeTopic);
             _commandMgr->sendError(buf, F("MQTT System"));
         }

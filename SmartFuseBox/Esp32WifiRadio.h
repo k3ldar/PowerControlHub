@@ -118,7 +118,7 @@ public:
 
     IWifiClient* available() override
     {
-        WiFiClient client = _server.available();
+        WiFiClient client = _server.accept();
         if (client)
         {
             return new Esp32WifiClient(client);

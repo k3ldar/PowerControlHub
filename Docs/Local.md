@@ -126,6 +126,8 @@ If `waitForConnection` is `true` when initialising serial, the firmware waits up
 
 ## 5. Sensor Pins
 
+> For full per-board pin tables, ESP32 safety rules, and porting caveats see **[Docs/Pins.md](Pins.md)**.
+
 Default pin assignments for the example sensors. Change these to match your wiring.
 
 | Constant | Default | Connected to |

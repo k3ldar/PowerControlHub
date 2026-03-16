@@ -25,10 +25,16 @@
 
 #if defined(ESP32)
 #include "esp_timer.h"
+#include <esp_heap_caps.h>
 #endif
 
-#if defined(WIFI_SUPPORT)
+#if defined(WIFI_SUPPORT) && defined(ARDUINO_UNO_R4)
 #include <WiFiS3.h>
+#endif
+
+#if defined(WIFI_SUPPORT) && defined(ESP32)
+#include <WiFi.h>
+#include <esp_mac.h>
 #endif
 
 #if defined(ARDUINO_UNO_R4) || defined(ARDUINO_R4_MINIMA)
@@ -51,8 +57,10 @@ uint16_t SystemFunctions::freeMemory()
 #elif defined(ARDUINO_UNO_R4) || defined(ARDUINO_R4_MINIMA)
     char top;
     return &top - reinterpret_cast<char*>(sbrk(0));
+#elif defined(ESP32)
+    return heap_caps_get_free_size(MALLOC_CAP_DEFAULT);
 #else
-#error "You must define 'ARDUINO_MEGA2560' or 'ARDUINO_UNO_R4' or 'ARDUINO_R4_MINIMA'"
+#error "You must define 'ARDUINO_MEGA2560' or 'ARDUINO_UNO_R4' or 'ARDUINO_R4_MINIMA'" or 'ESP32' in your board configuration in Local.h
 #endif
 }
 
@@ -63,7 +71,12 @@ uint8_t SystemFunctions::GenerateDefaultPassword(char* buffer, size_t bufferSize
 
 #if defined(WIFI_SUPPORT)
     uint8_t mac[6];
+#if defined(ESP32)
+    // Read MAC directly from eFuse — safe to call before WiFi.begin() / WiFi.mode()
+    esp_read_mac(mac, ESP_MAC_WIFI_STA);
+#else
     WiFi.macAddress(mac);
+#endif
 
     snprintf_P(buffer, bufferSize, PSTR("sfb-%02X%02X%02X"), mac[3], mac[4], mac[5]);
 #else

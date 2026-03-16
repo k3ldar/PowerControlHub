@@ -88,7 +88,7 @@ enum class MqttError : uint8_t
 
 // MQTT Buffer Sizes
 constexpr uint16_t MqttMaxPacketSize = 512;
-constexpr uint8_t MqttMaxTopicLength = 64;
+constexpr uint8_t MqttMaxTopicLength = 128;
 constexpr uint16_t MqttMaxPayloadLength = 512;
 constexpr uint8_t MqttClientIdLength = 32;
 

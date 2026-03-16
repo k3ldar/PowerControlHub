@@ -39,10 +39,13 @@
   // Activate exactly ONE. Remove the trailing underscore to enable.
   // ARDUINO_UNO_R4   – Arduino Uno R4 WiFi (BLE + WiFi)
   // ARDUINO_R4_MINIMA – Arduino Uno R4 Minima (no radio)
-  // ESP32_           – ESP32 NodeMCU-32 or compatible (WiFi + BLE)
-#define ARDUINO_UNO_R4
+  // ESP32_           – ESP32 NodeMCU-32 or compatible (WiFi + BLE) 
+#define ARDUINO_UNO_R4_
 #define ARDUINO_R4_MINIMA_
-#define ESP32_
+
+#if !defined(ESP32) && !defined(ARDUINO_UNO_R4) && !defined(ARDUINO_R4_MINIMA)
+#define ESP32
+#endif
 
 
 // ─── Controller Mode ──────────────────────────────────────────────────────────
@@ -55,7 +58,7 @@
 // Remove the trailing underscore to enable each feature.
 
 // SD card support (experimental)
-#define SD_CARD_SUPPORT
+#define SD_CARD_SUPPORT_
 
 #if defined(SD_CARD_SUPPORT)
 // Read config.txt from SD card at boot. Requires SD_CARD_SUPPORT.
@@ -68,6 +71,10 @@
 // Bluetooth BLE (mutually exclusive with WIFI_SUPPORT on Arduino Uno R4)
 #define BLUETOOTH_SUPPORT_
 
+// Led Manager on arduino R4 Wifi, experimental at present time
+#if defined(ARDUINO_UNO_R4)
+#define LED_MANAGER_
+#endif
 
 // ─── Serial ───────────────────────────────────────────────────────────────────
 // Maximum milliseconds to wait for serial connection before proceeding with setup.
@@ -75,17 +82,36 @@ constexpr unsigned long serialInitTimeoutMs = 300;
 
 
 // ─── Sensor Pins ──────────────────────────────────────────────────────────────
+#if defined(ESP32)
+// ESP32 NodeMCU-32S — adjust to your actual sensor wiring.
+// ADC1 pins are safe; ADC2 pins (0,2,4,12-15,25-27) conflict with WiFi when active.
+constexpr uint8_t WaterSensorPin = 34;       // ADC1, input-only, safe for analog read
+constexpr uint8_t WaterSensorActivePin = 21; // GPIO21, output-capable, used to drive sensor power/enable
+constexpr uint8_t Dht11SensorPin = 4;
+constexpr uint8_t LightSensorPin = 36;       // ADC1 (VP), input-only, safe
+constexpr bool LightSensorIsDigital = false;
+#else
 constexpr uint8_t WaterSensorPin = A0;
-constexpr uint8_t LightSensorAnalogPin = A1;
-constexpr uint8_t LightSensorPin = D3;
-constexpr uint8_t WaterSensorActivePin = D8;
-constexpr uint8_t Dht11SensorPin = D9;
+constexpr uint8_t WaterSensorActivePin = 8;
+constexpr uint8_t Dht11SensorPin = 9;
+// LightSensorPin can be used for either a digital or analog light sensor. Indicate 
+// whether digital (on/off) sensor, of false for analog (light level) sensor
+constexpr uint8_t LightSensorPin = 3;
+constexpr bool LightSensorIsDigital = true;
+#endif
 
 #if defined(SD_CARD_SUPPORT)
-constexpr uint8_t SdCardCsPin = D10;
-constexpr uint8_t SdCardMosiPin = D11;
-constexpr uint8_t SdCardMisoPin = D12;
-constexpr uint8_t SdCardSckPin = D13;
+#if defined(ESP32)
+constexpr uint8_t SdCardCsPin = 5;
+constexpr uint8_t SdCardMosiPin = 23;
+constexpr uint8_t SdCardMisoPin = 19;
+constexpr uint8_t SdCardSckPin = 18;
+#else
+constexpr uint8_t SdCardCsPin = 10;
+constexpr uint8_t SdCardMosiPin = 11;
+constexpr uint8_t SdCardMisoPin = 12;
+constexpr uint8_t SdCardSckPin = 13;
+#endif
 #endif
 
 
@@ -93,14 +119,27 @@ constexpr uint8_t SdCardSckPin = D13;
 // ConfigRelayCount must match the number of entries in Relays[].
 constexpr uint8_t ConfigRelayCount = 8;
 
-constexpr uint8_t Relay1 = D7;
-constexpr uint8_t Relay2 = D6;
-constexpr uint8_t Relay3 = D5;
-constexpr uint8_t Relay4 = D4;
+#if defined(ESP32)
+// ESP32 NodeMCU-32S safe GPIO pins (avoids flash SPI pins 6-11 and strapping pins).
+// Adjust these to match your actual relay board wiring.
+constexpr uint8_t Relay1 = 32;
+constexpr uint8_t Relay2 = 33;
+constexpr uint8_t Relay3 = 25;
+constexpr uint8_t Relay4 = 26;
+constexpr uint8_t Relay5 = 27;
+constexpr uint8_t Relay6 = 14;
+constexpr uint8_t Relay7 = 12;
+constexpr uint8_t Relay8 = 13;
+#else
+constexpr uint8_t Relay1 = 7;
+constexpr uint8_t Relay2 = 6;
+constexpr uint8_t Relay3 = 5;
+constexpr uint8_t Relay4 = 4;
 constexpr uint8_t Relay5 = 19;
 constexpr uint8_t Relay6 = 18;
 constexpr uint8_t Relay7 = 17;
 constexpr uint8_t Relay8 = 16;
+#endif
 
 constexpr uint8_t Relays[ConfigRelayCount] = { Relay1, Relay2, Relay3, Relay4, Relay5, Relay6, Relay7, Relay8 };
 
@@ -110,3 +149,8 @@ constexpr uint8_t Relays[ConfigRelayCount] = { Relay1, Relay2, Relay3, Relay4, R
 // WIFI_SUPPORT, SCHEDULER_SUPPORT, and validates combinations.
 // Do not edit BoardConfig.h — it is updated by the upstream repository.
 #include "BoardConfig.h"
+
+
+// ─── Network Config ───────────────────────────────────────────────────────────
+constexpr uint8_t MaxConcurrentClients = 2;
+constexpr uint8_t MaxPersistentClients = 1;
