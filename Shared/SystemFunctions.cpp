@@ -48,7 +48,7 @@ uint16_t SystemFunctions::stackAvailable()
     return (unsigned int)&v - (__brkval == 0 ? (unsigned int)&__heap_start : (unsigned int)__brkval);
 }
 
-uint16_t SystemFunctions::freeMemory()
+size_t SystemFunctions::freeMemory()
 {
 #if defined(ARDUINO_MEGA2560)
     extern int __heap_start, * __brkval;

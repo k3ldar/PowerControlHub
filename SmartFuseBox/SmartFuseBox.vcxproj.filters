@@ -462,6 +462,9 @@
     <ClInclude Include="BoardConfig.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Dht11SensorHandler.h">
+      <Filter>Header Files\SharedCode\Sensors</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Wifi.md" />

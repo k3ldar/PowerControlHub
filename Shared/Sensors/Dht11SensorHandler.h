@@ -43,6 +43,7 @@ private:
 	WarningManager* _warningManager;
 	dht11 _dht11Sensor;
 	const uint8_t _sensorPin;
+	const char* _name;
 	float _humidity;
 	float _celsius;
 
@@ -100,9 +101,9 @@ protected:
 	}
 public:
 	Dht11SensorHandler(MessageBus* messageBus, BroadcastManager* broadcastManager, SensorCommandHandler* sensorCommandHandler,
-		WarningManager* warningManager, uint8_t sensorPin)
+		WarningManager* warningManager, uint8_t sensorPin, const char* name = "Dht11")
 		: BroadcastLoggerSupport(broadcastManager), _messageBus(messageBus), _sensorCommandHandler(sensorCommandHandler),
-			_warningManager(warningManager), _dht11Sensor(), _sensorPin(sensorPin), _humidity(0.0f), _celsius(0.0f)
+			_warningManager(warningManager), _dht11Sensor(), _sensorPin(sensorPin), _name(name), _humidity(0.0f), _celsius(0.0f)
 	{
 	}
 
@@ -133,7 +134,7 @@ public:
 
 	const char* getSensorName() const override
 	{
-		return "dht11";
+		return _name;
 	}
 
 #if defined(MQTT_SUPPORT)
