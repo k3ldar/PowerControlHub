@@ -137,7 +137,7 @@ void BluetoothSystemService::updateFreeMemory()
 {
     if (_charFreeMemory)
     {
-        uint32_t freeMemory = SystemFunctions::freeMemory();
+        size_t freeMemory = SystemFunctions::freeMemory();
         _charFreeMemory->writeValue(freeMemory);
     }
 }

@@ -36,7 +36,7 @@ public:
     * 
 	* @return Estimated free memory in bytes
     */
-    static uint16_t freeMemory();
+    static size_t freeMemory();
 
     /**
 	* @brief Estimate available stack space.
