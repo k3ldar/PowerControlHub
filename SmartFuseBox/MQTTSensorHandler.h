@@ -41,14 +41,6 @@ private:
     // Channel map (built during begin())
     std::vector<MqttChannelMap> _channelMap;
 
-    // Channel indices for typed MessageBus events (-1 if not present)
-    int8_t _tempChannelIdx;
-    int8_t _humidityChannelIdx;
-    int8_t _lightChannelIdx;
-    int8_t _lightLevelChannelIdx;
-    int8_t _avgLightLevelChannelIdx;
-    int8_t _waterChannelIdx;
-
     // Discovery state
     bool _discoveryPending;
     uint8_t _discoveryIndex;

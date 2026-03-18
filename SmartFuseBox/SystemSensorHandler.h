@@ -82,7 +82,8 @@ public:
 		IWifiController* wifiController,
 		IBluetoothRadio* bluetoothController,
 		WarningManager* warningManager)
-		: _messageBus(messageBus),
+		: BaseSensor("system"),
+		_messageBus(messageBus),
 		_wifiController(wifiController),
 		_bluetoothRadio(bluetoothController),
 		_warningManager(warningManager)
@@ -105,7 +106,7 @@ public:
 			SystemFunctions::freeMemory(), SystemCpuMonitor::getCpuUsage());
 	}
 
-	SensorIdList getSensorId() const override
+	SensorIdList getSensorIdType() const override
 	{
 		return SensorIdList::SystemSensor;
 	}
@@ -120,11 +121,6 @@ public:
 		return SystemFreeMemory;
 	}
 
-	const char* getSensorName() const override
-	{
-		return "system";
-	}
-
 #if defined(MQTT_SUPPORT)
 	uint8_t getMqttChannelCount() const override
 	{
@@ -135,14 +131,14 @@ public:
 	{
 		switch (channelIndex)
 		{
-			case 0: return { "Sys Free Memory", "free_memory",   nullptr,        "b",     false };
-			case 1: return { "Sys CPU Usage",   "cpu_usage",     nullptr,        "%",     false };
-			case 2: return { "Sys Bluetooth",   "bluetooth",     "connectivity", nullptr, true };
-			case 3: return { "Sys WiFi",        "wifi",          "connectivity", nullptr, true };
-			case 4: return { "Sys SD Log Size", "sd_log_size",   nullptr,        "MB",    false };
-			case 5: return { "Sys Warnings",    "warning_count", nullptr,        nullptr, false };
-			case 6: return { "Sys Uptime",      "uptime",        nullptr,        nullptr, false };
-			default: return { nullptr, nullptr, nullptr, nullptr, false };
+			case 0: return { "Sys Free Memory", "free_memory", "free_memory", nullptr, "b", false };
+			case 1: return { "Sys CPU Usage", "cpu_usage", "cpu_usage", nullptr, "%", false };
+			case 2: return { "Sys Bluetooth", "bluetooth", "bluetooth", "connectivity", nullptr, true };
+			case 3: return { "Sys WiFi", "wifi", "wifi", "connectivity", nullptr, true };
+			case 4: return { "Sys SD Log Size", "sd_log_size",   "sd_log_size", nullptr, "MB",    false };
+			case 5: return { "Sys Warnings", "warning_count", "warning_count", nullptr, nullptr, false };
+			case 6: return { "Sys Uptime", "uptime", "uptime", nullptr, nullptr, false };
+			default: return { nullptr, nullptr, nullptr, nullptr, nullptr, false };
 		}
 	}
 

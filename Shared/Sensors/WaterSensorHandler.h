@@ -42,10 +42,14 @@ private:
 	SensorCommandHandler* _sensorCommandHandler;
 	const uint8_t _sensorPin;
 	const uint8_t _activePin;
-	const char* _name;
 	Queue<uint16_t> _waterPumpQueue;
 	uint16_t _latestWaterLevel;
 	bool _waitingForStabilization;
+
+#if defined(MQTT_SUPPORT)
+	char _slugWaterLevel[32];
+	char _nameWaterLevel[48];
+#endif
 
 protected:
 	void initialize() override
@@ -95,12 +99,17 @@ protected:
 public:
 	WaterSensorHandler(MessageBus* messageBus, BroadcastManager* broadcastManager,
 		SensorCommandHandler* sensorCommandHandler, uint8_t sensorPin, uint8_t activePin, const char* name = "WaterLevel")
-		: BroadcastLoggerSupport(broadcastManager), _messageBus(messageBus), _sensorCommandHandler(sensorCommandHandler),
-			_sensorPin(sensorPin), _activePin(activePin), _name(name), _waterPumpQueue(15, 0),
-		_latestWaterLevel(0), _waitingForStabilization(false)
+		: BaseSensor(name), BroadcastLoggerSupport(broadcastManager), _messageBus(messageBus), _sensorCommandHandler(sensorCommandHandler),
+			_sensorPin(sensorPin), _activePin(activePin), _waterPumpQueue(15, 0),
+			_latestWaterLevel(0), _waitingForStabilization(false)
 	{
 		pinMode(sensorPin, INPUT);
 		digitalWrite(_activePin, LOW);
+
+#if defined(MQTT_SUPPORT)
+		snprintf(_slugWaterLevel, sizeof(_slugWaterLevel), "%s_water_level", _safeSlug);
+		snprintf(_nameWaterLevel, sizeof(_nameWaterLevel), "%s Water Level", _name);
+#endif
 	}
 
 	void formatStatusJson(char* buffer, size_t size) override
@@ -109,7 +118,7 @@ public:
 			_latestWaterLevel, _waterPumpQueue.average());
 	}
 
-	SensorIdList getSensorId() const override
+	SensorIdList getSensorIdType() const override
 	{
 		return SensorIdList::WaterSensor;
 	}
@@ -124,11 +133,6 @@ public:
 		return SensorWaterLevel;
 	}
 
-	const char* getSensorName() const override
-	{
-		return _name;
-	}
-
 #if defined(MQTT_SUPPORT)
 
 	uint8_t getMqttChannelCount() const override
@@ -139,7 +143,7 @@ public:
 	MqttSensorChannel getMqttChannel(uint8_t channelIndex) const override
 	{
 		(void)channelIndex;
-		return { _name, "water_level", nullptr, nullptr, false };
+		return { _nameWaterLevel, _slugWaterLevel, "water_level", nullptr, nullptr, false };
 	}
 
 	void getMqttValue(uint8_t channelIndex, char* buffer, size_t size) const override

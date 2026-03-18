@@ -35,19 +35,13 @@ const char PROGMEM EntityTypeBinarySensor[] = "binary_sensor";
 const char PROGMEM EntityTypeSensor[] = "sensor";
 
 MQTTSensorHandler::MQTTSensorHandler(MQTTController* mqttController, MessageBus* messageBus, SensorController* sensorController, SerialCommandManager* commandMgr)
-    : MQTTHandler(mqttController, messageBus)
-    , _config(nullptr)
-    , _sensorController(sensorController)
-    , _commandMgr(commandMgr)
-    , _tempChannelIdx(-1)
-    , _humidityChannelIdx(-1)
-    , _lightChannelIdx(-1)
-    , _lightLevelChannelIdx(-1)
-    , _avgLightLevelChannelIdx(-1)
-    , _waterChannelIdx(-1)
-    , _discoveryPending(false)
-    , _discoveryIndex(0)
-    , _lastDiscoveryPublish(0)
+    : MQTTHandler(mqttController, messageBus),
+        _config(nullptr),
+        _sensorController(sensorController),
+        _commandMgr(commandMgr),
+        _discoveryPending(false),
+        _discoveryIndex(0),
+        _lastDiscoveryPublish(0)
 {
     _config = ConfigManager::getConfigPtr();
 }
@@ -96,6 +90,7 @@ bool MQTTSensorHandler::begin()
     for (uint8_t s = 0; s < _sensorController->sensorCount(); s++)
     {
         BaseSensor* sensor = _sensorController->sensorGet(s);
+
         if (sensor == nullptr)
         {
             continue;
@@ -104,33 +99,6 @@ bool MQTTSensorHandler::begin()
         for (uint8_t c = 0; c < sensor->getMqttChannelCount(); c++)
         {
             _channelMap.push_back({ sensor, c });
-
-            uint8_t newIdx = static_cast<uint8_t>(_channelMap.size() - 1);
-            const char* slug = sensor->getMqttChannel(c).slug;
-            if (strcmp(slug, "temperature") == 0)
-            {
-                _tempChannelIdx = static_cast<int8_t>(newIdx);
-            }
-            else if (strcmp(slug, "humidity") == 0)
-            {
-                _humidityChannelIdx = static_cast<int8_t>(newIdx);
-            }
-            else if (strcmp(slug, "light") == 0)
-            {
-                _lightChannelIdx = static_cast<int8_t>(newIdx);
-            }
-            else if (strcmp(slug, "light_level") == 0)
-            {
-                _lightLevelChannelIdx = static_cast<int8_t>(newIdx);
-            }
-            else if (strcmp(slug, "avg_light_level") == 0)
-            {
-                _avgLightLevelChannelIdx = static_cast<int8_t>(newIdx);
-            }
-            else if (strcmp(slug, "water_level") == 0)
-            {
-                _waterChannelIdx = static_cast<int8_t>(newIdx);
-            }
         }
     }
 
@@ -190,8 +158,7 @@ void MQTTSensorHandler::update()
             }
         }
     }
-
-    }
+}
 
 void MQTTSensorHandler::end()
 {
@@ -225,18 +192,30 @@ void MQTTSensorHandler::unsubscribe()
 void MQTTSensorHandler::onTemperatureUpdated(float temperature)
 {
     (void)temperature;
-    if (_tempChannelIdx >= 0)
+
+    for (uint8_t i = 0; i < _channelMap.size(); i++)
     {
-        publishSensorState(static_cast<uint8_t>(_tempChannelIdx));
+        MqttSensorChannel ch = _channelMap[i].sensor->getMqttChannel(_channelMap[i].channelIndex);
+
+        if (ch.typeSlug != nullptr && strcmp(ch.typeSlug, "temperature") == 0)
+        {
+            publishSensorState(i);
+        }
     }
 }
 
 void MQTTSensorHandler::onHumidityUpdated(uint8_t humidity)
 {
     (void)humidity;
-    if (_humidityChannelIdx >= 0)
+
+    for (uint8_t i = 0; i < _channelMap.size(); i++)
     {
-        publishSensorState(static_cast<uint8_t>(_humidityChannelIdx));
+        MqttSensorChannel ch = _channelMap[i].sensor->getMqttChannel(_channelMap[i].channelIndex);
+
+        if (ch.typeSlug != nullptr && strcmp(ch.typeSlug, "humidity") == 0)
+        {
+            publishSensorState(i);
+        }
     }
 }
 
@@ -246,23 +225,33 @@ void MQTTSensorHandler::onLightSensorUpdated(bool isDaytime, uint16_t lightLevel
     (void)lightLevel;
     (void)averageLightLevel;
 
-    if (_lightChannelIdx >= 0)
-        publishSensorState(static_cast<uint8_t>(_lightChannelIdx));
+    for (uint8_t i = 0; i < _channelMap.size(); i++)
+    {
+        MqttSensorChannel ch = _channelMap[i].sensor->getMqttChannel(_channelMap[i].channelIndex);
 
-    if (_lightLevelChannelIdx >= 0)
-        publishSensorState(static_cast<uint8_t>(_lightLevelChannelIdx));
-
-    if (_avgLightLevelChannelIdx >= 0)
-        publishSensorState(static_cast<uint8_t>(_avgLightLevelChannelIdx));
+        if (ch.typeSlug != nullptr &&
+            (strcmp(ch.typeSlug, "light") == 0 ||
+             strcmp(ch.typeSlug, "light_level") == 0 ||
+             strcmp(ch.typeSlug, "avg_light_level") == 0))
+        {
+            publishSensorState(i);
+        }
+    }
 }
 
 void MQTTSensorHandler::onWaterLevelUpdated(uint16_t waterLevel, uint16_t averageWaterLevel)
 {
     (void)waterLevel;
     (void)averageWaterLevel;
-    if (_waterChannelIdx >= 0)
+
+    for (uint8_t i = 0; i < _channelMap.size(); i++)
     {
-        publishSensorState(static_cast<uint8_t>(_waterChannelIdx));
+        MqttSensorChannel ch = _channelMap[i].sensor->getMqttChannel(_channelMap[i].channelIndex);
+
+        if (ch.typeSlug != nullptr && strcmp(ch.typeSlug, "water_level") == 0)
+        {
+            publishSensorState(i);
+        }
     }
 }
 
