@@ -21,6 +21,7 @@
 #include "ConfigManager.h"
 #include "SensorController.h"
 #include <vector>
+#include <map>
 
 // Forward declaration
 class SerialCommandManager;
@@ -29,6 +30,9 @@ struct MqttChannelMap
 {
     BaseSensor* sensor;
     uint8_t channelIndex;
+    const char* typeSlug;
+    unsigned long long lastPublishTime;  // 64-bit timestamp of last MQTT publish (overflow-safe)
+    unsigned long publishIntervalMs;     // Cached publish interval from sensor
 };
 
 class MQTTSensorHandler : public MQTTHandler
@@ -41,13 +45,17 @@ private:
     // Channel map (built during begin())
     std::vector<MqttChannelMap> _channelMap;
 
-    // Channel indices for typed MessageBus events (-1 if not present)
-    int8_t _tempChannelIdx;
-    int8_t _humidityChannelIdx;
-    int8_t _lightChannelIdx;
-    int8_t _lightLevelChannelIdx;
-    int8_t _avgLightLevelChannelIdx;
-    int8_t _waterChannelIdx;
+    // Map from typeSlug to channel indices for fast event handler lookup (Option 1)
+    // Using std::map with custom string comparator for embedded compatibility
+    struct StrCompare {
+        bool operator()(const char* a, const char* b) const {
+            if (a == nullptr && b == nullptr) return false;
+            if (a == nullptr) return true;
+            if (b == nullptr) return false;
+            return strcmp(a, b) < 0;
+        }
+    };
+    std::map<const char*, std::vector<uint8_t>, StrCompare> _typeSlugToIndices;
 
     // Discovery state
     bool _discoveryPending;

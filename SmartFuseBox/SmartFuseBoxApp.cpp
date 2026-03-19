@@ -124,6 +124,7 @@ void SmartFuseBoxApp::setup(BaseSensorHandler** sensorHandlers, uint8_t sensorHa
         for (uint8_t i = 0; i < sensorHandlerCount; i++)
         {
             baseSensors[i] = static_cast<BaseSensor*>(sensorHandlers[i]);
+            baseSensors[i]->setUniqueId(i);
         }
     }
 

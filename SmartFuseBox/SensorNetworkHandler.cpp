@@ -50,6 +50,16 @@ void SensorNetworkHandler::formatStatusJson(char* buffer, size_t size)
         return;
     }
 
+    if (!_sensorController)
+    {
+        int written = snprintf(buffer, size, "\"sensors\":{}");
+        if (written < 0 || written >= static_cast<int>(size))
+        {
+            buffer[size - 1] = '\0';
+        }
+        return;
+    }
+
     int written = snprintf(buffer, size, "\"sensors\":{");
     if (written < 0 || written >= static_cast<int>(size))
     {
@@ -87,9 +97,10 @@ void SensorNetworkHandler::formatStatusJson(char* buffer, size_t size)
 
         // Write sensor entry (removed duplicate and fixed format)
         int n = snprintf(buffer + written, size - written, 
-            "\"%s\":{\"id\":%d,\"type\":%d,%s}",
-            sensor->getSensorName(), 
-            static_cast<uint8_t>(sensor->getSensorId()), 
+            "\"%s\":{\"uid\":%d,\"idType\":%d,\"type\":%d,%s}",
+            sensor->getSensorName(),
+            sensor->getUid(), 
+            static_cast<uint8_t>(sensor->getSensorIdType()),
             static_cast<uint8_t>(sensor->getSensorType()), 
             sensorBuffer);
 

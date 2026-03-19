@@ -18,8 +18,8 @@
 #pragma once
 
 #include "Local.h"
-#if defined(LED_MANAGER)
 #include "MessageBus.h"
+#if defined(LED_MANAGER)
 
 constexpr auto LedUpdateFrequency = 500;
 

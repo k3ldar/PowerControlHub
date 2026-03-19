@@ -43,9 +43,15 @@ private:
 	WarningManager* _warningManager;
 	dht11 _dht11Sensor;
 	const uint8_t _sensorPin;
-	const char* _name;
 	float _humidity;
 	float _celsius;
+
+#if defined(MQTT_SUPPORT)
+	char _slugTemp[32];
+	char _slugHumidity[32];
+	char _nameTemp[48];
+	char _nameHumidity[48];
+#endif
 
 protected:
 	void initialize() override
@@ -102,9 +108,15 @@ protected:
 public:
 	Dht11SensorHandler(MessageBus* messageBus, BroadcastManager* broadcastManager, SensorCommandHandler* sensorCommandHandler,
 		WarningManager* warningManager, uint8_t sensorPin, const char* name = "Dht11")
-		: BroadcastLoggerSupport(broadcastManager), _messageBus(messageBus), _sensorCommandHandler(sensorCommandHandler),
-			_warningManager(warningManager), _dht11Sensor(), _sensorPin(sensorPin), _name(name), _humidity(0.0f), _celsius(0.0f)
+		: BaseSensor(name), BroadcastLoggerSupport(broadcastManager), _messageBus(messageBus), _sensorCommandHandler(sensorCommandHandler),
+			_warningManager(warningManager), _dht11Sensor(), _sensorPin(sensorPin), _humidity(0.0f), _celsius(0.0f)
 	{
+#if defined(MQTT_SUPPORT)
+		snprintf(_slugTemp, sizeof(_slugTemp), "%s_temperature", _safeSlug);
+		snprintf(_slugHumidity, sizeof(_slugHumidity), "%s_humidity", _safeSlug);
+		snprintf(_nameTemp, sizeof(_nameTemp), "%s Temperature", _name);
+		snprintf(_nameHumidity, sizeof(_nameHumidity), "%s Humidity", _name);
+#endif
 	}
 
 	void formatStatusJson(char* buffer, size_t size) override
@@ -117,7 +129,7 @@ public:
 			celsius, humidity);
 	}
 
-	SensorIdList getSensorId() const override
+	SensorIdList getSensorIdType() const override
 	{
 		return SensorIdList::Dht11Sensor;
 	}
@@ -132,11 +144,6 @@ public:
 		return SensorTemperature;
 	}
 
-	const char* getSensorName() const override
-	{
-		return _name;
-	}
-
 #if defined(MQTT_SUPPORT)
 	uint8_t getMqttChannelCount() const override
 	{
@@ -147,9 +154,10 @@ public:
 	{
 		if (channelIndex == 0)
 		{
-			return { "Temperature", "temperature", "temperature", "\xc2\xb0""C", false };
+			return { _nameTemp, _slugTemp, "temperature", "temperature", "\xc2\xb0""C", false };
 		}
-		return { "Humidity", "humidity", "humidity", "%", false };
+
+		return { _nameHumidity, _slugHumidity, "humidity", "humidity", "%", false };
 	}
 
 	void getMqttValue(uint8_t channelIndex, char* buffer, size_t size) const override

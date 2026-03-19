@@ -409,8 +409,8 @@ public:
 		MessageBus* messageBus, 
 #endif
 
-		BroadcastManager* broadcastManager, SensorCommandHandler* sensorCommandHandler, WarningManager* warningManager)
-		: BroadcastLoggerSupport(broadcastManager), 
+		BroadcastManager* broadcastManager, SensorCommandHandler* sensorCommandHandler, WarningManager* warningManager, const char* name = "Gps")
+		: BaseSensor(name), BroadcastLoggerSupport(broadcastManager), 
 		  _gpsSerial(gpsSerial),
 
 #if defined(MESSAGE_BUS)
@@ -466,7 +466,7 @@ public:
 	}
 #endif
 
-	SensorIdList getSensorId() const override
+	SensorIdList getSensorIdType() const override
 	{
 		return SensorIdList::GpsSensor;
 	}

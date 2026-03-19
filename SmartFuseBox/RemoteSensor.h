@@ -46,10 +46,10 @@ private:
 public:
     RemoteSensor(SensorIdList sensorId, const char* sensorName, const char* commandId,
 #if defined(MQTT_SUPPORT)
-		const char* mqttTopic, const MqttSensorChannel* mqttChannels,
+        const char* mqttTopic, const MqttSensorChannel* mqttChannels,
 #endif
         uint8_t paramCount)
-        : _sensorId(sensorId), _sensorName(sensorName), _commandId(commandId),
+        : BaseSensor(sensorName), _sensorId(sensorId), _sensorName(sensorName), _commandId(commandId),
 #if defined(MQTT_SUPPORT)
           _mqttTopic(mqttTopic), _mqttChannels(mqttChannels),
 #endif
@@ -123,7 +123,7 @@ public:
     MqttSensorChannel getMqttChannel(uint8_t channelIndex) const override
     {
         if (!_mqttChannels || channelIndex >= _paramCount)
-			return { nullptr, nullptr, nullptr, nullptr, false };
+			return { nullptr, nullptr, nullptr, nullptr, nullptr, false };
 
 		return _mqttChannels[channelIndex];
     }
@@ -146,7 +146,7 @@ public:
     }
 #endif
 
-    SensorIdList getSensorId() const override
+    SensorIdList getSensorIdType() const override
     {
         return _sensorId;
     }

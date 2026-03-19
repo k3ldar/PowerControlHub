@@ -90,7 +90,19 @@ bool MQTTController::begin()
     _isEnabled = true;
 
     // Attempt initial connection (but don't fail initialization if connection fails)
-    connect();
+    // Only attempt connect if WiFi is already connected. If not, defer until update() retry logic when
+    // the radio reports a connected state to avoid noisy network errors while WiFi is establishing.
+    if (_wifiRadio == nullptr || _wifiRadio->status() == WifiConnectionState::Connected)
+    {
+        connect();
+    }
+    else
+    {
+        if (_commandMgr != nullptr)
+        {
+            _commandMgr->sendDebug(F("WiFi not connected, deferring MQTT connect"), F("MQTT Controller"));
+        }
+    }
 
     // Return true if MQTT is configured and enabled
     // Actual connection will be handled by retry logic in update()
@@ -140,10 +152,22 @@ bool MQTTController::connect()
         return true;
     }
 
+    // Ensure WiFi is connected before attempting TCP connect
+    if (_wifiRadio != nullptr && _wifiRadio->status() != WifiConnectionState::Connected)
+    {
+        if (_commandMgr != nullptr)
+        {
+            _commandMgr->sendDebug(F("WiFi not connected, skipping connect"), F("MQTT Controller"));
+        }
+
+        return false;
+    }
+
     if (_commandMgr != nullptr)
     {
         _commandMgr->sendDebug(F("Attempting connect"), F("MQTT Controller"));
     }
+
     bool result = _mqttClient->connect();
 
     if (result)

@@ -35,12 +35,20 @@ private:
     RelayController* _relayController;
     const uint8_t _sensorPin;
     bool _isDigital;
-    const char* _name;
     bool _isDaytime;
     bool _pendingDaytime;
     uint8_t _pendingDaytimeCount;
     Queue<uint16_t> _lightQueue;
     uint16_t _currentLightLevel;
+
+#if defined(MQTT_SUPPORT)
+    char _slugLight[28];
+    char _slugLightLevel[32];
+    char _slugAvgLightLevel[40];
+    char _nameDaylight[48];
+    char _nameLightLevel[48];
+    char _nameAvgLightLevel[48];
+#endif
 
     void syncNightRelay(Config* config)
     {
@@ -97,8 +105,11 @@ protected:
 
             uint16_t avgLevel = _lightQueue.average();
             uint16_t threshold = (config != nullptr) ? config->lightSensor.daytimeThreshold : 512;
-            uint16_t hysteresis = (threshold * AnalogHysteresisPct) / 100;
-            if (hysteresis == 0) hysteresis = 1;
+            uint16_t hysteresis = static_cast<uint16_t>((static_cast<uint32_t>(threshold) * AnalogHysteresisPct) / 100U);
+
+            if (hysteresis == 0)
+                hysteresis = 1;
+            
             uint16_t lower = (threshold > hysteresis) ? threshold - hysteresis : 0;
             uint16_t upper = (threshold + hysteresis > 1023) ? 1023 : threshold + hysteresis;
             reading = _isDaytime ? (avgLevel > lower) : (avgLevel > upper);
@@ -154,12 +165,20 @@ protected:
 public:
     LightSensorHandler(MessageBus* messageBus, BroadcastManager* broadcastManager, SensorCommandHandler* sensorCommandHandler,
         RelayController* relayController, uint8_t sensorPin, bool isDigital, const char* name = "LightSensor")
-        : BroadcastLoggerSupport(broadcastManager),
+        : BaseSensor(name), BroadcastLoggerSupport(broadcastManager),
           _messageBus(messageBus), _sensorCommandHandler(sensorCommandHandler),
           _relayController(relayController), _sensorPin(sensorPin), _isDigital(isDigital),
-          _name(name), _isDaytime(true), _pendingDaytime(true), _pendingDaytimeCount(DaytimeConfirmReadings),
+          _isDaytime(true), _pendingDaytime(true), _pendingDaytimeCount(DaytimeConfirmReadings),
           _lightQueue(LightQueueCapacity), _currentLightLevel(0)
     {
+#if defined(MQTT_SUPPORT)
+        snprintf(_slugLight, sizeof(_slugLight), "%s_light", _safeSlug);
+        snprintf(_slugLightLevel, sizeof(_slugLightLevel), "%s_light_level", _safeSlug);
+        snprintf(_slugAvgLightLevel, sizeof(_slugAvgLightLevel), "%s_avg_light_level", _safeSlug);
+        snprintf(_nameDaylight, sizeof(_nameDaylight), "%s Daylight", _name);
+        snprintf(_nameLightLevel, sizeof(_nameLightLevel), "%s Light Level", _name);
+        snprintf(_nameAvgLightLevel, sizeof(_nameAvgLightLevel), "%s Avg Light Level", _name);
+#endif
     }
 
     void formatStatusJson(char* buffer, size_t size) override
@@ -170,7 +189,7 @@ public:
             effectiveAverage());
     }
 
-    SensorIdList getSensorId() const override
+    SensorIdList getSensorIdType() const override
     {
         return SensorIdList::LightSensor;
     }
@@ -183,11 +202,6 @@ public:
     const char* getSensorCommandId() const override
     {
         return SensorLightSensor;
-    }
-
-    const char* getSensorName() const override
-    {
-        return _name;
     }
 
     uint16_t getLightLevel() const
@@ -211,9 +225,9 @@ public:
     {
         switch (channelIndex)
         {
-            case 1: return { "Light Level", "light_level", nullptr, nullptr, false };
-            case 2: return { "Avg Light Level", "avg_light_level", nullptr, nullptr, false };
-            default: return { "Daylight", "light", "light", nullptr, true };
+            case 1: return { _nameLightLevel, _slugLightLevel, "light_level", nullptr, nullptr, false };
+            case 2: return { _nameAvgLightLevel, _slugAvgLightLevel, "avg_light_level", nullptr, nullptr, false };
+            default: return { _nameDaylight, _slugLight, "light", "light", nullptr, true  };
         }
     }
 

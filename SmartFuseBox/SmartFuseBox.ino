@@ -81,8 +81,8 @@ SystemSensorHandler systemSensorHandler(app.messageBus(),
 // Project specific remote sensors
 #if defined(MQTT_SUPPORT)
 MqttSensorChannel gpsMqttChannels[] = {
-	{ "Latitude", "latitude", nullptr, "°", false },
-	{ "Longitude", "longitude", nullptr, "°", false }
+	{ "Latitude", "latitude", "latitude", nullptr, "°", false},
+	{ "Longitude", "longitude", "longitude", nullptr, "°", false}
 };
 RemoteSensor gpsLatLonSensor(SensorIdList::GpsSensor, "Gps", SensorGpsLatLong, "Gps", gpsMqttChannels, 2);
 #else

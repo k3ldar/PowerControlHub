@@ -20,6 +20,7 @@
 #if defined(MQTT_SUPPORT)
 #include "MQTTSensorHandler.h"
 #include "SystemDefinitions.h"
+#include "SystemFunctions.h"
 #include <SerialCommandManager.h>
 #include <string.h>
 #include <stdio.h>
@@ -35,19 +36,13 @@ const char PROGMEM EntityTypeBinarySensor[] = "binary_sensor";
 const char PROGMEM EntityTypeSensor[] = "sensor";
 
 MQTTSensorHandler::MQTTSensorHandler(MQTTController* mqttController, MessageBus* messageBus, SensorController* sensorController, SerialCommandManager* commandMgr)
-    : MQTTHandler(mqttController, messageBus)
-    , _config(nullptr)
-    , _sensorController(sensorController)
-    , _commandMgr(commandMgr)
-    , _tempChannelIdx(-1)
-    , _humidityChannelIdx(-1)
-    , _lightChannelIdx(-1)
-    , _lightLevelChannelIdx(-1)
-    , _avgLightLevelChannelIdx(-1)
-    , _waterChannelIdx(-1)
-    , _discoveryPending(false)
-    , _discoveryIndex(0)
-    , _lastDiscoveryPublish(0)
+    : MQTTHandler(mqttController, messageBus),
+        _config(nullptr),
+        _sensorController(sensorController),
+        _commandMgr(commandMgr),
+        _discoveryPending(false),
+        _discoveryIndex(0),
+        _lastDiscoveryPublish(0)
 {
     _config = ConfigManager::getConfigPtr();
 }
@@ -93,9 +88,12 @@ bool MQTTSensorHandler::begin()
 
     // Build channel map from sensor controller
     _channelMap.clear();
+    _typeSlugToIndices.clear();
+
     for (uint8_t s = 0; s < _sensorController->sensorCount(); s++)
     {
         BaseSensor* sensor = _sensorController->sensorGet(s);
+
         if (sensor == nullptr)
         {
             continue;
@@ -103,33 +101,19 @@ bool MQTTSensorHandler::begin()
 
         for (uint8_t c = 0; c < sensor->getMqttChannelCount(); c++)
         {
-            _channelMap.push_back({ sensor, c });
+            // Get channel info and cache typeSlug (Option 4)
+            MqttSensorChannel ch = sensor->getMqttChannel(c);
+            uint8_t channelIndex = static_cast<uint8_t>(_channelMap.size());
 
-            uint8_t newIdx = static_cast<uint8_t>(_channelMap.size() - 1);
-            const char* slug = sensor->getMqttChannel(c).slug;
-            if (strcmp(slug, "temperature") == 0)
+            // Cache publish interval from sensor (Option 1)
+            unsigned long interval = sensor->getMqttPublishIntervalMs(c);
+
+            _channelMap.push_back({ sensor, c, ch.typeSlug, 0, interval });
+
+            // Build typeSlug-to-indices map for fast event lookup (Option 1)
+            if (ch.typeSlug != nullptr)
             {
-                _tempChannelIdx = static_cast<int8_t>(newIdx);
-            }
-            else if (strcmp(slug, "humidity") == 0)
-            {
-                _humidityChannelIdx = static_cast<int8_t>(newIdx);
-            }
-            else if (strcmp(slug, "light") == 0)
-            {
-                _lightChannelIdx = static_cast<int8_t>(newIdx);
-            }
-            else if (strcmp(slug, "light_level") == 0)
-            {
-                _lightLevelChannelIdx = static_cast<int8_t>(newIdx);
-            }
-            else if (strcmp(slug, "avg_light_level") == 0)
-            {
-                _avgLightLevelChannelIdx = static_cast<int8_t>(newIdx);
-            }
-            else if (strcmp(slug, "water_level") == 0)
-            {
-                _waterChannelIdx = static_cast<int8_t>(newIdx);
+                _typeSlugToIndices[ch.typeSlug].push_back(channelIndex);
             }
         }
     }
@@ -190,8 +174,7 @@ void MQTTSensorHandler::update()
             }
         }
     }
-
-    }
+}
 
 void MQTTSensorHandler::end()
 {
@@ -225,18 +208,44 @@ void MQTTSensorHandler::unsubscribe()
 void MQTTSensorHandler::onTemperatureUpdated(float temperature)
 {
     (void)temperature;
-    if (_tempChannelIdx >= 0)
+
+    unsigned long long now = SystemFunctions::millis64();
+    auto it = _typeSlugToIndices.find("temperature");
+    if (it != _typeSlugToIndices.end())
     {
-        publishSensorState(static_cast<uint8_t>(_tempChannelIdx));
+        for (uint8_t i = 0; i < it->second.size(); i++)
+        {
+            uint8_t idx = it->second[i];
+            MqttChannelMap& channel = _channelMap[idx];
+
+            if (now - channel.lastPublishTime >= channel.publishIntervalMs)
+            {
+                publishSensorState(idx);
+                channel.lastPublishTime = now;
+            }
+        }
     }
 }
 
 void MQTTSensorHandler::onHumidityUpdated(uint8_t humidity)
 {
     (void)humidity;
-    if (_humidityChannelIdx >= 0)
+
+    unsigned long long now = SystemFunctions::millis64();
+    auto it = _typeSlugToIndices.find("humidity");
+    if (it != _typeSlugToIndices.end())
     {
-        publishSensorState(static_cast<uint8_t>(_humidityChannelIdx));
+        for (uint8_t i = 0; i < it->second.size(); i++)
+        {
+            uint8_t idx = it->second[i];
+            MqttChannelMap& channel = _channelMap[idx];
+
+            if (now - channel.lastPublishTime >= channel.publishIntervalMs)
+            {
+                publishSensorState(idx);
+                channel.lastPublishTime = now;
+            }
+        }
     }
 }
 
@@ -246,23 +255,50 @@ void MQTTSensorHandler::onLightSensorUpdated(bool isDaytime, uint16_t lightLevel
     (void)lightLevel;
     (void)averageLightLevel;
 
-    if (_lightChannelIdx >= 0)
-        publishSensorState(static_cast<uint8_t>(_lightChannelIdx));
+    unsigned long long now = SystemFunctions::millis64();
 
-    if (_lightLevelChannelIdx >= 0)
-        publishSensorState(static_cast<uint8_t>(_lightLevelChannelIdx));
+    // Publish all light-related channels
+    const char* lightTypes[] = { "light", "light_level", "avg_light_level" };
+    for (uint8_t t = 0; t < 3; t++)
+    {
+        auto it = _typeSlugToIndices.find(lightTypes[t]);
+        if (it != _typeSlugToIndices.end())
+        {
+            for (uint8_t i = 0; i < it->second.size(); i++)
+            {
+                uint8_t idx = it->second[i];
+                MqttChannelMap& channel = _channelMap[idx];
 
-    if (_avgLightLevelChannelIdx >= 0)
-        publishSensorState(static_cast<uint8_t>(_avgLightLevelChannelIdx));
+                if (now - channel.lastPublishTime >= channel.publishIntervalMs)
+                {
+                    publishSensorState(idx);
+                    channel.lastPublishTime = now;
+                }
+            }
+        }
+    }
 }
 
 void MQTTSensorHandler::onWaterLevelUpdated(uint16_t waterLevel, uint16_t averageWaterLevel)
 {
     (void)waterLevel;
     (void)averageWaterLevel;
-    if (_waterChannelIdx >= 0)
+
+    unsigned long long now = SystemFunctions::millis64();
+    auto it = _typeSlugToIndices.find("water_level");
+    if (it != _typeSlugToIndices.end())
     {
-        publishSensorState(static_cast<uint8_t>(_waterChannelIdx));
+        for (uint8_t i = 0; i < it->second.size(); i++)
+        {
+            uint8_t idx = it->second[i];
+            MqttChannelMap& channel = _channelMap[idx];
+
+            if (now - channel.lastPublishTime >= channel.publishIntervalMs)
+            {
+                publishSensorState(idx);
+                channel.lastPublishTime = now;
+            }
+        }
     }
 }
 

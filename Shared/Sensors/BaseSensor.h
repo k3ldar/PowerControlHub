@@ -21,6 +21,9 @@
 #include "LoggingSupport.h"
 #include "Local.h"
 
+// Forward declaration to allow SmartFuseBoxApp to be declared friend below
+class SmartFuseBoxApp;
+
 #if defined(FUSE_BOX_CONTROLLER)
 #include "JsonVisitor.h"
 #endif
@@ -33,10 +36,13 @@ enum class SensorType : uint8_t
 
 #if defined(MQTT_SUPPORT)
 
+constexpr uint8_t SafeSlugLength = 20;
+
 struct MqttSensorChannel
 {
 	const char* name;
 	const char* slug;
+	const char* typeSlug; 
 	const char* deviceClass;
 	const char* unit;
 	bool isBinary;
@@ -49,16 +55,62 @@ class BaseSensor : public BaseSensorHandler
 	, public JsonVisitor
 #endif
 {
+    // Allow top-level application class to access BaseSensor internals
+	friend class SmartFuseBoxApp;
+private:
+	uint8_t _uniqueId = 0;
+
+	void setUniqueId(uint8_t id)
+	{
+		_uniqueId = id;
+	}
+protected:
+	const char* _name;
+
+#if defined(MQTT_SUPPORT)
+	char _safeSlug[SafeSlugLength];
+
+	static void buildSafeSlug(const char* name, char* out, size_t size)
+	{
+		size_t i = 0;
+
+		while (name[i] && i < size - 1)
+		{
+			char c = name[i];
+			out[i] = (c == ' ') ? '_' : ((c >= 'A' && c <= 'Z') ? static_cast<char>(c + 32) : c);
+			i++;
+		}
+
+		out[i] = '\0';
+	}
+#endif
+
+	explicit BaseSensor(const char* name)
+		: _name(name)
+	{
+#if defined(MQTT_SUPPORT)
+		buildSafeSlug(_name, _safeSlug, sizeof(_safeSlug));
+#endif
+	}
+
 public:
 	virtual ~BaseSensor() = default;
 
-	virtual SensorIdList getSensorId() const = 0;
+	uint8_t getUid() const
+	{
+		return _uniqueId;
+	}
+
+	virtual SensorIdList getSensorIdType() const = 0;
 
 	virtual SensorType getSensorType() const = 0;
 
 	virtual const char* getSensorCommandId() const = 0;
 
-	virtual const char* getSensorName() const = 0;
+	virtual const char* getSensorName() const
+	{
+		return _name;
+	}
 
 #if defined(MQTT_SUPPORT)
 	virtual uint8_t getMqttChannelCount() const = 0;
@@ -66,5 +118,11 @@ public:
 	virtual MqttSensorChannel getMqttChannel(uint8_t channelIndex) const = 0;
 
 	virtual void getMqttValue(uint8_t channelIndex, char* buffer, size_t size) const = 0;
+
+	virtual unsigned long getMqttPublishIntervalMs(uint8_t channelIndex) const
+	{
+		(void)channelIndex;
+		return 1000; // Default: publish every 1 second
+	}
 #endif
 };
