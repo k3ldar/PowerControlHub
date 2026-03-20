@@ -126,7 +126,7 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
 		sender->sendCommand(ConfigSoundRelayId, buffer);
 
 		// C9 Sound start delay
-		snprintf(buffer, sizeof(buffer), "v=%d", static_cast<uint8_t>(config->sound.startDelayMs));
+		snprintf(buffer, sizeof(buffer), "v=%u", static_cast<unsigned int>(config->sound.startDelayMs));
 		sender->sendCommand(ConfigSoundStartDelay, buffer);
 
 		// C10 Bluetooth enable

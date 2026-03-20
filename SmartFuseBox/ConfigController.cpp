@@ -239,6 +239,9 @@ ConfigResult ConfigController::setWifiAccessMode(const WifiMode accessMode)
 	if (_config == nullptr)
 		return ConfigResult::InvalidConfig;
 
+	// only accept supported WiFi modes to avoid persisting invalid values from user input
+	if (accessMode != WifiMode::AccessPoint && accessMode != WifiMode::Client)
+		return ConfigResult::InvalidParameter;
 	_config->network.accessMode = accessMode;
 	return ConfigResult::Success;
 }

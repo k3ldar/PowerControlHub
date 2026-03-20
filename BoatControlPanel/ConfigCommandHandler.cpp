@@ -309,7 +309,7 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
         // C14 - Set WiFi password
         if (paramCount >= 1)
         {
-            if (cfg->network.accessMode != static_cast<uint8_t>(WifiMode::Client))
+            if (cfg->network.accessMode != WifiMode::Client)
             {
                 sendAckErr(sender, command, F("Only available in Client mode"));
                 return true;
