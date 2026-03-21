@@ -39,7 +39,7 @@
   // Activate exactly ONE. Remove the trailing underscore to enable.
   // ARDUINO_UNO_R4   – Arduino Uno R4 WiFi (BLE + WiFi)
   // ARDUINO_R4_MINIMA – Arduino Uno R4 Minima (no radio)
-  // ESP32_           – ESP32 NodeMCU-32 or compatible (WiFi + BLE)
+  // ESP32_           – ESP32 NodeMCU-32 or compatible (WiFi + BLE) 
 #define ARDUINO_UNO_R4_
 #define ARDUINO_R4_MINIMA_
 
@@ -54,20 +54,6 @@
 #define FUSE_BOX_CONTROLLER
 
 
-// ─── Sub Controller Mode ──────────────────────────────────────────────────────
-// local to this repository, as local implementations of the same SmartFuseBox
-#define SUB_CONTROLLER_WEATHER_STATION_
-#define SUB_CONTROLLER_BASEMENT_SENSOR
-
-#if defined(SUB_CONTROLLER_WEATHER_STATION) && defined(SUB_CONTROLLER_BASEMENT_SENSOR)
-#error There can only be on sub controller mode active at a time. Please choose between WEATHER_STATION and MQTT_SENSOR.
-#elif defined(SUB_CONTROLLER_WEATHER_STATION)
-#define ARDUINO_UNO_R4
-#elif defined(SUB_CONTROLLER_BASEMENT_SENSOR) && !defined(ESP32)
-#define ESP32
-#endif
-
-
 // ─── Optional Features ────────────────────────────────────────────────────────
 // Remove the trailing underscore to enable each feature.
 
@@ -80,7 +66,7 @@
 #endif
 
 // MQTT home-assistant discovery (requires WIFI_SUPPORT — enforced in BoardConfig.h)
-#define MQTT_SUPPORT
+#define MQTT_SUPPORT_
 
 // Bluetooth BLE (mutually exclusive with WIFI_SUPPORT on Arduino Uno R4)
 #define BLUETOOTH_SUPPORT_
@@ -96,29 +82,27 @@ constexpr unsigned long serialInitTimeoutMs = 300;
 
 
 // ─── Sensor Pins ──────────────────────────────────────────────────────────────
-#if defined(SUB_CONTROLLER_WEATHER_STATION)
-
-constexpr uint8_t WaterSensorPin = A0;
-constexpr uint8_t WaterSensorActivePin = D8;
-constexpr uint8_t Dht11SensorPin = D7;
-
-constexpr bool LightSensorIsDigital = true;
-constexpr uint8_t LightSensorPin = D2;
-
-#elif defined(SUB_CONTROLLER_BASEMENT_SENSOR)
-
-constexpr uint8_t Dht11StoreRoomSensorPin = 4;
-constexpr uint8_t Dht11MakerRoomSensorPin = 5;
-constexpr uint8_t Dht11PassagewaySensorPin = 25;
-constexpr uint8_t Dht11WashRoomSensorPin = 26;
-
+#if defined(ESP32)
+// ESP32 NodeMCU-32S — adjust to your actual sensor wiring.
+// ADC1 pins are safe; ADC2 pins (0,2,4,12-15,25-27) conflict with WiFi when active.
+constexpr uint8_t WaterSensorPin = 34;       // ADC1, input-only, safe for analog read
+constexpr uint8_t WaterSensorActivePin = 21; // GPIO21, output-capable, used to drive sensor power/enable
+constexpr uint8_t Dht11SensorPin = 4;
+constexpr uint8_t LightSensorPin = 36;       // ADC1 (VP), input-only, safe
+constexpr bool LightSensorIsDigital = false;
 #else
-#error Please select sub type
+constexpr uint8_t WaterSensorPin = A0;
+constexpr uint8_t WaterSensorActivePin = 8;
+constexpr uint8_t Dht11SensorPin = 9;
+// LightSensorPin can be used for either a digital or analog light sensor. Indicate 
+// whether digital (on/off) sensor, of false for analog (light level) sensor
+constexpr uint8_t LightSensorPin = 3;
+constexpr bool LightSensorIsDigital = true;
 #endif
 
 #if defined(SD_CARD_SUPPORT)
 #if defined(ESP32)
-constexpr uint8_t SdCardCsPin = 6;
+constexpr uint8_t SdCardCsPin = 5;
 constexpr uint8_t SdCardMosiPin = 23;
 constexpr uint8_t SdCardMisoPin = 19;
 constexpr uint8_t SdCardSckPin = 18;
@@ -133,27 +117,32 @@ constexpr uint8_t SdCardSckPin = 13;
 
 // ─── Relay Config ─────────────────────────────────────────────────────────────
 // ConfigRelayCount must match the number of entries in Relays[].
+constexpr uint8_t ConfigRelayCount = 8;
 
-#if defined(SUB_CONTROLLER_WEATHER_STATION)
-
-constexpr uint8_t ConfigRelayCount = 4;
-
-constexpr uint8_t Relay1 = D13;
-constexpr uint8_t Relay2 = D12;
-constexpr uint8_t Relay3 = D11;
-constexpr uint8_t Relay4 = D10;
-
-constexpr uint8_t Relays[ConfigRelayCount] = { Relay1, Relay2, Relay3, Relay4 };
-
-#elif defined(ESP32)
-
-constexpr uint8_t ConfigRelayCount = 1;
-
+#if defined(ESP32)
+// ESP32 NodeMCU-32S safe GPIO pins (avoids flash SPI pins 6-11 and strapping pins).
+// Adjust these to match your actual relay board wiring.
 constexpr uint8_t Relay1 = 32;
-
-constexpr uint8_t Relays[ConfigRelayCount] = { Relay1 };
-
+constexpr uint8_t Relay2 = 33;
+constexpr uint8_t Relay3 = 25;
+constexpr uint8_t Relay4 = 26;
+constexpr uint8_t Relay5 = 27;
+constexpr uint8_t Relay6 = 14;
+constexpr uint8_t Relay7 = 12;
+constexpr uint8_t Relay8 = 13;
+#else
+constexpr uint8_t Relay1 = 7;
+constexpr uint8_t Relay2 = 6;
+constexpr uint8_t Relay3 = 5;
+constexpr uint8_t Relay4 = 4;
+constexpr uint8_t Relay5 = 19;
+constexpr uint8_t Relay6 = 18;
+constexpr uint8_t Relay7 = 17;
+constexpr uint8_t Relay8 = 16;
 #endif
+
+constexpr uint8_t Relays[ConfigRelayCount] = { Relay1, Relay2, Relay3, Relay4, Relay5, Relay6, Relay7, Relay8 };
+
 
 // ─── Framework Config ─────────────────────────────────────────────────────────
 // BoardConfig.h reads the defines above and derives EEPROM capacity,
@@ -163,7 +152,5 @@ constexpr uint8_t Relays[ConfigRelayCount] = { Relay1 };
 
 
 // ─── Network Config ───────────────────────────────────────────────────────────
-#if defined(WIFI_SUPPORT)
-constexpr uint8_t MaxConcurrentClients = 5;
+constexpr uint8_t MaxConcurrentClients = 2;
 constexpr uint8_t MaxPersistentClients = 1;
-#endif
