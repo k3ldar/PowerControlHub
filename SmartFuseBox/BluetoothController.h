@@ -89,6 +89,53 @@ public:
         }
     }
 
+    void advertise() override
+    {
+        if (_enabled)
+            BLE.advertise();
+    }
+
+    void stopAdvertise() override
+    {
+        if (_enabled)
+            BLE.stopAdvertise();
+    }
+
+    void setLocalName(const char* name) override
+    {
+        if (_enabled)
+            BLE.setLocalName(name);
+    }
+
+    void setDeviceName(const char* name) override
+    {
+        if (_enabled)
+            BLE.setDeviceName(name);
+    }
+
+    void poll() override
+    {
+        if (_enabled)
+            BLE.poll();
+    }
+
+    bool isConnected() const override
+    {
+        return _enabled && BLE.connected();
+    }
+
+    void setAdvertisedServiceUUID(const char* uuid) override
+    {
+        if (_enabled)
+            BLE.setAdvertisedServiceUUID(uuid);
+    }
+
+    void setAdvertisedService(void* service) override
+    {
+        if (_enabled && service)
+            BLE.setAdvertisedService(*static_cast<BLEService*>(service));
+    }
+
 private:
     SystemCommandHandler* _systemHandler;
     SensorCommandHandler* _sensorHandler;

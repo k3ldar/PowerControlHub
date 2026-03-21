@@ -19,7 +19,7 @@
 
 #include "Local.h"
 
-#if defined(BLUETOOTH_SUPPORT)
+#if defined(BLUETOOTH_SUPPORT) && defined(ARDUINO_UNO_R4)
     #include "BluetoothController.h"
     using PlatformBluetoothRadio = BluetoothController;
 #else

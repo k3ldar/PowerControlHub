@@ -70,6 +70,12 @@
     <Filter Include="Source Files\Scheduler">
       <UniqueIdentifier>{7e859e50-9303-4ac2-b6cf-67c4d02f2121}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Wifi">
+      <UniqueIdentifier>{d4fd71c2-65d2-4063-85cd-025fd454bafd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\SDCard">
+      <UniqueIdentifier>{f48d29f5-d769-4b98-95b3-644826ed0f98}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="SmartFuseBox.ino" />
@@ -288,12 +294,6 @@
     <ClInclude Include="Queue.h">
       <Filter>Header Files\SharedCode</Filter>
     </ClInclude>
-    <ClInclude Include="WifiServer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="WifiController.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="SystemCommandHandler.h">
       <Filter>Header Files\SharedCode\SerialCommandHandlers</Filter>
     </ClInclude>
@@ -369,12 +369,6 @@
     <ClInclude Include="SensorDataRecord.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="SdCardLogger.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="MicroSdDriver.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="MQTTRelayHandler.h">
       <Filter>Header Files\MQTT</Filter>
     </ClInclude>
@@ -399,9 +393,6 @@
     <ClInclude Include="MQTTSensorHandler.h">
       <Filter>Header Files\MQTT</Filter>
     </ClInclude>
-    <ClInclude Include="SystemSensorHandler.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="MQTTSystemHandler.h">
       <Filter>Header Files\MQTT</Filter>
     </ClInclude>
@@ -409,33 +400,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="RemoteSensor.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="WifiRadioBridge.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Esp32WifiRadio.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="R4WifiRadio.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="NullWifiRadio.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="NullBluetoothRadio.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="BluetoothRadioBridge.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="R4WifiClient.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Esp32WifiClient.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="NullWifiClient.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="IWifiRadio.h">
@@ -464,6 +428,48 @@
     </ClInclude>
     <ClInclude Include="Dht11SensorHandler.h">
       <Filter>Header Files\SharedCode\Sensors</Filter>
+    </ClInclude>
+    <ClInclude Include="Esp32WifiClient.h">
+      <Filter>Header Files\Wifi</Filter>
+    </ClInclude>
+    <ClInclude Include="Esp32WifiRadio.h">
+      <Filter>Header Files\Wifi</Filter>
+    </ClInclude>
+    <ClInclude Include="NullWifiClient.h">
+      <Filter>Header Files\Wifi</Filter>
+    </ClInclude>
+    <ClInclude Include="NullWifiRadio.h">
+      <Filter>Header Files\Wifi</Filter>
+    </ClInclude>
+    <ClInclude Include="R4WifiClient.h">
+      <Filter>Header Files\Wifi</Filter>
+    </ClInclude>
+    <ClInclude Include="R4WifiRadio.h">
+      <Filter>Header Files\Wifi</Filter>
+    </ClInclude>
+    <ClInclude Include="WifiController.h">
+      <Filter>Header Files\Wifi</Filter>
+    </ClInclude>
+    <ClInclude Include="WifiRadioBridge.h">
+      <Filter>Header Files\Wifi</Filter>
+    </ClInclude>
+    <ClInclude Include="WifiServer.h">
+      <Filter>Header Files\Wifi</Filter>
+    </ClInclude>
+    <ClInclude Include="BluetoothRadioBridge.h">
+      <Filter>Header Files\Bluetooth</Filter>
+    </ClInclude>
+    <ClInclude Include="NullBluetoothRadio.h">
+      <Filter>Header Files\Bluetooth</Filter>
+    </ClInclude>
+    <ClInclude Include="SystemSensorHandler.h">
+      <Filter>Header Files\Sensors</Filter>
+    </ClInclude>
+    <ClInclude Include="MicroSdDriver.h">
+      <Filter>Header Files\SDCard</Filter>
+    </ClInclude>
+    <ClInclude Include="SdCardLogger.h">
+      <Filter>Header Files\SDCard</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
