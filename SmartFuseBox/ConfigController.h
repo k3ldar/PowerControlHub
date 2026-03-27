@@ -63,7 +63,7 @@ public:
 	ConfigResult rename(const char* name);
 	ConfigResult renameRelay(const uint8_t relayIndex, const char* name);
 	ConfigResult mapHomeButton(const uint8_t homeButtonIndex, const uint8_t relayIndex);
-	ConfigResult mapHomeButtonColor(const uint8_t homeButtonIndex, const uint8_t colorIndex);
+	ConfigResult mapHomeButtonColor(const uint8_t relayIndex, const uint8_t colorIndex);
 	ConfigResult setVesselType(const uint8_t vesselType);
 	ConfigResult setSoundRelayButton(const uint8_t relayIndex);
 	ConfigResult setsoundDelayStart(const uint16_t delayMilliSeconds);

@@ -98,14 +98,14 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
 			}
 
             // Copy short name with truncation to relay short name length
-            size_t maxShortLen = sizeof(cfg->relay.shortNames[idx]) - 1;
-            strncpy(cfg->relay.shortNames[idx], shortName, maxShortLen);
-            cfg->relay.shortNames[idx][maxShortLen] = '\0';
+            size_t maxShortLen = sizeof(cfg->relay.relays[idx].shortName) - 1;
+            strncpy(cfg->relay.relays[idx].shortName, shortName, maxShortLen);
+            cfg->relay.relays[idx].shortName[maxShortLen] = '\0';
 
             // Copy long name with truncation to relay long name length
-            size_t maxLongLen = sizeof(cfg->relay.longNames[idx]) - 1;
-            strncpy(cfg->relay.longNames[idx], longName, maxLongLen);
-            cfg->relay.longNames[idx][maxLongLen] = '\0';
+            size_t maxLongLen = sizeof(cfg->relay.relays[idx].longName) - 1;
+            strncpy(cfg->relay.relays[idx].longName, longName, maxLongLen);
+            cfg->relay.relays[idx].longName[maxLongLen] = '\0';
 
             sendAckOk(sender, command, &params[0]);
         }
@@ -165,7 +165,7 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
                 return true;
             }
 
-            cfg->relay.buttonImage[button] = (uint8_t)buttonColor;
+            cfg->relay.relays[button].buttonImage = (uint8_t)buttonColor;
             sendAckOk(sender, command, &params[0]);
         }
         else
@@ -196,16 +196,16 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
             if (relay != DefaultValue)
             {
                 // Only auto-rename if the relay does not already have a custom name
-                if (cfg->relay.shortNames[relay][0] == '\0')
+                if (cfg->relay.relays[relay].shortName[0] == '\0')
                 {
-                    strncpy(cfg->relay.shortNames[relay], "Sound", sizeof(cfg->relay.shortNames[relay]) - 1);
-                    cfg->relay.shortNames[relay][sizeof(cfg->relay.shortNames[relay]) - 1] = '\0';
+                    strncpy(cfg->relay.relays[relay].shortName, "Sound", sizeof(cfg->relay.relays[relay].shortName) - 1);
+                    cfg->relay.relays[relay].shortName[sizeof(cfg->relay.relays[relay].shortName) - 1] = '\0';
                 }
 
-                if (cfg->relay.longNames[relay][0] == '\0')
+                if (cfg->relay.relays[relay].longName[0] == '\0')
                 {
-                    strncpy(cfg->relay.longNames[relay], "Sound\r\nSignals", sizeof(cfg->relay.longNames[relay]) - 1);
-                    cfg->relay.longNames[relay][sizeof(cfg->relay.longNames[relay]) - 1] = '\0';
+                    strncpy(cfg->relay.relays[relay].longName, "Sound\r\nSignals", sizeof(cfg->relay.relays[relay].longName) - 1);
+                    cfg->relay.relays[relay].longName[sizeof(cfg->relay.relays[relay].longName) - 1] = '\0';
                 }
             }
 
@@ -383,7 +383,7 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
                 return true;
             }
 
-            cfg->relay.defaultState[relay] = (value == 1);
+            cfg->relay.relays[relay].defaultState = (value == 1);
             sendAckOk(sender, command, &params[0]);
         }
         else
@@ -561,7 +561,7 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
         // C4 entries - send both short and long names in format: <idx>=<shortName|longName>
         for (uint8_t i = 0; i < ConfigRelayCount; ++i)
         {
-            snprintf_P(buffer, sizeof(buffer), PSTR("%u=%s|%s"), i, cfg->relay.shortNames[i], cfg->relay.longNames[i]);
+            snprintf_P(buffer, sizeof(buffer), PSTR("%u=%s|%s"), i, cfg->relay.relays[i].shortName, cfg->relay.relays[i].longName);
             sender->sendCommand(ConfigRenameRelay, buffer);
         }
 
@@ -575,7 +575,7 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
 		// C6 Send home page button color mappings
 		for (uint8_t i = 0; i < ConfigRelayCount; i++)
 		{
-			snprintf_P(buffer, sizeof(buffer), PSTR("%u=%u"), i, cfg->relay.buttonImage[i]);
+			snprintf_P(buffer, sizeof(buffer), PSTR("%u=%u"), i, cfg->relay.relays[i].buttonImage);
 			sender->sendCommand(ConfigSetButtonColor, buffer);
 		}
 
@@ -621,7 +621,7 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
         // C18 Default relay states
         for (uint8_t i = 0; i < ConfigRelayCount; ++i)
         {
-            snprintf_P(buffer, sizeof(buffer), PSTR("%u=%u"), i, cfg->relay.defaultState[i] ? 1 : 0);
+            snprintf_P(buffer, sizeof(buffer), PSTR("%u=%u"), i, cfg->relay.relays[i].defaultState ? 1 : 0);
             sender->sendCommand(ConfigDefaultRelayState, buffer);
         }
 

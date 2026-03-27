@@ -393,7 +393,7 @@ void MQTTRelayHandler::publishRelayDiscoveryConfig(uint8_t relayIndex)
     char payload[MqttMaxPayloadLength];
 
     // Get relay name from config (use long name for display)
-    const char* relayName = _config->relay.longNames[relayIndex];
+    const char* relayName = _config->relay.relays[relayIndex].longName;
 
     // Build minimal JSON discovery payload
     int payloadLen = snprintf(payload, sizeof(payload),

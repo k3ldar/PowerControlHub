@@ -46,20 +46,20 @@ public:
 
         // initialize global variables
         sendText(F("pageSplash.vaBoatName"), config->vessel.name);
-        sendText(F("pageSplash.vaHomeB1"), config->relay.shortNames[0]);
-        sendText(F("pageSplash.vaHomeB2"), config->relay.shortNames[1]);
-        sendText(F("pageSplash.vaHomeB3"), config->relay.shortNames[2]);
-        sendText(F("pageSplash.vaHomeB4"), config->relay.shortNames[3]);
+        sendText(F("pageSplash.vaHomeB1"), config->relay.relays[0].shortName);
+        sendText(F("pageSplash.vaHomeB2"), config->relay.relays[1].shortName);
+        sendText(F("pageSplash.vaHomeB3"), config->relay.relays[2].shortName);
+        sendText(F("pageSplash.vaHomeB4"), config->relay.relays[3].shortName);
 
         // Relay page global variables
-        sendText(F("pageSplash.vaRelayName1"), config->relay.longNames[0]);
-        sendText(F("pageSplash.vaRelayName2"), config->relay.longNames[1]);
-        sendText(F("pageSplash.vaRelayName3"), config->relay.longNames[2]);
-        sendText(F("pageSplash.vaRelayName4"), config->relay.longNames[3]);
-        sendText(F("pageSplash.vaRelayName5"), config->relay.longNames[4]);
-        sendText(F("pageSplash.vaRelayName6"), config->relay.longNames[5]);
-        sendText(F("pageSplash.vaRelayName7"), config->relay.longNames[6]);
-        sendText(F("pageSplash.vaRelayName8"), config->relay.longNames[7]);
+        sendText(F("pageSplash.vaRelayName1"), config->relay.relays[0].longName);
+        sendText(F("pageSplash.vaRelayName2"), config->relay.relays[1].longName);
+        sendText(F("pageSplash.vaRelayName3"), config->relay.relays[2].longName);
+        sendText(F("pageSplash.vaRelayName4"), config->relay.relays[3].longName);
+        sendText(F("pageSplash.vaRelayName5"), config->relay.relays[4].longName);
+        sendText(F("pageSplash.vaRelayName6"), config->relay.relays[5].longName);
+        sendText(F("pageSplash.vaRelayName7"), config->relay.relays[8].longName);
+        sendText(F("pageSplash.vaRelayName8"), config->relay.relays[7].longName);
     }
 
     void refresh(unsigned long now) override

@@ -99,7 +99,7 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
 		// C4 entries - send both short and long names in format: <idx>=<shortName|longName>
 		for (uint8_t i = 0; i < ConfigRelayCount; ++i)
 		{
-			snprintf(buffer, sizeof(buffer), "%u=%s|%s", i, config->relay.shortNames[i], config->relay.longNames[i]);
+			snprintf(buffer, sizeof(buffer), "%u=%s|%s", i, config->relay.relays[i].shortName, config->relay.relays[i].longName);
 			sender->sendCommand(ConfigRenameRelay, buffer);
 		}
 
@@ -113,7 +113,7 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
 		// C6 Send home page button color mappings
 		for (uint8_t i = 0; i < ConfigRelayCount; i++)
 		{
-			snprintf(buffer, sizeof(buffer), "%u=%u", i, config->relay.buttonImage[i]);
+			snprintf(buffer, sizeof(buffer), "%u=%u", i, config->relay.relays[i].buttonImage);
 			sender->sendCommand(ConfigSetButtonColor, buffer);
 		}
 
@@ -172,15 +172,18 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
 		// C18 Default relay states
 		for (uint8_t i = 0; i < ConfigRelayCount; ++i)
 		{
-			snprintf(buffer, sizeof(buffer), "%d=%s", i, (config->relay.defaultState[i] ? "1" : "0"));
+			snprintf(buffer, sizeof(buffer), "%d=%s", i, (config->relay.relays[i].defaultState ? "1" : "0"));
 			sender->sendCommand(ConfigDefaultRelayState, buffer);
 		}
 
-		// C19 Linked relays
+		// C19 Linked relays — only emit actual pairs to avoid unintentional unlinks on the receiver
 		for (uint8_t i = 0; i < ConfigMaxLinkedRelays; ++i)
 		{
-			snprintf(buffer, sizeof(buffer), "%d=%d", config->relay.linkedRelays[i][0], config->relay.linkedRelays[i][1]);
-			sender->sendCommand(ConfigLinkRelays, buffer);
+			if (config->relay.linkedRelays[i][0] != MaxUint8Value)
+			{
+				snprintf(buffer, sizeof(buffer), "%d=%d", config->relay.linkedRelays[i][0], config->relay.linkedRelays[i][1]);
+				sender->sendCommand(ConfigLinkRelays, buffer);
+			}
 		}
 
 		// C20 Timezone offset
@@ -318,13 +321,13 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
 	}
 	else if (strcmp(command, ConfigSetButtonColor) == 0)
 	{
-		// Expect "MAP <button>=<color>" where button 0..3, image 0..5 (or 255 to unmap)
+		// Expect "MAP <relay>=<color>" where relay 0..7, image 0..5 (or 255 to clear)
 		if (paramCount >= 1)
 		{
-			uint8_t button = static_cast<uint8_t>(strtoul(params[0].key, nullptr, 0));
+			uint8_t relayIndex = static_cast<uint8_t>(strtoul(params[0].key, nullptr, 0));
 			uint8_t buttonColor = static_cast<uint8_t>(strtoul(params[0].value, nullptr, 0));
 
-			result = _configController->mapHomeButtonColor(button, buttonColor);
+			result = _configController->mapHomeButtonColor(relayIndex, buttonColor);
 		}
 		else
 		{

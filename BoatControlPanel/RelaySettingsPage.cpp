@@ -88,7 +88,7 @@ void RelaySettingsPage::onEnterPage()
 	for (uint8_t i = 0; i < ConfigRelayCount; i++)
     {
         const char* buttonName = reinterpret_cast<const char*>(pgm_read_ptr(&SettingRelayButtons[i]));
-        sendText(reinterpret_cast<const __FlashStringHelper*>(buttonName), config->relay.shortNames[i]);
+        sendText(reinterpret_cast<const __FlashStringHelper*>(buttonName), config->relay.relays[i].shortName);
     }
 
     _currentSettingsIndex = relayHomePageSetupId;
@@ -177,7 +177,7 @@ void RelaySettingsPage::loadConfigPage()
 
             for (uint8_t i = 0; i < ConfigRelayCount; i++)
             {
-                bool selButton = config->relay.defaultState[i];
+                bool selButton = config->relay.relays[i].defaultState;
                 uint16_t buttonColor = selButton ? ButtonSelected : ButtonNotSelected;
                 const char* buttonName = reinterpret_cast<const char*>(pgm_read_ptr(&SettingRelayButtons[i]));
 
@@ -304,7 +304,7 @@ void RelaySettingsPage::loadConfigPage()
             // Load current button image selections and set button colors
             for (uint8_t i = 0; i < ConfigRelayCount; i++)
             {
-                uint8_t imageId = config->relay.buttonImage[i];
+                uint8_t imageId = config->relay.relays[i].buttonImage;
                 
                 // Map image ID to character (1-5, default to white)
                 char colorChar;
@@ -481,14 +481,14 @@ bool RelaySettingsPage::validateExternalData()
             // Clear all default states first
             for (uint8_t i = 0; i < ConfigRelayCount; i++)
             {
-                config->relay.defaultState[i] = false;
+                config->relay.relays[i].defaultState = false;
             }
 
             // Set selected relays to ON by default
             for (uint8_t i = 0; i < len; i++)
             {
                 uint8_t relayIndex = _externalData[i] - '0';
-                config->relay.defaultState[relayIndex] = true;
+                config->relay.relays[relayIndex].defaultState = true;
             }
 
             result = true;
@@ -644,7 +644,7 @@ bool RelaySettingsPage::validateExternalData()
                     default:  imageId = ImageButtonColorGrey;   break;
                 }
                 
-                config->relay.buttonImage[i] = imageId;
+                config->relay.relays[i].buttonImage = imageId;
             }
 
             result = true;

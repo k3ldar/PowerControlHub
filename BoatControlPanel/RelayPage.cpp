@@ -246,6 +246,6 @@ void RelayPage::configUpdated()
         setPicture(relayPrefix, ImageButtonColorGrey + ImageButtonColorOffset);
         setPicture2(relayPrefix, ImageButtonColorGrey + ImageButtonColorOffset);
 
-        sendText(relayPrefix, config->relay.longNames[button]);
+        sendText(relayPrefix, config->relay.relays[button].longName);
     }
 }

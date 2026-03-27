@@ -109,14 +109,14 @@ ConfigResult ConfigController::renameRelay(const uint8_t relayIndex, const char*
 	}
 
 	// Copy short name with truncation to relay short name length
-	size_t maxShortLen = sizeof(_config->relay.shortNames[relayIndex]) - 1;
-	strncpy(_config->relay.shortNames[relayIndex], shortName, maxShortLen);
-	_config->relay.shortNames[relayIndex][maxShortLen] = '\0';
+	size_t maxShortLen = sizeof(_config->relay.relays[relayIndex].shortName) - 1;
+	strncpy(_config->relay.relays[relayIndex].shortName, shortName, maxShortLen);
+	_config->relay.relays[relayIndex].shortName[maxShortLen] = '\0';
 
 	// Copy long name with truncation to relay long name length
-	size_t maxLongLen = sizeof(_config->relay.longNames[relayIndex]) - 1;
-	strncpy(_config->relay.longNames[relayIndex], longName, maxLongLen);
-	_config->relay.longNames[relayIndex][maxLongLen] = '\0';
+	size_t maxLongLen = sizeof(_config->relay.relays[relayIndex].longName) - 1;
+	strncpy(_config->relay.relays[relayIndex].longName, longName, maxLongLen);
+	_config->relay.relays[relayIndex].longName[maxLongLen] = '\0';
 	return ConfigResult::Success;
 }
 
@@ -135,12 +135,12 @@ ConfigResult ConfigController::mapHomeButton(const uint8_t homeButtonIndex, cons
 	return ConfigResult::Success;
 }
 
-ConfigResult ConfigController::mapHomeButtonColor(const uint8_t homeButtonIndex, const uint8_t colorIndex)
+ConfigResult ConfigController::mapHomeButtonColor(const uint8_t relayIndex, const uint8_t colorIndex)
 {
 	if (_config == nullptr)
 		return ConfigResult::InvalidConfig;
 
-	if (homeButtonIndex >= ConfigRelayCount)
+	if (relayIndex >= ConfigRelayCount)
 		return ConfigResult::InvalidRelay;
 
 	uint8_t color = colorIndex;
@@ -152,7 +152,7 @@ ConfigResult ConfigController::mapHomeButtonColor(const uint8_t homeButtonIndex,
 	if ((color < ImageButtonColorBlue || color > ImageButtonColorYellow) && color != DefaultValue)
 		return ConfigResult::InvalidParameter;
 
-	_config->relay.buttonImage[homeButtonIndex] = color;
+	_config->relay.relays[relayIndex].buttonImage = color;
 	return ConfigResult::Success;
 }
 
@@ -319,7 +319,7 @@ ConfigResult ConfigController::setRelayDefaultState(const uint8_t relayIndex, co
 	if (relayIndex >= ConfigRelayCount)
 		return ConfigResult::InvalidRelay;
 
-	_config->relay.defaultState[relayIndex] = isOpen;
+	_config->relay.relays[relayIndex].defaultState = isOpen;
 	return ConfigResult::Success;
 }
 
@@ -358,12 +358,10 @@ ConfigResult ConfigController::linkRelays(uint8_t relayIndex, uint8_t linkedRela
 	for (uint8_t i = 0; i < ConfigMaxLinkedRelays; i++)
 	{
 		if (_config->relay.linkedRelays[i][0] == relayIndex || _config->relay.linkedRelays[i][1] == relayIndex)
-		{
 			return ConfigResult::Failed;
-		}
 	}
 
-	// find next linked relay space
+	// find next available slot
 	for (uint8_t i = 0; i < ConfigMaxLinkedRelays; i++)
 	{
 		if (_config->relay.linkedRelays[i][0] == MaxUint8Value)
@@ -390,7 +388,6 @@ ConfigResult ConfigController::unlinkRelay(uint8_t relayIndex)
 	if (relayIndex >= ConfigRelayCount)
 		return ConfigResult::InvalidRelay;
 
-	// find next linked relay space
 	bool found = false;
 	for (uint8_t i = 0; i < ConfigMaxLinkedRelays; i++)
 	{

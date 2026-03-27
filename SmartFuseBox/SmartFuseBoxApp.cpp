@@ -218,7 +218,7 @@ void SmartFuseBoxApp::setup(BaseSensorHandler** sensorHandlers, uint8_t sensorHa
     // open any relays that are default open
     for (uint8_t i = 0; i < ConfigRelayCount; i++)
     {
-        if (config->relay.defaultState[i])
+        if (config->relay.relays[i].defaultState)
         {
             _relayController.setRelayState(i, true);
         }

@@ -232,7 +232,7 @@ void HomePage::handleTouch(uint8_t compId, uint8_t eventType)
 		if (commandMgrComputer)
 		{
 			char debugMsg[64];
-			snprintf_P(debugMsg, sizeof(debugMsg), PSTR("%s pressed"), config->relay.shortNames[relayIndex]);
+			snprintf_P(debugMsg, sizeof(debugMsg), PSTR("%s pressed"), config->relay.relays[relayIndex].shortName);
 			commandMgrComputer->sendDebug(debugMsg, F("HomePage"));
 		}
     }
@@ -241,7 +241,7 @@ void HomePage::handleTouch(uint8_t compId, uint8_t eventType)
 		if (commandMgrComputer)
 		{
 			char debugMsg[64];
-			snprintf_P(debugMsg, sizeof(debugMsg), PSTR("%s released"), config->relay.shortNames[relayIndex]);
+			snprintf_P(debugMsg, sizeof(debugMsg), PSTR("%s released"), config->relay.relays[relayIndex].shortName);
 			commandMgrComputer->sendDebug(debugMsg, F("HomePage"));
 		}
 
@@ -660,7 +660,7 @@ void HomePage::configUpdated()
             setPicture(buffer, _buttonImage[button]);
 
             // Use short name for home page display
-            sendText(buffer, config->relay.shortNames[relayIndex]);
+            sendText(buffer, config->relay.relays[relayIndex].shortName);
         }
         else
         {

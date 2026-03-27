@@ -86,13 +86,13 @@ CommandResult ConfigNetworkHandler::handleRequest(const char* method,
 	}
 	else if (strcmp(command, ConfigSetButtonColor) == 0)
 	{
-		// Expect "MAP <button>=<color>" where button 0..3, image 0..5 (or 255 to unmap)
+		// Expect "MAP <relay>=<color>" where relay 0..7, image 0..5 (or 255 to clear)
 		if (paramCount >= 1)
 		{
-			uint8_t button = static_cast<uint8_t>(strtoul(params[0].key, nullptr, 0));
+			uint8_t relayIndex = static_cast<uint8_t>(strtoul(params[0].key, nullptr, 0));
 			uint8_t buttonColor = static_cast<uint8_t>(strtoul(params[0].value, nullptr, 0));
 
-			result = _configController->mapHomeButtonColor(button, buttonColor);
+			result = _configController->mapHomeButtonColor(relayIndex, buttonColor);
 		}
 		else
 		{
@@ -490,9 +490,9 @@ void ConfigNetworkHandler::formatStatusJson(IWifiClient* client)
 	{
 		if (i > 0) client->print(",");
 		client->print("{\"shortName\":\"");
-		client->print(config->relay.shortNames[i]);
+		client->print(config->relay.relays[i].shortName);
 		client->print("\",\"longName\":\"");
-		client->print(config->relay.longNames[i]);
+		client->print(config->relay.relays[i].longName);
 		client->print("\"}");
 	}
 
@@ -503,7 +503,9 @@ void ConfigNetworkHandler::formatStatusJson(IWifiClient* client)
 
 	for (uint8_t i = 0; i < ConfigHomeButtons; ++i)
 	{
-		if (i > 0) client->print(",");
+		if (i > 0)
+			client->print(",");
+
 		client->print(config->relay.homePageMapping[i]);
 	}
 
@@ -514,8 +516,10 @@ void ConfigNetworkHandler::formatStatusJson(IWifiClient* client)
 
 	for (uint8_t i = 0; i < ConfigRelayCount; ++i)
 	{
-		if (i > 0) client->print(",");
-		client->print(config->relay.buttonImage[i]);
+		if (i > 0)
+			client->print(",");
+
+		client->print(config->relay.relays[i].buttonImage);
 	}
 
 	client->print("],");
@@ -592,8 +596,10 @@ void ConfigNetworkHandler::formatStatusJson(IWifiClient* client)
 
 	for (uint8_t i = 0; i < ConfigRelayCount; ++i)
 	{
-		if (i > 0) client->print(",");
-		client->print(config->relay.defaultState[i] ? "true" : "false");
+		if (i > 0)
+			client->print(",");
+
+		client->print(config->relay.relays[i].defaultState ? "true" : "false");
 	}
 
 	client->print("],");
@@ -610,7 +616,6 @@ void ConfigNetworkHandler::formatStatusJson(IWifiClient* client)
 		client->print(config->relay.linkedRelays[i][1]);
 		client->print("]");
 	}
-
 	client->print("],");
 
 	// C20 Timezone offset

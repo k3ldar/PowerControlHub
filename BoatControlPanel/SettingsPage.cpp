@@ -178,7 +178,7 @@ void SettingsPage::loadConfigPage()
 
             loadPage(
                 buffer,
-                config->relay.shortNames[relayIndex],
+                config->relay.relays[relayIndex].shortName,
                 ConfigShortRelayNameLength - 1,
                 ShowAlphaKeyboard,
                 true);
@@ -208,7 +208,7 @@ void SettingsPage::loadConfigPage()
             snprintf_P(buffer, sizeof(buffer), LongRelayDescription, relayIndex + 1);
             loadPage(
                 buffer,
-                config->relay.longNames[relayIndex],
+                config->relay.relays[relayIndex].longName,
                 ConfigLongRelayNameLength - 1,
                 ShowAlphaKeyboard,
                 true);
@@ -370,8 +370,8 @@ bool SettingsPage::validateExternalData()
             return false;
         }
 
-        strncpy(config->relay.shortNames[relayIndex], _externalData, ConfigShortRelayNameLength - 1);
-        config->relay.shortNames[relayIndex][ConfigShortRelayNameLength - 1] = '\0';
+        strncpy(config->relay.relays[relayIndex].shortName, _externalData, ConfigShortRelayNameLength - 1);
+        config->relay.relays[relayIndex].shortName[ConfigShortRelayNameLength - 1] = '\0';
         result = true;
 
         break;
@@ -400,8 +400,8 @@ bool SettingsPage::validateExternalData()
             return false;
         }
 
-        strncpy(config->relay.longNames[relayIndex], _externalData, ConfigLongRelayNameLength - 1);
-        config->relay.longNames[relayIndex][ConfigLongRelayNameLength - 1] = '\0';
+        strncpy(config->relay.relays[relayIndex].longName, _externalData, ConfigLongRelayNameLength - 1);
+        config->relay.relays[relayIndex].longName[ConfigLongRelayNameLength - 1] = '\0';
         result = true;
 
         break;

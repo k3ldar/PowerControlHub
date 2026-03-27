@@ -168,20 +168,32 @@ void ConfigManager::resetToDefaults()
     strncpy_P(_cfg.vessel.name, DefaultBoatName, ConfigMaxNameLength - 1);
     _cfg.vessel.name[ConfigMaxNameLength - 1] = '\0';  // Ensure null termination
 
-    // Default relay names (both short and long)
     for (uint8_t i = 0; i < ConfigRelayCount; ++i)
     {
-        // Default short name: "R0", "R1", etc.
         char shortBuf[ConfigShortRelayNameLength]{ 0 };
         snprintf_P(shortBuf, sizeof(shortBuf), RelayNameShort, (unsigned)i);
-        strncpy(_cfg.relay.shortNames[i], shortBuf, ConfigShortRelayNameLength - 1);
-        _cfg.relay.shortNames[i][ConfigShortRelayNameLength - 1] = '\0';
+        strncpy(_cfg.relay.relays[i].shortName, shortBuf, ConfigShortRelayNameLength - 1);
+        _cfg.relay.relays[i].shortName[ConfigShortRelayNameLength - 1] = '\0';
 
-        // Default long name: "Relay 0", "Relay 1", etc.
         char longBuf[ConfigLongRelayNameLength]{ 0 };
         snprintf_P(longBuf, sizeof(longBuf), RelayNameLong, (unsigned)i);
-        strncpy(_cfg.relay.longNames[i], longBuf, ConfigLongRelayNameLength - 1);
-        _cfg.relay.longNames[i][ConfigLongRelayNameLength - 1] = '\0';
+        strncpy(_cfg.relay.relays[i].longName, longBuf, ConfigLongRelayNameLength - 1);
+        _cfg.relay.relays[i].longName[ConfigLongRelayNameLength - 1] = '\0';
+
+        _cfg.relay.relays[i].buttonImage = 0x02;    // default color blue
+        _cfg.relay.relays[i].defaultState = false;   // default off (relay closed)
+#if defined(FUSE_BOX_CONTROLLER)
+        _cfg.relay.relays[i].pin = Relays[i]; // default pin from Local.h
+#else
+        _cfg.relay.relays[i].pin = 0x255; // default value for no pin
+#endif
+    }
+
+    // Reset linked relay table
+    for (uint8_t i = 0; i < ConfigMaxLinkedRelays; ++i)
+    {
+        _cfg.relay.linkedRelays[i][0] = 0xFF;
+        _cfg.relay.linkedRelays[i][1] = 0xFF;
     }
 
     // Default home page mapping: first four relays visible in order
@@ -190,30 +202,12 @@ void ConfigManager::resetToDefaults()
         _cfg.relay.homePageMapping[i] = i; // map slot i -> relay i
     }
 
-    // Default home page mapping: first four relays visible in order
-    for (uint8_t i = 0; i < ConfigRelayCount; ++i)
-    {
-        _cfg.relay.buttonImage[i] = 0x02; // default color blue
-    }
-
 	_cfg.vessel.vesselType = VesselType::Motor;
 	_cfg.sound.hornRelayIndex = 0xFF; // none
     _cfg.lightSensor.nightRelayIndex = 0xFF; // none
     _cfg.lightSensor.daytimeThreshold = 512;
     _cfg.sound.startDelayMs = 500; // 500ms
-	
-    // default relay states
-	for (uint8_t i = 0; i < ConfigRelayCount; ++i)
-    {
-        _cfg.relay.defaultState[i] = false; // default off (relay closed)
-    }
 
-    // reset linked relays
-    for (uint8_t i = 0; i < ConfigMaxLinkedRelays; ++i)
-    {
-        _cfg.relay.linkedRelays[i][0] = 0xFF;
-        _cfg.relay.linkedRelays[i][1] = 0xFF;
-    }
 
 	strncpy(_cfg.vessel.mmsi, "000000000", ConfigMmsiLength - 1);
 	strncpy(_cfg.vessel.callSign, "NOCALL", ConfigCallSignLength - 1);
