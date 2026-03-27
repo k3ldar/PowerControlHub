@@ -109,14 +109,14 @@ ConfigResult ConfigController::renameRelay(const uint8_t relayIndex, const char*
 	}
 
 	// Copy short name with truncation to relay short name length
-	size_t maxShortLen = sizeof(_config->relay.shortNames[relayIndex]) - 1;
-	strncpy(_config->relay.shortNames[relayIndex], shortName, maxShortLen);
-	_config->relay.shortNames[relayIndex][maxShortLen] = '\0';
+	size_t maxShortLen = sizeof(_config->relay.relays[relayIndex].shortName) - 1;
+	strncpy(_config->relay.relays[relayIndex].shortName, shortName, maxShortLen);
+	_config->relay.relays[relayIndex].shortName[maxShortLen] = '\0';
 
 	// Copy long name with truncation to relay long name length
-	size_t maxLongLen = sizeof(_config->relay.longNames[relayIndex]) - 1;
-	strncpy(_config->relay.longNames[relayIndex], longName, maxLongLen);
-	_config->relay.longNames[relayIndex][maxLongLen] = '\0';
+	size_t maxLongLen = sizeof(_config->relay.relays[relayIndex].longName) - 1;
+	strncpy(_config->relay.relays[relayIndex].longName, longName, maxLongLen);
+	_config->relay.relays[relayIndex].longName[maxLongLen] = '\0';
 	return ConfigResult::Success;
 }
 
@@ -152,7 +152,7 @@ ConfigResult ConfigController::mapHomeButtonColor(const uint8_t homeButtonIndex,
 	if ((color < ImageButtonColorBlue || color > ImageButtonColorYellow) && color != DefaultValue)
 		return ConfigResult::InvalidParameter;
 
-	_config->relay.buttonImage[homeButtonIndex] = color;
+	_config->relay.relays[homeButtonIndex].buttonImage = color;
 	return ConfigResult::Success;
 }
 
@@ -319,7 +319,7 @@ ConfigResult ConfigController::setRelayDefaultState(const uint8_t relayIndex, co
 	if (relayIndex >= ConfigRelayCount)
 		return ConfigResult::InvalidRelay;
 
-	_config->relay.defaultState[relayIndex] = isOpen;
+	_config->relay.relays[relayIndex].defaultState = isOpen;
 	return ConfigResult::Success;
 }
 
@@ -352,32 +352,18 @@ ConfigResult ConfigController::linkRelays(uint8_t relayIndex, uint8_t linkedRela
 		return ConfigResult::InvalidParameter;
 	}
 
-	uint8_t availableIndex = MaxUint8Value;
-
-	// is the relay already linked?
-	for (uint8_t i = 0; i < ConfigMaxLinkedRelays; i++)
-	{
-		if (_config->relay.linkedRelays[i][0] == relayIndex || _config->relay.linkedRelays[i][1] == relayIndex)
-		{
-			return ConfigResult::Failed;
-		}
-	}
-
-	// find next linked relay space
-	for (uint8_t i = 0; i < ConfigMaxLinkedRelays; i++)
-	{
-		if (_config->relay.linkedRelays[i][0] == MaxUint8Value)
-		{
-			availableIndex = i;
-			break;
-		}
-	}
-
-	if (availableIndex == MaxUint8Value)
+	// is relayIndex already a source in a link?
+	if (_config->relay.relays[relayIndex].linkedRelay != MaxUint8Value)
 		return ConfigResult::Failed;
 
-	_config->relay.linkedRelays[availableIndex][0] = relayIndex;
-	_config->relay.linkedRelays[availableIndex][1] = linkedRelay;
+	// is relayIndex already a target of another relay's link?
+	for (uint8_t i = 0; i < ConfigRelayCount; i++)
+	{
+		if (_config->relay.relays[i].linkedRelay == relayIndex)
+			return ConfigResult::Failed;
+	}
+
+	_config->relay.relays[relayIndex].linkedRelay = linkedRelay;
 	return ConfigResult::Success;
 }
 
@@ -392,12 +378,20 @@ ConfigResult ConfigController::unlinkRelay(uint8_t relayIndex)
 
 	// find next linked relay space
 	bool found = false;
-	for (uint8_t i = 0; i < ConfigMaxLinkedRelays; i++)
+
+	// relayIndex is a source of a link
+	if (_config->relay.relays[relayIndex].linkedRelay != MaxUint8Value)
 	{
-		if (_config->relay.linkedRelays[i][0] == relayIndex || _config->relay.linkedRelays[i][1] == relayIndex)
+		_config->relay.relays[relayIndex].linkedRelay = MaxUint8Value;
+		found = true;
+	}
+
+	// relayIndex is a target of someone else's link
+	for (uint8_t i = 0; i < ConfigRelayCount; i++)
+	{
+		if (_config->relay.relays[i].linkedRelay == relayIndex)
 		{
-			_config->relay.linkedRelays[i][0] = MaxUint8Value;
-			_config->relay.linkedRelays[i][1] = MaxUint8Value;
+			_config->relay.relays[i].linkedRelay = MaxUint8Value;
 			found = true;
 		}
 	}

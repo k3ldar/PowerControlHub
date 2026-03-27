@@ -490,9 +490,9 @@ void ConfigNetworkHandler::formatStatusJson(IWifiClient* client)
 	{
 		if (i > 0) client->print(",");
 		client->print("{\"shortName\":\"");
-		client->print(config->relay.shortNames[i]);
+		client->print(config->relay.relays[i].shortName);
 		client->print("\",\"longName\":\"");
-		client->print(config->relay.longNames[i]);
+		client->print(config->relay.relays[i].longName);
 		client->print("\"}");
 	}
 
@@ -503,7 +503,9 @@ void ConfigNetworkHandler::formatStatusJson(IWifiClient* client)
 
 	for (uint8_t i = 0; i < ConfigHomeButtons; ++i)
 	{
-		if (i > 0) client->print(",");
+		if (i > 0)
+			client->print(",");
+
 		client->print(config->relay.homePageMapping[i]);
 	}
 
@@ -514,8 +516,10 @@ void ConfigNetworkHandler::formatStatusJson(IWifiClient* client)
 
 	for (uint8_t i = 0; i < ConfigRelayCount; ++i)
 	{
-		if (i > 0) client->print(",");
-		client->print(config->relay.buttonImage[i]);
+		if (i > 0)
+			client->print(",");
+
+		client->print(config->relay.relays[i].buttonImage);
 	}
 
 	client->print("],");
@@ -592,25 +596,26 @@ void ConfigNetworkHandler::formatStatusJson(IWifiClient* client)
 
 	for (uint8_t i = 0; i < ConfigRelayCount; ++i)
 	{
-		if (i > 0) client->print(",");
-		client->print(config->relay.defaultState[i] ? "true" : "false");
+		if (i > 0)
+			client->print(",");
+
+		client->print(config->relay.relays[i].defaultState ? "true" : "false");
 	}
 
 	client->print("],");
 	client->print("\"linkedRelays\":[");
 
-	for (uint8_t i = 0; i < ConfigMaxLinkedRelays; ++i)
+	for (uint8_t i = 0; i < ConfigRelayCount; ++i)
 	{
 		if (i > 0)
 			client->print(",");
 
 		client->print("[");
-		client->print(config->relay.linkedRelays[i][0]);
+		client->print(i);
 		client->print(",");
-		client->print(config->relay.linkedRelays[i][1]);
+		client->print(config->relay.relays[i].linkedRelay);
 		client->print("]");
 	}
-
 	client->print("],");
 
 	// C20 Timezone offset

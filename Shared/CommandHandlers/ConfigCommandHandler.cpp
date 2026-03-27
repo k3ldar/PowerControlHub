@@ -99,7 +99,7 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
 		// C4 entries - send both short and long names in format: <idx>=<shortName|longName>
 		for (uint8_t i = 0; i < ConfigRelayCount; ++i)
 		{
-			snprintf(buffer, sizeof(buffer), "%u=%s|%s", i, config->relay.shortNames[i], config->relay.longNames[i]);
+			snprintf(buffer, sizeof(buffer), "%u=%s|%s", i, config->relay.relays[i].shortName, config->relay.relays[i].longName);
 			sender->sendCommand(ConfigRenameRelay, buffer);
 		}
 
@@ -113,7 +113,7 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
 		// C6 Send home page button color mappings
 		for (uint8_t i = 0; i < ConfigRelayCount; i++)
 		{
-			snprintf(buffer, sizeof(buffer), "%u=%u", i, config->relay.buttonImage[i]);
+			snprintf(buffer, sizeof(buffer), "%u=%u", i, config->relay.relays[i].buttonImage);
 			sender->sendCommand(ConfigSetButtonColor, buffer);
 		}
 
@@ -172,14 +172,14 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
 		// C18 Default relay states
 		for (uint8_t i = 0; i < ConfigRelayCount; ++i)
 		{
-			snprintf(buffer, sizeof(buffer), "%d=%s", i, (config->relay.defaultState[i] ? "1" : "0"));
+			snprintf(buffer, sizeof(buffer), "%d=%s", i, (config->relay.relays[i].defaultState ? "1" : "0"));
 			sender->sendCommand(ConfigDefaultRelayState, buffer);
 		}
 
 		// C19 Linked relays
-		for (uint8_t i = 0; i < ConfigMaxLinkedRelays; ++i)
+		for (uint8_t i = 0; i < ConfigRelayCount; ++i)
 		{
-			snprintf(buffer, sizeof(buffer), "%d=%d", config->relay.linkedRelays[i][0], config->relay.linkedRelays[i][1]);
+			snprintf(buffer, sizeof(buffer), "%d=%d", i, config->relay.relays[i].linkedRelay);
 			sender->sendCommand(ConfigLinkRelays, buffer);
 		}
 

@@ -22,19 +22,16 @@
 #include "SmartFuseBoxApp.h"
 #include "SystemFunctions.h"
 
-#if defined(SUB_CONTROLLER_WEATHER_STATION)
 #include "WaterSensorHandler.h"
-#include "LightSensorHandler.h"
-#endif
-
 #include "Dht11SensorHandler.h"
+#include "LightSensorHandler.h"
 #include "SystemSensorHandler.h"
 
 #include "RemoteSensor.h"
 
-// BaseSensor.h is required here because the localSensors[] array below is typed
-// as BaseSensorHandler*. When MQTT_SUPPORT is active, RemoteSensor inherits from
-// a different base that is not pulled in by the sensor-specific headers above.
+ // BaseSensor.h is required here because the localSensors[] array below is typed
+ // as BaseSensorHandler*. When MQTT_SUPPORT is active, RemoteSensor inherits from
+ // a different base that is not pulled in by the sensor-specific headers above.
 #if defined(MQTT_SUPPORT)
 #include "BaseSensor.h"
 #endif
@@ -68,7 +65,6 @@ SerialCommandManager commandMgrLink(&LINK_SERIAL, onLinkCommandReceived, '\n', '
 SmartFuseBoxApp app(&commandMgrComputer, &commandMgrLink, Relays, ConfigRelayCount);
 
 // Project-specific sensors
-#if defined(SUB_CONTROLLER_WEATHER_STATION)
 WaterSensorHandler waterSensorHandler(app.messageBus(), app.broadcastManager(),
 	app.sensorCommandHandler(), WaterSensorPin, WaterSensorActivePin);
 Dht11SensorHandler dht11SensorHandler(app.messageBus(), app.broadcastManager(),
@@ -76,23 +72,11 @@ Dht11SensorHandler dht11SensorHandler(app.messageBus(), app.broadcastManager(),
 LightSensorHandler lightSensorHandler(app.messageBus(), app.broadcastManager(),
 	app.sensorCommandHandler(), app.relayController(),
 	LightSensorPin, LightSensorIsDigital);
-#endif
-
-#if defined(SUB_CONTROLLER_BASEMENT_SENSOR)
-Dht11SensorHandler basementStoreRoom(app.messageBus(), app.broadcastManager(),
-	app.sensorCommandHandler(), app.warningManager(), Dht11StoreRoomSensorPin, "StoreRoom");
-Dht11SensorHandler basementMakerRoom(app.messageBus(), app.broadcastManager(),
-	app.sensorCommandHandler(), app.warningManager(), Dht11MakerRoomSensorPin, "MakerRoom");
-Dht11SensorHandler basementPassageway(app.messageBus(), app.broadcastManager(),
-	app.sensorCommandHandler(), app.warningManager(), Dht11PassagewaySensorPin, "PassageWay");
-Dht11SensorHandler basementWashRoom(app.messageBus(), app.broadcastManager(),
-	app.sensorCommandHandler(), app.warningManager(), Dht11WashRoomSensorPin, "WashRoom");
-#endif
-
 SystemSensorHandler systemSensorHandler(app.messageBus(),
 	app.wifiController(),
 	app.bluetoothController(),
 	app.warningManager());
+
 
 // Project specific remote sensors
 #if defined(MQTT_SUPPORT)
@@ -115,11 +99,7 @@ constexpr uint8_t remoteSensorCount = sizeof(remoteSensors) / sizeof(remoteSenso
 // Note: gpsLatLonSensor appears in remoteSensors[] (for the remote-sync pipeline)
 // AND here (so it is also ticked by the local poll loop for status reporting).
 BaseSensorHandler* localSensors[] = {
-#if defined(SUB_CONTROLLER_WEATHER_STATION)
 	&waterSensorHandler, &dht11SensorHandler, &lightSensorHandler, &systemSensorHandler, &gpsLatLonSensor
-#elif defined(SUB_CONTROLLER_BASEMENT_SENSOR)
-	&basementStoreRoom, &basementMakerRoom, &basementPassageway, &basementWashRoom, & systemSensorHandler, &gpsLatLonSensor
-#endif
 };
 constexpr uint8_t sensorHandlerCount = sizeof(localSensors) / sizeof(localSensors[0]);
 

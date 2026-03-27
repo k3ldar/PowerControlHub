@@ -103,7 +103,8 @@ enum class SchedulerActionType : uint8_t
 constexpr uint8_t ConfigVersion1 = 1;
 constexpr uint8_t ConfigVersion2 = 2;
 constexpr uint8_t ConfigVersion3 = 3;
-constexpr uint8_t ConfigVersion = ConfigVersion3;
+constexpr uint8_t ConfigVersion4 = 4;
+constexpr uint8_t ConfigVersion = ConfigVersion4;
 
 constexpr uint8_t ConfigHomeButtons = 4;
 constexpr uint8_t ConfigMaxNameLength = 31; // max characters (inc null)
@@ -112,7 +113,6 @@ constexpr uint8_t ConfigLongRelayNameLength = 21; // max characters (inc null) -
 constexpr uint8_t ConfigMmsiLength = 10; // 9 chars + null
 constexpr uint8_t ConfigHomePortLength = 31; // 30 chars + null
 constexpr uint8_t ConfigCallSignLength = 10; // 9 chars + null
-constexpr uint8_t ConfigLinkedRelayCount = 2;
 
 
 struct SystemConfig {
@@ -131,16 +131,21 @@ struct VesselConfig {
     int8_t reserved2[4];
 } __attribute__((packed));
 
+struct RelayEntry {
+    char    shortName[ConfigShortRelayNameLength];  // 6 bytes
+    char    longName[ConfigLongRelayNameLength];    // 21 bytes
+    uint8_t pin;                                   // 1 byte
+    uint8_t buttonImage;                           // 1 byte
+    bool    defaultState;                          // 1 byte
+    uint8_t linkedRelay;                           // 1 byte, 0xFF = none
+    uint8_t reserved[2];                           // 2 bytes future growth
+} __attribute__((packed));
+
 struct RelayConfig {
-    char    shortNames[ConfigRelayCount][ConfigShortRelayNameLength];
-    char    longNames[ConfigRelayCount][ConfigLongRelayNameLength];
-    uint8_t homePageMapping[ConfigHomeButtons];
-    uint8_t buttonImage[ConfigRelayCount];
-    bool    defaultState[ConfigRelayCount];
-    uint8_t linkedRelays[ConfigMaxLinkedRelays][ConfigLinkedRelayCount];
-	uint8_t pins[ConfigRelayCount];
-    uint8_t reserved1[4];
-    int8_t reserved2[4];
+    uint8_t    homePageMapping[ConfigHomeButtons];  // 4 bytes  — UI layout, not per-relay
+    RelayEntry relays[ConfigRelayCount];            // 8 × 33 = 264 bytes
+    uint8_t    reserved1[4];                        // 4 bytes
+    int8_t     reserved2[4];                        // 4 bytes
 } __attribute__((packed));
 
 struct NetworkConfig {
