@@ -55,7 +55,15 @@ private:
         if (config == nullptr || _relayController == nullptr)
             return;
 
-        uint8_t nightRelay = config->lightSensor.nightRelayIndex;
+        uint8_t nightRelay = DefaultValue;
+        for (uint8_t i = 0; i < ConfigRelayCount; ++i)
+        {
+            if (config->relay.relays[i].actionType == RelayActionType::NightRelay)
+            {
+                nightRelay = i;
+                break;
+            }
+        }
 
         if (nightRelay < ConfigRelayCount)
         {

@@ -17,6 +17,7 @@
  */
 #include "Local.h"
 #include "RelayNetworkHandler.h"
+#include "SystemFunctions.h"
 
 RelayNetworkHandler::RelayNetworkHandler(RelayController* relayController)
 	: _relayController(relayController)
@@ -35,24 +36,24 @@ CommandResult RelayNetworkHandler::handleRequest(const char* method,
 		return CommandResult::error(RelayControllerNotInitialised);
 	}
 
-	if (strcmp(command, RelayTurnAllOff) == 0)
+	if (SystemFunctions::commandMatches(command, RelayTurnAllOff))
 	{
 		_relayController->turnAllRelaysOff();
 		formatStatusJson(responseBuffer, bufferSize);
 		return CommandResult::ok();
 	}
-	else if (strcmp(command, RelayTurnAllOn) == 0)
+	else if (SystemFunctions::commandMatches(command, RelayTurnAllOn))
 	{
 		_relayController->turnAllRelaysOn();
 		formatStatusJson(responseBuffer, bufferSize);
 		return CommandResult::ok();
 	}
-	else if (strcmp(command, RelayRetrieveStates) == 0)
+	else if (SystemFunctions::commandMatches(command, RelayRetrieveStates))
 	{
 		formatStatusJson(responseBuffer, bufferSize);
 		return CommandResult::ok();
 	}
-	else if (strcmp(command, RelaySetState) == 0)
+	else if (SystemFunctions::commandMatches(command, RelaySetState))
 	{
 		if (paramCount == 1)
 		{
@@ -84,7 +85,7 @@ CommandResult RelayNetworkHandler::handleRequest(const char* method,
 			return CommandResult::error(InvalidCommandParameters);
 		}
 	}
-	else if (strcmp(command, RelayStatusGet) == 0)
+	else if (SystemFunctions::commandMatches(command, RelayStatusGet))
 	{
 		if (paramCount == 1)
 		{
@@ -112,7 +113,8 @@ void RelayNetworkHandler::formatStatusJson(char* buffer, size_t size)
 	if (!buffer || size == 0)
 		return;
 
-	// Simple JSON formatting without library (to save memory)
+	Config* config = ConfigManager::getConfigPtr();
+
 	int written = snprintf(buffer, size, "\"relays\":[");
 
 	if (written < 0 || written >= static_cast<int>(size))
@@ -124,9 +126,28 @@ void RelayNetworkHandler::formatStatusJson(char* buffer, size_t size)
 	for (uint8_t i = 0; i < _relayController->getRelayCount(); i++)
 	{
 		CommandResult result = _relayController->getRelayStatus(i);
-		int n = snprintf(buffer + written, size - written,
-						"%d%s", result.status,
-						(i < _relayController->getRelayCount() - 1) ? "," : "");
+		int n;
+
+		if (config != nullptr && i < ConfigRelayCount)
+		{
+			const RelayEntry& relay = config->relay.relays[i];
+			n = snprintf(buffer + written, size - written,
+				"%s{\"sn\":\"%s\",\"pn\":%u,\"bt\":%u,\"df\":%u,\"at\":%u,\"st\":%u}",
+				(i > 0) ? "," : "",
+				relay.shortName,
+				relay.pin,
+				relay.buttonImage,
+				relay.defaultState ? 1u : 0u,
+				static_cast<uint8_t>(relay.actionType),
+				result.status);
+		}
+		else
+		{
+			n = snprintf(buffer + written, size - written,
+				"%s%u",
+				(i > 0) ? "," : "",
+				result.status);
+		}
 
 		if (n < 0 || written + n >= static_cast<int>(size))
 			break;
@@ -134,14 +155,125 @@ void RelayNetworkHandler::formatStatusJson(char* buffer, size_t size)
 		written += n;
 	}
 
-	snprintf(buffer + written, size - written, "]");
+	int n = snprintf(buffer + written, size - written, "]");
+	if (n < 0 || written + n >= static_cast<int>(size))
+	{
+		buffer[size - 1] = '\0';
+		return;
+	}
+	written += n;
+
+	if (config != nullptr)
+	{
+		n = snprintf(buffer + written, size - written,
+			",\"hm\":[%u,%u,%u,%u]",
+			config->relay.homePageMapping[0],
+			config->relay.homePageMapping[1],
+			config->relay.homePageMapping[2],
+			config->relay.homePageMapping[3]);
+
+		if (n < 0 || written + n >= static_cast<int>(size))
+		{
+			buffer[size - 1] = '\0';
+			return;
+		}
+		written += n;
+
+		n = snprintf(buffer + written, size - written, ",\"lk\":[");
+		if (n < 0 || written + n >= static_cast<int>(size))
+		{
+			buffer[size - 1] = '\0';
+			return;
+		}
+		written += n;
+
+		for (uint8_t i = 0; i < ConfigMaxLinkedRelays; i++)
+		{
+			n = snprintf(buffer + written, size - written,
+				"%s[%u,%u]",
+				(i > 0) ? "," : "",
+				config->relay.linkedRelays[i][0],
+				config->relay.linkedRelays[i][1]);
+
+			if (n < 0 || written + n >= static_cast<int>(size))
+			{
+				buffer[size - 1] = '\0';
+				return;
+			}
+			written += n;
+		}
+
+		n = snprintf(buffer + written, size - written, "]");
+		if (n < 0 || written + n >= static_cast<int>(size))
+		{
+			buffer[size - 1] = '\0';
+		}
+	}
 }
 
 void RelayNetworkHandler::formatWifiStatusJson(IWifiClient* client)
 {
-	char buffer[MaximumJsonResponseBufferSize];
-	buffer[0] = '\0';
+	Config* config = ConfigManager::getConfigPtr();
+	uint8_t relayCount = _relayController->getRelayCount();
 
-	formatStatusJson(buffer, sizeof(buffer));
-	client->print(buffer);
+	client->print("\"relays\":[");
+
+	for (uint8_t i = 0; i < relayCount; i++)
+	{
+		CommandResult result = _relayController->getRelayStatus(i);
+
+		if (i > 0)
+			client->print(",");
+
+		if (config != nullptr && i < ConfigRelayCount)
+		{
+			const RelayEntry& relay = config->relay.relays[i];
+			client->print("{\"shortName\":\"");
+			client->print(relay.shortName);
+			client->print("\",\"longName\":\"");
+			client->print(relay.longName);
+			client->print("\",\"pin\":");
+			client->print(relay.pin);
+			client->print(",\"img\":");
+			client->print(relay.buttonImage);
+			client->print(",\"defaultState\":");
+			client->print(relay.defaultState ? 1 : 0);
+			client->print(",\"actionType\":");
+			client->print(static_cast<uint8_t>(relay.actionType));
+			client->print(",\"state\":");
+			client->print(result.status);
+			client->print("}");
+		}
+		else
+		{
+			client->print(result.status);
+		}
+	}
+
+	client->print("]");
+
+	if (config != nullptr)
+	{
+		client->print(",\"homeMap\":[");
+		for (uint8_t i = 0; i < ConfigHomeButtons; i++)
+		{
+			if (i > 0)
+				client->print(",");
+			client->print(config->relay.homePageMapping[i]);
+		}
+		client->print("]");
+
+		client->print(",\"linked\":[");
+		for (uint8_t i = 0; i < ConfigMaxLinkedRelays; i++)
+		{
+			if (i > 0)
+				client->print(",");
+			client->print("[");
+			client->print(config->relay.linkedRelays[i][0]);
+			client->print(",");
+			client->print(config->relay.linkedRelays[i][1]);
+			client->print("]");
+		}
+		client->print("]");
+	}
 }

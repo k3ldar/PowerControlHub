@@ -28,8 +28,9 @@ private:
     static bool loadHeader();
     static bool saveHeader();
     static uint16_t calcHeaderChecksum(const SystemHeader& h);
-    static void migrateV1toV2();
+	static void migrateV1toV2();
 	static void migrateV2toV3();
+	static void migrateV3toV4();
     static Config _cfg;
     static SystemHeader _hdr;
 

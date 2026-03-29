@@ -97,13 +97,21 @@ enum class SchedulerActionType : uint8_t
 	AllRelaysOff = 0x06,
 };
 
+enum class RelayActionType : uint8_t
+{
+	Default    = 0x00,
+	Horn       = 0x01,  // Replaces SoundConfig::hornRelayIndex
+	NightRelay = 0x02,  // Replaces LightSensorConfig::nightRelayIndex
+};
+
 
 // Keep struct packed and stable. Increase 'VERSION' when you change layout.
 // Packed POD for persistent configuration.
 constexpr uint8_t ConfigVersion1 = 1;
 constexpr uint8_t ConfigVersion2 = 2;
 constexpr uint8_t ConfigVersion3 = 3;
-constexpr uint8_t ConfigVersion = ConfigVersion3;
+constexpr uint8_t ConfigVersion4 = 4;
+constexpr uint8_t ConfigVersion = ConfigVersion4;
 
 constexpr uint8_t ConfigHomeButtons = 4;
 constexpr uint8_t ConfigMaxNameLength = 31; // max characters (inc null)
@@ -131,12 +139,13 @@ struct VesselConfig {
 } __attribute__((packed));
 
 struct RelayEntry {
-    char    shortName[ConfigShortRelayNameLength];  // 6 bytes
-    char    longName[ConfigLongRelayNameLength];    // 21 bytes
-    uint8_t pin;                                   // 1 byte
-    uint8_t buttonImage;                           // 1 byte
-    bool    defaultState;                          // 1 byte
-    uint8_t reserved[2];                           // 2 bytes future growth
+    char            shortName[ConfigShortRelayNameLength];  // 6 bytes
+    char            longName[ConfigLongRelayNameLength];    // 21 bytes
+    uint8_t         pin;                                   // 1 byte
+    uint8_t         buttonImage;                           // 1 byte
+    bool            defaultState;                          // 1 byte
+    RelayActionType actionType;                            // 1 byte
+    uint8_t         reserved[1];                           // 1 byte future growth
 } __attribute__((packed));
 
 struct RelayConfig {

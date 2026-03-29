@@ -20,6 +20,7 @@
 // 
 
 #include "SoundCommandHandler.h"
+#include "SystemFunctions.h"
 
 
 
@@ -57,67 +58,67 @@ bool SoundCommandHandler::handleCommand(SerialCommandManager* sender, const char
         return true;
     }
 
-    if (strcmp(command, SoundSignalCancel) == 0)
+    if (SystemFunctions::commandMatches(command, SoundSignalCancel))
     {
         _soundController->playSound(SoundType::None);
         sendAckOk(sender, command);
     }
-    else if (strcmp(command, SoundSignalActive) == 0)
+    else if (SystemFunctions::commandMatches(command, SoundSignalActive))
     {
         StringKeyValue param = makeParam(static_cast<uint8_t>(_soundController->getCurrentSoundType()), static_cast<uint8_t>(_soundController->getCurrentSoundState()));
         sendAckOk(sender, command, &param);
     }
-    else if (strcmp(command, SoundSignalSoS) == 0)
+    else if (SystemFunctions::commandMatches(command, SoundSignalSoS))
     {
         _soundController->playSound(SoundType::Sos);
         sendAckOk(sender, command);
     }
-    else if (strcmp(command, SoundSignalFog) == 0)
+    else if (SystemFunctions::commandMatches(command, SoundSignalFog))
     {
         _soundController->playSound(SoundType::Fog);
         sendAckOk(sender, command);
     }
-    else if (strcmp(command, SoundSignalMoveAstern) == 0)
+    else if (SystemFunctions::commandMatches(command, SoundSignalMoveAstern))
     {
         _soundController->playSound(SoundType::MoveAstern);
         sendAckOk(sender, command);
     }
-    else if (strcmp(command, SoundSignalMovePort) == 0)
+    else if (SystemFunctions::commandMatches(command, SoundSignalMovePort))
     {
         _soundController->playSound(SoundType::MovePort);
         sendAckOk(sender, command);
     }
-    else if (strcmp(command, SoundSignalMoveStarboard) == 0)
+    else if (SystemFunctions::commandMatches(command, SoundSignalMoveStarboard))
     {
         _soundController->playSound(SoundType::MoveStarboard);
         sendAckOk(sender, command);
     }
-    else if (strcmp(command, SoundSignalMoveDanger) == 0)
+    else if (SystemFunctions::commandMatches(command, SoundSignalMoveDanger))
     {
         _soundController->playSound(SoundType::MoveDanger);
         sendAckOk(sender, command);
     }
-    else if (strcmp(command, SoundSignalOvertakeConsent) == 0)
+    else if (SystemFunctions::commandMatches(command, SoundSignalOvertakeConsent))
     {
         _soundController->playSound(SoundType::OvertakeConsent);
         sendAckOk(sender, command);
     }
-    else if (strcmp(command, SoundSignalOvertakeDanger) == 0)
+    else if (SystemFunctions::commandMatches(command, SoundSignalOvertakeDanger))
     {
         _soundController->playSound(SoundType::OvertakeDanger);
         sendAckOk(sender, command);
     }
-    else if (strcmp(command, SoundSignalOvertakePort) == 0)
+    else if (SystemFunctions::commandMatches(command, SoundSignalOvertakePort))
     {
         _soundController->playSound(SoundType::OvertakePort);
         sendAckOk(sender, command);
     }
-    else if (strcmp(command, SoundSignalOvertakeStarboard) == 0)
+    else if (SystemFunctions::commandMatches(command, SoundSignalOvertakeStarboard))
     {
         _soundController->playSound(SoundType::OvertakeStarboard);
         sendAckOk(sender, command);
     }
-    else if (strcmp(command, SoundSignalTest) == 0)
+    else if (SystemFunctions::commandMatches(command, SoundSignalTest))
     {
         _soundController->playSound(SoundType::Test);
         sendAckOk(sender, command);

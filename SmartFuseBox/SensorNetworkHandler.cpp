@@ -18,6 +18,7 @@
 #include "Local.h"
 #include "SensorNetworkHandler.h"
 #include "SystemDefinitions.h"
+#include "SystemFunctions.h"
 
 
 SensorNetworkHandler::SensorNetworkHandler(SensorController* sensorController)
@@ -35,7 +36,7 @@ CommandResult SensorNetworkHandler::handleRequest(const char* method,
 	(void)responseBuffer;
 	(void)bufferSize;
 
-	if (strcmp(command, SensorBearing) == 0)
+	if (SystemFunctions::commandMatches(command, SensorBearing))
 	{
 		// nothing to do in this context
 	}

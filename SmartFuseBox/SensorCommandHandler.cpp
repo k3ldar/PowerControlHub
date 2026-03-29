@@ -288,7 +288,7 @@ bool SensorCommandHandler::handleCommand(SerialCommandManager* sender, const cha
         char buffer[64];
         sendDebugMessage(F("Query request - no params"), F("SensorCommandHandler"));
 
-        if (strcmp(command, SensorTemperature) == 0)
+        if (SystemFunctions::commandMatches(command, SensorTemperature))
         {
             // S0 query
             snprintf_P(buffer, sizeof(buffer), PSTR("v=%.1f"), _lastTemperature);
@@ -297,7 +297,7 @@ bool SensorCommandHandler::handleCommand(SerialCommandManager* sender, const cha
             sendDebugMessage(F("Returned Temperature"), F("SensorCommandHandler"));
             return true;
         }
-        else if (strcmp(command, SensorHumidity) == 0)
+        else if (SystemFunctions::commandMatches(command, SensorHumidity))
         {
             // S1 query
             snprintf_P(buffer, sizeof(buffer), PSTR("v=%d"), _lastHumidity);
@@ -306,7 +306,7 @@ bool SensorCommandHandler::handleCommand(SerialCommandManager* sender, const cha
             sendDebugMessage(F("Returned Humidity"), F("SensorCommandHandler"));
             return true;
         }
-        else if (strcmp(command, SensorBearing) == 0)
+        else if (SystemFunctions::commandMatches(command, SensorBearing))
         {
             // S2 query
             snprintf_P(buffer, sizeof(buffer), PSTR("v=%.1f"), _lastBearing);
@@ -315,7 +315,7 @@ bool SensorCommandHandler::handleCommand(SerialCommandManager* sender, const cha
             sendDebugMessage(F("Returned Bearing"), F("SensorCommandHandler"));
             return true;
         }
-        else if (strcmp(command, SensorDirection) == 0)
+        else if (SystemFunctions::commandMatches(command, SensorDirection))
         {
             // S3 query
             snprintf_P(buffer, sizeof(buffer), PSTR("v=%s"), _gpsDirection ? _gpsDirection : "N");
@@ -324,7 +324,7 @@ bool SensorCommandHandler::handleCommand(SerialCommandManager* sender, const cha
             sendDebugMessage(F("Returned Direction"), F("SensorCommandHandler"));
             return true;
         }
-        else if (strcmp(command, SensorSpeed) == 0)
+        else if (SystemFunctions::commandMatches(command, SensorSpeed))
         {
             // S4 query
             snprintf_P(buffer, sizeof(buffer), PSTR("v=%d"), _lastSpeed);
@@ -333,7 +333,7 @@ bool SensorCommandHandler::handleCommand(SerialCommandManager* sender, const cha
             sendDebugMessage(F("Returned Speed"), F("SensorCommandHandler"));
             return true;
         }
-        else if (strcmp(command, SensorCompassTemp) == 0)
+        else if (SystemFunctions::commandMatches(command, SensorCompassTemp))
         {
             // S5 query
             snprintf_P(buffer, sizeof(buffer), PSTR("v=%.1f"), _lastCompassTemp);
@@ -342,7 +342,7 @@ bool SensorCommandHandler::handleCommand(SerialCommandManager* sender, const cha
             sendDebugMessage(F("Returned Compass Temp"), F("SensorCommandHandler"));
             return true;
         }
-        else if (strcmp(command, SensorWaterLevel) == 0)
+        else if (SystemFunctions::commandMatches(command, SensorWaterLevel))
         {
             // S6 query
             snprintf_P(buffer, sizeof(buffer), PSTR("v=%d"), _lastWaterLevel);
@@ -351,7 +351,7 @@ bool SensorCommandHandler::handleCommand(SerialCommandManager* sender, const cha
             sendDebugMessage(F("Returned Water Level"), F("SensorCommandHandler"));
             return true;
         }
-        else if (strcmp(command, SensorWaterPumpActive) == 0)
+        else if (SystemFunctions::commandMatches(command, SensorWaterPumpActive))
         {
             // S7 query
             snprintf_P(buffer, sizeof(buffer), PSTR("v=%d"), _lastWaterPumpActive ? 1 : 0);
@@ -360,7 +360,7 @@ bool SensorCommandHandler::handleCommand(SerialCommandManager* sender, const cha
             sendDebugMessage(F("Returned Water Pump"), F("SensorCommandHandler"));
             return true;
         }
-        else if (strcmp(command, SensorHornActive) == 0)
+        else if (SystemFunctions::commandMatches(command, SensorHornActive))
         {
             // S8 query
             snprintf_P(buffer, sizeof(buffer), PSTR("v=%d"), _lastHornActive ? 1 : 0);
@@ -369,7 +369,7 @@ bool SensorCommandHandler::handleCommand(SerialCommandManager* sender, const cha
             sendDebugMessage(F("Returned Horn Active"), F("SensorCommandHandler"));
             return true;
         }
-        else if (strcmp(command, SensorLightSensor) == 0)
+        else if (SystemFunctions::commandMatches(command, SensorLightSensor))
         {
             // S9 query
             snprintf_P(buffer, sizeof(buffer), PSTR("v=%d"), _isDaytime ? 1 : 0);
@@ -378,7 +378,7 @@ bool SensorCommandHandler::handleCommand(SerialCommandManager* sender, const cha
             sendDebugMessage(F("Returned Light Sensor"), F("SensorCommandHandler"));
             return true;
         }
-        else if (strcmp(command, SensorGpsLatLong) == 0)
+        else if (SystemFunctions::commandMatches(command, SensorGpsLatLong))
         {
             // S10 query
             snprintf_P(buffer, sizeof(buffer), PSTR("lat=%.6f&lon=%.6f"), _gpsLatitude, _gpsLongitude);
@@ -387,7 +387,7 @@ bool SensorCommandHandler::handleCommand(SerialCommandManager* sender, const cha
             sendDebugMessage(F("Returned GPS LatLong"), F("SensorCommandHandler"));
             return true;
         }
-        else if (strcmp(command, SensorGpsAltitude) == 0)
+        else if (SystemFunctions::commandMatches(command, SensorGpsAltitude))
         {
             // S11 query
             snprintf_P(buffer, sizeof(buffer), PSTR("v=%.2f"), _altitude);
@@ -396,7 +396,7 @@ bool SensorCommandHandler::handleCommand(SerialCommandManager* sender, const cha
             sendDebugMessage(F("Returned GPS Altitude"), F("SensorCommandHandler"));
             return true;
         }
-        else if (strcmp(command, SensorGpsSpeed) == 0)
+        else if (SystemFunctions::commandMatches(command, SensorGpsSpeed))
         {
             // S12 query
             snprintf_P(buffer, sizeof(buffer), PSTR("v=%.2f&course=%.2f&dir=%s"),
@@ -406,7 +406,7 @@ bool SensorCommandHandler::handleCommand(SerialCommandManager* sender, const cha
             sendDebugMessage(F("Returned GPS Speed"), F("SensorCommandHandler"));
             return true;
         }
-        else if (strcmp(command, SensorGpsSatellites) == 0)
+        else if (SystemFunctions::commandMatches(command, SensorGpsSatellites))
         {
             // S13 query
             snprintf_P(buffer, sizeof(buffer), PSTR("v=%lu"), (unsigned long)_gpsSatellites);
@@ -415,7 +415,7 @@ bool SensorCommandHandler::handleCommand(SerialCommandManager* sender, const cha
             sendDebugMessage(F("Returned GPS Satellites"), F("SensorCommandHandler"));
             return true;
         }
-        else if (strcmp(command, SensorGpsDistance) == 0)
+        else if (SystemFunctions::commandMatches(command, SensorGpsDistance))
         {
             // S14 query
             snprintf_P(buffer, sizeof(buffer), PSTR("v=%.2f"), _gpsDistance);
@@ -430,58 +430,58 @@ bool SensorCommandHandler::handleCommand(SerialCommandManager* sender, const cha
         return false;
     }
 
-    if (strcmp(command, SensorTemperature) == 0)
+    if (SystemFunctions::commandMatches(command, SensorTemperature))
     {
         sendDebugMessage(F("Sensor Temperature"), F("SensorCommandHandler"));
         setTemperature(atof(params[0].value));
     }
-    else if (strcmp(command, SensorHumidity) == 0)
+    else if (SystemFunctions::commandMatches(command, SensorHumidity))
     {
         sendDebugMessage(F("Sensor Humidity"), F("SensorCommandHandler"));
         setHumidity(static_cast<uint8_t>(atof(params[0].value)));
     }
-    else if (strcmp(command, SensorBearing) == 0)
+    else if (SystemFunctions::commandMatches(command, SensorBearing))
     {
         sendDebugMessage(F("Sensor Bearing"), F("SensorCommandHandler"));
         setBearing(atof(params[0].value));
     }
-    else if (strcmp(command, SensorDirection) == 0)
+    else if (SystemFunctions::commandMatches(command, SensorDirection))
     {
         sendDebugMessage(F("Sensor Direction"), F("SensorCommandHandler"));
         setGpsDirection(params[0].value);
     }
-    else if (strcmp(command, SensorSpeed) == 0)
+    else if (SystemFunctions::commandMatches(command, SensorSpeed))
     {
         sendDebugMessage(F("Sensor Speed"), F("SensorCommandHandler"));
         setSpeed(static_cast<uint8_t>(strtoul(params[0].value, nullptr, 0)));
     }
-    else if (strcmp(command, SensorCompassTemp) == 0)
+    else if (SystemFunctions::commandMatches(command, SensorCompassTemp))
     {
         sendDebugMessage(F("Sensor Compass Temp"), F("SensorCommandHandler"));
         setCompassTemperature(atof(params[0].value));
     }
-    else if (strcmp(command, SensorWaterLevel) == 0)
+    else if (SystemFunctions::commandMatches(command, SensorWaterLevel))
     {
         sendDebugMessage(F("Sensor Water Level"), F("SensorCommandHandler"));
         setWaterLevel(static_cast<uint16_t>(strtoul(params[0].value, nullptr, 0)));
     }
-    else if (strcmp(command, SensorWaterPumpActive) == 0)
+    else if (SystemFunctions::commandMatches(command, SensorWaterPumpActive))
     {
         sendDebugMessage(F("Sensor Water Pump Active"), F("SensorCommandHandler"));
         setWaterPumpActive(strtoul(params[0].value, nullptr, 0) > 0);
     }
-    else if (strcmp(command, SensorHornActive) == 0)
+    else if (SystemFunctions::commandMatches(command, SensorHornActive))
     {
         sendDebugMessage(F("Sensor Horn Active"), F("SensorCommandHandler"));
         setHornActive(strtoul(params[0].value, nullptr, 0) > 0);
     }
-    else if (strcmp(command, SensorLightSensor) == 0)
+    else if (SystemFunctions::commandMatches(command, SensorLightSensor))
     {
         sendDebugMessage(F("Sensor Day Time"), F("SensorCommandHandler"));
         setDaytime(strtoul(params[0].value, nullptr, 0) > 0);
     }
     // Add GPS command handlers
-    else if (strcmp(command, SensorGpsLatLong) == 0)
+    else if (SystemFunctions::commandMatches(command, SensorGpsLatLong))
     {
         sendDebugMessage(F("GPS LatLong"), F("SensorCommandHandler"));
 
@@ -514,12 +514,12 @@ bool SensorCommandHandler::handleCommand(SerialCommandManager* sender, const cha
             }
         }
     }
-    else if (strcmp(command, SensorGpsAltitude) == 0)
+    else if (SystemFunctions::commandMatches(command, SensorGpsAltitude))
     {
         sendDebugMessage(F("GPS Altitude"), F("SensorCommandHandler"));
         setGpsAltitude(atof(params[0].value));
     }
-    else if (strcmp(command, SensorGpsSpeed) == 0)
+    else if (SystemFunctions::commandMatches(command, SensorGpsSpeed))
     {
         sendDebugMessage(F("GPS Speed"), F("SensorCommandHandler"));
         setSpeed(atof(params[0].value));
@@ -535,13 +535,13 @@ bool SensorCommandHandler::handleCommand(SerialCommandManager* sender, const cha
             setGpsDirection(params[2].value);
         }
     }
-    else if (strcmp(command, SensorGpsSatellites) == 0)
+    else if (SystemFunctions::commandMatches(command, SensorGpsSatellites))
     {
         sendDebugMessage(F("GPS Satellites"), F("SensorCommandHandler"));
         setGpsSatellites(strtoul(params[0].value, nullptr, 0));
     }
-	else if (strcmp(command, SensorGpsDistance) == 0)
-    {
+	else if (SystemFunctions::commandMatches(command, SensorGpsDistance))
+	{
         sendDebugMessage(F("GPS Distance"), F("SensorCommandHandler"));
         setGpsDistance(atof(params[0].value));
     }

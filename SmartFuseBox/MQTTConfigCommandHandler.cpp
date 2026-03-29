@@ -47,52 +47,52 @@ bool MQTTConfigCommandHandler::processCommand(const char* command, const char* p
     
 #if defined(MQTT_SUPPORT)
     // M0 - MQTT Enabled
-    if (strcmp(command, MqttConfigEnable) == 0)
+    if (SystemFunctions::commandMatches(command, MqttConfigEnable))
     {
         return handleMqttEnable(params);
     }
     // M1 - MQTT Broker
-    else if (strcmp(command, MqttConfigBroker) == 0)
+    else if (SystemFunctions::commandMatches(command, MqttConfigBroker))
     {
         return handleMqttBroker(params);
     }
     // M2 - MQTT Port
-    else if (strcmp(command, MqttConfigPort) == 0)
+    else if (SystemFunctions::commandMatches(command, MqttConfigPort))
     {
         return handleMqttPort(params);
     }
     // M3 - MQTT Username
-    else if (strcmp(command, MqttConfigUsername) == 0)
+    else if (SystemFunctions::commandMatches(command, MqttConfigUsername))
     {
         return handleMqttUsername(params);
     }
     // M4 - MQTT Password
-    else if (strcmp(command, MqttConfigPassword) == 0)
+    else if (SystemFunctions::commandMatches(command, MqttConfigPassword))
     {
         return handleMqttPassword(params);
     }
     // M5 - MQTT Device ID
-    else if (strcmp(command, MqttConfigDeviceId) == 0)
+    else if (SystemFunctions::commandMatches(command, MqttConfigDeviceId))
     {
         return handleMqttDeviceId(params);
     }
     // M6 - HA Discovery Enabled
-    else if (strcmp(command, MqttConfigHADiscovery) == 0)
+    else if (SystemFunctions::commandMatches(command, MqttConfigHADiscovery))
     {
         return handleMqttHADiscovery(params);
     }
     // M7 - Keep Alive Interval
-    else if (strcmp(command, MqttConfigKeepAlive) == 0)
+    else if (SystemFunctions::commandMatches(command, MqttConfigKeepAlive))
     {
         return handleMqttKeepAlive(params);
     }
     // M8 - MQTT Connection State (query only)
-    else if (strcmp(command, MqttConfigState) == 0)
+    else if (SystemFunctions::commandMatches(command, MqttConfigState))
     {
         return handleMqttState(params);
     }
     // M9 - Discovery Prefix
-    else if (strcmp(command, MqttConfigDiscoveryPrefix) == 0)
+    else if (SystemFunctions::commandMatches(command, MqttConfigDiscoveryPrefix))
     {
         return handleMqttDiscoveryPrefix(params);
     }

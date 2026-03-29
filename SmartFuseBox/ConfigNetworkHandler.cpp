@@ -36,16 +36,16 @@ CommandResult ConfigNetworkHandler::handleRequest(const char* method,
 {
 	(void)method;
 	ConfigResult result;
-	if (strcmp(command, ConfigSaveSettings) == 0)
+	if (SystemFunctions::commandMatches(command, ConfigSaveSettings))
 	{
 		result = _configController->save();
 	}
-	else if (strcmp(command, ConfigResetSettings) == 0)
+	else if (SystemFunctions::commandMatches(command, ConfigResetSettings))
 	{
 		// Reset to defaults
 		result = _configController->reset();
 	}
-	else if (strcmp(command, ConfigRename) == 0)
+	else if (SystemFunctions::commandMatches(command, ConfigRename))
 	{
 		if (paramCount >= 1)
 		{
@@ -56,20 +56,7 @@ CommandResult ConfigNetworkHandler::handleRequest(const char* method,
 			result = ConfigResult::InvalidParameter;
 		}
 	}
-	else if (strcmp(command, ConfigRenameRelay) == 0)
-	{
-		// Expect "C4:<idx>=<shortName>" or "C4:<idx>=<shortName|longName>" where idx 0..7
-		if (paramCount >= 1)
-		{
-			uint8_t idx = static_cast<uint8_t>(strtoul(params[0].key, nullptr, 0));
-			result = _configController->renameRelay(idx, params[0].value);
-		}
-		else
-		{
-			result = ConfigResult::InvalidParameter;
-		}
-	}
-	else if (strcmp(command, ConfigMapHomeButton) == 0)
+	else if (SystemFunctions::commandMatches(command, ConfigMapHomeButton))
 	{
 		// Expect "MAP <button>=<relay>" where button 0..3, relay 0..7 (or 255 to unmap)
 		if (paramCount >= 1)
@@ -84,22 +71,70 @@ CommandResult ConfigNetworkHandler::handleRequest(const char* method,
 			result = ConfigResult::InvalidParameter;
 		}
 	}
-	else if (strcmp(command, ConfigSetButtonColor) == 0)
+	else if (SystemFunctions::commandMatches(command, RelayRename))
 	{
-		// Expect "MAP <relay>=<color>" where relay 0..7, image 0..5 (or 255 to clear)
+		// R6: <idx>=<shortName|longName>
 		if (paramCount >= 1)
 		{
-			uint8_t relayIndex = static_cast<uint8_t>(strtoul(params[0].key, nullptr, 0));
-			uint8_t buttonColor = static_cast<uint8_t>(strtoul(params[0].value, nullptr, 0));
-
-			result = _configController->mapHomeButtonColor(relayIndex, buttonColor);
+			Config* cfg = ConfigManager::getConfigPtr();
+			if (cfg == nullptr) { result = ConfigResult::InvalidConfig; }
+			else
+			{
+				uint8_t idx = static_cast<uint8_t>(strtoul(params[0].key, nullptr, 0));
+				if (idx >= ConfigRelayCount) { result = ConfigResult::InvalidRelay; }
+				else
+				{
+					int pipeIdx = SystemFunctions::indexOf(params[0].value, '|', 0);
+					char shortName[ConfigShortRelayNameLength] = "";
+					char longName[ConfigLongRelayNameLength] = "";
+					if (pipeIdx >= 0)
+					{
+						SystemFunctions::substr(shortName, sizeof(shortName), params[0].value, 0, pipeIdx);
+						SystemFunctions::substr(longName, sizeof(longName), params[0].value, pipeIdx + 1);
+					}
+					else
+					{
+						strncpy(shortName, params[0].value, sizeof(shortName) - 1);
+					}
+					strncpy(cfg->relay.relays[idx].shortName, shortName, sizeof(cfg->relay.relays[idx].shortName) - 1);
+					cfg->relay.relays[idx].shortName[sizeof(cfg->relay.relays[idx].shortName) - 1] = '\0';
+					strncpy(cfg->relay.relays[idx].longName, longName, sizeof(cfg->relay.relays[idx].longName) - 1);
+					cfg->relay.relays[idx].longName[sizeof(cfg->relay.relays[idx].longName) - 1] = '\0';
+					result = ConfigResult::Success;
+				}
+			}
 		}
 		else
 		{
 			result = ConfigResult::InvalidParameter;
 		}
 	}
-	else if (strcmp(command, ConfigBoatType) == 0)
+	else if (SystemFunctions::commandMatches(command, RelaySetButtonColor))
+	{
+		// R7: <relay>=<color>
+		if (paramCount >= 1)
+		{
+			Config* cfg = ConfigManager::getConfigPtr();
+			if (cfg == nullptr) { result = ConfigResult::InvalidConfig; }
+			else
+			{
+				uint8_t relayIndex = static_cast<uint8_t>(strtoul(params[0].key, nullptr, 0));
+				uint8_t color = static_cast<uint8_t>(strtoul(params[0].value, nullptr, 0));
+				if (relayIndex >= ConfigRelayCount) { result = ConfigResult::InvalidRelay; }
+				else
+				{
+					if (color < DefaultValue) color += 2;
+					cfg->relay.relays[relayIndex].buttonImage = color;
+					result = ConfigResult::Success;
+				}
+			}
+		}
+		else
+		{
+			result = ConfigResult::InvalidParameter;
+		}
+	}
+	else if (SystemFunctions::commandMatches(command, ConfigBoatType))
 	{
 		// Expect "C7:type=<value>" where value is 0..3
 		if (paramCount >= 1)
@@ -112,20 +147,7 @@ CommandResult ConfigNetworkHandler::handleRequest(const char* method,
 			result = ConfigResult::InvalidParameter;
 		}
 	}
-	else if (strcmp(command, ConfigSoundRelayId) == 0)
-	{
-		// Expect "MAP <value>=<relay>" where relay 0..7 (or 255 to unmap)
-		if (paramCount == 1 && strlen(params[0].value) > 0)
-		{
-			uint8_t relay = atoi(params[0].value);
-			result = _configController->setSoundRelayButton(relay);
-		}
-		else
-		{
-			result = ConfigResult::InvalidParameter;
-		}
-	}
-	else if (strcmp(command, ConfigSoundStartDelay) == 0)
+	else if (SystemFunctions::commandMatches(command, ConfigSoundStartDelay))
 	{
 		if (paramCount == 1)
 		{
@@ -137,7 +159,7 @@ CommandResult ConfigNetworkHandler::handleRequest(const char* method,
 			result = ConfigResult::InvalidParameter;
 		}
 	}
-	else if (strcmp(command, ConfigBluetoothEnable) == 0)
+	else if (SystemFunctions::commandMatches(command, ConfigBluetoothEnable))
 	{
 		// Expect "C10:v=<0|1>"
 		if (paramCount >= 1)
@@ -150,7 +172,7 @@ CommandResult ConfigNetworkHandler::handleRequest(const char* method,
 			result = ConfigResult::InvalidParameter;
 		}
 	}
-	else if (strcmp(command, ConfigWifiEnable) == 0)
+	else if (SystemFunctions::commandMatches(command, ConfigWifiEnable))
 	{
 		// Expect "C11:v=<0|1>"
 		if (paramCount >= 1)
@@ -163,7 +185,7 @@ CommandResult ConfigNetworkHandler::handleRequest(const char* method,
 			result = ConfigResult::InvalidParameter;
 		}
 	}
-	else if (strcmp(command, ConfigWifiMode) == 0)
+	else if (SystemFunctions::commandMatches(command, ConfigWifiMode))
 	{
 		// Expect "C12:v=<0|1>"
 		if (paramCount >= 1)
@@ -176,7 +198,7 @@ CommandResult ConfigNetworkHandler::handleRequest(const char* method,
 			result = ConfigResult::InvalidParameter;
 		}
 	}
-	else if (strcmp(command, ConfigWifiSSID) == 0)
+	else if (SystemFunctions::commandMatches(command, ConfigWifiSSID))
 	{
 		// Expect "C13:v=<value>"
 		if (paramCount >= 1)
@@ -188,7 +210,7 @@ CommandResult ConfigNetworkHandler::handleRequest(const char* method,
 			result = ConfigResult::InvalidParameter;
 		}
 	}
-	else if (strcmp(command, ConfigWifiPassword) == 0)
+	else if (SystemFunctions::commandMatches(command, ConfigWifiPassword))
 	{
 		// Expect "C14:v=<value>"
 		if (paramCount >= 1)
@@ -200,7 +222,7 @@ CommandResult ConfigNetworkHandler::handleRequest(const char* method,
 			result = ConfigResult::InvalidParameter;
 		}
 	}
-	else if (strcmp(command, ConfigWifiPort) == 0)
+	else if (SystemFunctions::commandMatches(command, ConfigWifiPort))
 	{
 		// Expect "C15:v=<value>"
 		if (paramCount >= 1)
@@ -213,7 +235,7 @@ CommandResult ConfigNetworkHandler::handleRequest(const char* method,
 			result = ConfigResult::InvalidParameter;
 		}
 	}
-	else if (strcmp(command, ConfigWifiState) == 0)
+	else if (SystemFunctions::commandMatches(command, ConfigWifiState))
 	{
 		// C16 WiFi State
 		uint8_t state = static_cast<uint8_t>(WifiConnectionState::Disconnected);
@@ -226,7 +248,7 @@ CommandResult ConfigNetworkHandler::handleRequest(const char* method,
 		int len = snprintf(responseBuffer, bufferSize, "v=%d", state);
 		result = (len > 0 && len < static_cast<int>(bufferSize)) ? ConfigResult::Success : ConfigResult::InvalidParameter;
 	}
-	else if (strcmp(command, ConfigWifiApIpAddress) == 0)
+	else if (SystemFunctions::commandMatches(command, ConfigWifiApIpAddress))
 	{
 		// Expect "C17:v=<value>"
 		if (paramCount >= 1)
@@ -238,42 +260,7 @@ CommandResult ConfigNetworkHandler::handleRequest(const char* method,
 			result = ConfigResult::InvalidParameter;
 		}
 	}
-	else if (strcmp(command, ConfigDefaultRelayState) == 0)
-	{
-		if (paramCount == 1)
-		{
-			uint8_t relayIndex = static_cast<uint8_t>(atoi(params[0].key));
-			result = _configController->setRelayDefaultState(relayIndex, SystemFunctions::parseBooleanValue(params[0].value));
-		}
-		else
-		{
-			result = ConfigResult::InvalidParameter;
-		}
-	}
-	else if (strcmp(command, ConfigLinkRelays) == 0)
-	{
-		// Expect "C19:<relay1>=<relay2>" to link relay1 to relay2
-		// or "C19:<relay1>=0xFF" to unlink relay1
-		if (paramCount >= 1)
-		{
-			uint8_t relay1 = static_cast<uint8_t>(strtoul(params[0].key, nullptr, 0));
-			uint8_t relay2 = static_cast<uint8_t>(strtoul(params[0].value, nullptr, 0));
-
-			if (relay2 < MaxUint8Value)
-			{
-				result = _configController->linkRelays(relay1, relay2);
-			}
-			else
-			{
-				result = _configController->unlinkRelay(relay1);
-			}
-		}
-		else
-		{
-			result = ConfigResult::InvalidParameter;
-		}
-	}
-	else if (strcmp(command, ConfigTimeZoneOffset) == 0)
+	else if (SystemFunctions::commandMatches(command, ConfigTimeZoneOffset))
 	{
 		// C20 - Set timezone offset
 		if (paramCount >= 1)
@@ -286,7 +273,97 @@ CommandResult ConfigNetworkHandler::handleRequest(const char* method,
 			result = ConfigResult::InvalidParameter;
 		}
 	}
-	else if (strcmp(command, ConfigMmsi) == 0)
+	else if (SystemFunctions::commandMatches(command, RelaySetDefaultState)
+		|| SystemFunctions::commandMatches(command, RelayLink)
+		|| SystemFunctions::commandMatches(command, RelaySetActionType)
+		|| SystemFunctions::commandMatches(command, RelaySetPin))
+	{
+		// R8/R9/R10/R11 — relay config, operate directly on config
+		Config* cfg = ConfigManager::getConfigPtr();
+		if (cfg == nullptr || paramCount < 1)
+		{
+			result = ConfigResult::InvalidParameter;
+		}
+		else if (SystemFunctions::commandMatches(command, RelaySetDefaultState))
+		{
+			uint8_t relayIndex = static_cast<uint8_t>(strtoul(params[0].key, nullptr, 0));
+			if (relayIndex >= ConfigRelayCount)
+				result = ConfigResult::InvalidRelay;
+			else
+			{
+				cfg->relay.relays[relayIndex].defaultState = SystemFunctions::parseBooleanValue(params[0].value);
+				result = ConfigResult::Success;
+			}
+		}
+		else if (SystemFunctions::commandMatches(command, RelayLink))
+		{
+			uint8_t relay1 = static_cast<uint8_t>(strtoul(params[0].key, nullptr, 0));
+			uint8_t relay2 = static_cast<uint8_t>(strtoul(params[0].value, nullptr, 0));
+			if (relay1 >= ConfigRelayCount)
+			{
+				result = ConfigResult::InvalidRelay;
+			}
+			else if (relay2 == DefaultValue)
+			{
+				for (uint8_t i = 0; i < ConfigMaxLinkedRelays; ++i)
+				{
+					if (cfg->relay.linkedRelays[i][0] == relay1 || cfg->relay.linkedRelays[i][1] == relay1)
+					{
+						cfg->relay.linkedRelays[i][0] = DefaultValue;
+						cfg->relay.linkedRelays[i][1] = DefaultValue;
+					}
+				}
+				result = ConfigResult::Success;
+			}
+			else if (relay2 >= ConfigRelayCount)
+			{
+				result = ConfigResult::InvalidParameter;
+			}
+			else
+			{
+				result = ConfigResult::Failed;
+				for (uint8_t i = 0; i < ConfigMaxLinkedRelays; ++i)
+				{
+					if (cfg->relay.linkedRelays[i][0] == DefaultValue)
+					{
+						cfg->relay.linkedRelays[i][0] = relay1;
+						cfg->relay.linkedRelays[i][1] = relay2;
+						result = ConfigResult::Success;
+						break;
+					}
+				}
+			}
+		}
+		else if (SystemFunctions::commandMatches(command, RelaySetActionType))
+		{
+			uint8_t relayIndex = static_cast<uint8_t>(strtoul(params[0].key, nullptr, 0));
+			uint8_t actionType = static_cast<uint8_t>(strtoul(params[0].value, nullptr, 0));
+			if (relayIndex >= ConfigRelayCount)
+				result = ConfigResult::InvalidRelay;
+			else if (actionType > static_cast<uint8_t>(RelayActionType::NightRelay))
+				result = ConfigResult::InvalidParameter;
+			else
+			{
+				cfg->relay.relays[relayIndex].actionType = static_cast<RelayActionType>(actionType);
+				result = ConfigResult::Success;
+			}
+		}
+		else if (SystemFunctions::commandMatches(command, RelaySetPin))
+		{
+			uint8_t relayIndex = static_cast<uint8_t>(strtoul(params[0].key, nullptr, 0));
+			uint8_t pin = static_cast<uint8_t>(strtoul(params[0].value, nullptr, 0));
+			if (relayIndex >= ConfigRelayCount)
+				result = ConfigResult::InvalidRelay;
+			else if (pin == 0)
+				result = ConfigResult::InvalidParameter;
+			else
+			{
+				cfg->relay.relays[relayIndex].pin = pin;
+				result = ConfigResult::Success;
+			}
+		}
+	}
+	else if (SystemFunctions::commandMatches(command, ConfigMmsi))
 	{
 		// C21 - Set MMSI
 		if (paramCount >= 1)
@@ -298,7 +375,7 @@ CommandResult ConfigNetworkHandler::handleRequest(const char* method,
 			result = ConfigResult::InvalidParameter;
 		}
 	}
-	else if (strcmp(command, ConfigCallSign) == 0)
+	else if (SystemFunctions::commandMatches(command, ConfigCallSign))
 	{
 		// C22 - Set call sign
 		if (paramCount >= 1)
@@ -310,7 +387,7 @@ CommandResult ConfigNetworkHandler::handleRequest(const char* method,
 			result = ConfigResult::InvalidParameter;
 		}
 	}
-	else if (strcmp(command, ConfigHomePort) == 0)
+	else if (SystemFunctions::commandMatches(command, ConfigHomePort))
 	{
 		// C23 - Set home port
 		if (paramCount >= 1)
@@ -322,7 +399,7 @@ CommandResult ConfigNetworkHandler::handleRequest(const char* method,
 			result = ConfigResult::InvalidParameter;
 		}
 	}
-	else if (strcmp(command, ConfigLedColor) == 0)
+	else if (SystemFunctions::commandMatches(command, ConfigLedColor))
 	{
 		// C24 - Set LED RGB color
 		if (paramCount >= 5)
@@ -350,7 +427,7 @@ CommandResult ConfigNetworkHandler::handleRequest(const char* method,
 			result = ConfigResult::InvalidParameter;
 		}
 	}
-	else if (strcmp(command, ConfigLedBrightness) == 0)
+	else if (SystemFunctions::commandMatches(command, ConfigLedBrightness))
 	{
 		// C25 - Set LED brightness
 		if (paramCount >= 2)
@@ -372,7 +449,7 @@ CommandResult ConfigNetworkHandler::handleRequest(const char* method,
 			result = ConfigResult::InvalidParameter;
 		}
 	}
-	else if (strcmp(command, ConfigLedAutoSwitch) == 0)
+	else if (SystemFunctions::commandMatches(command, ConfigLedAutoSwitch))
 	{
 		// C26 - Enable/disable auto day/night switching
 		if (paramCount >= 1)
@@ -385,7 +462,7 @@ CommandResult ConfigNetworkHandler::handleRequest(const char* method,
 			result = ConfigResult::InvalidParameter;
 		}
 	}
-	else if (strcmp(command, ConfigLedEnable) == 0)
+	else if (SystemFunctions::commandMatches(command, ConfigLedEnable))
 	{
 		// C27 - Enable/disable individual LEDs
 		if (paramCount >= 3)
@@ -409,7 +486,7 @@ CommandResult ConfigNetworkHandler::handleRequest(const char* method,
 			result = ConfigResult::InvalidParameter;
 		}
 	}
-	else if (strcmp(command, ControlPanelTones) == 0)
+	else if (SystemFunctions::commandMatches(command, ControlPanelTones))
 	{
 		// C28 - Configure control panel tones
 		if (paramCount >= 4)
@@ -439,7 +516,7 @@ CommandResult ConfigNetworkHandler::handleRequest(const char* method,
 			result = ConfigResult::InvalidParameter;
 		}
 	}
-	else if (strcmp(command, ConfigSdCardSpeed) == 0)
+	else if (SystemFunctions::commandMatches(command, ConfigSdCardSpeed))
 	{
 		// C31 - Set SD card initialize speed
 		// Format: C31:v=4 (or 8, 12, 16, 20, 24)
@@ -482,47 +559,6 @@ void ConfigNetworkHandler::formatStatusJson(IWifiClient* client)
 	client->print("\"name\":\"");
 	client->print(config->vessel.name);
 	client->print("\",");
-
-	// Relays: short and long names
-	client->print("\"relays\":[");
-
-	for (uint8_t i = 0; i < ConfigRelayCount; ++i)
-	{
-		if (i > 0) client->print(",");
-		client->print("{\"shortName\":\"");
-		client->print(config->relay.relays[i].shortName);
-		client->print("\",\"longName\":\"");
-		client->print(config->relay.relays[i].longName);
-		client->print("\"}");
-	}
-
-	client->print("],");
-
-	// Home button mappings
-	client->print("\"homeButtonMapping\":[");
-
-	for (uint8_t i = 0; i < ConfigHomeButtons; ++i)
-	{
-		if (i > 0)
-			client->print(",");
-
-		client->print(config->relay.homePageMapping[i]);
-	}
-
-	client->print("],");
-
-	// Button colors
-	client->print("\"buttonColors\":[");
-
-	for (uint8_t i = 0; i < ConfigRelayCount; ++i)
-	{
-		if (i > 0)
-			client->print(",");
-
-		client->print(config->relay.relays[i].buttonImage);
-	}
-
-	client->print("],");
 
 	// Vessel type
 	client->print("\"vesselType\":");
@@ -590,33 +626,6 @@ void ConfigNetworkHandler::formatStatusJson(IWifiClient* client)
 	}
 
 	client->print("\",");
-
-	// Default relay states
-	client->print("\"defaultRelayStates\":[");
-
-	for (uint8_t i = 0; i < ConfigRelayCount; ++i)
-	{
-		if (i > 0)
-			client->print(",");
-
-		client->print(config->relay.relays[i].defaultState ? "true" : "false");
-	}
-
-	client->print("],");
-	client->print("\"linkedRelays\":[");
-
-	for (uint8_t i = 0; i < ConfigMaxLinkedRelays; ++i)
-	{
-		if (i > 0)
-			client->print(",");
-
-		client->print("[");
-		client->print(config->relay.linkedRelays[i][0]);
-		client->print(",");
-		client->print(config->relay.linkedRelays[i][1]);
-		client->print("]");
-	}
-	client->print("],");
 
 	// C20 Timezone offset
 	client->print("\"timezoneOffset\":");

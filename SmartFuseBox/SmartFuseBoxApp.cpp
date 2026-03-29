@@ -29,13 +29,16 @@ SmartFuseBoxApp* SmartFuseBoxApp::_instance = nullptr;
 
 constexpr uint8_t DefaultDelay = 5;
 
+// Placeholder pin array used to size RelayController at construction.
+// Actual pins are loaded from config in setup() via syncPinsFromConfig().
+static uint8_t _disabledRelayPins[ConfigRelayCount];
+
 SmartFuseBoxApp::SmartFuseBoxApp(SerialCommandManager* commandMgrComputer,
-    SerialCommandManager* commandMgrLink,
-    const uint8_t* relayPins, uint8_t relayCount)
+    SerialCommandManager* commandMgrLink)
     : _commandMgrComputer(commandMgrComputer),
     _commandMgrLink(commandMgrLink),
     _messageBus(),
-    _relayController(&_messageBus, relayPins, relayCount),
+    _relayController(&_messageBus, (memset(_disabledRelayPins, DefaultValue, sizeof(_disabledRelayPins)), _disabledRelayPins), ConfigRelayCount),
     _soundController(),
     _broadcastManager(commandMgrComputer, commandMgrLink),
     _warningManager(commandMgrLink, HeartbeatIntervalMs, HeartbeatTimeoutMs),
@@ -105,6 +108,10 @@ void SmartFuseBoxApp::setup(BaseSensorHandler** sensorHandlers, uint8_t sensorHa
     {
         _warningManager.raiseWarning(WarningType::DefaultConfigurationFuseBox);
     }
+
+    // Sync relay pin assignments from config (overrides the bootstrap pins
+    // passed at construction; disabled relays will have pin == 0xFF).
+    _relayController.syncPinsFromConfig();
 
 	if (remoteSensorCount > 0 && remoteSensors != nullptr)
     {
@@ -218,7 +225,7 @@ void SmartFuseBoxApp::setup(BaseSensorHandler** sensorHandlers, uint8_t sensorHa
     // open any relays that are default open
     for (uint8_t i = 0; i < ConfigRelayCount; i++)
     {
-        if (config->relay.relays[i].defaultState)
+        if (!_relayController.isDisabled(i) && config->relay.relays[i].defaultState)
         {
             _relayController.setRelayState(i, true);
         }

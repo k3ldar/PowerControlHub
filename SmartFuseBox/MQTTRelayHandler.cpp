@@ -70,6 +70,9 @@ bool MQTTRelayHandler::begin()
 
             for (uint8_t i = 0; i < ConfigRelayCount; i++)
             {
+                if (_config->relay.relays[i].pin == PinDisabled)
+                    continue;
+
                 CommandResult statusResult = _relayController->getRelayStatus(i);
                 if (statusResult.success)
                 {
@@ -102,8 +105,12 @@ void MQTTRelayHandler::update()
             // Only publish if enough time has elapsed since last discovery message (200ms minimum)
             if (now - _lastDiscoveryPublish >= MinPublishInterval)
             {
-                publishRelayDiscoveryConfig(_discoveryIndex);
-                _lastDiscoveryPublish = now;
+                // Skip disabled relays (no pin assigned)
+                if (_config == nullptr || _config->relay.relays[_discoveryIndex].pin != PinDisabled)
+                {
+                    publishRelayDiscoveryConfig(_discoveryIndex);
+                    _lastDiscoveryPublish = now;
+                }
                 _discoveryIndex++;
 
                 // Check if discovery is complete
@@ -238,6 +245,18 @@ void MQTTRelayHandler::handleRelayCommand(uint8_t relayIndex, const char* payloa
         }
         return;
     }
+
+    // Reject commands targeting a disabled relay
+    if (_config != nullptr && _config->relay.relays[relayIndex].pin == PinDisabled)
+    {
+        if (_commandMgr != nullptr)
+        {
+            char buf[32];
+            snprintf(buf, sizeof(buf), "Relay %u is disabled", relayIndex);
+            _commandMgr->sendDebug(buf, F("MQTT Relay"));
+        }
+        return;
+    }
     
     // Parse command (ON, OFF, TOGGLE, 1, 0)
     bool turnOn = false;
@@ -334,6 +353,9 @@ void MQTTRelayHandler::onRelayStatusChanged(uint8_t relayBitmask)
     {
         if (relayBitmask & (1 << i))
         {
+            if (_config != nullptr && _config->relay.relays[i].pin == PinDisabled)
+                continue;
+
             CommandResult statusResult = _relayController->getRelayStatus(i);
             if (statusResult.success)
             {

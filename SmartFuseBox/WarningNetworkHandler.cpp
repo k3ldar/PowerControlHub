@@ -21,6 +21,7 @@
 
 #include "Local.h"
 #include "WarningNetworkHandler.h"
+#include "SystemFunctions.h"
 
 
 WarningNetworkHandler::WarningNetworkHandler(WarningManager* warningManager)
@@ -51,7 +52,7 @@ CommandResult WarningNetworkHandler::handleRequest(const char* method,
 		return CommandResult::error(InvalidCommandParameters);
 	}
 
-	if (strcmp(command, WarningsList) == 0)
+	if (SystemFunctions::commandMatches(command, WarningsList))
 	{
 		formatStatusJson(responseBuffer, bufferSize);
 		return CommandResult::ok();

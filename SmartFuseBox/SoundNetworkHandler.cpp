@@ -18,6 +18,7 @@
 
 #include "Local.h"
 #include "SoundNetworkHandler.h"
+#include "SystemFunctions.h"
 
 SoundNetworkHandler::SoundNetworkHandler(SoundController* soundController)
 	: _soundController(soundController)
@@ -47,55 +48,55 @@ CommandResult SoundNetworkHandler::handleRequest(const char* method,
 		return CommandResult::error(InvalidCommandParameters);
 	}
 
-	if (strcmp(command, SoundSignalCancel) == 0)
+	if (SystemFunctions::commandMatches(command, SoundSignalCancel))
 	{
 		_soundController->playSound(SoundType::None);
 	}
-	else if (strcmp(command, SoundSignalActive) == 0)
+	else if (SystemFunctions::commandMatches(command, SoundSignalActive))
 	{
 		// status is always returned below
 	}
-	else if (strcmp(command, SoundSignalSoS) == 0)
+	else if (SystemFunctions::commandMatches(command, SoundSignalSoS))
 	{
 		_soundController->playSound(SoundType::Sos);
 	}
-	else if (strcmp(command, SoundSignalFog) == 0)
+	else if (SystemFunctions::commandMatches(command, SoundSignalFog))
 	{
 		_soundController->playSound(SoundType::Fog);
 	}
-	else if (strcmp(command, SoundSignalMoveAstern) == 0)
+	else if (SystemFunctions::commandMatches(command, SoundSignalMoveAstern))
 	{
 		_soundController->playSound(SoundType::MoveAstern);
 	}
-	else if (strcmp(command, SoundSignalMovePort) == 0)
+	else if (SystemFunctions::commandMatches(command, SoundSignalMovePort))
 	{
 		_soundController->playSound(SoundType::MovePort);
 	}
-	else if (strcmp(command, SoundSignalMoveStarboard) == 0)
+	else if (SystemFunctions::commandMatches(command, SoundSignalMoveStarboard))
 	{
 		_soundController->playSound(SoundType::MoveStarboard);
 	}
-	else if (strcmp(command, SoundSignalMoveDanger) == 0)
+	else if (SystemFunctions::commandMatches(command, SoundSignalMoveDanger))
 	{
 		_soundController->playSound(SoundType::MoveDanger);
 	}
-	else if (strcmp(command, SoundSignalOvertakeConsent) == 0)
+	else if (SystemFunctions::commandMatches(command, SoundSignalOvertakeConsent))
 	{
 		_soundController->playSound(SoundType::OvertakeConsent);
 	}
-	else if (strcmp(command, SoundSignalOvertakeDanger) == 0)
+	else if (SystemFunctions::commandMatches(command, SoundSignalOvertakeDanger))
 	{
 		_soundController->playSound(SoundType::OvertakeDanger);
 	}
-	else if (strcmp(command, SoundSignalOvertakePort) == 0)
+	else if (SystemFunctions::commandMatches(command, SoundSignalOvertakePort))
 	{
 		_soundController->playSound(SoundType::OvertakePort);
 	}
-	else if (strcmp(command, SoundSignalOvertakeStarboard) == 0)
+	else if (SystemFunctions::commandMatches(command, SoundSignalOvertakeStarboard))
 	{
 		_soundController->playSound(SoundType::OvertakeStarboard);
 	}
-	else if (strcmp(command, SoundSignalTest) == 0)
+	else if (SystemFunctions::commandMatches(command, SoundSignalTest))
 	{
 		_soundController->playSound(SoundType::Test);
 	}

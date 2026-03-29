@@ -36,7 +36,19 @@ private:
 	bool* _relayStatus;
 	uint8_t* _relays;
 	uint8_t _relayCount;
-	uint8_t _reservedSoundRelay;
+
+	bool isHornRelay(uint8_t relayIndex) const
+	{
+		Config* config = ConfigManager::getConfigPtr();
+		if (config == nullptr || relayIndex >= _relayCount)
+			return false;
+		return config->relay.relays[relayIndex].actionType == RelayActionType::Horn;
+	}
+
+	bool isRelayDisabled(uint8_t relayIndex) const
+	{
+		return _relays[relayIndex] == PinDisabled;
+	}
 
 	RelayResult setRelayStatus(uint8_t relayIndex, bool isOn)
 	{
@@ -45,7 +57,7 @@ private:
 			return RelayResult::InvalidIndex;
 		}
 
-		if (relayIndex == _reservedSoundRelay)
+		if (isHornRelay(relayIndex))
 		{
 			return RelayResult::Reserved;
 		}
@@ -53,11 +65,14 @@ private:
 		// Compute which relays actually change state so subscribers can be notified
 		uint8_t changedMask = 0;
 
-		// Primary relay
+		// Primary relay — only write hardware if the pin is assigned
 		if (_relayStatus[relayIndex] != isOn)
 		{
 			_relayStatus[relayIndex] = isOn;
-			digitalWrite(_relays[relayIndex], isOn ? LOW : HIGH);
+			if (!isRelayDisabled(relayIndex))
+			{
+				digitalWrite(_relays[relayIndex], isOn ? LOW : HIGH);
+			}
 			changedMask |= (1 << relayIndex);
 		}
 
@@ -71,7 +86,7 @@ private:
 					if (config->relay.linkedRelays[i][0] == relayIndex)
 					{
 						uint8_t linkedRelay = config->relay.linkedRelays[i][1];
-						if (linkedRelay < _relayCount)
+						if (linkedRelay < _relayCount && !isRelayDisabled(linkedRelay))
 						{
 							if (_relayStatus[linkedRelay] != isOn)
 							{
@@ -95,8 +110,7 @@ private:
 
 public:
 	RelayController(MessageBus* messageBus, const uint8_t* relayPins, uint8_t totalRelays)
-		: _messageBus(messageBus), _relayStatus(nullptr), _relays(nullptr), _relayCount(totalRelays),
-		  _reservedSoundRelay(DefaultValue)
+		: _messageBus(messageBus), _relayStatus(nullptr), _relays(nullptr), _relayCount(totalRelays)
 	{
 		_relays = new uint8_t[_relayCount];
 		memcpy(_relays, relayPins, sizeof(uint8_t)* _relayCount);
@@ -120,8 +134,11 @@ public:
 		for (uint8_t i = 0; i < _relayCount; i++)
 		{
 			_relayStatus[i] = false;
-			pinMode(_relays[i], OUTPUT);
-			digitalWrite(_relays[i], HIGH);
+			if (!isRelayDisabled(i))
+			{
+				pinMode(_relays[i], OUTPUT);
+				digitalWrite(_relays[i], HIGH);
+			}
 		}
 	}
 
@@ -159,7 +176,7 @@ public:
 
 	CommandResult getRelayStatus(uint8_t relayIndex)
 	{
-		uint8_t status = 0xFF;
+		uint8_t status = PinDisabled;
 		if (relayIndex < _relayCount)
 		{
 			status = _relayStatus[relayIndex] ? 1 : 0;
@@ -184,7 +201,26 @@ public:
 
 	uint8_t getRelayCount() const { return _relayCount; }
 
-	uint8_t getReservedSoundRelay() const { return _reservedSoundRelay; }
+	bool isDisabled(uint8_t relayIndex) const
+	{
+		if (relayIndex >= _relayCount)
+			return true;
 
-	void setReservedSoundRelay(uint8_t relayIndex) { _reservedSoundRelay = relayIndex; }
+		return isRelayDisabled(relayIndex);
+	}
+
+	// Refresh the pin array from persisted config (call after ConfigManager::load()).
+	// Disabled relays (pin == PinDisabled) will be skipped by all hardware writes.
+	void syncPinsFromConfig()
+	{
+		Config* config = ConfigManager::getConfigPtr();
+
+		if (config == nullptr)
+			return;
+
+		for (uint8_t i = 0; i < _relayCount; i++)
+		{
+			_relays[i] = config->relay.relays[i].pin;
+		}
+	}
 };

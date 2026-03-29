@@ -20,6 +20,10 @@
 #include "ConfigManager.h"
 #include "RelayController.h"
 
+#if defined(FUSE_BOX_CONTROLLER)
+constexpr uint8_t RelayImageButtonColorBlue   = 2;
+constexpr uint8_t RelayImageButtonColorYellow = 7;
+#endif
 
 // internal message handlers
 class RelayCommandHandler : public BaseCommandHandler
@@ -28,7 +32,10 @@ private:
     SerialCommandManager* _commandMgrComputer;
     SerialCommandManager* _commandMgrLink;
     RelayController* _relayController;
+    Config* _config;
+
     void broadcastRelayStatus(const char* cmd, const StringKeyValue* param = nullptr);
+    void sendAllRelayConfig(SerialCommandManager* sender);
 
 public:
     RelayCommandHandler(SerialCommandManager* commandMgrComputer, SerialCommandManager* commandMgrLink, RelayController* relayController);

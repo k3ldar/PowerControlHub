@@ -20,6 +20,7 @@
 //#include "Local.h"
 
 constexpr uint8_t DefaultValue = 0xFF;
+constexpr uint8_t PinDisabled = 0xFF;
 
 constexpr uint8_t BufferSuccess = 0x00;
 constexpr uint8_t BufferInvalid = 0x01;
@@ -45,6 +46,13 @@ constexpr char RelayTurnAllOn[] = "R1";
 constexpr char RelayRetrieveStates[] = "R2";
 constexpr char RelaySetState[] = "R3";
 constexpr char RelayStatusGet[] = "R4";
+constexpr char RelayGetAllConfig[] = "R5";
+constexpr char RelayRename[] = "R6";
+constexpr char RelaySetButtonColor[] = "R7";
+constexpr char RelaySetDefaultState[] = "R8";
+constexpr char RelayLink[] = "R9";
+constexpr char RelaySetActionType[] = "R10";
+constexpr char RelaySetPin[] = "R11";
 
 constexpr char SoundSignalCancel[] = "H0";
 constexpr char SoundSignalActive[] = "H1";
@@ -65,11 +73,11 @@ constexpr char ConfigSaveSettings[] = "C0";
 constexpr char ConfigGetSettings[] = "C1";
 constexpr char ConfigResetSettings[] = "C2";
 constexpr char ConfigRename[] = "C3";
-constexpr char ConfigRenameRelay[] = "C4";
+constexpr char ConfigRenameRelay[] = "C4";    // Retired — use RelayRename (R6)
 constexpr char ConfigMapHomeButton[] = "C5";
-constexpr char ConfigSetButtonColor[] = "C6";
+constexpr char ConfigSetButtonColor[] = "C6";  // Retired — use RelaySetButtonColor (R7)
 constexpr char ConfigBoatType[] = "C7";
-constexpr char ConfigSoundRelayId[] = "C8";
+constexpr char ConfigSoundRelayId[] = "C8";    // Retired — use RelaySetActionType (R10)
 constexpr char ConfigSoundStartDelay[] = "C9";
 
 constexpr char ConfigBluetoothEnable[] = "C10";
@@ -82,8 +90,8 @@ constexpr char ConfigWifiPort[] = "C15";
 constexpr char ConfigWifiState[] = "C16";
 constexpr char ConfigWifiApIpAddress[] = "C17";
 
-constexpr char ConfigDefaultRelayState[] = "C18";
-constexpr char ConfigLinkRelays[] = "C19";
+constexpr char ConfigDefaultRelayState[] = "C18"; // Retired — use RelaySetDefaultState (R8)
+constexpr char ConfigLinkRelays[] = "C19";        // Retired — use RelayLink (R9)
 constexpr char ConfigTimeZoneOffset[] = "C20";
 constexpr char ConfigMmsi[] = "C21";
 constexpr char ConfigCallSign[] = "C22";
@@ -96,7 +104,7 @@ constexpr char ControlPanelTones[] = "C28";
 constexpr char ConfigReloadFromSd[] = "C29";
 constexpr char ConfigExportToSd[] = "C30";
 constexpr char ConfigSdCardSpeed[] = "C31";
-constexpr char ConfigLightSensorNightRelay[] = "C32";
+constexpr char ConfigLightSensorNightRelay[] = "C32"; // Retired — use RelaySetActionType (R10) with NightRelay
 constexpr char ConfigLightSensorThreshold[] = "C33";
 
 constexpr char MqttConfigEnable[] = "M0";

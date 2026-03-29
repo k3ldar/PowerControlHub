@@ -68,13 +68,18 @@ bool ConfigManager::load()
             migrateV1toV2();
             migrated = true;
         }
-        else if (_cfg.version == ConfigVersion2)
-        {
-            migrateV2toV3();
-            migrated = true;
+		else if (_cfg.version == ConfigVersion2)
+		{
+			migrateV2toV3();
+			migrated = true;
 		}
-        else
-        {
+		else if (_cfg.version == ConfigVersion3)
+		{
+			migrateV3toV4();
+			migrated = true;
+		}
+		else
+		{
             // Version is below the oldest known migration (e.g. 0x00 on some blank boards).
             // Cannot migrate safely — reset and persist clean defaults.
             resetToDefaults();
@@ -134,10 +139,32 @@ void ConfigManager::migrateV2toV3()
 
     for (uint8_t i = 0; i < ConfigMaxSensors; ++i)
     {
-        memset(_cfg.sensors.sensors[i].pins, 0xFF, ConfigMaxSensorPins);
+        memset(_cfg.sensors.sensors[i].pins, PinDisabled, ConfigMaxSensorPins);
     }
 
-    _cfg.version = ConfigVersion;
+    _cfg.version = ConfigVersion3;
+}
+
+void ConfigManager::migrateV3toV4()
+{
+    // V3 -> V4: RelayActionType field added to RelayEntry (consumes 1 reserved byte).
+    // Promote hornRelayIndex -> Horn actionType, nightRelayIndex -> NightRelay actionType.
+    for (uint8_t i = 0; i < ConfigRelayCount; ++i)
+    {
+        _cfg.relay.relays[i].actionType = RelayActionType::Default;
+    }
+
+    if (_cfg.sound.hornRelayIndex < ConfigRelayCount)
+    {
+        _cfg.relay.relays[_cfg.sound.hornRelayIndex].actionType = RelayActionType::Horn;
+    }
+
+    if (_cfg.lightSensor.nightRelayIndex < ConfigRelayCount)
+    {
+        _cfg.relay.relays[_cfg.lightSensor.nightRelayIndex].actionType = RelayActionType::NightRelay;
+    }
+
+    _cfg.version = ConfigVersion4;
 }
 
 bool ConfigManager::save()
@@ -185,15 +212,15 @@ void ConfigManager::resetToDefaults()
 #if defined(FUSE_BOX_CONTROLLER)
         _cfg.relay.relays[i].pin = Relays[i]; // default pin from Local.h
 #else
-        _cfg.relay.relays[i].pin = 0x255; // default value for no pin
+        _cfg.relay.relays[i].pin = PinDisabled; // no pin assigned
 #endif
     }
 
     // Reset linked relay table
     for (uint8_t i = 0; i < ConfigMaxLinkedRelays; ++i)
     {
-        _cfg.relay.linkedRelays[i][0] = 0xFF;
-        _cfg.relay.linkedRelays[i][1] = 0xFF;
+        _cfg.relay.linkedRelays[i][0] = PinDisabled;
+        _cfg.relay.linkedRelays[i][1] = PinDisabled;
     }
 
     // Default home page mapping: first four relays visible in order
@@ -203,8 +230,8 @@ void ConfigManager::resetToDefaults()
     }
 
 	_cfg.vessel.vesselType = VesselType::Motor;
-	_cfg.sound.hornRelayIndex = 0xFF; // none
-    _cfg.lightSensor.nightRelayIndex = 0xFF; // none
+	_cfg.sound.hornRelayIndex = PinDisabled; // none
+    _cfg.lightSensor.nightRelayIndex = PinDisabled; // none
     _cfg.lightSensor.daytimeThreshold = 512;
     _cfg.sound.startDelayMs = 500; // 500ms
 
@@ -280,7 +307,7 @@ void ConfigManager::resetToDefaults()
 	_cfg.sound.badRepeatMs = 60000;
 
     for (uint8_t i = 0; i < ConfigMaxSensors; ++i)
-        memset(_cfg.sensors.sensors[i].pins, 0xFF, ConfigMaxSensorPins);
+        memset(_cfg.sensors.sensors[i].pins, PinDisabled, ConfigMaxSensorPins);
 
     // compute checksum
     _cfg.checksum = 0;

@@ -21,6 +21,7 @@
 
 #include "ConfigManager.h"
 #include "SystemDefinitions.h"
+#include "SystemFunctions.h"
 
 CommandResult SchedulerNetworkHandler::handleRequest(const char* method,
     const char* command,
@@ -39,7 +40,7 @@ CommandResult SchedulerNetworkHandler::handleRequest(const char* method,
     }
 
     // T0 — List events: returns count and per-slot enabled states
-    if (strcmp(command, TimerListEvents) == 0 || command[0] == '\0')
+    if (SystemFunctions::commandMatches(command, TimerListEvents) || command[0] == '\0')
     {
         int written = snprintf(responseBuffer, bufferSize,
             "\"success\":true,\"schedule\":{\"count\":%u,\"slots\":[",
@@ -69,7 +70,7 @@ CommandResult SchedulerNetworkHandler::handleRequest(const char* method,
     }
 
     // T1 — Get event detail at index v=<index>
-    if (strcmp(command, TimerGetEvent) == 0)
+    if (SystemFunctions::commandMatches(command, TimerGetEvent))
     {
         if (paramCount < 1)
         {
