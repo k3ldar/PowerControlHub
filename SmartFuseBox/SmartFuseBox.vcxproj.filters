@@ -16,12 +16,6 @@
     <Filter Include="Header Files\Sensors">
       <UniqueIdentifier>{b2560382-112e-4051-8e71-7cbe1f03a4f2}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\SharedCode">
-      <UniqueIdentifier>{161e671c-dae2-4c3b-9b3d-810d308ef21f}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\SharedCode">
-      <UniqueIdentifier>{2c5c1b61-1f57-461e-9bb6-4da6def3c316}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\Bluetooth">
       <UniqueIdentifier>{5acd69d0-acce-44d6-a78e-47664e8e5636}</UniqueIdentifier>
     </Filter>
@@ -34,12 +28,6 @@
     <Filter Include="Source Files\SerialCommandHandlers">
       <UniqueIdentifier>{116e7f36-ca32-4d49-9f14-c2cadc47a1be}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\SharedCode\SerialCommandHandlers">
-      <UniqueIdentifier>{83156138-a987-43b1-a64d-b3cb5c3ce530}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\SharedCode\SerialCommandHandlers">
-      <UniqueIdentifier>{c1b264e0-e00a-461f-bdac-3792ee219b47}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\BusinessLogic">
       <UniqueIdentifier>{9f596ba8-b476-499a-b358-f705bee60d84}</UniqueIdentifier>
     </Filter>
@@ -51,9 +39,6 @@
     </Filter>
     <Filter Include="Source Files\BusinessLogic">
       <UniqueIdentifier>{0936f4f8-0dcf-4bae-b691-92dcc0d450a7}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\SharedCode\Sensors">
-      <UniqueIdentifier>{2b471eb6-d372-4efd-a2d0-48c9f6e5b8e0}</UniqueIdentifier>
     </Filter>
     <Filter Include="Header Files\MQTT">
       <UniqueIdentifier>{5ae035a4-a7e2-4d8a-926d-cd93d7c54131}</UniqueIdentifier>
@@ -91,21 +76,6 @@
     <ClCompile Include="ConfigCommandHandler.cpp">
       <Filter>Source Files\SerialCommandHandlers</Filter>
     </ClCompile>
-    <ClCompile Include="AckCommandHandler.cpp">
-      <Filter>Source Files\SharedCode\SerialCommandHandlers</Filter>
-    </ClCompile>
-    <ClCompile Include="BroadcastManager.cpp">
-      <Filter>Source Files\SharedCode</Filter>
-    </ClCompile>
-    <ClCompile Include="WarningManager.cpp">
-      <Filter>Source Files\SharedCode</Filter>
-    </ClCompile>
-    <ClCompile Include="WarningCommandHandler.cpp">
-      <Filter>Source Files\SharedCode\SerialCommandHandlers</Filter>
-    </ClCompile>
-    <ClCompile Include="SystemCpuMonitor.cpp">
-      <Filter>Source Files\SharedCode</Filter>
-    </ClCompile>
     <ClCompile Include="BluetoothManager.cpp">
       <Filter>Source Files\Bluetooth</Filter>
     </ClCompile>
@@ -123,9 +93,6 @@
     </ClCompile>
     <ClCompile Include="ConfigManager.cpp">
       <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SystemCommandHandler.cpp">
-      <Filter>Source Files\SharedCode\SerialCommandHandlers</Filter>
     </ClCompile>
     <ClCompile Include="RelayNetworkHandler.cpp">
       <Filter>Source Files\NetworkCommandHandlers</Filter>
@@ -157,20 +124,8 @@
     <ClCompile Include="LedMatrixManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="SensorController.h">
-      <Filter>Header Files\SharedCode\Sensors</Filter>
-    </ClCompile>
-    <ClCompile Include="DateTimeManager.cpp">
-      <Filter>Source Files\SharedCode</Filter>
-    </ClCompile>
-    <ClCompile Include="SystemFunctions.cpp">
-      <Filter>Source Files\SharedCode</Filter>
-    </ClCompile>
     <ClCompile Include="ConfigSyncManager.cpp">
       <Filter>Source Files\BusinessLogic</Filter>
-    </ClCompile>
-    <ClCompile Include="ToneManager.cpp">
-      <Filter>Source Files\SharedCode</Filter>
     </ClCompile>
     <ClCompile Include="SdCardLogger.cpp">
       <Filter>Source Files</Filter>
@@ -229,6 +184,36 @@
     <ClCompile Include="ScheduleController.cpp">
       <Filter>Source Files\Scheduler</Filter>
     </ClCompile>
+    <ClCompile Include="SensorController.h">
+      <Filter>Header Files\Sensors</Filter>
+    </ClCompile>
+    <ClCompile Include="AckCommandHandler.cpp">
+      <Filter>Source Files\SerialCommandHandlers</Filter>
+    </ClCompile>
+    <ClCompile Include="SystemCommandHandler.cpp">
+      <Filter>Source Files\SerialCommandHandlers</Filter>
+    </ClCompile>
+    <ClCompile Include="WarningCommandHandler.cpp">
+      <Filter>Source Files\SerialCommandHandlers</Filter>
+    </ClCompile>
+    <ClCompile Include="BroadcastManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DateTimeManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SystemCpuMonitor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SystemFunctions.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ToneManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="WarningManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="__vm\.SmartFuseBox.vsarduino.h">
@@ -243,30 +228,6 @@
     <ClInclude Include="Local.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Config.h">
-      <Filter>Header Files\SharedCode</Filter>
-    </ClInclude>
-    <ClInclude Include="AckCommandHandler.h">
-      <Filter>Header Files\SharedCode\SerialCommandHandlers</Filter>
-    </ClInclude>
-    <ClInclude Include="BroadcastManager.h">
-      <Filter>Header Files\SharedCode</Filter>
-    </ClInclude>
-    <ClInclude Include="SharedBaseCommandHandler.h">
-      <Filter>Header Files\SharedCode\SerialCommandHandlers</Filter>
-    </ClInclude>
-    <ClInclude Include="WarningType.h">
-      <Filter>Header Files\SharedCode</Filter>
-    </ClInclude>
-    <ClInclude Include="ConfigCommandHandler.h">
-      <Filter>Header Files\SharedCode\SerialCommandHandlers</Filter>
-    </ClInclude>
-    <ClInclude Include="SensorCommandHandler.h">
-      <Filter>Header Files\SharedCode\SerialCommandHandlers</Filter>
-    </ClInclude>
-    <ClInclude Include="SystemCpuMonitor.h">
-      <Filter>Header Files\SharedCode</Filter>
-    </ClInclude>
     <ClInclude Include="BluetoothSystemService.h">
       <Filter>Header Files\Bluetooth</Filter>
     </ClInclude>
@@ -279,26 +240,11 @@
     <ClInclude Include="BluetoothSensorService.h">
       <Filter>Header Files\Bluetooth</Filter>
     </ClInclude>
-    <ClInclude Include="ConfigManager.h">
-      <Filter>Header Files\SharedCode</Filter>
-    </ClInclude>
     <ClInclude Include="BluetoothController.h">
       <Filter>Header Files\Bluetooth</Filter>
     </ClInclude>
     <ClInclude Include="BluetoothRelayService.h">
       <Filter>Header Files\Bluetooth</Filter>
-    </ClInclude>
-    <ClInclude Include="LoggingSupport.h">
-      <Filter>Header Files\SharedCode</Filter>
-    </ClInclude>
-    <ClInclude Include="Queue.h">
-      <Filter>Header Files\SharedCode</Filter>
-    </ClInclude>
-    <ClInclude Include="SystemCommandHandler.h">
-      <Filter>Header Files\SharedCode\SerialCommandHandlers</Filter>
-    </ClInclude>
-    <ClInclude Include="WarningCommandHandler.h">
-      <Filter>Header Files\SharedCode\SerialCommandHandlers</Filter>
     </ClInclude>
     <ClInclude Include="RelayController.h">
       <Filter>Header Files\BusinessLogic</Filter>
@@ -345,26 +291,8 @@
     <ClInclude Include="LightSensorHandler.h">
       <Filter>Header Files\Sensors</Filter>
     </ClInclude>
-    <ClInclude Include="BaseSensor.h">
-      <Filter>Header Files\SharedCode\Sensors</Filter>
-    </ClInclude>
     <ClInclude Include="ConfigSyncManager.h">
       <Filter>Header Files\BusinessLogic</Filter>
-    </ClInclude>
-    <ClInclude Include="SystemDefinitions.h">
-      <Filter>Header Files\SharedCode</Filter>
-    </ClInclude>
-    <ClInclude Include="SystemFunctions.h">
-      <Filter>Header Files\SharedCode</Filter>
-    </ClInclude>
-    <ClInclude Include="WarningManager.h">
-      <Filter>Header Files\SharedCode</Filter>
-    </ClInclude>
-    <ClInclude Include="DateTimeManager.h">
-      <Filter>Header Files\SharedCode</Filter>
-    </ClInclude>
-    <ClInclude Include="ToneManager.h">
-      <Filter>Header Files\SharedCode</Filter>
     </ClInclude>
     <ClInclude Include="SensorDataRecord.h">
       <Filter>Header Files</Filter>
@@ -426,9 +354,6 @@
     <ClInclude Include="BoardConfig.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Dht11SensorHandler.h">
-      <Filter>Header Files\SharedCode\Sensors</Filter>
-    </ClInclude>
     <ClInclude Include="Esp32WifiClient.h">
       <Filter>Header Files\Wifi</Filter>
     </ClInclude>
@@ -470,6 +395,66 @@
     </ClInclude>
     <ClInclude Include="SdCardLogger.h">
       <Filter>Header Files\SDCard</Filter>
+    </ClInclude>
+    <ClInclude Include="BaseSensor.h">
+      <Filter>Header Files\Sensors</Filter>
+    </ClInclude>
+    <ClInclude Include="Dht11SensorHandler.h">
+      <Filter>Header Files\Sensors</Filter>
+    </ClInclude>
+    <ClInclude Include="AckCommandHandler.h">
+      <Filter>Header Files\SerialCommandHandlers</Filter>
+    </ClInclude>
+    <ClInclude Include="ConfigCommandHandler.h">
+      <Filter>Header Files\SerialCommandHandlers</Filter>
+    </ClInclude>
+    <ClInclude Include="SensorCommandHandler.h">
+      <Filter>Header Files\SerialCommandHandlers</Filter>
+    </ClInclude>
+    <ClInclude Include="SharedBaseCommandHandler.h">
+      <Filter>Header Files\SerialCommandHandlers</Filter>
+    </ClInclude>
+    <ClInclude Include="SystemCommandHandler.h">
+      <Filter>Header Files\SerialCommandHandlers</Filter>
+    </ClInclude>
+    <ClInclude Include="WarningCommandHandler.h">
+      <Filter>Header Files\SerialCommandHandlers</Filter>
+    </ClInclude>
+    <ClInclude Include="BroadcastManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Config.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ConfigManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DateTimeManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LoggingSupport.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Queue.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SystemCpuMonitor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SystemDefinitions.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SystemFunctions.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ToneManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="WarningManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="WarningType.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

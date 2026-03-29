@@ -21,15 +21,18 @@
 
 #include "SDCardConfigLoader.h"
 #include "ConfigManager.h"
+#include "SystemFunctions.h"
 #include <string.h>
 
 SdCardConfigLoader::SdCardConfigLoader(SerialCommandManager* computerSerial,
                                        SerialCommandManager* linkSerial,
                                        ConfigController* configController,
+                                       RelayController* relayController,
                                        ConfigSyncManager* configSyncManager)
     : _computerSerial(computerSerial),
       _linkSerial(linkSerial),
       _configController(configController),
+      _relayController(relayController),
       _configSyncManager(configSyncManager),
       _sdConfigPresent(false)
 {
@@ -140,173 +143,229 @@ bool SdCardConfigLoader::applyConfigCommand(const char* line)
         }
     }
 
-    // Now apply the command through ConfigController
-    // We bypass the SerialCommandManager and call ConfigController methods directly
-    
-    ConfigResult result = ConfigResult::InvalidCommand;
+    // Route command through the appropriate controller, using commandMatches for
+    // consistent comparison (guards against prefix ambiguity e.g. R1 vs R10/R11).
 
-    if (strcmp(command, "C3") == 0 && paramCount >= 1)
-    {
-        result = _configController->rename(params[0].value);
-    }
-    else if (strcmp(command, "C4") == 0 && paramCount >= 1)
+    // ── Relay config commands (R6–R11) ───────────────────────────────────────
+    if (SystemFunctions::commandMatches(command, RelayRename) && paramCount >= 1)
     {
         uint8_t idx = static_cast<uint8_t>(strtoul(params[0].key, nullptr, 0));
-        result = _configController->renameRelay(idx, params[0].value);
+        int pipeIdx = SystemFunctions::indexOf(params[0].value, '|', 0);
+        char shortName[ConfigShortRelayNameLength] = "";
+        char longName[ConfigLongRelayNameLength] = "";
+
+        if (pipeIdx >= 0)
+        {
+            SystemFunctions::substr(shortName, sizeof(shortName), params[0].value, 0, pipeIdx);
+            SystemFunctions::substr(longName, sizeof(longName), params[0].value, pipeIdx + 1);
+        }
+        else
+        {
+            strncpy(shortName, params[0].value, sizeof(shortName) - 1);
+        }
+
+        RelayResult rr = _relayController->renameRelay(idx, shortName, longName);
+        if (rr != RelayResult::Success)
+        {
+            char errorMsg[64];
+            snprintf(errorMsg, sizeof(errorMsg), "Command failed: %s (result=%d)", command, static_cast<uint8_t>(rr));
+            logError(errorMsg, line);
+            return false;
+        }
+        return true;
     }
-    else if (strcmp(command, "C5") == 0 && paramCount >= 1)
+    else if (SystemFunctions::commandMatches(command, RelaySetButtonColor) && paramCount >= 1)
     {
-        uint8_t button = static_cast<uint8_t>(strtoul(params[0].key, nullptr, 0));
-        uint8_t relay = static_cast<uint8_t>(strtoul(params[0].value, nullptr, 0));
-        result = _configController->mapHomeButton(button, relay);
-    }
-    else if (strcmp(command, "C6") == 0 && paramCount >= 1)
-    {
-        uint8_t button = static_cast<uint8_t>(strtoul(params[0].key, nullptr, 0));
+        uint8_t relayIndex = static_cast<uint8_t>(strtoul(params[0].key, nullptr, 0));
         uint8_t color = static_cast<uint8_t>(strtoul(params[0].value, nullptr, 0));
-        result = _configController->mapHomeButtonColor(button, color);
+
+        RelayResult rr = _relayController->setButtonColor(relayIndex, color);
+        if (rr != RelayResult::Success)
+        {
+            char errorMsg[64];
+            snprintf(errorMsg, sizeof(errorMsg), "Command failed: %s (result=%d)", command, static_cast<uint8_t>(rr));
+            logError(errorMsg, line);
+            return false;
+        }
+        return true;
     }
-    else if (strcmp(command, "C7") == 0 && paramCount >= 1)
+    else if (SystemFunctions::commandMatches(command, RelaySetDefaultState) && paramCount >= 1)
     {
-        uint8_t type = atoi(params[0].value);
-        result = _configController->setVesselType(type);
+        uint8_t relayIndex = static_cast<uint8_t>(strtoul(params[0].key, nullptr, 0));
+        bool state = SystemFunctions::parseBooleanValue(params[0].value);
+
+        RelayResult rr = _relayController->setRelayDefaultState(relayIndex, state);
+        if (rr != RelayResult::Success)
+        {
+            char errorMsg[64];
+            snprintf(errorMsg, sizeof(errorMsg), "Command failed: %s (result=%d)", command, static_cast<uint8_t>(rr));
+            logError(errorMsg, line);
+            return false;
+        }
+        return true;
     }
-    else if (strcmp(command, "C8") == 0 && paramCount >= 1)
-    {
-        uint8_t relay = atoi(params[0].value);
-        result = _configController->setSoundRelayButton(relay);
-    }
-    else if (strcmp(command, "C9") == 0 && paramCount >= 1)
-    {
-        uint16_t delay = atoi(params[0].value);
-        result = _configController->setsoundDelayStart(delay);
-    }
-    else if (strcmp(command, "C10") == 0 && paramCount >= 1)
-    {
-        bool enabled = (atoi(params[0].value) != 0);
-        result = _configController->setBluetoothEnabled(enabled);
-    }
-    else if (strcmp(command, "C11") == 0 && paramCount >= 1)
-    {
-        bool enabled = (atoi(params[0].value) != 0);
-        result = _configController->setWifiEnabled(enabled);
-    }
-    else if (strcmp(command, "C12") == 0 && paramCount >= 1)
-    {
-        WifiMode mode = static_cast<WifiMode>(atoi(params[0].value));
-        result = _configController->setWifiAccessMode(mode);
-    }
-    else if (strcmp(command, "C13") == 0 && colonPos != nullptr)
-    {
-        result = _configController->setWifiSsid(colonPos + 1);
-    }
-    else if (strcmp(command, "C14") == 0 && colonPos != nullptr)
-    {
-        result = _configController->setWifiPassword(colonPos + 1);
-    }
-    else if (strcmp(command, "C15") == 0 && paramCount >= 1)
-    {
-        uint16_t port = atoi(params[0].value);
-        result = _configController->setWifiPort(port);
-    }
-    else if (strcmp(command, "C17") == 0 && colonPos != nullptr)
-    {
-        result = _configController->setWifiIpAddress(colonPos + 1);
-    }
-    else if (strcmp(command, "C18") == 0 && paramCount >= 1)
-    {
-        uint8_t relay = static_cast<uint8_t>(atoi(params[0].key));
-        bool state = (atoi(params[0].value) != 0);
-        result = _configController->setRelayDefaultState(relay, state);
-    }
-    else if (strcmp(command, "C19") == 0 && paramCount >= 1)
+    else if (SystemFunctions::commandMatches(command, RelayLink) && paramCount >= 1)
     {
         uint8_t relay1 = static_cast<uint8_t>(strtoul(params[0].key, nullptr, 0));
         uint8_t relay2 = static_cast<uint8_t>(strtoul(params[0].value, nullptr, 0));
-        
-        if (relay2 == 255)
+
+        RelayResult rr;
+        if (relay2 == DefaultValue)
         {
-            result = _configController->unlinkRelay(relay1);
+            rr = _relayController->unlinkRelay(relay1);
         }
         else
         {
-            result = _configController->linkRelays(relay1, relay2);
+            rr = _relayController->linkRelays(relay1, relay2);
         }
+
+        if (rr != RelayResult::Success)
+        {
+            char errorMsg[64];
+            snprintf(errorMsg, sizeof(errorMsg), "Command failed: %s (result=%d)", command, static_cast<uint8_t>(rr));
+            logError(errorMsg, line);
+            return false;
+        }
+        return true;
     }
-    else if (strcmp(command, "C20") == 0 && paramCount >= 1)
+    else if (SystemFunctions::commandMatches(command, RelaySetActionType) && paramCount >= 1)
     {
-        int8_t offset = static_cast<int8_t>(atoi(params[0].value));
-        result = _configController->setTimezoneOffset(offset);
+        uint8_t relayIndex = static_cast<uint8_t>(strtoul(params[0].key, nullptr, 0));
+        uint8_t actionType = static_cast<uint8_t>(strtoul(params[0].value, nullptr, 0));
+
+        RelayResult rr = _relayController->setRelayActionType(relayIndex, static_cast<RelayActionType>(actionType));
+        if (rr != RelayResult::Success)
+        {
+            char errorMsg[64];
+            snprintf(errorMsg, sizeof(errorMsg), "Command failed: %s (result=%d)", command, static_cast<uint8_t>(rr));
+            logError(errorMsg, line);
+            return false;
+        }
+        return true;
     }
-    else if (strcmp(command, "C21") == 0 && colonPos != nullptr)
+    else if (SystemFunctions::commandMatches(command, RelaySetPin) && paramCount >= 1)
+    {
+        uint8_t relayIndex = static_cast<uint8_t>(strtoul(params[0].key, nullptr, 0));
+        uint8_t pin = static_cast<uint8_t>(strtoul(params[0].value, nullptr, 0));
+
+        RelayResult rr = _relayController->setRelayPin(relayIndex, pin);
+        if (rr != RelayResult::Success)
+        {
+            char errorMsg[64];
+            snprintf(errorMsg, sizeof(errorMsg), "Command failed: %s (result=%d)", command, static_cast<uint8_t>(rr));
+            logError(errorMsg, line);
+            return false;
+        }
+        return true;
+    }
+
+    // ── Device / network config commands (C-series) ──────────────────────────
+    ConfigResult result = ConfigResult::InvalidCommand;
+
+    if (SystemFunctions::commandMatches(command, ConfigRename) && paramCount >= 1)
+    {
+        result = _configController->rename(params[0].value);
+    }
+    else if (SystemFunctions::commandMatches(command, ConfigMapHomeButton) && paramCount >= 1)
+    {
+        uint8_t button = static_cast<uint8_t>(strtoul(params[0].key, nullptr, 0));
+        uint8_t relay  = static_cast<uint8_t>(strtoul(params[0].value, nullptr, 0));
+        result = _configController->mapHomeButton(button, relay);
+    }
+    else if (SystemFunctions::commandMatches(command, ConfigBoatType) && paramCount >= 1)
+    {
+        result = _configController->setVesselType(static_cast<uint8_t>(atoi(params[0].value)));
+    }
+    else if (SystemFunctions::commandMatches(command, ConfigSoundStartDelay) && paramCount >= 1)
+    {
+        result = _configController->setsoundDelayStart(static_cast<uint16_t>(atoi(params[0].value)));
+    }
+    else if (SystemFunctions::commandMatches(command, ConfigBluetoothEnable) && paramCount >= 1)
+    {
+        result = _configController->setBluetoothEnabled(atoi(params[0].value) != 0);
+    }
+    else if (SystemFunctions::commandMatches(command, ConfigWifiEnable) && paramCount >= 1)
+    {
+        result = _configController->setWifiEnabled(atoi(params[0].value) != 0);
+    }
+    else if (SystemFunctions::commandMatches(command, ConfigWifiMode) && paramCount >= 1)
+    {
+        result = _configController->setWifiAccessMode(static_cast<WifiMode>(atoi(params[0].value)));
+    }
+    else if (SystemFunctions::commandMatches(command, ConfigWifiSSID) && colonPos != nullptr)
+    {
+        result = _configController->setWifiSsid(colonPos + 1);
+    }
+    else if (SystemFunctions::commandMatches(command, ConfigWifiPassword) && colonPos != nullptr)
+    {
+        result = _configController->setWifiPassword(colonPos + 1);
+    }
+    else if (SystemFunctions::commandMatches(command, ConfigWifiPort) && paramCount >= 1)
+    {
+        result = _configController->setWifiPort(static_cast<uint16_t>(atoi(params[0].value)));
+    }
+    else if (SystemFunctions::commandMatches(command, ConfigWifiApIpAddress) && colonPos != nullptr)
+    {
+        result = _configController->setWifiIpAddress(colonPos + 1);
+    }
+    else if (SystemFunctions::commandMatches(command, ConfigTimeZoneOffset) && paramCount >= 1)
+    {
+        result = _configController->setTimezoneOffset(static_cast<int8_t>(atoi(params[0].value)));
+    }
+    else if (SystemFunctions::commandMatches(command, ConfigMmsi) && colonPos != nullptr)
     {
         result = _configController->setMmsi(colonPos + 1);
     }
-    else if (strcmp(command, "C22") == 0)
+    else if (SystemFunctions::commandMatches(command, ConfigCallSign))
     {
-        if (colonPos != nullptr && *(colonPos + 1) != '\0')
-        {
-            result = _configController->setCallSign(colonPos + 1);
-        }
-        else
-        {
-            result = _configController->setCallSign("");
-        }
+        result = _configController->setCallSign(colonPos != nullptr && *(colonPos + 1) != '\0' ? colonPos + 1 : "");
     }
-    else if (strcmp(command, "C23") == 0)
+    else if (SystemFunctions::commandMatches(command, ConfigHomePort))
     {
-        if (colonPos != nullptr && *(colonPos + 1) != '\0')
-        {
-            result = _configController->setHomePort(colonPos + 1);
-        }
-        else
-        {
-            result = _configController->setHomePort("");
-        }
+        result = _configController->setHomePort(colonPos != nullptr && *(colonPos + 1) != '\0' ? colonPos + 1 : "");
     }
-    else if (strcmp(command, "C24") == 0 && paramCount >= 5)
+    else if (SystemFunctions::commandMatches(command, ConfigLedColor) && paramCount >= 5)
     {
         uint8_t type = 0, colorSet = 0, r = 0, g = 0, b = 0;
-        
+
         for (uint8_t i = 0; i < paramCount; i++)
         {
             if (strcmp(params[i].key, "t") == 0)
-                type = atoi(params[i].value);
+                type = static_cast<uint8_t>(atoi(params[i].value));
             else if (strcmp(params[i].key, "c") == 0)
-                colorSet = atoi(params[i].value);
+                colorSet = static_cast<uint8_t>(atoi(params[i].value));
             else if (strcmp(params[i].key, "r") == 0)
-                r = atoi(params[i].value);
+                r = static_cast<uint8_t>(atoi(params[i].value));
             else if (strcmp(params[i].key, "g") == 0)
-                g = atoi(params[i].value);
+                g = static_cast<uint8_t>(atoi(params[i].value));
             else if (strcmp(params[i].key, "b") == 0)
-                b = atoi(params[i].value);
+                b = static_cast<uint8_t>(atoi(params[i].value));
         }
-        
+
         result = _configController->setLedColor(type, colorSet, r, g, b);
     }
-    else if (strcmp(command, "C25") == 0 && paramCount >= 2)
+    else if (SystemFunctions::commandMatches(command, ConfigLedBrightness) && paramCount >= 2)
     {
         uint8_t type = 0, brightness = 0;
-        
+
         for (uint8_t i = 0; i < paramCount; i++)
         {
             if (strcmp(params[i].key, "t") == 0)
-                type = atoi(params[i].value);
+                type = static_cast<uint8_t>(atoi(params[i].value));
             else if (strcmp(params[i].key, "b") == 0)
-                brightness = atoi(params[i].value);
+                brightness = static_cast<uint8_t>(atoi(params[i].value));
         }
-        
+
         result = _configController->setLedBrightness(type, brightness);
     }
-    else if (strcmp(command, "C26") == 0 && paramCount >= 1)
+    else if (SystemFunctions::commandMatches(command, ConfigLedAutoSwitch) && paramCount >= 1)
     {
-        bool enabled = (atoi(params[0].value) != 0);
-        result = _configController->setLedAutoSwitch(enabled);
+        result = _configController->setLedAutoSwitch(atoi(params[0].value) != 0);
     }
-    else if (strcmp(command, "C27") == 0 && paramCount >= 3)
+    else if (SystemFunctions::commandMatches(command, ConfigLedEnable) && paramCount >= 3)
     {
         bool gps = false, warning = false, system = false;
-        
+
         for (uint8_t i = 0; i < paramCount; i++)
         {
             if (strcmp(params[i].key, "g") == 0)
@@ -316,30 +375,38 @@ bool SdCardConfigLoader::applyConfigCommand(const char* line)
             else if (strcmp(params[i].key, "s") == 0)
                 system = (atoi(params[i].value) != 0);
         }
-        
+
         result = _configController->setLedEnableStates(gps, warning, system);
     }
-    else if (strcmp(command, "C28") == 0 && paramCount >= 4)
+    else if (SystemFunctions::commandMatches(command, ControlPanelTones) && paramCount >= 4)
     {
         uint8_t type = 0, preset = 0;
         uint16_t toneHz = 0, durationMs = 0;
         uint32_t repeatMs = 0;
-        
+
         for (uint8_t i = 0; i < paramCount; i++)
         {
             if (strcmp(params[i].key, "t") == 0)
-                type = atoi(params[i].value);
+                type = static_cast<uint8_t>(atoi(params[i].value));
             else if (strcmp(params[i].key, "h") == 0)
-                toneHz = atoi(params[i].value);
+                toneHz = static_cast<uint16_t>(atoi(params[i].value));
             else if (strcmp(params[i].key, "d") == 0)
-                durationMs = atoi(params[i].value);
+                durationMs = static_cast<uint16_t>(atoi(params[i].value));
             else if (strcmp(params[i].key, "p") == 0)
-                preset = atoi(params[i].value);
+                preset = static_cast<uint8_t>(atoi(params[i].value));
             else if (strcmp(params[i].key, "r") == 0)
                 repeatMs = strtoul(params[i].value, nullptr, 0);
         }
-        
+
         result = _configController->setControlPanelTones(type, preset, toneHz, durationMs, repeatMs);
+    }
+    else if (SystemFunctions::commandMatches(command, ConfigSdCardSpeed) && paramCount >= 1)
+    {
+        result = _configController->setSdCardInitializeSpeed(static_cast<uint8_t>(atoi(params[0].value)));
+    }
+    else if (SystemFunctions::commandMatches(command, ConfigLightSensorThreshold) && paramCount >= 1)
+    {
+        result = _configController->setLightSensorThreshold(static_cast<uint16_t>(atoi(params[0].value)));
     }
     else
     {
@@ -548,136 +615,184 @@ bool SdCardConfigLoader::exportConfigToSd()
     // C3 - Boat name
     if (strlen(config->vessel.name) > 0)
     {
-        configFile->print("C3:");
+        configFile->print(ConfigRename);
+        configFile->print(":");
         configFile->println(config->vessel.name);
     }
 
-    // C4 - Relay names
+    // R6 - Relay names (short|long)
     for (uint8_t i = 0; i < ConfigRelayCount; i++)
     {
-        configFile->print("C4:");
+        configFile->print(RelayRename);
+        configFile->print(":");
         configFile->print(i);
         configFile->print("=");
-        configFile->print(config->relay.shortNames[i]);
+        configFile->print(config->relay.relays[i].shortName);
         configFile->print("|");
-        configFile->println(config->relay.longNames[i]);
+        configFile->println(config->relay.relays[i].longName);
     }
 
     // C5 - Home button mappings
     for (uint8_t i = 0; i < ConfigHomeButtons; i++)
     {
-        configFile->print("C5:");
+        configFile->print(ConfigMapHomeButton);
+        configFile->print(":");
         configFile->print(i);
         configFile->print("=");
         configFile->println(config->relay.homePageMapping[i]);
     }
 
-    // C6 - Button colors
+    // R7 - Button colors
     for (uint8_t i = 0; i < ConfigRelayCount; i++)
     {
-        configFile->print("C6:");
+        configFile->print(RelaySetButtonColor);
+        configFile->print(":");
         configFile->print(i);
         configFile->print("=");
-        configFile->println(config->relay.buttonImage[i]);
+        configFile->println(config->relay.relays[i].buttonImage);
+    }
+
+    // R8 - Default relay states
+    for (uint8_t i = 0; i < ConfigRelayCount; i++)
+    {
+        configFile->print(RelaySetDefaultState);
+        configFile->print(":");
+        configFile->print(i);
+        configFile->print("=");
+        configFile->println(config->relay.relays[i].defaultState ? "1" : "0");
+    }
+
+    // R9 - Linked relays
+    for (uint8_t i = 0; i < ConfigMaxLinkedRelays; i++)
+    {
+        if (config->relay.linkedRelays[i][0] != DefaultValue)
+        {
+            configFile->print(RelayLink);
+            configFile->print(":");
+            configFile->print(config->relay.linkedRelays[i][0]);
+            configFile->print("=");
+            configFile->println(config->relay.linkedRelays[i][1]);
+        }
+    }
+
+    // R10 - Relay action types
+    for (uint8_t i = 0; i < ConfigRelayCount; i++)
+    {
+        if (config->relay.relays[i].actionType != RelayActionType::Default)
+        {
+            configFile->print(RelaySetActionType);
+            configFile->print(":");
+            configFile->print(i);
+            configFile->print("=");
+            configFile->println(static_cast<uint8_t>(config->relay.relays[i].actionType));
+        }
+    }
+
+    // R11 - Relay pins (skip disabled)
+    for (uint8_t i = 0; i < ConfigRelayCount; i++)
+    {
+        if (config->relay.relays[i].pin != PinDisabled)
+        {
+            configFile->print(RelaySetPin);
+            configFile->print(":");
+            configFile->print(i);
+            configFile->print("=");
+            configFile->println(config->relay.relays[i].pin);
+        }
     }
 
     // C7 - Vessel type
-    configFile->print("C7:v=");
+    configFile->print(ConfigBoatType);
+    configFile->print(":v=");
     configFile->println(static_cast<uint8_t>(config->vessel.vesselType));
 
-    // C8 - Sound relay
-    configFile->print("C8:v=");
-    configFile->println(config->sound.hornRelayIndex);
-
     // C9 - Sound delay
-    configFile->print("C9:v=");
+    configFile->print(ConfigSoundStartDelay);
+    configFile->print(":v=");
     configFile->println(config->sound.startDelayMs);
 
     // C10 - Bluetooth enabled
-    configFile->print("C10:v=");
+    configFile->print(ConfigBluetoothEnable);
+    configFile->print(":v=");
     configFile->println(config->network.bluetoothEnabled ? "1" : "0");
 
     // C11 - WiFi enabled
-    configFile->print("C11:v=");
+    configFile->print(ConfigWifiEnable);
+    configFile->print(":v=");
     configFile->println(config->network.wifiEnabled ? "1" : "0");
 
     // C12 - WiFi mode
-    configFile->print("C12:v=");
+    configFile->print(ConfigWifiMode);
+    configFile->print(":v=");
     configFile->println(static_cast<uint8_t>(config->network.accessMode));
 
     // C13 - WiFi SSID
-    configFile->print("C13:");
+    configFile->print(ConfigWifiSSID);
+    configFile->print(":");
     configFile->println(config->network.ssid);
 
     // C14 - WiFi password
-    configFile->print("C14:");
+    configFile->print(ConfigWifiPassword);
+    configFile->print(":");
     configFile->println(config->network.password);
 
     // C15 - WiFi port
-    configFile->print("C15:v=");
+    configFile->print(ConfigWifiPort);
+    configFile->print(":v=");
     configFile->println(config->network.port);
 
     // C17 - WiFi AP IP
-    configFile->print("C17:");
+    configFile->print(ConfigWifiApIpAddress);
+    configFile->print(":");
     configFile->println(config->network.apIpAddress);
 
-    // C18 - Default relay states
-    for (uint8_t i = 0; i < ConfigRelayCount; i++)
-    {
-        configFile->print("C18:");
-        configFile->print(i);
-        configFile->print("=");
-        configFile->println(config->relay.defaultState[i] ? "1" : "0");
-    }
-
-    // C19 - Linked relays
-    for (uint8_t i = 0; i < ConfigMaxLinkedRelays; i++)
-    {
-        configFile->print("C19:");
-        configFile->print(config->relay.linkedRelays[i][0]);
-        configFile->print("=");
-        configFile->println(config->relay.linkedRelays[i][1]);
-    }
-
     // C20 - Timezone offset
-    configFile->print("C20:v=");
+    configFile->print(ConfigTimeZoneOffset);
+    configFile->print(":v=");
     configFile->println(config->system.timezoneOffset);
 
     // C21 - MMSI
-    configFile->print("C21:");
+    configFile->print(ConfigMmsi);
+    configFile->print(":");
     configFile->println(config->vessel.mmsi);
 
     // C22 - Call sign
-    configFile->print("C22:");
+    configFile->print(ConfigCallSign);
+    configFile->print(":");
     configFile->println(config->vessel.callSign);
 
     // C23 - Home port
-    configFile->print("C23:");
+    configFile->print(ConfigHomePort);
+    configFile->print(":");
     configFile->println(config->vessel.homePort);
 
     // C24 - LED colors
-    configFile->print("C24:t=0;c=0;r=");
+    configFile->print(ConfigLedColor);
+    configFile->print(":t=0;c=0;r=");
     configFile->print(config->led.dayGoodColor[0]);
     configFile->print(";g=");
     configFile->print(config->led.dayGoodColor[1]);
     configFile->print(";b=");
     configFile->println(config->led.dayGoodColor[2]);
 
-    configFile->print("C24:t=0;c=1;r=");
+    configFile->print(ConfigLedColor);
+    configFile->print(":t=0;c=1;r=");
     configFile->print(config->led.dayBadColor[0]);
     configFile->print(";g=");
     configFile->print(config->led.dayBadColor[1]);
     configFile->print(";b=");
     configFile->println(config->led.dayBadColor[2]);
 
-    configFile->print("C24:t=1;c=0;r=");
+    configFile->print(ConfigLedColor);
+    configFile->print(":t=1;c=0;r=");
     configFile->print(config->led.nightGoodColor[0]);
     configFile->print(";g=");
     configFile->print(config->led.nightGoodColor[1]);
     configFile->print(";b=");
     configFile->println(config->led.nightGoodColor[2]);
 
-    configFile->print("C24:t=1;c=1;r=");
+    configFile->print(ConfigLedColor);
+    configFile->print(":t=1;c=1;r=");
     configFile->print(config->led.nightBadColor[0]);
     configFile->print(";g=");
     configFile->print(config->led.nightBadColor[1]);
@@ -685,18 +800,22 @@ bool SdCardConfigLoader::exportConfigToSd()
     configFile->println(config->led.nightBadColor[2]);
 
     // C25 - LED brightness
-    configFile->print("C25:t=0;b=");
+    configFile->print(ConfigLedBrightness);
+    configFile->print(":t=0;b=");
     configFile->println(config->led.dayBrightness);
 
-    configFile->print("C25:t=1;b=");
+    configFile->print(ConfigLedBrightness);
+    configFile->print(":t=1;b=");
     configFile->println(config->led.nightBrightness);
 
     // C26 - LED auto switch
-    configFile->print("C26:v=");
+    configFile->print(ConfigLedAutoSwitch);
+    configFile->print(":v=");
     configFile->println(config->led.autoSwitch ? "1" : "0");
 
     // C27 - LED enable states
-    configFile->print("C27:g=");
+    configFile->print(ConfigLedEnable);
+    configFile->print(":g=");
     configFile->print(config->led.gpsEnabled ? "1" : "0");
     configFile->print(";w=");
     configFile->print(config->led.warningEnabled ? "1" : "0");
@@ -704,7 +823,8 @@ bool SdCardConfigLoader::exportConfigToSd()
     configFile->println(config->led.systemEnabled ? "1" : "0");
 
     // C28 - Control panel tones
-    configFile->print("C28:t=0;h=");
+    configFile->print(ControlPanelTones);
+    configFile->print(":t=0;h=");
     configFile->print(config->sound.goodToneHz);
     configFile->print(";d=");
     configFile->print(config->sound.goodDurationMs);
@@ -712,7 +832,8 @@ bool SdCardConfigLoader::exportConfigToSd()
     configFile->print(config->sound.goodPreset);
     configFile->println(";r=0");
 
-    configFile->print("C28:t=1;h=");
+    configFile->print(ControlPanelTones);
+    configFile->print(":t=1;h=");
     configFile->print(config->sound.badToneHz);
     configFile->print(";d=");
     configFile->print(config->sound.badDurationMs);

@@ -24,6 +24,7 @@
 #include <Arduino.h>
 #include <SerialCommandManager.h>
 #include "ConfigController.h"
+#include "RelayController.h"
 #include "ConfigSyncManager.h"
 #include "SdCardLogger.h"
 
@@ -70,6 +71,7 @@ private:
     SerialCommandManager* _computerSerial;
     SerialCommandManager* _linkSerial;
     ConfigController* _configController;
+    RelayController* _relayController;
     ConfigSyncManager* _configSyncManager;
     bool _sdConfigPresent;
 
@@ -121,6 +123,7 @@ public:
     SdCardConfigLoader(SerialCommandManager* computerSerial,
                        SerialCommandManager* linkSerial,
                        ConfigController* configController,
+                       RelayController* relayController,
                        ConfigSyncManager* configSyncManager);
 
     /**

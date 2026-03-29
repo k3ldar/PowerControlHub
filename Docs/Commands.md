@@ -42,14 +42,14 @@ These are commands used to configure the system settings and can only be sent fr
 | Command | Example | Purpose |
 |---|---|---|
 | `C0` — Save settings | `C0` | Persist current in-memory config to EEPROM. Responds `SAVED` on success; error `EEPROM commit failed` on failure. No params. |
-| `C1` — Get settings | `C1` | Request full config. Device replies with multiple commands: `C3 <boatName>`, `C4 <idx>:<shortName|longName>` for each relay, `C5 <slot>:<relay>` for each home-slot mapping, `C6 <idx>=<color>` for each button color, `C7 v=<type>` for vessel type, `C8 v=<relay>` for sound relay, `C9 v=<delay>` for sound delay, `C10`-`C17` for WiFi/Bluetooth settings (Arduino Uno R4 only), `C18 <relay>=<state>` for default relay states, `C19 <relay>=<linkedrelay>` for linked relays, `C20 v=<offset>` for timezone, `C21 <mmsi>` for MMSI, `C22 <callsign>` for call sign, `C23 <homeport>` for home port, then `OK`. No params. |
+| `C1` — Get settings | `C1` | Request full config. Device replies with multiple commands: `C3 <boatName>`, `C5 <slot>:<relay>` for each home-slot mapping, `C7 v=<type>` for vessel type, `C9 v=<delay>` for sound delay, `C10`-`C17` for WiFi/Bluetooth settings (SFB only), `C20 v=<offset>` for timezone, `C21 <mmsi>` for MMSI, `C22 <callsign>` for call sign, `C23 <homeport>` for home port, `R6 <idx>=<shortName\|longName>` for each relay name, `R7 <idx>=<color>` for each button color, `R8 <relay>=<state>` for default relay states, `R9 <relay>=<linkedrelay>` for linked relay pairs (active pairs only), `R10 <relay>=<actionType>` for non-default action types only, `R11 <relay>=<pin>` for relay pins, then `OK`. No params. |
 | `C2` — Reset settings | `C2` | Request full reset of all config settings. No params. |
 | `C3` — Rename boat (BCP) | `C3:Sea Wolf` or `C3:name=SeaWolf` | Set the boat name. `<key>:<value>` pair (value is used as boat name. Empty name → error. Name is truncated to configured max length. |
-| `C4` — Rename relay (BCP) | `C4:2=Bilge` or `C4:2=Bilge\|Bilge Pump` | Rename a relay. Param format: `<idx>=<shortName>` or `<idx>=<shortName|longName>`. `idx` must be 0..7 (`RELAY_COUNT`). If no pipe character or long name provided, the short name is used for both. Short name is truncated to 5 chars (used on home page), long name is truncated to 20 chars (used on buttons page). Missing name → error. |
+| ~~`C4`~~ — ~~Rename relay~~ | — | **Retired.** Use `R6` — Relay Rename instead. |
 | `C5` — Map home button (BCP) | `C5:1=3` (map) — `C5:1=255` (unmap) | Map a home-page slot to a relay. Param format: `<slot>:<relay>`. `button` must be 0..3 (`HOME_BUTTONS`). `relay` must be 0..7 or `255` to clear/unmap. |
-| `C6` — Map home button color (BCP) | `C6:0=4` (map button 1 to Red when activated) — `C6:1=255` (unmap colors) | Map a home-page button to a color when activated (on). Param format: `<slot>:<relay>`. `slot` must be 0..3 (`ConfigManager::HOME_SLOTS`). `relay` must be 0..7 or `255` to clear/unmap. |
+| ~~`C6`~~ — ~~Set relay button color~~ | — | **Retired.** Use `R7` — Relay Set Button Color instead. |
 | `C7` — Set vessel type | `C7:v=1` | Set the vessel type. Param format: `v=<type>`. Possible values for `<type>` are: 0 (Motor), 1 (Sail), 2 (Fishing), 3 (Yacht). Uses enum values as defined in `Config.h`. Invalid or missing value → error. |
-| `C8` — Sound relay button | `C8:v=3` (map) — `C8:v=255` (unmap) | Map the sound system (horn) to a relay. Param format: `v=<relay>`. `relay` must be 0..7 or `255` to clear/unmap. Auto-renames relay to "Sound" / "Sound\r\nSignals" if not already named. |
+| ~~`C8`~~ — ~~Sound relay button~~ | — | **Retired.** Use `R10` — Relay Set Action Type with `actionType=1` (Horn) instead. |
 | `C9` — Sound delay Start | `C9:v=0xFF` | Sets the delay before the sound is started in milliseconds, allows other processing to continue so as sounds are not cut off. Invalid or missing value → error. |
 | `C10` — Bluetooth Enabled (SFB) | `C10:v=1` | Sets the enabled state of bluetooth, 0 disabled, 1 enabled, if disabling then a restart is required. Invalid or missing value → error. |
 | `C11` — Wifi Enabled (SFB) | `C11:v=1` | Sets the enabled state of wifi, 0 disabled, 1 enabled, if disabling then a restart is required. Invalid or missing value → error. |
@@ -59,8 +59,8 @@ These are commands used to configure the system settings and can only be sent fr
 | `C15` — Wifi Port (SFB) | `C15:v=80` | Set's the wifi port, this is the port used to listen on, default value is 80. Invalid or zero port → error. |
 | `C16` — Wifi connection state (SFB) | `C16` | Wifi connection state, no params, returns WifiConnectionState value. Note: Not implemented in ConfigCommandHandler - use SystemCommandHandler. |
 | `C17` — Wifi AP Ip address (SFB) | `C17:192.168.4.1` | Sets the IP address when using access point mode, default is 192.168.4.1. Param format: IP address directly (no v= prefix). |
-| `C18` — Initial relay on | `C18:3=1` — `C18:3=0`  | Set's the initial status of a relay to on by default. Param format: `<relay>=<value>`. `relay` must be 0..7 (`RELAY_COUNT`), `value` must be 0 (off by default) or 1 (on by default). |
-| `C19` — Link Relays | `C19:3=4` — `C19:3=255` (unlink) | Links relays together, if one relay is switched on, the linked relay is switched on, and vice versa for switching off. Param format: `<relay>=<linkedrelay>`. `relay` must be 0..7 (`RELAY_COUNT`) `linkedrelay` must be 0..7 or `0xFF` (255) to unlink. |
+| ~~`C18`~~ — ~~Initial relay on~~ | — | **Retired.** Use `R8` — Relay Set Default State instead. |
+| ~~`C19`~~ — ~~Link Relays~~ | — | **Retired.** Use `R9` — Relay Link instead. |
 | `C20` — Timezone Offset | `C20:v=-5` or `C20:v=8` | Set timezone offset from UTC in hours. Param format: `v=<offset>`. Valid range: -12 to +14. Invalid offset → error. |
 | `C21` — MMSI | `C21:123456789` | Set Maritime Mobile Service Identity (MMSI) number. Param format: MMSI value directly (no v= prefix). Must be exactly 9 digits. Invalid length → error. |
 | `C22` — Call Sign | `C22:ABCD123` | Set vessel call sign. Param format: call sign value directly (no v= prefix). Truncated to configured max length (ConfigCallSignLength). |
@@ -73,7 +73,7 @@ These are commands used to configure the system settings and can only be sent fr
 | `C29` — Reload Config from SD (SFB) | `C29` | **Local only (Serial/USB)**. Reload configuration from SD card config.txt file... |
 | `C30` — Export Config to SD (SFB) | `C30` | **Local only (Serial/USB)**. Export current in-memory configuration to SD card... |
 | `C31` — SD Card Initialize Speed (SFB) | `C31:v=4` | Set SD card SPI initialization speed in MHz. Param format: `v=<speed>`. Valid values: 4, 8, 12, 16, 20, 24. Default is 4 MHz. **Note:** Higher speeds (16+ MHz) should only be used with high-quality SD cards that explicitly support high-speed SPI mode. Using speeds that are too high for your SD card may result in initialization failures or data corruption. If experiencing SD card issues, try reducing the speed to 4 or 8 MHz. |
-| `C32` — Light Sensor Night Relay (SFB) | `C32:v=255` | Set the relay index to activate at night (when light sensor reports night-time). Param format: `v=<relay>`. Valid values: 0–(relay count-1). Use 255 to disable night relay switching. Query without params returns current relay index. |
+| ~~`C32`~~ — ~~Light Sensor Night Relay~~ | — | **Retired.** Use `R10` — Relay Set Action Type with `actionType=2` (NightRelay) instead. |
 | `C33` — Light Sensor Daytime Threshold (SFB) | `C33:v=512` | Set the analogue light level threshold above which daytime is detected. Param format: `v=<threshold>`. Valid range: 0–1023. Default is 512. Readings from the rolling average of the last 10 samples are compared against this value; 3 consecutive consistent readings are required before the day/night state changes (see S9). |
 
 ### MQTT Configuration Commands (SFB)
@@ -125,7 +125,7 @@ Common error responses you may see: `Missing param`, `Missing params`, `Missing 
 
 ### Wifi Configuration Commands (SFB)
 Route: /api/config/{command}
-Example: Specify sound relay button = /api/config/C8?v=3 
+Example: Set relay button color = /api/config/R7?2=4
 
 
 ------
@@ -155,6 +155,13 @@ These commands are used to control the relays on the Boat Control Panel. Command
 | `R2` — Retrieve States | `R2` | Retrieve the state of all relays. |
 | `R3` — Relay State Set | `R3:3=1` (turn on relay 3) — `R3:5=0` (turn off relay 5) | Set the state of a specific relay. Param format: `<idx>=<state>`. `idx` must be 0..7 (`RELAY_COUNT`). `state` must be `0` (off) or `1` (on). |
 | `R4` — Relay State Get | `R4:3` (retrieves status of relay 3) — `R4:5` (returns status of relay 5). Param format: `<idx>`. `idx` must be 0..7 (`RELAY_COUNT`). |
+| `R5` — Get All Relay Config | `R5` | Returns full relay configuration for all relays via a series of `R6`–`R11` responses. No params. |
+| `R6` — Relay Rename | `R6:2=Bilge` or `R6:2=Bilge\|Bilge Pump` | Rename a relay. Param format: `<idx>=<shortName>` or `<idx>=<shortName\|longName>`. `idx` must be 0..7 (`RELAY_COUNT`). If no pipe character or long name is provided, the short name is used for both. Short name is truncated to 5 chars (used on home page), long name is truncated to 20 chars (used on buttons page). Missing name → error. |
+| `R7` — Relay Set Button Color | `R7:2=4` (set relay 2 to Red when on) — `R7:2=255` (clear color) | Set the button image/color shown for a relay when it is active (on). Param format: `<relay>=<color>`. `relay` must be 0..7 (`RELAY_COUNT`). `color` must be 0..5 (maps to BTN_COLOR_BLUE..BTN_COLOR_YELLOW) or `255` to clear. |
+| `R8` — Relay Set Default State | `R8:3=1` (default on) — `R8:3=0` (default off) | Set the power-on default state of a relay. Param format: `<relay>=<value>`. `relay` must be 0..7 (`RELAY_COUNT`), `value` must be 0 (off by default) or 1 (on by default). |
+| `R9` — Relay Link | `R9:3=4` (link) — `R9:3=255` (unlink) | Link two relays together so toggling one also toggles the other. Param format: `<relay>=<linkedrelay>`. `relay` must be 0..7 (`RELAY_COUNT`). `linkedrelay` must be 0..7 or `0xFF` (255) to unlink. |
+| `R10` — Relay Set Action Type | `R10:2=0` (Default) — `R10:2=1` (Horn) — `R10:2=2` (NightRelay) | Set the action type for a relay. Param format: `<relay>=<actionType>`. `relay` must be 0..7 (`RELAY_COUNT`). `actionType`: `0`=Default, `1`=Horn (replaces C8 — the relay that activates the sound/horn system), `2`=NightRelay (replaces C32 — activates at night per light sensor). Only one relay may be assigned Horn and one NightRelay at a time; assigning a new relay clears the previous one automatically. |
+| `R11` — Relay Set Pin | `R11:2=15` | Set the GPIO pin number for a relay. Param format: `<relay>=<pin>`. `relay` must be 0..7 (`RELAY_COUNT`). `pin` must be a valid non-zero GPIO pin number. |
 
 
 ### Wifi Relay Commands (SFB)

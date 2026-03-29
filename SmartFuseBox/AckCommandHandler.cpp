@@ -155,7 +155,7 @@ bool AckCommandHandler::handleCommand(SerialCommandManager* sender, const char* 
     (void)sender;
 
     // Validate command
-    if (strncmp(command, AckCommand, 3) != 0)
+    if (!SystemFunctions::commandMatches(command, AckCommand))
     {
         char debugMsg[64];
         snprintf_P(debugMsg, sizeof(debugMsg), PSTR("Unknown ACK command %s"), command);
@@ -172,12 +172,12 @@ bool AckCommandHandler::handleCommand(SerialCommandManager* sender, const char* 
 	}
 
     // Ignore redundant ACK:ACK=ok messages
-    if (strncmp(params[0].key, AckCommand, 3) == 0)
+    if (SystemFunctions::commandMatches(params[0].key, AckCommand))
     {
         return true; // Silently ignore, consider it handled
     }
 
-    if (strcmp(params[0].value, AckSuccess) != 0)
+    if (!SystemFunctions::commandMatches(params[0].value, AckSuccess))
     {
         char debugMsg[120];
         snprintf_P(debugMsg, sizeof(debugMsg), PSTR("ACK indicates failure: key='%s', val='%s'"), params[0].key, params[0].value);
@@ -188,7 +188,7 @@ bool AckCommandHandler::handleCommand(SerialCommandManager* sender, const char* 
     // only process known ACK keys if you need to take action
 
 #if defined(BOAT_CONTROL_PANEL)
-    if (strcmp(params[0].key, SystemHeartbeatCommand) == 0 && strcmp(params[0].value, AckSuccess) == 0)
+    if (SystemFunctions::commandMatches(params[0].key, SystemHeartbeatCommand) && strcmp(params[0].value, AckSuccess) == 0)
     {
         // Heartbeat acknowledgement
         processHeartbeatAck(sender, params[0].key, params[0].value);

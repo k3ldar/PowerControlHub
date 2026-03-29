@@ -47,7 +47,7 @@ CommandResult SystemNetworkHandler::handleRequest(const char* method,
 	(void)params;
 	(void)paramCount;
 
-	if (strcmp(command, SystemHeartbeatCommand) == 0)
+	if (SystemFunctions::commandMatches(command, SystemHeartbeatCommand))
 	{
 		formatStatusJson(responseBuffer, bufferSize);
 		return CommandResult::ok();

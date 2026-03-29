@@ -21,13 +21,16 @@
 #include "ConfigController.h"
 #include "WifiController.h"
 
+class RelayController;
+
 class ConfigNetworkHandler : public INetworkCommandHandler
 {
 private:
 	ConfigController* _configController;
 	WifiController* _wifiController;
+	RelayController* _relayController;
 public:
-	explicit ConfigNetworkHandler(ConfigController* configController, WifiController* wifiController);
+	explicit ConfigNetworkHandler(ConfigController* configController, WifiController* wifiController, RelayController* relayController);
 
 	const char* getRoute() const override { return "/api/config"; }
 

@@ -75,11 +75,11 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
 	// Access the in-memory config
 	ConfigResult result;
 
-	if (strcmp(command, ConfigSaveSettings) == 0)
+	if (SystemFunctions::commandMatches(command, ConfigSaveSettings))
 	{
 		result = _configController->save();
 	}
-	else if (strcmp(command, ConfigGetSettings) == 0)
+	else if (SystemFunctions::commandMatches(command, ConfigGetSettings))
 	{
 		char buffer[128]{};
 		buffer[0] = '\0';
@@ -96,13 +96,6 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
 		// C3:<name>
 		sender->sendCommand(ConfigRename, config->vessel.name);
 
-		// C4 entries - send both short and long names in format: <idx>=<shortName|longName>
-		for (uint8_t i = 0; i < ConfigRelayCount; ++i)
-		{
-			snprintf(buffer, sizeof(buffer), "%u=%s|%s", i, config->relay.relays[i].shortName, config->relay.relays[i].longName);
-			sender->sendCommand(ConfigRenameRelay, buffer);
-		}
-
 		// C5 entries
 		for (uint8_t s = 0; s < ConfigHomeButtons; ++s)
 		{
@@ -110,20 +103,9 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
 			sender->sendCommand(ConfigMapHomeButton, buffer);
 		}
 
-		// C6 Send home page button color mappings
-		for (uint8_t i = 0; i < ConfigRelayCount; i++)
-		{
-			snprintf(buffer, sizeof(buffer), "%u=%u", i, config->relay.relays[i].buttonImage);
-			sender->sendCommand(ConfigSetButtonColor, buffer);
-		}
-
 		// C7 Boat type
 		snprintf(buffer, sizeof(buffer), "v=%d", static_cast<uint8_t>(config->vessel.vesselType));
 		sender->sendCommand(ConfigBoatType, buffer);
-
-		// C8 Sound relay ID
-		snprintf(buffer, sizeof(buffer), "v=%d", static_cast<uint8_t>(config->sound.hornRelayIndex));
-		sender->sendCommand(ConfigSoundRelayId, buffer);
 
 		// C9 Sound start delay
 		snprintf(buffer, sizeof(buffer), "v=%u", static_cast<unsigned int>(config->sound.startDelayMs));
@@ -167,23 +149,6 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
 			_wifiController->getIpAddress(ipBuffer, sizeof(ipBuffer));
 			snprintf(buffer, sizeof(buffer), "v=%s", ipBuffer);
 			sender->sendCommand(ConfigWifiApIpAddress, buffer);
-		}
-
-		// C18 Default relay states
-		for (uint8_t i = 0; i < ConfigRelayCount; ++i)
-		{
-			snprintf(buffer, sizeof(buffer), "%d=%s", i, (config->relay.relays[i].defaultState ? "1" : "0"));
-			sender->sendCommand(ConfigDefaultRelayState, buffer);
-		}
-
-		// C19 Linked relays — only emit actual pairs to avoid unintentional unlinks on the receiver
-		for (uint8_t i = 0; i < ConfigMaxLinkedRelays; ++i)
-		{
-			if (config->relay.linkedRelays[i][0] != MaxUint8Value)
-			{
-				snprintf(buffer, sizeof(buffer), "%d=%d", config->relay.linkedRelays[i][0], config->relay.linkedRelays[i][1]);
-				sender->sendCommand(ConfigLinkRelays, buffer);
-			}
 		}
 
 		// C20 Timezone offset
@@ -265,22 +230,18 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
 		snprintf(buffer, sizeof(buffer), "v=%u", config->sdCard.initializeSpeed);
 		sender->sendCommand(ConfigSdCardSpeed, buffer);
 
-		// C32 Light sensor night relay
-		snprintf(buffer, sizeof(buffer), "v=%d", config->lightSensor.nightRelayIndex);
-		sender->sendCommand(ConfigLightSensorNightRelay, buffer);
-
 		// C33 Light sensor daytime threshold
 		snprintf(buffer, sizeof(buffer), "v=%u", config->lightSensor.daytimeThreshold);
 		sender->sendCommand(ConfigLightSensorThreshold, buffer);
 
 		result = ConfigResult::Success;
 	}
-	else if (strcmp(command, ConfigResetSettings) == 0)
+	else if (SystemFunctions::commandMatches(command, ConfigResetSettings))
 	{
 		// Reset to defaults
 		result = _configController->reset();
 	}
-	else if (strcmp(command, ConfigRename) == 0)
+	else if (SystemFunctions::commandMatches(command, ConfigRename))
 	{
 		if (paramCount >= 1)
 		{
@@ -291,20 +252,7 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
 			result = ConfigResult::InvalidParameter;
 		}
 	}
-	else if (strcmp(command, ConfigRenameRelay) == 0)
-	{
-		// Expect "C4:<idx>=<shortName>" or "C4:<idx>=<shortName|longName>" where idx 0..7
-		if (paramCount >= 1)
-		{
-			uint8_t idx = static_cast<uint8_t>(strtoul(params[0].key, nullptr, 0));
-			result = _configController->renameRelay(idx, params[0].value);
-		}
-		else
-		{
-			result = ConfigResult::InvalidParameter;
-		}
-	}
-	else if (strcmp(command, ConfigMapHomeButton) == 0)
+	else if (SystemFunctions::commandMatches(command, ConfigMapHomeButton))
 	{
 		// Expect "MAP <button>=<relay>" where button 0..3, relay 0..7 (or 255 to unmap)
 		if (paramCount >= 1)
@@ -319,22 +267,7 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
 			result = ConfigResult::InvalidParameter;
 		}
 	}
-	else if (strcmp(command, ConfigSetButtonColor) == 0)
-	{
-		// Expect "MAP <relay>=<color>" where relay 0..7, image 0..5 (or 255 to clear)
-		if (paramCount >= 1)
-		{
-			uint8_t relayIndex = static_cast<uint8_t>(strtoul(params[0].key, nullptr, 0));
-			uint8_t buttonColor = static_cast<uint8_t>(strtoul(params[0].value, nullptr, 0));
-
-			result = _configController->mapHomeButtonColor(relayIndex, buttonColor);
-		}
-		else
-		{
-			result = ConfigResult::InvalidParameter;
-		}
-	}
-	else if (strcmp(command, ConfigBoatType) == 0)
+	else if (SystemFunctions::commandMatches(command, ConfigBoatType))
 	{
 		// Expect "C7:type=<value>" where value is 0..3
 		if (paramCount >= 1)
@@ -347,20 +280,7 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
 			result = ConfigResult::InvalidParameter;
 		}
 	}
-	else if (strcmp(command, ConfigSoundRelayId) == 0)
-	{
-		// Expect "MAP <value>=<relay>" where relay 0..7 (or 255 to unmap)
-		if (paramCount == 1 && strlen(params[0].value) > 0)
-		{
-			uint8_t relay = atoi(params[0].value);
-			result = _configController->setSoundRelayButton(relay);
-		}
-		else
-		{
-			result = ConfigResult::InvalidParameter;
-		}
-	}
-	else if (strcmp(command, ConfigSoundStartDelay) == 0)
+	else if (SystemFunctions::commandMatches(command, ConfigSoundStartDelay))
 	{
 		if (paramCount == 1)
 		{
@@ -372,7 +292,7 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
 			result = ConfigResult::InvalidParameter;
 		}
 	}
-	else if (strcmp(command, ConfigBluetoothEnable) == 0)
+	else if (SystemFunctions::commandMatches(command, ConfigBluetoothEnable))
 	{
 		// Expect "C10:v=<0|1>"
 		if (paramCount >= 1)
@@ -385,7 +305,7 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
 			result = ConfigResult::InvalidParameter;
 		}
 	}
-	else if (strcmp(command, ConfigWifiEnable) == 0)
+	else if (SystemFunctions::commandMatches(command, ConfigWifiEnable))
 	{
 		// Expect "C11:v=<0|1>"
 		if (paramCount >= 1)
@@ -398,7 +318,7 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
 			result = ConfigResult::InvalidParameter;
 		}
 	}
-	else if (strcmp(command, ConfigWifiMode) == 0)
+	else if (SystemFunctions::commandMatches(command, ConfigWifiMode))
 	{
 		// Expect "C12:v=<0|1>"
 		if (paramCount >= 1)
@@ -411,7 +331,7 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
 			result = ConfigResult::InvalidParameter;
 		}
 	}
-	else if (strcmp(command, ConfigWifiSSID) == 0)
+	else if (SystemFunctions::commandMatches(command, ConfigWifiSSID))
 	{
 		// Expect "C13:v=<value>"
 		if (paramCount >= 1)
@@ -423,7 +343,7 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
 			result = ConfigResult::InvalidParameter;
 		}
 	}
-	else if (strcmp(command, ConfigWifiPassword) == 0)
+	else if (SystemFunctions::commandMatches(command, ConfigWifiPassword))
 	{
 		// Expect "C14:v=<value>"
 		if (paramCount >= 1)
@@ -435,7 +355,7 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
 			result = ConfigResult::InvalidParameter;
 		}
 	}
-	else if (strcmp(command, ConfigWifiPort) == 0)
+	else if (SystemFunctions::commandMatches(command, ConfigWifiPort))
 	{
 		// Expect "C15:v=<value>"
 		if (paramCount >= 1)
@@ -448,7 +368,7 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
 			result = ConfigResult::InvalidParameter;
 		}
 	}
-	else if (strcmp(command, ConfigWifiState) == 0)
+	else if (SystemFunctions::commandMatches(command, ConfigWifiState))
 	{
 		// C16 WiFi State
 		uint8_t state = static_cast<uint8_t>(WifiConnectionState::Disconnected);
@@ -463,7 +383,7 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
 		sender->sendCommand(ConfigWifiState, cmd);
 		result = ConfigResult::Success;
 	}
-	else if (strcmp(command, ConfigWifiApIpAddress) == 0)
+	else if (SystemFunctions::commandMatches(command, ConfigWifiApIpAddress))
 	{
 		// Expect "C17:v=<value>"
 		if (paramCount >= 1)
@@ -475,43 +395,7 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
 			result = ConfigResult::InvalidParameter;
 		}
 	}
-	else if (strcmp(command, ConfigDefaultRelayState) == 0)
-	{
-		if (paramCount == 1)
-		{
-			uint8_t relayIndex = static_cast<uint8_t>(atoi(params[0].key));
-			result = _configController->setRelayDefaultState(relayIndex, SystemFunctions::parseBooleanValue(params[0].value));
-		}
-		else
-		{
-			result = ConfigResult::InvalidParameter;
-		}
-	}
-	else if (strcmp(command, ConfigLinkRelays) == 0)
-	{
-		// Expect "C19:<relay1>=<relay2>" to link relay1 to relay2
-		// or "C19:<relay1>=0xFF" to unlink relay1
-		if (paramCount >= 1)
-		{
-			uint8_t relay1 = static_cast<uint8_t>(strtoul(params[0].key, nullptr, 0));
-			uint8_t relay2 = static_cast<uint8_t>(strtoul(params[0].value, nullptr, 0));
-
-			if (relay2 < MaxUint8Value)
-			{
-
-				result = _configController->linkRelays(relay1, relay2);
-			}
-			else
-			{
-				result = _configController->unlinkRelay(relay1);
-			}
-		}
-		else
-		{
-			result = ConfigResult::InvalidParameter;
-		}
-	}
-	else if (strcmp(command, ConfigTimeZoneOffset) == 0)
+	else if (SystemFunctions::commandMatches(command, ConfigTimeZoneOffset))
 	{
 		// C20 - Set timezone offset (hours from UTC, -12 to +14)
 		// Format: C20:v=-5 or C20:v=8
@@ -525,7 +409,7 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
 			result = ConfigResult::InvalidParameter;
 		}
 	}
-	else if (strcmp(command, ConfigMmsi) == 0)
+	else if (SystemFunctions::commandMatches(command, ConfigMmsi))
 	{
 		// C21 - Set MMSI (9 digits)
 		// Format: C21:123456789
@@ -538,7 +422,7 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
 			result = ConfigResult::InvalidParameter;
 		}
 	}
-	else if (strcmp(command, ConfigCallSign) == 0)
+	else if (SystemFunctions::commandMatches(command, ConfigCallSign))
 	{
 		// C22 - Set call sign
 		// Format: C22:ABCD123
@@ -551,7 +435,7 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
 			result = ConfigResult::InvalidParameter;
 		}
 	}
-	else if (strcmp(command, ConfigHomePort) == 0)
+	else if (SystemFunctions::commandMatches(command, ConfigHomePort))
 	{
 		// C23 - Set home port
 		// Format: C23:Miami
@@ -564,7 +448,7 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
 			result = ConfigResult::InvalidParameter;
 		}
 	}
-	else if (strcmp(command, ConfigLedColor) == 0)
+	else if (SystemFunctions::commandMatches(command, ConfigLedColor))
 	{
 		// C24 - Set LED RGB color
 		// Format: C24:t=0;c=0;r=255;g=50;b=213
@@ -594,7 +478,7 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
 			result = ConfigResult::InvalidParameter;
 		}
 	}
-	else if (strcmp(command, ConfigLedBrightness) == 0)
+	else if (SystemFunctions::commandMatches(command, ConfigLedBrightness))
 	{
 		// C25 - Set LED brightness
 		// Format: C25:t=0;b=75
@@ -618,7 +502,7 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
 			result = ConfigResult::InvalidParameter;
 		}
 	}
-	else if (strcmp(command, ConfigLedAutoSwitch) == 0)
+	else if (SystemFunctions::commandMatches(command, ConfigLedAutoSwitch))
 	{
 		// C26 - Enable/disable auto day/night switching
 		// Format: C26:v=true or C26:v=1
@@ -632,7 +516,7 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
 			result = ConfigResult::InvalidParameter;
 		}
 	}
-	else if (strcmp(command, ConfigLedEnable) == 0)
+	else if (SystemFunctions::commandMatches(command, ConfigLedEnable))
 	{
 		// C27 - Enable/disable individual LEDs
 		// Format: C27:g=true;w=true;s=false
@@ -658,7 +542,7 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
 			result = ConfigResult::InvalidParameter;
 		}
 	}
-	else if (strcmp(command, ControlPanelTones) == 0)
+	else if (SystemFunctions::commandMatches(command, ControlPanelTones))
 	{
 		// C28 - Configure control panel tones
 		// Format: C28:t=0;h=400;d=500;p=0;r=30000
@@ -690,7 +574,7 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
 			result = ConfigResult::InvalidParameter;
 		}
 	}
-	else if (strcmp(command, ConfigReloadFromSd) == 0)
+	else if (SystemFunctions::commandMatches(command, ConfigReloadFromSd))
 	{
 #if defined(SD_CARD_SUPPORT)
 		if (_sdCardConfigLoader)
@@ -715,7 +599,7 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
 		return true;
 #endif
 	}
-	else if (strcmp(command, ConfigExportToSd) == 0)
+	else if (SystemFunctions::commandMatches(command, ConfigExportToSd))
 	{
 #if defined(SD_CARD_SUPPORT)
 		if (_sdCardConfigLoader)
@@ -740,7 +624,7 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
 		return true;
 #endif
 	}
-	else if (strcmp(command, ConfigSdCardSpeed) == 0)
+	else if (SystemFunctions::commandMatches(command, ConfigSdCardSpeed))
 	{
 #if defined(SD_CARD_SUPPORT)
 		if (paramCount >= 1)
@@ -757,19 +641,7 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
 		return true;
 #endif
 	}
-	else if (strcmp(command, ConfigLightSensorNightRelay) == 0)
-	{
-		if (paramCount == 1)
-		{
-			uint8_t relay = static_cast<uint8_t>(strtoul(params[0].value, nullptr, 0));
-			result = _configController->setLightSensorNightRelay(relay);
-		}
-		else
-		{
-			result = ConfigResult::InvalidParameter;
-		}
-	}
-	else if (strcmp(command, ConfigLightSensorThreshold) == 0)
+	else if (SystemFunctions::commandMatches(command, ConfigLightSensorThreshold))
 	{
 		if (paramCount == 1)
 		{
@@ -796,7 +668,7 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
 			// Query operation - similar to C16 WiFi State
 			StringKeyValue param;
 
-			if (strcmp(command, MqttConfigEnable) == 0)
+			if (SystemFunctions::commandMatches(command, MqttConfigEnable))
 			{
 				// M0 - MQTT Enabled
 				strncpy(param.key, ValueParamName, sizeof(param.key));
@@ -804,7 +676,7 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
 				sendAckOk(sender, command, &param);
 				return true;
 			}
-			else if (strcmp(command, MqttConfigBroker) == 0)
+			else if (SystemFunctions::commandMatches(command, MqttConfigBroker))
 			{
 				// M1 - MQTT Broker
 				strncpy(param.key, ValueParamName, sizeof(param.key));
@@ -812,7 +684,7 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
 				sendAckOk(sender, command, &param);
 				return true;
 			}
-			else if (strcmp(command, MqttConfigPort) == 0)
+			else if (SystemFunctions::commandMatches(command, MqttConfigPort))
 			{
 				// M2 - MQTT Port
 				strncpy(param.key, ValueParamName, sizeof(param.key));
@@ -820,7 +692,7 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
 				sendAckOk(sender, command, &param);
 				return true;
 			}
-			else if (strcmp(command, MqttConfigUsername) == 0)
+			else if (SystemFunctions::commandMatches(command, MqttConfigUsername))
 			{
 				// M3 - MQTT Username
 				strncpy(param.key, ValueParamName, sizeof(param.key));
@@ -829,7 +701,7 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
 				sendAckOk(sender, command, &param);
 				return true;
 			}
-			else if (strcmp(command, MqttConfigPassword) == 0)
+			else if (SystemFunctions::commandMatches(command, MqttConfigPassword))
 			{
 				// M4 - MQTT Password
 				strncpy(param.key, ValueParamName, sizeof(param.key));
@@ -838,7 +710,7 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
 				sendAckOk(sender, command, &param);
 				return true;
 			}
-			else if (strcmp(command, MqttConfigDeviceId) == 0)
+			else if (SystemFunctions::commandMatches(command, MqttConfigDeviceId))
 			{
 				// M5 - MQTT Device ID
 				strncpy(param.key, ValueParamName, sizeof(param.key));
@@ -846,7 +718,7 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
 				sendAckOk(sender, command, &param);
 				return true;
 			}
-			else if (strcmp(command, MqttConfigHADiscovery) == 0)
+			else if (SystemFunctions::commandMatches(command, MqttConfigHADiscovery))
 			{
 				// M6 - HA Discovery Enabled
 				strncpy(param.key, ValueParamName, sizeof(param.key));
@@ -854,7 +726,7 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
 				sendAckOk(sender, command, &param);
 				return true;
 			}
-			else if (strcmp(command, MqttConfigKeepAlive) == 0)
+			else if (SystemFunctions::commandMatches(command, MqttConfigKeepAlive))
 			{
 				// M7 - Keep Alive Interval
 				strncpy(param.key, ValueParamName, sizeof(param.key));
@@ -862,7 +734,7 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
 				sendAckOk(sender, command, &param);
 				return true;
 			}
-			else if (strcmp(command, MqttConfigState) == 0)
+			else if (SystemFunctions::commandMatches(command, MqttConfigState))
 			{
 				// M8 - MQTT Connection State
 				strncpy(param.key, ValueParamName, sizeof(param.key));
@@ -883,7 +755,7 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
 				sendAckOk(sender, command, &param);
 				return true;
 			}
-			else if (strcmp(command, MqttConfigDiscoveryPrefix) == 0)
+			else if (SystemFunctions::commandMatches(command, MqttConfigDiscoveryPrefix))
 			{
 				// M9 - Discovery Prefix
 				strncpy(param.key, ValueParamName, sizeof(param.key));
@@ -974,8 +846,8 @@ const char* const* ConfigCommandHandler::supportedCommands(size_t& count) const
 {
 	static const char* cmds[] = {
 		ConfigSaveSettings, ConfigGetSettings, ConfigResetSettings,
-		ConfigRename, ConfigRenameRelay, ConfigMapHomeButton, ConfigSetButtonColor,
-		ConfigBoatType, ConfigSoundRelayId, ConfigSoundStartDelay,
+		ConfigRename, ConfigMapHomeButton,
+		ConfigBoatType, ConfigSoundStartDelay,
 		ConfigBluetoothEnable, ConfigWifiEnable, ConfigWifiMode, ConfigWifiSSID,
 		ConfigWifiPassword, ConfigWifiPort, ConfigWifiState, ConfigWifiApIpAddress,
 #if defined(MQTT_SUPPORT)
@@ -983,12 +855,11 @@ const char* const* ConfigCommandHandler::supportedCommands(size_t& count) const
 		MqttConfigPassword, MqttConfigDeviceId, MqttConfigHADiscovery, MqttConfigKeepAlive,
 		MqttConfigState, MqttConfigDiscoveryPrefix,
 #endif
-		ConfigDefaultRelayState, ConfigLinkRelays,
 		ConfigTimeZoneOffset, ConfigMmsi, ConfigCallSign, ConfigHomePort,
 		ConfigLedColor, ConfigLedBrightness, ConfigLedAutoSwitch, ConfigLedEnable,
 		ControlPanelTones,
 		ConfigReloadFromSd, ConfigExportToSd, ConfigSdCardSpeed,
-		ConfigLightSensorNightRelay, ConfigLightSensorThreshold
+		ConfigLightSensorThreshold
 	};
 	count = sizeof(cmds) / sizeof(cmds[0]);
 	return cmds;

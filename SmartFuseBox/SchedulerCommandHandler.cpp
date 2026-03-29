@@ -19,6 +19,7 @@
 #include "Local.h"
 
 #include "SchedulerCommandHandler.h"
+#include "SystemFunctions.h"
 //#include "SystemDefinitions.h"
 
 SchedulerCommandHandler::SchedulerCommandHandler(RelayController* relayController)
@@ -86,7 +87,7 @@ bool SchedulerCommandHandler::handleCommand(SerialCommandManager* sender, const 
     }
 
     // T0 — List all events: returns count and per-slot enabled states
-    if (strcmp(command, TimerListEvents) == 0)
+    if (SystemFunctions::commandMatches(command, TimerListEvents))
     {
         char states[ConfigMaxScheduledEvents * 2] = { 0 };
         char* p = states;
@@ -104,7 +105,7 @@ bool SchedulerCommandHandler::handleCommand(SerialCommandManager* sender, const 
     }
 
     // T1 — Get event detail at index v=<index>
-    if (strcmp(command, TimerGetEvent) == 0)
+    if (SystemFunctions::commandMatches(command, TimerGetEvent))
     {
         if (paramCount < 1)
         {
@@ -138,7 +139,7 @@ bool SchedulerCommandHandler::handleCommand(SerialCommandManager* sender, const 
     }
 
     // T2 — Set event: i=<index>;e=<enabled>;t=<type,b0,b1,b2,b3>;c=<type,b0,b1,b2,b3>;a=<type,b0,b1,b2,b3>
-    if (strcmp(command, TimerSetEvent) == 0)
+    if (SystemFunctions::commandMatches(command, TimerSetEvent))
     {
         if (paramCount < 5)
         {
@@ -224,7 +225,7 @@ bool SchedulerCommandHandler::handleCommand(SerialCommandManager* sender, const 
     }
 
     // T3 — Delete event at index v=<index>
-    if (strcmp(command, TimerDeleteEvent) == 0)
+    if (SystemFunctions::commandMatches(command, TimerDeleteEvent))
     {
         if (paramCount < 1)
         {
@@ -247,7 +248,7 @@ bool SchedulerCommandHandler::handleCommand(SerialCommandManager* sender, const 
     }
 
     // T4 — Enable/disable event: i=<index>;v=<0|1>
-    if (strcmp(command, TimerEnableEvent) == 0)
+    if (SystemFunctions::commandMatches(command, TimerEnableEvent))
     {
         if (paramCount < 2)
         {
@@ -296,7 +297,7 @@ bool SchedulerCommandHandler::handleCommand(SerialCommandManager* sender, const 
     }
 
     // T5 — Clear all events
-    if (strcmp(command, TimerClearAll) == 0)
+    if (SystemFunctions::commandMatches(command, TimerClearAll))
     {
         memset(&cfg->scheduler, 0x00, sizeof(SchedulerSettings));
         sendAckOk(sender, command);
@@ -304,7 +305,7 @@ bool SchedulerCommandHandler::handleCommand(SerialCommandManager* sender, const 
     }
 
     // T6 — Trigger event now (bypasses trigger and condition, executes action immediately)
-    if (strcmp(command, TimerTriggerNow) == 0)
+    if (SystemFunctions::commandMatches(command, TimerTriggerNow))
     {
         if (paramCount < 1)
         {

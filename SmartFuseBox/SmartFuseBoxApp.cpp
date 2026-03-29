@@ -29,13 +29,16 @@ SmartFuseBoxApp* SmartFuseBoxApp::_instance = nullptr;
 
 constexpr uint8_t DefaultDelay = 5;
 
+// Placeholder pin array used to size RelayController at construction.
+// Actual pins are loaded from config in setup() via syncPinsFromConfig().
+static uint8_t _disabledRelayPins[ConfigRelayCount];
+
 SmartFuseBoxApp::SmartFuseBoxApp(SerialCommandManager* commandMgrComputer,
-    SerialCommandManager* commandMgrLink,
-    const uint8_t* relayPins, uint8_t relayCount)
+    SerialCommandManager* commandMgrLink)
     : _commandMgrComputer(commandMgrComputer),
     _commandMgrLink(commandMgrLink),
     _messageBus(),
-    _relayController(&_messageBus, relayPins, relayCount),
+    _relayController(&_messageBus, (memset(_disabledRelayPins, DefaultValue, sizeof(_disabledRelayPins)), _disabledRelayPins), ConfigRelayCount),
     _soundController(),
     _broadcastManager(commandMgrComputer, commandMgrLink),
     _warningManager(commandMgrLink, HeartbeatIntervalMs, HeartbeatTimeoutMs),
@@ -50,11 +53,10 @@ SmartFuseBoxApp::SmartFuseBoxApp(SerialCommandManager* commandMgrComputer,
     _wifiController(&_messageBus, commandMgrComputer, &_warningManager),
     _configController(&_soundController, 
         &_bluetoothController,
-        &_wifiController, 
-        &_relayController),
+        &_wifiController),
     _configSyncManager(commandMgrComputer, commandMgrLink, &_configController, &_warningManager),
     _configHandler(&_wifiController, &_configController),
-    _configNetworkHandler(&_configController, &_wifiController),
+    _configNetworkHandler(&_configController, &_wifiController, &_relayController),
     _relayNetworkHandler(&_relayController),
     _soundNetworkHandler(&_soundController),
     _warningNetworkHandler(&_warningManager),
@@ -85,7 +87,7 @@ SmartFuseBoxApp::SmartFuseBoxApp(SerialCommandManager* commandMgrComputer,
 #endif
 
 #if defined(CARD_CONFIG_LOADER)
-      , _sdCardConfigLoader(commandMgrComputer, commandMgrLink, &_configController, &_configSyncManager)
+      , _sdCardConfigLoader(commandMgrComputer, commandMgrLink, &_configController, &_relayController, &_configSyncManager)
 #endif
 {
 #if defined(CARD_CONFIG_LOADER)
@@ -105,6 +107,11 @@ void SmartFuseBoxApp::setup(BaseSensorHandler** sensorHandlers, uint8_t sensorHa
     {
         _warningManager.raiseWarning(WarningType::DefaultConfigurationFuseBox);
     }
+
+    // Sync relay pin assignments from config (overrides the bootstrap pins
+    // passed at construction; disabled relays will have pin == 0xFF).
+    _relayController.syncPinsFromConfig();
+    _relayController.setSoundController(&_soundController);
 
 	if (remoteSensorCount > 0 && remoteSensors != nullptr)
     {
@@ -218,7 +225,7 @@ void SmartFuseBoxApp::setup(BaseSensorHandler** sensorHandlers, uint8_t sensorHa
     // open any relays that are default open
     for (uint8_t i = 0; i < ConfigRelayCount; i++)
     {
-        if (config->relay.relays[i].defaultState)
+        if (!_relayController.isDisabled(i) && config->relay.relays[i].defaultState)
         {
             _relayController.setRelayState(i, true);
         }

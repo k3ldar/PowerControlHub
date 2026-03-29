@@ -49,7 +49,7 @@ bool SystemCommandHandler::handleCommand(SerialCommandManager* sender, const cha
     (void)params;
     (void)paramCount;
 
-    if (strcmp(command, SystemHeartbeatCommand) == 0)
+    if (SystemFunctions::commandMatches(command, SystemHeartbeatCommand))
     {
         for (uint8_t i = 0; i < paramCount; i++)
         {
@@ -73,25 +73,25 @@ bool SystemCommandHandler::handleCommand(SerialCommandManager* sender, const cha
 
         sendAckOk(sender, command);
     }
-    else if (strcmp(command, SystemInitialized) == 0)
+    else if (SystemFunctions::commandMatches(command, SystemInitialized))
     {
         sendAckOk(sender, command);
     }
-    else if (strcmp(command, SystemFreeMemory) == 0)
+    else if (SystemFunctions::commandMatches(command, SystemFreeMemory))
     {
         StringKeyValue param;
 		strncpy(param.key, ValueParamName, sizeof(param.key));
 		snprintf_P(param.value, sizeof(param.value), PSTR("%u"), SystemFunctions::freeMemory());
         sendAckOk(sender, command, &param);
     }
-	else if (strcmp(command, SystemCpuUsage) == 0)
+	else if (SystemFunctions::commandMatches(command, SystemCpuUsage))
     {
         StringKeyValue param;
         strncpy(param.key, ValueParamName, sizeof(param.key));
         snprintf_P(param.value, sizeof(param.value), PSTR("%u"), SystemCpuMonitor::getCpuUsage());
         sendAckOk(sender, command, &param);
     }
-	else if (strcmp(command, SystemBluetoothStatus) == 0)
+	else if (SystemFunctions::commandMatches(command, SystemBluetoothStatus))
     {
 		Config* config = ConfigManager::getConfigPtr();
 
@@ -108,7 +108,7 @@ bool SystemCommandHandler::handleCommand(SerialCommandManager* sender, const cha
         }
     }
 #if defined(WIFI_SUPPORT)
-    else if (strcmp(command, SystemWifiStatus) == 0)
+    else if (SystemFunctions::commandMatches(command, SystemWifiStatus))
     {
         Config* config = ConfigManager::getConfigPtr();
 
@@ -143,7 +143,7 @@ bool SystemCommandHandler::handleCommand(SerialCommandManager* sender, const cha
         }
     }
 #endif
-    else if (strcmp(command, SystemSetDateTime) == 0 && paramCount == 1)
+    else if (SystemFunctions::commandMatches(command, SystemSetDateTime) && paramCount == 1)
     {
         bool success = false;
 
@@ -170,7 +170,7 @@ bool SystemCommandHandler::handleCommand(SerialCommandManager* sender, const cha
         
         return true;
     }
-	else if (strcmp(command, SystemGetDateTime) == 0)
+	else if (SystemFunctions::commandMatches(command, SystemGetDateTime))
     {
         if (DateTimeManager::isTimeSet())
         {
@@ -186,7 +186,7 @@ bool SystemCommandHandler::handleCommand(SerialCommandManager* sender, const cha
         
         return true;
     }
-    else if (strcmp(command, SystemSdCardPresent) == 0)
+    else if (SystemFunctions::commandMatches(command, SystemSdCardPresent))
     {
         bool present = false;
 
@@ -200,7 +200,7 @@ bool SystemCommandHandler::handleCommand(SerialCommandManager* sender, const cha
         StringKeyValue param = makeParam(ValueParamName, value);
         sendAckOk(sender, command, &param);
     }
-    else if (strcmp(command, SystemSdCardLogFileSize) == 0)
+    else if (SystemFunctions::commandMatches(command, SystemSdCardLogFileSize))
     {
         uint32_t fileSize = 0;
 
@@ -216,7 +216,7 @@ bool SystemCommandHandler::handleCommand(SerialCommandManager* sender, const cha
         snprintf_P(param.value, sizeof(param.value), PSTR("%lu"), (unsigned long)fileSize);
         sendAckOk(sender, command, &param);
     }
-    else if (strcmp(command, SystemRtcDiagnostic) == 0)
+    else if (SystemFunctions::commandMatches(command, SystemRtcDiagnostic))
     {
 #if defined(BOAT_CONTROL_PANEL)
         char diagnosticMsg[64];
@@ -236,7 +236,7 @@ bool SystemCommandHandler::handleCommand(SerialCommandManager* sender, const cha
         }
 #endif
     }
-    else if (strcmp(command, SystemUptime) == 0)
+    else if (SystemFunctions::commandMatches(command, SystemUptime))
     {
         StringKeyValue param;
         strncpy(param.key, ValueParamName, sizeof(param.key));

@@ -145,8 +145,7 @@ private:
 
 public:
     SmartFuseBoxApp(SerialCommandManager* commandMgrComputer,
-        SerialCommandManager* commandMgrLink,
-        const uint8_t* relayPins, uint8_t relayCount);
+        SerialCommandManager* commandMgrLink);
 
     void setup(BaseSensorHandler** sensorHandlers, uint8_t sensorHandlerCount,
         RemoteSensor** remoteSensors, uint8_t remoteSensorCount);

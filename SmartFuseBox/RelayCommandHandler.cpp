@@ -16,11 +16,14 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 #include "RelayCommandHandler.h"
+#include "ConfigManager.h"
 #include "SmartFuseBoxConstants.h"
+#include "SystemFunctions.h"
 
 
 RelayCommandHandler::RelayCommandHandler(SerialCommandManager* commandMgrComputer, SerialCommandManager* commandMgrLink, RelayController* relayController)
-    : _commandMgrComputer(commandMgrComputer), _commandMgrLink(commandMgrLink), _relayController(relayController)
+    : _commandMgrComputer(commandMgrComputer), _commandMgrLink(commandMgrLink), _relayController(relayController),
+      _config(nullptr)
 {
 }
 
@@ -31,8 +34,10 @@ RelayCommandHandler::~RelayCommandHandler()
 
 const char* const* RelayCommandHandler::supportedCommands(size_t& count) const
 {
-    static const char* cmds[] = { RelayTurnAllOff, RelayTurnAllOn, RelayRetrieveStates, 
-        RelaySetState, RelayStatusGet };
+    static const char* cmds[] = { RelayTurnAllOff, RelayTurnAllOn, RelayRetrieveStates,
+        RelaySetState, RelayStatusGet,
+        RelayGetAllConfig, RelayRename, RelaySetButtonColor, RelaySetDefaultState,
+        RelayLink, RelaySetActionType, RelaySetPin };
     count = sizeof(cmds) / sizeof(cmds[0]);
     return cmds;
 }
@@ -45,7 +50,7 @@ bool RelayCommandHandler::handleCommand(SerialCommandManager* sender, const char
         return true;
 	}
 
-    if (strncmp(command, RelayTurnAllOff, 2) == 0)
+    if (SystemFunctions::commandMatches(command, RelayTurnAllOff))
     {
         if (paramCount == 0)
         {
@@ -58,7 +63,7 @@ bool RelayCommandHandler::handleCommand(SerialCommandManager* sender, const char
             return true;
         }
     }
-    else if (strncmp(command, RelayTurnAllOn, 2) == 0)
+    else if (SystemFunctions::commandMatches(command, RelayTurnAllOn))
     {
         if (paramCount == 0)
         {
@@ -71,7 +76,7 @@ bool RelayCommandHandler::handleCommand(SerialCommandManager* sender, const char
 			return true;
         }
     }
-    else if (strncmp(command,  RelayRetrieveStates, 2) == 0)
+    else if (SystemFunctions::commandMatches(command, RelayRetrieveStates))
     {
         if (paramCount == 0)
         {
@@ -93,7 +98,7 @@ bool RelayCommandHandler::handleCommand(SerialCommandManager* sender, const char
 			return true;
         }
     }
-    else if (strncmp(command, RelaySetState, 2) == 0)
+    else if (SystemFunctions::commandMatches(command, RelaySetState))
     {
         if (paramCount == 1)
         {
@@ -128,7 +133,7 @@ bool RelayCommandHandler::handleCommand(SerialCommandManager* sender, const char
 			return true;
         }
 	}
-    else if (strncmp(command, RelayStatusGet, 2) == 0)
+    else if (SystemFunctions::commandMatches(command, RelayStatusGet))
     {
         if (paramCount == 1)
         {
@@ -151,6 +156,208 @@ bool RelayCommandHandler::handleCommand(SerialCommandManager* sender, const char
 			return true;
         }
 	}
+    else if (SystemFunctions::commandMatches(command, RelayGetAllConfig))
+    {
+        if (paramCount == 0)
+        {
+            sendAllRelayConfig(sender);
+        }
+        else
+        {
+            sendAckErr(sender, command, F("Invalid parameters"));
+            return true;
+        }
+    }
+    else if (SystemFunctions::commandMatches(command, RelayRename))
+    {
+        if (paramCount >= 1)
+        {
+            uint8_t idx = static_cast<uint8_t>(strtoul(params[0].key, nullptr, 0));
+
+            if (idx >= ConfigRelayCount)
+            {
+                sendAckErr(sender, command, F("Invalid relay index"), &params[0]);
+                return true;
+            }
+
+            if (SystemFunctions::calculateLength(params[0].value) == 0)
+            {
+                sendAckErr(sender, command, F("Missing name"), &params[0]);
+                return true;
+            }
+
+            int pipeIdx = SystemFunctions::indexOf(params[0].value, '|', 0);
+            char shortName[ConfigShortRelayNameLength] = "";
+            char longName[ConfigLongRelayNameLength] = "";
+
+            if (pipeIdx >= 0)
+            {
+                SystemFunctions::substr(shortName, sizeof(shortName), params[0].value, 0, pipeIdx);
+                SystemFunctions::substr(longName, sizeof(longName), params[0].value, pipeIdx + 1);
+            }
+            else
+            {
+                strncpy(shortName, params[0].value, sizeof(shortName) - 1);
+            }
+
+            _relayController->renameRelay(idx, shortName, longName);
+            sendAckOk(sender, command, &params[0]);
+        }
+        else
+        {
+            sendAckErr(sender, command, F("Invalid parameters"));
+            return true;
+        }
+    }
+    else if (SystemFunctions::commandMatches(command, RelaySetButtonColor))
+    {
+        if (paramCount >= 1)
+        {
+            uint8_t relayIndex = static_cast<uint8_t>(strtoul(params[0].key, nullptr, 0));
+            uint8_t color = static_cast<uint8_t>(strtoul(params[0].value, nullptr, 0));
+
+            if (relayIndex >= ConfigRelayCount)
+            {
+                sendAckErr(sender, command, F("Invalid relay index"), &params[0]);
+                return true;
+            }
+
+            if (color < DefaultValue)
+                color += 2;
+
+            if ((color < RelayImageButtonColorBlue || color > RelayImageButtonColorYellow) && color != DefaultValue)
+            {
+                sendAckErr(sender, command, F("Invalid color"), &params[0]);
+                return true;
+            }
+
+            _relayController->setButtonColor(relayIndex, color);
+            sendAckOk(sender, command, &params[0]);
+        }
+        else
+        {
+            sendAckErr(sender, command, F("Invalid parameters"));
+            return true;
+        }
+    }
+    else if (SystemFunctions::commandMatches(command, RelaySetDefaultState))
+    {
+        if (paramCount >= 1)
+        {
+            uint8_t relayIndex = static_cast<uint8_t>(strtoul(params[0].key, nullptr, 0));
+
+            if (relayIndex >= ConfigRelayCount)
+            {
+                sendAckErr(sender, command, F("Invalid relay index"), &params[0]);
+                return true;
+            }
+
+            _relayController->setRelayDefaultState(relayIndex, SystemFunctions::parseBooleanValue(params[0].value));
+            sendAckOk(sender, command, &params[0]);
+        }
+        else
+        {
+            sendAckErr(sender, command, F("Invalid parameters"));
+            return true;
+        }
+    }
+    else if (SystemFunctions::commandMatches(command, RelayLink))
+    {
+        if (paramCount >= 1)
+        {
+            uint8_t relayIndex = static_cast<uint8_t>(strtoul(params[0].key, nullptr, 0));
+            uint8_t linkedRelay = static_cast<uint8_t>(strtoul(params[0].value, nullptr, 0));
+
+            if (relayIndex >= ConfigRelayCount)
+            {
+                sendAckErr(sender, command, F("Invalid relay index"), &params[0]);
+                return true;
+            }
+
+            if (linkedRelay >= ConfigRelayCount && linkedRelay != DefaultValue)
+            {
+                sendAckErr(sender, command, F("Invalid linked relay (or 255 to unlink)"), &params[0]);
+                return true;
+            }
+
+            if (linkedRelay == DefaultValue)
+            {
+                _relayController->unlinkRelay(relayIndex);
+                sendAckOk(sender, command, &params[0]);
+            }
+            else
+            {
+                RelayResult linkResult = _relayController->linkRelays(relayIndex, linkedRelay);
+                if (linkResult == RelayResult::Failed)
+                {
+                    sendAckErr(sender, command, F("No available link slots"));
+                    return true;
+                }
+                sendAckOk(sender, command, &params[0]);
+            }
+        }
+        else
+        {
+            sendAckErr(sender, command, F("Invalid parameters"));
+            return true;
+        }
+    }
+    else if (SystemFunctions::commandMatches(command, RelaySetActionType))
+    {
+        if (paramCount >= 1)
+        {
+            uint8_t relayIndex = static_cast<uint8_t>(strtoul(params[0].key, nullptr, 0));
+            uint8_t actionType = static_cast<uint8_t>(strtoul(params[0].value, nullptr, 0));
+
+            if (relayIndex >= ConfigRelayCount)
+            {
+                sendAckErr(sender, command, F("Invalid relay index"), &params[0]);
+                return true;
+            }
+
+            if (actionType > static_cast<uint8_t>(RelayActionType::NightRelay))
+            {
+                sendAckErr(sender, command, F("Invalid action type"), &params[0]);
+                return true;
+            }
+
+            _relayController->setRelayActionType(relayIndex, static_cast<RelayActionType>(actionType));
+            sendAckOk(sender, command, &params[0]);
+        }
+        else
+        {
+            sendAckErr(sender, command, F("Invalid parameters"));
+            return true;
+        }
+    }
+    else if (SystemFunctions::commandMatches(command, RelaySetPin))
+    {
+        if (paramCount >= 1)
+        {
+            uint8_t relayIndex = static_cast<uint8_t>(strtoul(params[0].key, nullptr, 0));
+            uint8_t pin = static_cast<uint8_t>(strtoul(params[0].value, nullptr, 0));
+
+            if (relayIndex >= ConfigRelayCount)
+            {
+                sendAckErr(sender, command, F("Invalid relay index"), &params[0]);
+                return true;
+            }
+
+            if (pin == 0)
+            {
+                sendAckErr(sender, command, F("Invalid pin (use 255 to disable)"), &params[0]);
+                return true;
+            }
+
+            _relayController->setRelayPin(relayIndex, pin);
+            sendAckOk(sender, command, &params[0]);
+        }
+        else
+        {
+            sendAckErr(sender, command, F("Invalid parameters"));
+            return true;
+        }
+    }
     else
     {
         sendAckErr(sender, command, F("Unknown relay command"));
@@ -167,40 +374,7 @@ void RelayCommandHandler::setup()
 
 void RelayCommandHandler::configUpdated(Config* config)
 {
-	if (_relayController == nullptr)
-    {
-        return;
-    }
-
-    if (config == nullptr)
-    {
-        _relayController->setReservedSoundRelay(DefaultValue);
-        return;
-    }
-
-    _relayController->setReservedSoundRelay(config->sound.hornRelayIndex);
-
-    if (_relayController->getReservedSoundRelay() >= _relayController->getRelayCount() && _relayController->getReservedSoundRelay() != DefaultValue)
-    {
-        _relayController->setReservedSoundRelay(DefaultValue);
-
-        if (_commandMgrComputer != nullptr)
-        {
-            _commandMgrComputer->sendDebug(F("Invalid hornRelayIndex corrected to 0xFF"), F("RELAY"));
-        }
-    }
-
-    if (_commandMgrComputer != nullptr)
-    {
-        if (_relayController->getReservedSoundRelay() == DefaultValue)
-        {
-            _commandMgrComputer->sendDebug(F("Reserved sound relay: None (0xFF)"), F("RELAY"));
-        }
-        else
-        {
-            _commandMgrComputer->sendDebug(F("Reserved sound relay has been set"), F("RELAY"));
-        }
-    }
+	_config = config;
 }
 
 void RelayCommandHandler::broadcastRelayStatus(const char* cmd, const StringKeyValue* param)
@@ -214,4 +388,63 @@ void RelayCommandHandler::broadcastRelayStatus(const char* cmd, const StringKeyV
     {
         sendAckOk(_commandMgrComputer, cmd, param);
     }
+}
+
+void RelayCommandHandler::sendAllRelayConfig(SerialCommandManager* sender)
+{
+    if (_config == nullptr || sender == nullptr)
+        return;
+
+    char buffer[64]{};
+
+    // R6 — names
+    for (uint8_t i = 0; i < ConfigRelayCount; ++i)
+    {
+        snprintf(buffer, sizeof(buffer), "%u=%s|%s", i,
+            _config->relay.relays[i].shortName,
+            _config->relay.relays[i].longName);
+        sender->sendCommand(RelayRename, buffer);
+    }
+
+    // R7 — button colors
+    for (uint8_t i = 0; i < ConfigRelayCount; ++i)
+    {
+        snprintf(buffer, sizeof(buffer), "%u=%u", i, _config->relay.relays[i].buttonImage);
+        sender->sendCommand(RelaySetButtonColor, buffer);
+    }
+
+    // R8 — default states
+    for (uint8_t i = 0; i < ConfigRelayCount; ++i)
+    {
+        snprintf(buffer, sizeof(buffer), "%u=%u", i, _config->relay.relays[i].defaultState ? 1 : 0);
+        sender->sendCommand(RelaySetDefaultState, buffer);
+    }
+
+    // R9 — linked relays (only emit active pairs)
+    for (uint8_t i = 0; i < ConfigMaxLinkedRelays; ++i)
+    {
+        if (_config->relay.linkedRelays[i][0] != DefaultValue)
+        {
+            snprintf(buffer, sizeof(buffer), "%u=%u",
+                _config->relay.linkedRelays[i][0],
+                _config->relay.linkedRelays[i][1]);
+            sender->sendCommand(RelayLink, buffer);
+        }
+    }
+
+    // R10 — action types
+    for (uint8_t i = 0; i < ConfigRelayCount; ++i)
+    {
+        snprintf(buffer, sizeof(buffer), "%u=%u", i, static_cast<uint8_t>(_config->relay.relays[i].actionType));
+        sender->sendCommand(RelaySetActionType, buffer);
+    }
+
+    // R11 — pins
+    for (uint8_t i = 0; i < ConfigRelayCount; ++i)
+    {
+        snprintf(buffer, sizeof(buffer), "%u=%u", i, _config->relay.relays[i].pin);
+        sender->sendCommand(RelaySetPin, buffer);
+    }
+
+    sendAckOk(sender, RelayGetAllConfig);
 }

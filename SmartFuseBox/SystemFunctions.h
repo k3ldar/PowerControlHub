@@ -174,6 +174,26 @@ public:
     }
 
     /**
+     * @brief Check if a command string exactly matches an expected command.
+     *
+     * Validates length first, then uses strcmp for full string equality to
+     * prevent prefix ambiguity where shorter command names (e.g. "R1") would
+     * otherwise match longer ones (e.g. "R10", "R11") when strncmp with a
+     * fixed length is used.
+     *
+     * @param command The received command string
+     * @param expected The expected command constant to compare against
+     * @return true if command exactly equals expected
+     */
+    static bool commandMatches(const char* command, const char* expected)
+    {
+        if (strlen(command) != strlen(expected))
+            return false;
+
+        return strcmp(command, expected) == 0;
+    }
+
+    /**
 	* @brief Check if a string starts with a given prefix.
     * 
 	* @param str The main string to check

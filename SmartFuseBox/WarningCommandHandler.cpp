@@ -42,7 +42,7 @@ bool WarningCommandHandler::handleCommand(SerialCommandManager* sender, const ch
         return false;
     }
 
-    if (strncmp(command, WarningsActive, 2) == 0 && paramCount == 0)
+    if (SystemFunctions::commandMatches(command, WarningsActive) && paramCount == 0)
     {
         // Return the active warnings as a bitmask value
         uint32_t activeWarnings = warningManager->getActiveWarningsMask();
@@ -52,7 +52,7 @@ bool WarningCommandHandler::handleCommand(SerialCommandManager* sender, const ch
         sendAckOk(sender, command, &param);
         return true;
     }
-    else if (strncmp(command, WarningsList, 2) == 0 && paramCount == 0)
+    else if (SystemFunctions::commandMatches(command, WarningsList) && paramCount == 0)
     {
         // Return the complete bitmask of active warnings as a single value
         uint32_t activeWarnings = warningManager->getActiveWarningsMask();
@@ -62,7 +62,7 @@ bool WarningCommandHandler::handleCommand(SerialCommandManager* sender, const ch
         sendAckOk(sender, command, &param);
         return true;
     }
-    else if (strncmp(command, WarningStatus, 2) == 0 && paramCount == 1)
+    else if (SystemFunctions::commandMatches(command, WarningStatus) && paramCount == 1)
     {
         // Return warning status for specific warning (true if active otherwise false)
         // key will be warning type expressed as 0x04 etc, value is ignored on request and
@@ -86,14 +86,14 @@ bool WarningCommandHandler::handleCommand(SerialCommandManager* sender, const ch
 
         return true;
     }
-    else if (strncmp(command, WarningsClear, 2) == 0 && paramCount == 0)
+    else if (SystemFunctions::commandMatches(command, WarningsClear) && paramCount == 0)
     {
         warningManager->clearAllWarnings();
 
         sendAckOk(sender, command);
         return true;
     }
-    else if (strncmp(command, WarningsAdd, 2) == 0 && paramCount == 1)
+    else if (SystemFunctions::commandMatches(command, WarningsAdd) && paramCount == 1)
     {
         WarningType warningType = WarningType::None;
 

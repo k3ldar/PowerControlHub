@@ -20,12 +20,16 @@
 #include "SystemDefinitions.h"
 #include "ConfigManager.h"
 #include "MessageBus.h"
+#include "SoundController.h"
 
 enum class RelayResult : uint8_t
 {
 	Success = 0,
 	InvalidIndex = 1,
-	Reserved = 2
+	Reserved = 2,
+	InvalidConfig = 3,
+	InvalidParameter = 4,
+	Failed = 5
 };
 
 
@@ -33,10 +37,23 @@ class RelayController
 {
 private:
 	MessageBus* _messageBus;
+	SoundController* _soundController;
 	bool* _relayStatus;
 	uint8_t* _relays;
 	uint8_t _relayCount;
-	uint8_t _reservedSoundRelay;
+
+	bool isHornRelay(uint8_t relayIndex) const
+	{
+		Config* config = ConfigManager::getConfigPtr();
+		if (config == nullptr || relayIndex >= _relayCount)
+			return false;
+		return config->relay.relays[relayIndex].actionType == RelayActionType::Horn;
+	}
+
+	bool isRelayDisabled(uint8_t relayIndex) const
+	{
+		return _relays[relayIndex] == PinDisabled;
+	}
 
 	RelayResult setRelayStatus(uint8_t relayIndex, bool isOn)
 	{
@@ -45,7 +62,7 @@ private:
 			return RelayResult::InvalidIndex;
 		}
 
-		if (relayIndex == _reservedSoundRelay)
+		if (isHornRelay(relayIndex))
 		{
 			return RelayResult::Reserved;
 		}
@@ -53,11 +70,14 @@ private:
 		// Compute which relays actually change state so subscribers can be notified
 		uint8_t changedMask = 0;
 
-		// Primary relay
+		// Primary relay — only write hardware if the pin is assigned
 		if (_relayStatus[relayIndex] != isOn)
 		{
 			_relayStatus[relayIndex] = isOn;
-			digitalWrite(_relays[relayIndex], isOn ? LOW : HIGH);
+			if (!isRelayDisabled(relayIndex))
+			{
+				digitalWrite(_relays[relayIndex], isOn ? LOW : HIGH);
+			}
 			changedMask |= (1 << relayIndex);
 		}
 
@@ -71,7 +91,7 @@ private:
 					if (config->relay.linkedRelays[i][0] == relayIndex)
 					{
 						uint8_t linkedRelay = config->relay.linkedRelays[i][1];
-						if (linkedRelay < _relayCount)
+						if (linkedRelay < _relayCount && !isRelayDisabled(linkedRelay))
 						{
 							if (_relayStatus[linkedRelay] != isOn)
 							{
@@ -95,8 +115,7 @@ private:
 
 public:
 	RelayController(MessageBus* messageBus, const uint8_t* relayPins, uint8_t totalRelays)
-		: _messageBus(messageBus), _relayStatus(nullptr), _relays(nullptr), _relayCount(totalRelays),
-		  _reservedSoundRelay(DefaultValue)
+		: _messageBus(messageBus), _soundController(nullptr), _relayStatus(nullptr), _relays(nullptr), _relayCount(totalRelays)
 	{
 		_relays = new uint8_t[_relayCount];
 		memcpy(_relays, relayPins, sizeof(uint8_t)* _relayCount);
@@ -120,8 +139,11 @@ public:
 		for (uint8_t i = 0; i < _relayCount; i++)
 		{
 			_relayStatus[i] = false;
-			pinMode(_relays[i], OUTPUT);
-			digitalWrite(_relays[i], HIGH);
+			if (!isRelayDisabled(i))
+			{
+				pinMode(_relays[i], OUTPUT);
+				digitalWrite(_relays[i], HIGH);
+			}
 		}
 	}
 
@@ -159,7 +181,8 @@ public:
 
 	CommandResult getRelayStatus(uint8_t relayIndex)
 	{
-		uint8_t status = 0xFF;
+		uint8_t status = PinDisabled;
+
 		if (relayIndex < _relayCount)
 		{
 			status = _relayStatus[relayIndex] ? 1 : 0;
@@ -184,7 +207,173 @@ public:
 
 	uint8_t getRelayCount() const { return _relayCount; }
 
-	uint8_t getReservedSoundRelay() const { return _reservedSoundRelay; }
+	bool isDisabled(uint8_t relayIndex) const
+	{
+		if (relayIndex >= _relayCount)
+			return true;
 
-	void setReservedSoundRelay(uint8_t relayIndex) { _reservedSoundRelay = relayIndex; }
+		return isRelayDisabled(relayIndex);
+	}
+
+	// Refresh the pin array from persisted config (call after ConfigManager::load()).
+	// Disabled relays (pin == PinDisabled) will be skipped by all hardware writes.
+	void syncPinsFromConfig()
+	{
+		Config* config = ConfigManager::getConfigPtr();
+
+		if (config == nullptr)
+			return;
+
+		for (uint8_t i = 0; i < _relayCount; i++)
+		{
+			_relays[i] = config->relay.relays[i].pin;
+		}
+	}
+
+	void setSoundController(SoundController* soundController)
+	{
+		_soundController = soundController;
+	}
+
+	RelayResult setRelayActionType(uint8_t relayIndex, RelayActionType actionType)
+	{
+		Config* config = ConfigManager::getConfigPtr();
+		if (config == nullptr)
+			return RelayResult::InvalidConfig;
+
+		if (relayIndex >= _relayCount)
+			return RelayResult::InvalidIndex;
+
+		if (actionType > RelayActionType::NightRelay)
+			return RelayResult::InvalidParameter;
+
+		// Enforce single-instance: clear other relays that hold the same type
+		if (actionType != RelayActionType::Default)
+		{
+			for (uint8_t i = 0; i < _relayCount; ++i)
+			{
+				if (i != relayIndex && config->relay.relays[i].actionType == actionType)
+					config->relay.relays[i].actionType = RelayActionType::Default;
+			}
+		}
+
+		config->relay.relays[relayIndex].actionType = actionType;
+
+		// Keep legacy index fields in sync by rescanning the relay array
+		config->sound.hornRelayIndex = PinDisabled;
+		config->lightSensor.nightRelayIndex = PinDisabled;
+		for (uint8_t i = 0; i < _relayCount; ++i)
+		{
+			if (config->relay.relays[i].actionType == RelayActionType::Horn)
+				config->sound.hornRelayIndex = i;
+			else if (config->relay.relays[i].actionType == RelayActionType::NightRelay)
+				config->lightSensor.nightRelayIndex = i;
+		}
+
+		if (_soundController != nullptr)
+			_soundController->configUpdated(config);
+
+		return RelayResult::Success;
+	}
+
+	RelayResult setRelayDefaultState(uint8_t relayIndex, bool defaultState)
+	{
+		Config* config = ConfigManager::getConfigPtr();
+		if (config == nullptr)
+			return RelayResult::InvalidConfig;
+
+		if (relayIndex >= _relayCount)
+			return RelayResult::InvalidIndex;
+
+		config->relay.relays[relayIndex].defaultState = defaultState;
+		return RelayResult::Success;
+	}
+
+	RelayResult linkRelays(uint8_t relay1, uint8_t relay2)
+	{
+		Config* config = ConfigManager::getConfigPtr();
+		if (config == nullptr)
+			return RelayResult::InvalidConfig;
+
+		if (relay1 >= _relayCount || relay2 >= _relayCount)
+			return RelayResult::InvalidIndex;
+
+		for (uint8_t i = 0; i < ConfigMaxLinkedRelays; ++i)
+		{
+			if (config->relay.linkedRelays[i][0] == MaxUint8Value)
+			{
+				config->relay.linkedRelays[i][0] = relay1;
+				config->relay.linkedRelays[i][1] = relay2;
+				return RelayResult::Success;
+			}
+		}
+
+		return RelayResult::Failed;
+	}
+
+	RelayResult unlinkRelay(uint8_t relay)
+	{
+		Config* config = ConfigManager::getConfigPtr();
+		if (config == nullptr)
+			return RelayResult::InvalidConfig;
+
+		if (relay >= _relayCount)
+			return RelayResult::InvalidIndex;
+
+		for (uint8_t i = 0; i < ConfigMaxLinkedRelays; ++i)
+		{
+			if (config->relay.linkedRelays[i][0] == relay || config->relay.linkedRelays[i][1] == relay)
+			{
+				config->relay.linkedRelays[i][0] = MaxUint8Value;
+				config->relay.linkedRelays[i][1] = MaxUint8Value;
+			}
+		}
+
+		return RelayResult::Success;
+	}
+
+	RelayResult setRelayPin(uint8_t relayIndex, uint8_t pin)
+	{
+		Config* config = ConfigManager::getConfigPtr();
+		if (config == nullptr)
+			return RelayResult::InvalidConfig;
+
+		if (relayIndex >= _relayCount)
+			return RelayResult::InvalidIndex;
+
+		if (pin == 0)
+			return RelayResult::InvalidParameter;
+
+		config->relay.relays[relayIndex].pin = pin;
+		return RelayResult::Success;
+	}
+
+	RelayResult renameRelay(uint8_t relayIndex, const char* shortName, const char* longName)
+	{
+		Config* config = ConfigManager::getConfigPtr();
+		if (config == nullptr)
+			return RelayResult::InvalidConfig;
+
+		if (relayIndex >= _relayCount)
+			return RelayResult::InvalidIndex;
+
+		strncpy(config->relay.relays[relayIndex].shortName, shortName, ConfigShortRelayNameLength - 1);
+		config->relay.relays[relayIndex].shortName[ConfigShortRelayNameLength - 1] = '\0';
+		strncpy(config->relay.relays[relayIndex].longName, longName, ConfigLongRelayNameLength - 1);
+		config->relay.relays[relayIndex].longName[ConfigLongRelayNameLength - 1] = '\0';
+		return RelayResult::Success;
+	}
+
+	RelayResult setButtonColor(uint8_t relayIndex, uint8_t color)
+	{
+		Config* config = ConfigManager::getConfigPtr();
+		if (config == nullptr)
+			return RelayResult::InvalidConfig;
+
+		if (relayIndex >= _relayCount)
+			return RelayResult::InvalidIndex;
+
+		config->relay.relays[relayIndex].buttonImage = color;
+		return RelayResult::Success;
+	}
 };

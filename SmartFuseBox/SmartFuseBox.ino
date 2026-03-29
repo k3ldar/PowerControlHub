@@ -62,7 +62,7 @@ void onLinkCommandReceived(SerialCommandManager* mgr);
 SerialCommandManager commandMgrComputer(&COMPUTER_SERIAL, onComputerCommandReceived, '\n', ':', ';', '=', 500, 64);
 SerialCommandManager commandMgrLink(&LINK_SERIAL, onLinkCommandReceived, '\n', ':', ';', '=', 500, 64);
 
-SmartFuseBoxApp app(&commandMgrComputer, &commandMgrLink, Relays, ConfigRelayCount);
+SmartFuseBoxApp app(&commandMgrComputer, &commandMgrLink);
 
 // Project-specific sensors
 WaterSensorHandler waterSensorHandler(app.messageBus(), app.broadcastManager(),

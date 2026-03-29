@@ -20,7 +20,6 @@
 #include "Local.h"
 #include "ConfigManager.h"
 #include "SoundController.h"
-#include "RelayCommandHandler.h"
 
 // Forward declarations
 class IBluetoothRadio;
@@ -46,26 +45,21 @@ private:
 	SoundController* _soundController;
 	IBluetoothRadio* _bluetoothRadio;
 	IWifiController* _wifiController;
-	RelayController* _relayController;
 	Config* _config;
 
-	void updateSoundControllerConfig(); 
+	void updateSoundControllerConfig();
 public:
 
 	ConfigController(SoundController* soundController,
 		IBluetoothRadio* bluetoothRadio,
-		IWifiController* wifiController,
-		RelayController* relayController);
+		IWifiController* wifiController);
 
 	Config* getConfigPtr();
 	ConfigResult save();
 	ConfigResult reset();
 	ConfigResult rename(const char* name);
-	ConfigResult renameRelay(const uint8_t relayIndex, const char* name);
 	ConfigResult mapHomeButton(const uint8_t homeButtonIndex, const uint8_t relayIndex);
-	ConfigResult mapHomeButtonColor(const uint8_t relayIndex, const uint8_t colorIndex);
 	ConfigResult setVesselType(const uint8_t vesselType);
-	ConfigResult setSoundRelayButton(const uint8_t relayIndex);
 	ConfigResult setsoundDelayStart(const uint16_t delayMilliSeconds);
 	ConfigResult setBluetoothEnabled(const bool enabled);
 	ConfigResult setWifiEnabled(const bool enabled);
@@ -74,9 +68,6 @@ public:
 	ConfigResult setWifiPassword(const char* password);
 	ConfigResult setWifiPort(const uint16_t port);
 	ConfigResult setWifiIpAddress(const char* ipAddress);
-	ConfigResult setRelayDefaultState(const uint8_t relayIndex, const bool isOpen);
-	ConfigResult linkRelays(uint8_t relayIndex, uint8_t linkedRelay);
-	ConfigResult unlinkRelay(uint8_t relayIndex);
 	ConfigResult setTimezoneOffset(const int8_t offset);
 	ConfigResult setMmsi(const char* mmsi);
 	ConfigResult setCallSign(const char* callSign);
@@ -87,6 +78,5 @@ public:
 	ConfigResult setLedEnableStates(const bool gps, const bool warning, const bool system);
 	ConfigResult setControlPanelTones(const uint8_t type, const uint8_t preset, const uint16_t toneHz, const uint16_t durationMs, const uint32_t repeatMs);
 	ConfigResult setSdCardInitializeSpeed(const uint8_t speedMhz);
-	ConfigResult setLightSensorNightRelay(const uint8_t relayIndex);
 	ConfigResult setLightSensorThreshold(const uint16_t threshold);
 };
