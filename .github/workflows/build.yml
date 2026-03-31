@@ -33,7 +33,7 @@ jobs:
         arduino-cli lib install "SerialCommandManager"
         arduino-cli lib install "SensorManager"
         arduino-cli lib install "SdFat"
-        arduino-cli lib install "Dht11"
+        arduino-cli lib install "Bonezegei_DHT11"
 
     - name: Compile SmartFuseBox firmware
       run: |
