@@ -28,8 +28,6 @@ jobs:
     - name: Install required libraries
       run: |
         arduino-cli lib install "ArduinoJson"
-        arduino-cli lib install "HTTPClient"
-        arduino-cli lib install "WiFi"
         arduino-cli lib install "SerialCommandManager"
         arduino-cli lib install "SensorManager"
         arduino-cli lib install "SdFat"
@@ -39,10 +37,11 @@ jobs:
       run: |
         arduino-cli compile \
           --fqbn esp32:esp32:esp32s3 \
+          --output-dir SmartFuseBox/Build \
           SmartFuseBox
 
     - name: Upload firmware artifact
       uses: actions/upload-artifact@v4
       with:
         name: SmartFuseBox-firmware
-        path: SmartFuseBox/build/esp32.esp32.esp32s3/SmartFuseBox.ino.bin
+        path: SmartFuseBox/build/SmartFuseBox.ino.bin
