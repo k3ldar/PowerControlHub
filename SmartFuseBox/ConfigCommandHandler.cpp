@@ -20,7 +20,7 @@
 #include "ConfigController.h"
 #include "SystemFunctions.h"
 
-#if defined(SD_CARD_SUPPORT)
+#if defined(CARD_CONFIG_LOADER)
 #include "SdCardConfigLoader.h"
 #endif
 
@@ -36,7 +36,7 @@ ConfigCommandHandler::ConfigCommandHandler(
 	:
 	_wifiController(wifiController),
 	_configController(configController)
-#if defined(SD_CARD_SUPPORT)
+#if defined(CARD_CONFIG_LOADER)
 	, _sdCardConfigLoader(nullptr)
 #endif
 #if defined(MQTT_SUPPORT)
@@ -526,7 +526,7 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
 	}
 	else if (SystemFunctions::commandMatches(command, ConfigReloadFromSd))
 	{
-#if defined(SD_CARD_SUPPORT)
+#if defined(CARD_CONFIG_LOADER)
 		if (_sdCardConfigLoader)
 		{
 			if (_sdCardConfigLoader->reloadConfigFromSd())
@@ -551,7 +551,7 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
 	}
 	else if (SystemFunctions::commandMatches(command, ConfigExportToSd))
 	{
-#if defined(SD_CARD_SUPPORT)
+#if defined(CARD_CONFIG_LOADER)
 		if (_sdCardConfigLoader)
 		{
 			if (_sdCardConfigLoader->exportConfigToSd())
@@ -576,7 +576,7 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
 	}
 	else if (SystemFunctions::commandMatches(command, ConfigSdCardSpeed))
 	{
-#if defined(SD_CARD_SUPPORT)
+#if defined(CARD_CONFIG_LOADER)
 		if (paramCount >= 1)
 		{
 			uint8_t speedMhz = static_cast<uint8_t>(atoi(params[0].value));
@@ -785,7 +785,7 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
 	return true;
 }
 
-#if defined(SD_CARD_SUPPORT)
+#if defined(CARD_CONFIG_LOADER)
 void ConfigCommandHandler::setSdCardConfigLoader(SdCardConfigLoader* sdCardConfigLoader)
 {
 	_sdCardConfigLoader = sdCardConfigLoader;
