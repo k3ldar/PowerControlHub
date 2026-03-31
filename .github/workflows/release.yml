@@ -1,0 +1,60 @@
+name: Release SmartFuseBox Firmware
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Install Arduino CLI
+      uses: arduino/setup-arduino-cli@v1
+
+    - name: Configure Arduino CLI
+      run: |
+        arduino-cli config init
+        arduino-cli config set board_manager.additional_urls https://espressif.github.io/arduino-esp32/package_esp32_index.json
+        arduino-cli core update-index
+        arduino-cli core install esp32:esp32
+
+    - name: Install required libraries
+      run: |
+        arduino-cli lib install "ArduinoJson"
+        arduino-cli lib install "SerialCommandManager"
+        arduino-cli lib install "SensorManager"
+        arduino-cli lib install "SdFat"
+        arduino-cli lib install "dht11"
+
+    - name: Compile SmartFuseBox firmware
+      run: |
+        arduino-cli compile \
+          --fqbn esp32:esp32:esp32s3 \
+          --output-dir SmartFuseBox/build \
+          SmartFuseBox
+
+    - name: Generate checksum
+      run: |
+        sha256sum SmartFuseBox/build/SmartFuseBox.ino.bin | awk '{print $1}' > checksum.sha256
+
+    - name: Generate version.json
+      run: |
+        TAG="${GITHUB_REF#refs/tags/}"
+        URL="https://github.com/${{ github.repository }}/releases/download/${TAG}/SmartFuseBox.ino.bin"
+        CHECKSUM=$(cat checksum.sha256)
+        echo "{ \"version\": \"${TAG}\", \"url\": \"${URL}\", \"sha256\": \"${CHECKSUM}\" }" > version.json
+
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v2
+      with:
+        files: |
+          SmartFuseBox/build/SmartFuseBox.ino.bin
+          version.json
+          checksum.sha256
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
