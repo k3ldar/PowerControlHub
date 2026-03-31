@@ -32,6 +32,7 @@ jobs:
         arduino-cli lib install "WiFi"
         arduino-cli lib install "SerialCommandManager"
         arduino-cli lib install "SensorManager"
+        arduino-cli lib install "SdFat"
 
     - name: Compile SmartFuseBox firmware
       run: |
