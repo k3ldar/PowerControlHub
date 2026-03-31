@@ -31,6 +31,7 @@ jobs:
         arduino-cli lib install "HTTPClient"
         arduino-cli lib install "WiFi"
         arduino-cli lib install "SerialCommandManager"
+        arduino-cli lib install "SensorManager"
 
     - name: Compile SmartFuseBox firmware
       run: |
