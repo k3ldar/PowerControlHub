@@ -132,21 +132,28 @@ constexpr char WarningStatus[] = "W2";
 constexpr char WarningsClear[] = "W3";
 constexpr char WarningsAdd[] = "W4";
 
-constexpr char SensorTemperature[] = "S0";
-constexpr char SensorHumidity[] = "S1";
-constexpr char SensorBearing[] = "S2";
-constexpr char SensorDirection[] = "S3";
-constexpr char SensorSpeed[] = "S4";
-constexpr char SensorCompassTemp[] = "S5";
-constexpr char SensorWaterLevel[] = "S6";
-constexpr char SensorWaterPumpActive[] = "S7";
-constexpr char SensorHornActive[] = "S8";
-constexpr char SensorLightSensor[] = "S9";
-constexpr char SensorGpsLatLong[] = "S10";
-constexpr char SensorGpsAltitude[] = "S11";
-constexpr char SensorGpsSpeed[] = "S12";
-constexpr char SensorGpsSatellites[] = "S13";
-constexpr char SensorGpsDistance[] = "S14";
+constexpr char SensorConfigGetAll[] = "S0";
+constexpr char SensorConfigAddUpdate[] = "S1";
+constexpr char SensorConfigRemove[] = "S2";
+constexpr char SensorConfigRename[] = "S3";
+constexpr char SensorConfigSetPin[] = "S4";
+constexpr char SensorConfigSetEnabled[] = "S5";
+constexpr char SensorConfigSetOptions[] = "S6";
+constexpr char SensorTemperature[] = "S7";
+constexpr char SensorHumidity[] = "S8";
+constexpr char SensorBearing[] = "S9";
+constexpr char SensorDirection[] = "S10";
+constexpr char SensorSpeed[] = "S11";
+constexpr char SensorCompassTemp[] = "S12";
+constexpr char SensorWaterLevel[] = "S13";
+constexpr char SensorWaterPumpActive[] = "S14";
+constexpr char SensorHornActive[] = "S15";
+constexpr char SensorLightSensor[] = "S16";
+constexpr char SensorGpsLatLong[] = "S17";
+constexpr char SensorGpsAltitude[] = "S18";
+constexpr char SensorGpsSpeed[] = "S19";
+constexpr char SensorGpsSatellites[] = "S20";
+constexpr char SensorGpsDistance[] = "S21";
 
 
 constexpr char AckSuccess[] = "ok";
@@ -198,7 +205,7 @@ constexpr const char* compassDirections[16] = {
     "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"
 };
 
-constexpr uint16_t MaximumJsonResponseBufferSize = 512;
+constexpr uint16_t MaximumJsonResponseBufferSize = 1024;
 
 /*
 * Unique IDs for different sensor types in the system.

@@ -64,20 +64,6 @@ SerialCommandManager commandMgrLink(&LINK_SERIAL, onLinkCommandReceived, '\n', '
 
 SmartFuseBoxApp app(&commandMgrComputer, &commandMgrLink);
 
-// Project-specific sensors
-WaterSensorHandler waterSensorHandler(app.messageBus(), app.broadcastManager(),
-	app.sensorCommandHandler(), WaterSensorPin, WaterSensorActivePin);
-Dht11SensorHandler dht11SensorHandler(app.messageBus(), app.broadcastManager(),
-	app.sensorCommandHandler(), app.warningManager(), Dht11SensorPin);
-LightSensorHandler lightSensorHandler(app.messageBus(), app.broadcastManager(),
-	app.sensorCommandHandler(), app.relayController(),
-	LightSensorPin, LightSensorIsDigital);
-SystemSensorHandler systemSensorHandler(app.messageBus(),
-	app.wifiController(),
-	app.bluetoothController(),
-	app.warningManager());
-
-
 // Project specific remote sensors
 #if defined(MQTT_SUPPORT)
 MqttSensorChannel gpsMqttChannels[] = {
@@ -94,15 +80,6 @@ RemoteSensor* remoteSensors[] = {
 };
 constexpr uint8_t remoteSensorCount = sizeof(remoteSensors) / sizeof(remoteSensors[0]);
 
-
-// All sensors polled by the main loop — both board-local and remote.
-// Note: gpsLatLonSensor appears in remoteSensors[] (for the remote-sync pipeline)
-// AND here (so it is also ticked by the local poll loop for status reporting).
-BaseSensorHandler* localSensors[] = {
-	&waterSensorHandler, &dht11SensorHandler, &lightSensorHandler, &systemSensorHandler, &gpsLatLonSensor
-};
-constexpr uint8_t sensorHandlerCount = sizeof(localSensors) / sizeof(localSensors[0]);
-
 void setup()
 {
 	// Serial initialization is performed first to ensure that any logging or error messages
@@ -110,13 +87,8 @@ void setup()
 	SystemFunctions::initializeSerial(COMPUTER_SERIAL, 115200, true);
 	SystemFunctions::initializeSerial(LINK_SERIAL, 19200, true);
 
-	// Wire late-binding sensor dependencies
-#if defined(SD_CARD_SUPPORT)
-	systemSensorHandler.setSdCardLogger(app.sdCardLogger());
-#endif
-
 	// configure app
-	app.setup(localSensors, sensorHandlerCount, remoteSensors, remoteSensorCount);
+	app.setup(remoteSensors, remoteSensorCount);
 }
 
 void loop()

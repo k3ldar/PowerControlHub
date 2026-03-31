@@ -42,7 +42,7 @@ These are commands used to configure the system settings and can only be sent fr
 | Command | Example | Purpose |
 |---|---|---|
 | `C0` — Save settings | `C0` | Persist current in-memory config to EEPROM. Responds `SAVED` on success; error `EEPROM commit failed` on failure. No params. |
-| `C1` — Get settings | `C1` | Request full config. Device replies with multiple commands: `C3 <boatName>`, `C5 <slot>:<relay>` for each home-slot mapping, `C7 v=<type>` for vessel type, `C9 v=<delay>` for sound delay, `C10`-`C17` for WiFi/Bluetooth settings (SFB only), `C20 v=<offset>` for timezone, `C21 <mmsi>` for MMSI, `C22 <callsign>` for call sign, `C23 <homeport>` for home port, `R6 <idx>=<shortName\|longName>` for each relay name, `R7 <idx>=<color>` for each button color, `R8 <relay>=<state>` for default relay states, `R9 <relay>=<linkedrelay>` for linked relay pairs (active pairs only), `R10 <relay>=<actionType>` for non-default action types only, `R11 <relay>=<pin>` for relay pins, then `OK`. No params. |
+| `C1` — Get settings | `C1` | Request full config. Device replies with multiple commands: `C3 <boatName>`, `C5 <slot>:<relay>` for each home-slot mapping, `C7 v=<type>` for vessel type, `C9 v=<delay>` for sound delay, `C10`-`C17` for WiFi/Bluetooth settings (SFB only), `C20 v=<offset>` for timezone, `C21 <mmsi>` for MMSI, `C22 <callsign>` for call sign, `C23 <homeport>` for home port, `R6 <idx>=<shortName\|longName>` for each relay name, `R7 <idx>=<color>` for each button color, `R8 <relay>=<state>` for default relay states, `R9 <relay>=<linkedrelay>` for linked relay pairs (active pairs only), `R10 <relay>=<actionType>` for non-default action types only, `R11 <relay>=<pin>` for relay pins, `S0` for all sensor config entries (one `S0` response per configured sensor), then `OK`. No params. |
 | `C2` — Reset settings | `C2` | Request full reset of all config settings. No params. |
 | `C3` — Rename boat (BCP) | `C3:Sea Wolf` or `C3:name=SeaWolf` | Set the boat name. `<key>:<value>` pair (value is used as boat name. Empty name → error. Name is truncated to configured max length. |
 | ~~`C4`~~ — ~~Rename relay~~ | — | **Retired.** Use `R6` — Relay Rename instead. |
@@ -74,7 +74,7 @@ These are commands used to configure the system settings and can only be sent fr
 | `C30` — Export Config to SD (SFB) | `C30` | **Local only (Serial/USB)**. Export current in-memory configuration to SD card... |
 | `C31` — SD Card Initialize Speed (SFB) | `C31:v=4` | Set SD card SPI initialization speed in MHz. Param format: `v=<speed>`. Valid values: 4, 8, 12, 16, 20, 24. Default is 4 MHz. **Note:** Higher speeds (16+ MHz) should only be used with high-quality SD cards that explicitly support high-speed SPI mode. Using speeds that are too high for your SD card may result in initialization failures or data corruption. If experiencing SD card issues, try reducing the speed to 4 or 8 MHz. |
 | ~~`C32`~~ — ~~Light Sensor Night Relay~~ | — | **Retired.** Use `R10` — Relay Set Action Type with `actionType=2` (NightRelay) instead. |
-| `C33` — Light Sensor Daytime Threshold (SFB) | `C33:v=512` | Set the analogue light level threshold above which daytime is detected. Param format: `v=<threshold>`. Valid range: 0–1023. Default is 512. Readings from the rolling average of the last 10 samples are compared against this value; 3 consecutive consistent readings are required before the day/night state changes (see S9). |
+| `C33` — Light Sensor Daytime Threshold (SFB) | `C33:v=512` | Set the analogue light level threshold above which daytime is detected. Param format: `v=<threshold>`. Valid range: 0–1023. Default is 512. Readings from the rolling average of the last 10 samples are compared against this value; 3 consecutive consistent readings are required before the day/night state changes (see S16). |
 
 ### MQTT Configuration Commands (SFB)
 These commands configure MQTT connectivity for Home Assistant and other MQTT-based integrations.
@@ -136,8 +136,8 @@ These commands are used in response to receiving a command.
 
 | Command | Example | Purpose |
 |---|---|---|
-| `ACK` — Acknowledgement | `ACK:C4=Index out of range` | Indicates that the C4 command was processed and the index specified was out of range. |
-| `ACK` — Acknowledgement | `ACK:C4=ok` | Indicates that the C4 command was processed successfully. |
+| `ACK` — Acknowledgement | `ACK:R3=Index out of range` | Indicates that the R3 command was processed and the index specified was out of range. |
+| `ACK` — Acknowledgement | `ACK:R3=ok` | Indicates that the R3 command was processed successfully. |
 
 ### Wifi Acknowledgement Commands 
 Not supported
@@ -173,25 +173,53 @@ Returns JSON formatted response with all relay states.
 
 
 ## Sensor Commands
-These commands are used to send sensor data from the Boat Control Panel to a computer.
+All sensor-related commands use the `S` prefix, mirroring how `R` commands own both relay runtime and relay configuration. `S0`–`S6` are sensor configuration commands; `S7`–`S21` are sensor telemetry commands.
+
+### Sensor Configuration Commands (SFB)
+These commands configure the persisted sensor definitions stored in EEPROM (`SensorsConfig`). `SensorFactory` uses these definitions to construct live sensor instances at boot — **a reboot is required for any change to take effect**. Every mutating ACK carries `reboot=1` to make this explicit.
 
 | Command | Example | Purpose |
 |---|---|---|
-| `S0` — Temperature | `S0:v=72.5` | Send temperature sensor data. Param format: `<sensor>=<value>`. |
-| `S1` — Humidity | `S1:v=55.2` | Send humidity sensor data. Param format: `<sensor>=<value>`. |
-| `S2` — Bearing | `S2:v=128` | Send bearing sensor data. Param format: `<sensor>=<value>`. |
-| `S3` — Direction | `S3:v=NNW` | Send direction sensor data. Param format: `<sensor>=<value>`. |
-| `S4` — Speed | `S4:v=3.4` | Send speed sensor data. Param format: `<sensor>=<value>`. |
-| `S5` — Compass Temp | `S5:v=23.4` | Send compass temperature sensor data. Param format: `<sensor>=<value>`. |
-| `S6` — Water Level | `S6:v=3.4` | Send water level sensor data. Param format: `<sensor>=<value>`. |
-| `S7` — Water Pump Active  | `S7:v=1` | Send water pump active status. Param format: `<sensor>=<value>`, 0 = off, 1 = on. |
-| `S8` — Horn Active | `S8:v=1` | Send horn active status. Param format: `<sensor>=<value>`, 0 = off, 1 = on. |
-| `S9` — Light Sensor Active  | `S9:v=1` | Send light sensor daytime value. Param format: `<sensor>=<value>`, 0 = off (night time), 1 = on (day time). |
-| `S10` — GPS Lat/Long | `S10:lat=51.507351;lon=-0.127758` | Send GPS latitude and longitude coordinates. Param format: `lat=<latitude>;lon=<longitude>`. Values are in decimal degrees with 6 decimal places precision. |
-| `S11` — GPS Altitude | `S11:v=125.50` | Send GPS altitude in meters. Param format: `<sensor>=<value>`. Value is in meters with 2 decimal places precision. |
-| `S12` — GPS Speed | `S12:v=15.75;course=245.30;dir=NNW` | Send GPS speed in km/h with optional course/heading in degrees and optional direction. Param format: `v=<speed>;course=<degrees>;dir=<direction>`. Speed is in kilometers per hour with 2 decimal places precision. Course is in degrees (0-360) with 2 decimal places precision, where 0° is North, 90° is East, 180° is South, and 270° is West. Direction is optional cardinal direction string (N, NE, E, SE, S, SW, W, NW, etc.). |
-| `S13` — GPS Satellites | `S13:v=8` | Send GPS satellite count. Param format: `<sensor>=<value>`. Value is the number of satellites currently connected to the GPS module. |
-| `S14` — GPS Distance | `S14:v=1.23` | Send GPS distance moved. Param format: `<sensor>=<value>`. Value is the total distance travelled according to the GPS module. |
+| `S0` — Get All Sensor Config | `S0` | Returns one `S0` response per configured sensor entry. Response format: `i=<idx>;t=<type>;n=<name>;p0=<pin0>;p1=<pin1>;o0=<opt0>;o1=<opt1>;en=<0\|1>`. No params. |
+| `S1` — Add / Update Sensor | `S1:i=0;t=1;o0=0;o1=0` | Add or update the sensor at index `i` (0-based, up to `ConfigMaxSensors`). Param format: `i=<idx>;t=<type>;o0=<opt0>;o1=<opt1>`. `t` is the `SensorIdList` enum value. `o0`, `o1` are optional (default to `PinDisabled` / 0). ACK carries `reboot=1`. |
+| `S2` — Remove Sensor | `S2:0` | Remove (disable and clear) the sensor at the given index. Param format: `<idx>`. Clears name, pins, options and sets `enabled=false`. ACK carries `reboot=1`. |
+| `S3` — Rename Sensor | `S3:0=Bilge Pump` | Rename the sensor at the given index. Param format: `<idx>=<name>`. Name is truncated to `ConfigMaxSensorNameLength`. Empty name → error. ACK carries `reboot=1`. |
+| `S4` — Set Sensor Pin | `S4:i=0;s=0;v=34` | Set a specific pin slot for a sensor. Param format: `i=<idx>;s=<slot>;v=<pin>`. `slot` must be 0..`ConfigMaxSensorPins-1`. `pin` is the GPIO pin number; use `PinDisabled` (255) to clear. ACK carries `reboot=1`. |
+| `S5` — Set Sensor Enabled | `S5:0=1` | Enable or disable a sensor. Param format: `<idx>=<0\|1>`. ACK carries `reboot=1`. |
+| `S6` — Set Sensor Option | `S6:i=0;s=0;v=1` | Set an `options1` value for a sensor. Param format: `i=<idx>;s=<slot>;v=<value>`. `slot` must be within `options1` array bounds. `value` is a signed byte. ACK carries `reboot=1`. |
+
+**Sensor type values (`t` parameter for S1):**
+
+| Value | Name | Notes |
+|---|---|---|
+| `0` | WaterSensor | Uses `p0`=data pin, `p1`=power pin |
+| `1` | Dht11 | Uses `p0`=data pin |
+| `2` | LightSensor | Uses `p0`=analogue pin; `o0=1` enables digital mode |
+| `3` | SystemSensor | No pin required |
+
+Common sensor config error responses: `Config not available`, `Invalid sensor index`, `Missing sensor index`, `Missing parameters`, `Missing name`, `Invalid pin slot`, `Invalid option slot`.
+
+
+### Sensor Telemetry Commands
+These commands carry live sensor readings. They are sent automatically by the SFB when sensor values change or at their configured polling interval.
+
+| Command | Example | Purpose |
+|---|---|---|
+| `S7` — Temperature | `S7:v=72.5` | Send temperature sensor data. Param format: `v=<value>`. |
+| `S8` — Humidity | `S8:v=55.2` | Send humidity sensor data. Param format: `v=<value>`. |
+| `S9` — Bearing | `S9:v=128` | Send bearing sensor data. Param format: `v=<value>`. |
+| `S10` — Direction | `S10:v=NNW` | Send direction sensor data. Param format: `v=<value>`. |
+| `S11` — Speed | `S11:v=3.4` | Send speed sensor data. Param format: `v=<value>`. |
+| `S12` — Compass Temp | `S12:v=23.4` | Send compass temperature sensor data. Param format: `v=<value>`. |
+| `S13` — Water Level | `S13:v=3.4` | Send water level sensor data. Param format: `v=<value>`. |
+| `S14` — Water Pump Active | `S14:v=1` | Send water pump active status. Param format: `v=<value>`, 0 = off, 1 = on. |
+| `S15` — Horn Active | `S15:v=1` | Send horn active status. Param format: `v=<value>`, 0 = off, 1 = on. |
+| `S16` — Light Sensor | `S16:v=1` | Send light sensor daytime value. Param format: `v=<value>`, 0 = night, 1 = day. See C33 for threshold configuration. |
+| `S17` — GPS Lat/Long | `S17:lat=51.507351;lon=-0.127758` | Send GPS latitude and longitude coordinates. Param format: `lat=<latitude>;lon=<longitude>`. Values are in decimal degrees with 6 decimal places precision. |
+| `S18` — GPS Altitude | `S18:v=125.50` | Send GPS altitude in meters. Param format: `v=<value>`. Value is in meters with 2 decimal places precision. |
+| `S19` — GPS Speed | `S19:v=15.75;course=245.30;dir=NNW` | Send GPS speed in km/h with optional course/heading in degrees and optional direction. Param format: `v=<speed>;course=<degrees>;dir=<direction>`. Speed is in kilometers per hour with 2 decimal places precision. Course is in degrees (0-360) with 2 decimal places precision, where 0° is North, 90° is East, 180° is South, and 270° is West. Direction is optional cardinal direction string (N, NE, E, SE, S, SW, W, NW, etc.). |
+| `S20` — GPS Satellites | `S20:v=8` | Send GPS satellite count. Param format: `v=<value>`. Value is the number of satellites currently connected to the GPS module. |
+| `S21` — GPS Distance | `S21:v=1.23` | Send GPS distance moved. Param format: `v=<value>`. Value is the total distance travelled according to the GPS module. |
 
 
 ### Wifi Sensor Commands (SFB)

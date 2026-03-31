@@ -455,21 +455,11 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
 		// t=type (0=day, 1=night), c=colorset (0=good, 1=bad), r/g/b=0-255
 		if (paramCount >= 5)
 		{
-			uint8_t type = 0, colorSet = 0, r = 0, g = 0, b = 0;
-
-			for (uint8_t i = 0; i < paramCount; i++)
-			{
-				if (strcmp(params[i].key, "t") == 0)
-					type = static_cast<uint8_t>(atoi(params[i].value));
-				else if (strcmp(params[i].key, "c") == 0)
-					colorSet = static_cast<uint8_t>(atoi(params[i].value));
-				else if (strcmp(params[i].key, "r") == 0)
-					r = static_cast<uint8_t>(atoi(params[i].value));
-				else if (strcmp(params[i].key, "g") == 0)
-					g = static_cast<uint8_t>(atoi(params[i].value));
-				else if (strcmp(params[i].key, "b") == 0)
-					b = static_cast<uint8_t>(atoi(params[i].value));
-			}
+			uint8_t type = getParamValueU8t(params, paramCount, "t");
+			uint8_t colorSet = getParamValueU8t(params, paramCount, "c");
+			uint8_t r = getParamValueU8t(params, paramCount, "r");
+			uint8_t g = getParamValueU8t(params, paramCount, "g");
+			uint8_t b = getParamValueU8t(params, paramCount, "b");
 
 			result = _configController->setLedColor(type, colorSet, r, g, b);
 		}
@@ -485,15 +475,8 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
 		// t=type (0=day, 1=night), b=brightness (0-100)
 		if (paramCount >= 2)
 		{
-			uint8_t type = 0, brightness = 0;
-
-			for (uint8_t i = 0; i < paramCount; i++)
-			{
-				if (strcmp(params[i].key, "t") == 0)
-					type = static_cast<uint8_t>(atoi(params[i].value));
-				else if (strcmp(params[i].key, "b") == 0)
-					brightness = static_cast<uint8_t>(atoi(params[i].value));
-			}
+			uint8_t type = getParamValueU8t(params, paramCount, "t");
+			uint8_t brightness = getParamValueU8t(params, paramCount, "b");
 
 			result = _configController->setLedBrightness(type, brightness);
 		}
@@ -523,17 +506,9 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
 		// g=GPS LED, w=Warning LED, s=System LED
 		if (paramCount >= 3)
 		{
-			bool gps = false, warning = false, system = false;
-
-			for (uint8_t i = 0; i < paramCount; i++)
-			{
-				if (strcmp(params[i].key, "g") == 0)
-					gps = SystemFunctions::parseBooleanValue(params[i].value);
-				else if (strcmp(params[i].key, "w") == 0)
-					warning = SystemFunctions::parseBooleanValue(params[i].value);
-				else if (strcmp(params[i].key, "s") == 0)
-					system = SystemFunctions::parseBooleanValue(params[i].value);
-			}
+			bool gps = getParamValueBool(params, paramCount, "g");
+			bool warning = getParamValueBool(params, paramCount, "w");
+			bool system = getParamValueBool(params, paramCount, "s");
 
 			result = _configController->setLedEnableStates(gps, warning, system);
 		}
@@ -549,23 +524,11 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
 		// t=type (0=good, 1=bad), h=tone Hz, d=duration ms, p=preset, r=repeat interval ms (bad only)
 		if (paramCount >= 4)
 		{
-			uint8_t type = 0, preset = 0;
-			uint16_t toneHz = 0, durationMs = 0;
-			uint32_t repeatMs = 0;
-
-			for (uint8_t i = 0; i < paramCount; i++)
-			{
-				if (strcmp(params[i].key, "t") == 0)
-					type = static_cast<uint8_t>(atoi(params[i].value));
-				else if (strcmp(params[i].key, "h") == 0)
-					toneHz = static_cast<uint16_t>(atoi(params[i].value));
-				else if (strcmp(params[i].key, "d") == 0)
-					durationMs = static_cast<uint16_t>(atoi(params[i].value));
-				else if (strcmp(params[i].key, "p") == 0)
-					preset = static_cast<uint8_t>(atoi(params[i].value));
-				else if (strcmp(params[i].key, "r") == 0)
-					repeatMs = static_cast<uint32_t>(strtoul(params[i].value, nullptr, 0));
-			}
+			uint8_t type = getParamValueU8t(params, paramCount, "t");
+			uint8_t preset = getParamValueU8t(params, paramCount, "p");
+			uint16_t toneHz = getParamValueU16t(params, paramCount, "h");
+			uint16_t durationMs = getParamValueU16t(params, paramCount, "d");
+			uint32_t repeatMs = getParamValueU32t(params, paramCount, "r");
 
 			result = _configController->setControlPanelTones(type, preset, toneHz, durationMs, repeatMs);
 		}

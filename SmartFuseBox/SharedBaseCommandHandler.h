@@ -33,7 +33,7 @@
  * For boat-specific handlers that need additional dependencies (NextionControl, WarningManager),
  * use BaseBoatCommandHandler instead.
  */
-class SharedBaseCommandHandler : public BaseCommandHandler
+class SharedBaseCommandHandler : public virtual BaseCommandHandler
 {
 private:
     WarningManager* _warningManager;

@@ -151,8 +151,6 @@ public:
         return _sensorId;
     }
 
-#if defined(FUSE_BOX_CONTROLLER)
-
     void formatStatusJson(char* buffer, size_t size) override
     {
         if (!buffer || size == 0 || !_remoteParamsStorage)
@@ -197,7 +195,6 @@ public:
         // close object
         snprintf(buffer + pos, size - pos, "}");
     }
-#endif
 
     void handleRemoteCommand(const StringKeyValue params[], uint8_t paramCount)
     {

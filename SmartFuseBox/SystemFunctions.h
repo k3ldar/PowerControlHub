@@ -17,6 +17,11 @@
  */
 #pragma once
 #include <Arduino.h>
+#include <cerrno>
+#include <climits>
+#include <limits>
+#include <type_traits>
+
 
 
 struct TimeParts
@@ -106,6 +111,73 @@ public:
     static bool isAllDigits(const char* s);
 
     /**
+     * @brief Try to parse an unsigned integer of type T from a string.
+     *
+     * Accepts decimal or 0x-prefixed hexadecimal formats. Leading '-' is
+     * rejected. Uses strtoul/endptr/errno for robust detection and should
+     * validate the parsed value fits in the target type T (no overflow).
+     *
+     * @tparam T unsigned integer type (e.g., uint8_t, uint16_t, uint32_t)
+     * @param s Input string to parse
+     * @param out Parsed value on success
+     * @return true when parsing succeeded and value fits in T, false otherwise
+     */
+    template<typename T>
+    static bool parseUnsigned(const char* s, T& out)
+    {
+        static_assert(std::is_unsigned<T>::value, "parseUnsigned requires an unsigned type");
+
+        if (!s || *s == '\0' || *s == '-')
+            return false;
+
+        char* end = nullptr;
+        errno = 0;
+        unsigned long v = strtoul(s, &end, 0);
+
+        if (end == s || *end != '\0' || errno == ERANGE)
+            return false;
+
+        if (v > static_cast<unsigned long>(std::numeric_limits<T>::max()))
+            return false;
+
+        out = static_cast<T>(v);
+        return true;
+    }
+    /**
+     * @brief Try to parse a signed integer of type T from a string.
+     *
+     * Accepts an optional leading '+' or '-' and parses as base-10. Uses
+     * strtol/endptr/errno for robust detection and validates the parsed
+     * value fits in the target signed type T (no overflow).
+     *
+     * @tparam T signed integer type (e.g., int8_t, int16_t)
+     * @param s Input string to parse
+     * @param out Parsed value on success
+     * @return true when parsing succeeded and value fits in T, false otherwise
+     */
+    template<typename T>
+    static bool parseSigned(const char* s, T& out)
+    {
+        static_assert(std::is_signed<T>::value, "parseSigned requires a signed type");
+
+        if (!s || *s == '\0')
+            return false;
+
+        char* end = nullptr;
+        errno = 0;
+        long v = strtol(s, &end, 10);
+
+        if (end == s || *end != '\0' || errno == ERANGE)
+            return false;
+
+        if (v < static_cast<long>(std::numeric_limits<T>::min()) ||
+            v > static_cast<long>(std::numeric_limits<T>::max()))
+            return false;
+
+        out = static_cast<T>(v);
+        return true;
+    }
+    /**
      * @brief Calculate elapsed time between two millis() timestamps safely handling wrap-around.
      *
      * This function uses unsigned arithmetic to correctly handle the millis() overflow
@@ -136,17 +208,7 @@ public:
      *
 	 * @param serial Reference to the Stream (e.g., HardwareSerial) to reset
     */
-    static void resetSerial(Stream& serial)
-    {
-        // Flush outgoing data
-        serial.flush();
-
-        // Clear incoming buffer
-        while (serial.available() > 0)
-        {
-            serial.read();
-        }
-    }
+    static void resetSerial(Stream& serial);
 
     /**
      * @brief Concatenate multiple strings into a provided buffer.
@@ -163,13 +225,13 @@ public:
     static size_t concatStrings(char* dest, size_t destSize, const char* first, Args... args)
     {
         if (destSize == 0) return 0;
-        
+
         size_t written = 0;
         dest[0] = '\0';
-        
+
         written += appendString(dest, destSize, written, first);
         written += concatStringsImpl(dest, destSize, written, args...);
-        
+
         return written;
     }
 
@@ -185,13 +247,7 @@ public:
      * @param expected The expected command constant to compare against
      * @return true if command exactly equals expected
      */
-    static bool commandMatches(const char* command, const char* expected)
-    {
-        if (strlen(command) != strlen(expected))
-            return false;
-
-        return strcmp(command, expected) == 0;
-    }
+    static bool commandMatches(const char* command, const char* expected);
 
     /**
 	* @brief Check if a string starts with a given prefix.
@@ -200,10 +256,7 @@ public:
 	* @param prefix The prefix to look for
 	* @return true if str starts with prefix, false otherwise
     */
-    static bool startsWith(const char* str, const char* prefix)
-    {
-        return strncmp(str, prefix, strlen(prefix)) == 0;
-    }
+    static bool startsWith(const char* str, const char* prefix);
 
     /**
     * @brief Check if a string starts with a given prefix stored in PROGMEM.
@@ -212,31 +265,7 @@ public:
     * @param prefix The prefix to look for (in PROGMEM via F() macro)
     * @return true if str starts with prefix, false otherwise
     */
-    static bool startsWith(const char* str, const __FlashStringHelper* prefix)
-    {
-        if (!str || !prefix)
-            return false;
-
-        const char* p = reinterpret_cast<const char*>(prefix);
-        size_t i = 0;
-
-        // Compare character by character, reading from PROGMEM
-        while (true)
-        {
-            char prefixChar = pgm_read_byte(p + i);
-
-            if (prefixChar == '\0')
-            {
-                return true; // Reached end of prefix, it's a match
-            }
-
-            if (str[i] == '\0' || str[i] != prefixChar)
-            {
-                return false; // String ended or mismatch
-            }
-            i++;
-        }
-    }
+    static bool startsWith(const char* str, const __FlashStringHelper* prefix);
 
     /**
      * @brief Calculate the length of a string (PROGMEM or RAM).

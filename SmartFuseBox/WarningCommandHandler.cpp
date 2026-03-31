@@ -18,15 +18,8 @@
 #include "WarningCommandHandler.h"
 #include "SystemFunctions.h"
 
-#if defined(BOAT_CONTROL_PANEL)
-// Constructor: pass the NextionControl pointer so we can notify the current page
-WarningCommandHandler::WarningCommandHandler(BroadcastManager* broadcastManager,
-    NextionControl* nextionControl, WarningManager* warningManager)
-    : BaseBoatCommandHandler(broadcastManager, nextionControl, warningManager)
-#elif defined(FUSE_BOX_CONTROLLER)
 WarningCommandHandler::WarningCommandHandler(BroadcastManager* broadcastManager, WarningManager* warningManager)
     : SharedBaseCommandHandler(broadcastManager, warningManager)
-#endif
 {
 }
 

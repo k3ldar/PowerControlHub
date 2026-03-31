@@ -58,7 +58,7 @@
 // Remove the trailing underscore to enable each feature.
 
 // SD card support (experimental)
-#define SD_CARD_SUPPORT_
+#define SD_CARD_SUPPORT
 
 #if defined(SD_CARD_SUPPORT)
 // Read config.txt from SD card at boot. Requires SD_CARD_SUPPORT.
@@ -66,7 +66,7 @@
 #endif
 
 // MQTT home-assistant discovery (requires WIFI_SUPPORT — enforced in BoardConfig.h)
-#define MQTT_SUPPORT_
+#define MQTT_SUPPORT
 
 // Bluetooth BLE (mutually exclusive with WIFI_SUPPORT on Arduino Uno R4)
 #define BLUETOOTH_SUPPORT_

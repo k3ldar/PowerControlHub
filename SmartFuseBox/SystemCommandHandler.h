@@ -23,6 +23,7 @@
 #include "SystemDefinitions.h"
 #include "SystemFunctions.h"
 #include "WarningManager.h"
+#include "BaseConfigCommandHandler.h"
 
 #if defined(SD_CARD_SUPPORT)
 #include "SdCardLogger.h"
@@ -37,7 +38,7 @@
 #include "MQTTController.h"
 #endif
 
-class SystemCommandHandler : public SharedBaseCommandHandler
+class SystemCommandHandler : public SharedBaseCommandHandler, public BaseConfigCommandHandler
 {
 private:
 #if defined(WIFI_SUPPORT)

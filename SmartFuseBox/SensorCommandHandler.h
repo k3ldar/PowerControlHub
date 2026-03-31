@@ -21,27 +21,10 @@
 #include "SerialCommandManager.h"
 #include "Local.h"
 
-#if defined(FUSE_BOX_CONTROLLER)
 #include "RemoteSensor.h"
 #include "SharedBaseCommandHandler.h"
-#endif
 
-#if defined(BOAT_CONTROL_PANEL)
-#include "HomePage.h"
-#include "BaseBoatCommandHandler.h"
-#include "BaseBoatPage.h"
-#endif
-
-// Define the base class type based on the build configuration
-#if defined(BOAT_CONTROL_PANEL)
-    #define SENSOR_BASE_CLASS BaseBoatCommandHandler
-#elif defined(FUSE_BOX_CONTROLLER)
-    #define SENSOR_BASE_CLASS SharedBaseCommandHandler
-#else
-    #error "Either BOAT_CONTROL_PANEL or FUSE_BOX_CONTROLLER must be defined"
-#endif
-
-class SensorCommandHandler : public SENSOR_BASE_CLASS
+class SensorCommandHandler : public SharedBaseCommandHandler
 {
 private:
 	float _lastTemperature = NAN;
@@ -60,24 +43,16 @@ private:
 	const char* _gpsDirection;
 	double _gpsDistance = 0;
     bool _lastHornActive = false;
-#if defined(FUSE_BOX_CONTROLLER)
 	RemoteSensor** _remoteSensors;
 	size_t _remoteSensorCount;
-#endif
 
 public:
-#if defined(BOAT_CONTROL_PANEL)
-    explicit SensorCommandHandler(BroadcastManager* broadcastManager, NextionControl* nextionControl, WarningManager* warningManager);
-#elif defined(FUSE_BOX_CONTROLLER)
 	explicit SensorCommandHandler(BroadcastManager* broadcastManager, WarningManager* warningManager);
-#endif
 
     bool handleCommand(SerialCommandManager* sender, const char* command, const StringKeyValue params[], uint8_t paramCount) override;
     const char* const* supportedCommands(size_t& count) const override;
 
-#if defined(FUSE_BOX_CONTROLLER)
 	void setup(RemoteSensor* remoteSensors[], size_t remoteSensorCount);
-#endif
 
 
 	// Getters
@@ -116,5 +91,3 @@ public:
 	void setGpsDistance(double distance);
 	void setHornActive(bool value);
 };
-
-#undef SENSOR_BASE_CLASS

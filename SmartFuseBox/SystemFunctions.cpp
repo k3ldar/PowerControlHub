@@ -174,6 +174,57 @@ bool SystemFunctions::hasElapsed(unsigned long now, unsigned long previous, unsi
     return (now - previous) >= interval;
 }
 
+void SystemFunctions::resetSerial(Stream& serial)
+{
+    // Flush outgoing data
+    serial.flush();
+
+    // Clear incoming buffer
+    while (serial.available() > 0)
+    {
+        serial.read();
+    }
+}
+
+bool SystemFunctions::commandMatches(const char* command, const char* expected)
+{
+    if (strlen(command) != strlen(expected))
+        return false;
+
+    return strcmp(command, expected) == 0;
+}
+
+bool SystemFunctions::startsWith(const char* str, const char* prefix)
+{
+    return strncmp(str, prefix, strlen(prefix)) == 0;
+}
+
+bool SystemFunctions::startsWith(const char* str, const __FlashStringHelper* prefix)
+{
+    if (!str || !prefix)
+        return false;
+
+    const char* p = reinterpret_cast<const char*>(prefix);
+    size_t i = 0;
+
+    // Compare character by character, reading from PROGMEM
+    while (true)
+    {
+        char prefixChar = pgm_read_byte(p + i);
+
+        if (prefixChar == '\0')
+        {
+            return true; // Reached end of prefix, it's a match
+        }
+
+        if (str[i] == '\0' || str[i] != prefixChar)
+        {
+            return false; // String ended or mismatch
+        }
+        i++;
+    }
+}
+
 // Implementation
 size_t SystemFunctions::appendString(char* dest, size_t destSize, size_t offset, const char* src)
 {

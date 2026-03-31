@@ -51,25 +51,20 @@ bool SystemCommandHandler::handleCommand(SerialCommandManager* sender, const cha
 
     if (SystemFunctions::commandMatches(command, SystemHeartbeatCommand))
     {
-        for (uint8_t i = 0; i < paramCount; i++)
+        // Use BaseConfigCommandHandler helpers to read named params
+        const char* tStr = getParamValue(params, paramCount, "t");
+        if (tStr)
         {
-            // Handle time synchronization parameter (t=timestamp)
-            if (strcmp(params[i].key, "t") == 0)
+            unsigned long timestamp = static_cast<unsigned long>(strtoul(tStr, nullptr, 0));
+            if (timestamp > 0)
             {
-                unsigned long timestamp = static_cast<unsigned long>(strtoul(params[i].value, nullptr, 0));
-                if (timestamp > 0)
-                {
-                    DateTimeManager::setDateTime(timestamp);
-                }
-            }
-            // Handle warnings parameter (w=0x00) - received from Control Panel
-            else if (strcmp(params[i].key, "w") == 0)
-            {
-                // Warning bitmask received from Control Panel
-                // Could be processed here if needed for logging or monitoring
-                // Currently just acknowledged
+                DateTimeManager::setDateTime(timestamp);
             }
         }
+
+        // Warnings parameter (w) is currently ignored but read here for completeness
+        const char* wStr = getParamValue(params, paramCount, "w");
+        (void)wStr;
 
         sendAckOk(sender, command);
     }

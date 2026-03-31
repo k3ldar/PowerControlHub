@@ -20,6 +20,7 @@
 #include "SystemCpuMonitor.h"
 #include "DateTimeManager.h"
 #include "ConfigManager.h"
+#include "SensorFactory.h"
 
 #if defined(CARD_CONFIG_LOADER)
 #include "SDCardConfigLoader.h"
@@ -46,6 +47,7 @@ SmartFuseBoxApp::SmartFuseBoxApp(SerialCommandManager* commandMgrComputer,
     _soundHandler(commandMgrComputer, commandMgrLink, &_soundController),
     _interceptDebugHandler(&_broadcastManager),
     _sensorCommandHandler(&_broadcastManager, &_warningManager),
+    _sensorConfigHandler(commandMgrComputer, commandMgrLink),
     _warningCommandHandler(&_broadcastManager, &_warningManager),
     _ackHandler(&_broadcastManager, &_warningManager),
     _systemCommandHandler(&_broadcastManager, &_warningManager),
@@ -69,6 +71,8 @@ SmartFuseBoxApp::SmartFuseBoxApp(SerialCommandManager* commandMgrComputer,
 
       , _sensorManager(nullptr)
       , _sensorController(nullptr)
+      , _factorySensors(nullptr)
+      , _factorySensorCount(0)
 
 #if defined(MQTT_SUPPORT)
       , _mqttController(&_messageBus, ConfigManager::getConfigPtr(), _wifiController.getRadio(), commandMgrComputer)
@@ -95,8 +99,7 @@ SmartFuseBoxApp::SmartFuseBoxApp(SerialCommandManager* commandMgrComputer,
 #endif
 }
 
-void SmartFuseBoxApp::setup(BaseSensorHandler** sensorHandlers, uint8_t sensorHandlerCount,
-    RemoteSensor** remoteSensors, uint8_t remoteSensorCount)
+void SmartFuseBoxApp::setup(RemoteSensor** remoteSensors, uint8_t remoteSensorCount)
 {
     DateTimeManager::setDateTime();
 
@@ -118,23 +121,49 @@ void SmartFuseBoxApp::setup(BaseSensorHandler** sensorHandlers, uint8_t sensorHa
         _sensorCommandHandler.setup(remoteSensors, remoteSensorCount);
     }
 
-    // Create sensor management (needed before wifi/mqtt setup)
-    // SensorController expects an array of BaseSensor* but setup() is passed
-    // BaseSensorHandler** (sensorHandlers). Upcast each handler to BaseSensor*
-    // and build a temporary array to pass to SensorController.
-    BaseSensor** baseSensors = nullptr;
-    if (sensorHandlers != nullptr && sensorHandlerCount > 0)
+    // Build local sensors from SensorsConfig (populated by ConfigManager::load() above).
+    // SensorFactory allocates each enabled entry once; ownership stays with SmartFuseBoxApp.
+    Config* config = ConfigManager::getConfigPtr();
+
     {
-        baseSensors = new BaseSensor*[sensorHandlerCount];
-        for (uint8_t i = 0; i < sensorHandlerCount; i++)
-        {
-            baseSensors[i] = static_cast<BaseSensor*>(sensorHandlers[i]);
-            baseSensors[i]->setUniqueId(i);
-        }
+        SensorFactoryContext ctx;
+        ctx.messageBus           = &_messageBus;
+        ctx.broadcastManager     = &_broadcastManager;
+        ctx.sensorCommandHandler = &_sensorCommandHandler;
+        ctx.warningManager       = &_warningManager;
+        ctx.relayController      = &_relayController;
+        ctx.wifiController       = &_wifiController;
+        ctx.bluetoothRadio       = &_bluetoothController;
+#if defined(SD_CARD_SUPPORT)
+        ctx.sdCardLogger         = &_sdCardLogger;
+#endif
+
+        _factorySensors = SensorFactory::create(config->sensors, ctx, _factorySensorCount);
     }
 
-    _sensorController = new SensorController(baseSensors, sensorHandlerCount);
-    _sensorManager = new SensorManager(sensorHandlers, sensorHandlerCount);
+    // Merge factory-built local sensors and caller-supplied remote sensors into
+    // flat arrays for SensorController (query/status) and SensorManager (poll loop).
+    uint8_t totalCount = _factorySensorCount + remoteSensorCount;
+    BaseSensor**        allSensors  = (totalCount > 0) ? new BaseSensor*[totalCount]        : nullptr;
+    BaseSensorHandler** allHandlers = (totalCount > 0) ? new BaseSensorHandler*[totalCount] : nullptr;
+
+    for (uint8_t i = 0; i < _factorySensorCount; i++)
+    {
+        _factorySensors[i]->setUniqueId(i);
+        allSensors[i]  = _factorySensors[i];
+        allHandlers[i] = static_cast<BaseSensorHandler*>(_factorySensors[i]);
+    }
+
+    for (uint8_t i = 0; i < remoteSensorCount; i++)
+    {
+        uint8_t idx = _factorySensorCount + i;
+        remoteSensors[i]->setUniqueId(idx);
+        allSensors[idx]  = remoteSensors[i];
+        allHandlers[idx] = static_cast<BaseSensorHandler*>(remoteSensors[i]);
+    }
+
+    _sensorController = new SensorController(allSensors, totalCount);
+    _sensorManager    = new SensorManager(allHandlers, totalCount);
 
     _sensorNetworkHandler = new SensorNetworkHandler(_sensorController);
 
@@ -145,13 +174,13 @@ void SmartFuseBoxApp::setup(BaseSensorHandler** sensorHandlers, uint8_t sensorHa
 
     // serial command handlers
     ISerialCommandHandler* linkHandlers[] = { &_relayHandler, &_soundHandler, &_configHandler, &_ackHandler,
-        &_systemCommandHandler, &_warningCommandHandler, &_sensorCommandHandler, &_schedulerCommandHandler
+        &_systemCommandHandler, &_warningCommandHandler, &_sensorCommandHandler, &_sensorConfigHandler, &_schedulerCommandHandler
         };
     size_t linkHandlerCount = sizeof(linkHandlers) / sizeof(linkHandlers[0]);
     _commandMgrLink->registerHandlers(linkHandlers, linkHandlerCount);
 
     ISerialCommandHandler* computerHandlers[] = { &_relayHandler, &_soundHandler, &_configHandler, &_ackHandler,
-        &_systemCommandHandler, &_warningCommandHandler, &_sensorCommandHandler, &_schedulerCommandHandler 
+        &_systemCommandHandler, &_warningCommandHandler, &_sensorCommandHandler, &_sensorConfigHandler, &_schedulerCommandHandler 
         };
     size_t computerHandlerCount = sizeof(computerHandlers) / sizeof(computerHandlers[0]);
     _commandMgrComputer->registerHandlers(computerHandlers, computerHandlerCount);
@@ -169,8 +198,6 @@ void SmartFuseBoxApp::setup(BaseSensorHandler** sensorHandlers, uint8_t sensorHa
 #if defined(CARD_CONFIG_LOADER)
     _configHandler.setSdCardConfigLoader(&_sdCardConfigLoader);
 #endif
-
-    Config* config = ConfigManager::getConfigPtr();
 
     configureWifiSupport(config);
     configureBluetoothSupport(config);

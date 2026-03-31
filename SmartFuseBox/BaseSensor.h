@@ -20,13 +20,11 @@
 #include <SensorManager.h>
 #include "LoggingSupport.h"
 #include "Local.h"
+#include "JsonVisitor.h"
 
 // Forward declaration to allow SmartFuseBoxApp to be declared friend below
 class SmartFuseBoxApp;
 
-#if defined(FUSE_BOX_CONTROLLER)
-#include "JsonVisitor.h"
-#endif
 
 enum class SensorType : uint8_t
 {
@@ -50,10 +48,7 @@ struct MqttSensorChannel
 
 #endif
 
-class BaseSensor : public BaseSensorHandler
-#if defined(FUSE_BOX_CONTROLLER)
-	, public JsonVisitor
-#endif
+class BaseSensor : public BaseSensorHandler, public JsonVisitor
 {
     // Allow top-level application class to access BaseSensor internals
 	friend class SmartFuseBoxApp;

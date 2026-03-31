@@ -32,6 +32,7 @@
 #include "SoundCommandHandler.h"
 #include "InterceptDebugCommandHandler.h"
 #include "SensorCommandHandler.h"
+#include "SensorConfigCommandHandler.h"
 #include "WarningCommandHandler.h"
 #include "AckCommandHandler.h"
 #include "SystemCommandHandler.h"
@@ -74,6 +75,7 @@
 
 #include "BaseSensor.h"
 #include "RemoteSensor.h"
+#include "SensorFactory.h"
 
 class SmartFuseBoxApp
 {
@@ -91,6 +93,7 @@ private:
     SoundCommandHandler _soundHandler;
     InterceptDebugHandler _interceptDebugHandler;
     SensorCommandHandler _sensorCommandHandler;
+    SensorConfigCommandHandler _sensorConfigHandler;
     WarningCommandHandler _warningCommandHandler;
     AckCommandHandler _ackHandler;
     SystemCommandHandler _systemCommandHandler;
@@ -116,6 +119,8 @@ private:
 
     SensorManager* _sensorManager;
     SensorController* _sensorController;
+    BaseSensor** _factorySensors;
+    uint8_t _factorySensorCount;
 
 #if defined(MQTT_SUPPORT)
     MQTTController _mqttController;
@@ -147,8 +152,7 @@ public:
     SmartFuseBoxApp(SerialCommandManager* commandMgrComputer,
         SerialCommandManager* commandMgrLink);
 
-    void setup(BaseSensorHandler** sensorHandlers, uint8_t sensorHandlerCount,
-        RemoteSensor** remoteSensors, uint8_t remoteSensorCount);
+    void setup(RemoteSensor** remoteSensors, uint8_t remoteSensorCount);
     void loop();
 
     MessageBus* messageBus() { return &_messageBus; }

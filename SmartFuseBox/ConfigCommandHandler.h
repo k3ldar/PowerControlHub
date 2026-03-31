@@ -19,7 +19,7 @@
 
 #include <Arduino.h>
 
-#include "BaseCommandHandler.h"
+#include "BaseConfigCommandHandler.h"
 #include "IWifiController.h"
 #include "Local.h"
 
@@ -36,7 +36,7 @@ class MQTTConfigCommandHandler;
 class MQTTController;
 #endif
 
-class ConfigCommandHandler : public BaseCommandHandler
+class ConfigCommandHandler : public BaseConfigCommandHandler
 {
 private:
 	IWifiController* _wifiController;
