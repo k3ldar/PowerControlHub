@@ -211,6 +211,9 @@
     <ClCompile Include="WarningManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="OtaManager.cpp">
+      <Filter>Source Files\BusinessLogic</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="__vm\.SmartFuseBox.vsarduino.h">
@@ -458,6 +461,12 @@
     </ClInclude>
     <ClInclude Include="SensorConfigCommandHandler.h">
       <Filter>Header Files\SerialCommandHandlers</Filter>
+    </ClInclude>
+    <ClInclude Include="FirmwareVersion.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OtaManager.h">
+      <Filter>Header Files\BusinessLogic</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

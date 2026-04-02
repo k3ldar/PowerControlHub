@@ -39,7 +39,9 @@ constexpr char SystemSdCardPresent[] = "F8";
 constexpr char SystemSdCardLogFileSize[] = "F9";
 constexpr char SystemRtcDiagnostic[] = "F10";
 constexpr char SystemUptime[] = "F11";
-constexpr char SystemPageDemo[] = "F12";
+constexpr char SystemCheckForUpdate[] = "F12";
+constexpr char SystemOtaStatus[] = "F13";
+constexpr char SystemPageDemo[] = "F150";
 
 constexpr char RelayTurnAllOff[] = "R0";
 constexpr char RelayTurnAllOn[] = "R1";

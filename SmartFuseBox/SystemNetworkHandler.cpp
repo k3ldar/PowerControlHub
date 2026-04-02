@@ -21,6 +21,7 @@
 #include "ConfigManager.h"
 #include "DateTimeManager.h"
 #include "SystemFunctions.h"
+#include "FirmwareVersion.h"
 
 #if defined(SD_CARD_SUPPORT)
 #include "MicroSdDriver.h"
@@ -96,10 +97,13 @@ void SystemNetworkHandler::formatStatusJson(char* buffer, size_t size)
 	TimeParts timeParts = SystemFunctions::msToTimeParts(SystemFunctions::millis64());
 	SystemFunctions::formatTimeParts(uptime, UptimeBufferLength, timeParts);
 
+	char fw[16];
+	snprintf(fw, sizeof(fw), "v%u.%u.%u.%u",
+		FirmwareMajor, FirmwareMinor, FirmwarePatch, FirmwareBuild);
 
 	snprintf(buffer, size,
 		"\"system\":{\"mem\":%d,\"cpu\":%d,\"bluetooth\":%d,\"wifi\":%d,\"rssi\":%d,\"time\":\"%s\","
-		"\"sd\":{\"present\":%d,\"log\":%lu},\"Uptime\":\"%s\"}",
+		"\"sd\":{\"present\":%d,\"log\":%lu},\"Uptime\":\"%s\",\"fw\":\"%s\"}",
 		SystemFunctions::freeMemory(),
 		SystemCpuMonitor::getCpuUsage(),
 		bluetoothEnabled,
@@ -108,7 +112,8 @@ void SystemNetworkHandler::formatStatusJson(char* buffer, size_t size)
 		dateTimeStr,
 		sdPresent,
 		(unsigned long)logSize,
-		uptime);
+		uptime,
+		fw);
 }
 
 void SystemNetworkHandler::formatWifiStatusJson(IWifiClient* client)

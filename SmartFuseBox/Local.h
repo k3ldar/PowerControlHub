@@ -68,6 +68,12 @@
 // MQTT home-assistant discovery (requires WIFI_SUPPORT — enforced in BoardConfig.h)
 #define MQTT_SUPPORT
 
+// OTA auto-update via GitHub releases (requires ESP32 + WIFI_SUPPORT — enforced in BoardConfig.h).
+// When enabled, the device checks for a new release every 24 hours and broadcasts the result.
+// Auto-applying the update is OFF by default; use the F12:apply=1 command or set the
+// OtaFlagAutoApply bit in SystemHeader::reserved[0] to enable automatic installs.
+#define OTA_AUTO_UPDATE
+
 // Bluetooth BLE (mutually exclusive with WIFI_SUPPORT on Arduino Uno R4)
 #define BLUETOOTH_SUPPORT_
 

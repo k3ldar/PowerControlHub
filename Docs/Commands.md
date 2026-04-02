@@ -18,6 +18,8 @@ These are commands used to configure the system settings and can only be sent fr
 | `F9` — SD Card Log File Size | `F9` | Get current log file size in bytes. Returns `v=<bytes>` where bytes is the size of the active log file. Returns `v=0` if no file is open. No params. |
 | `F10` — RTC Diagnostic | `F10` | Perform DS1302 RTC diagnostics. Returns status message with RTC health (availability, running state, write protection, time validity). Returns error message if RTC fails any check. No params. |
 | `F11` — Uptime | F11 | Returns system uptime as "days HH:MM:SS" (e.g. 2d 03:12:45). No params. |
+| `F12` — OTA Check / Apply | `F12` or `F12:apply=1` | Trigger an OTA firmware check against the latest GitHub release. Without params (or `apply=0`) checks only and returns current status. With `apply=1` downloads and applies the update if one is available (or queues apply if a check is already in progress). Response params: `v=<current>` current firmware version, `av=<available>` available version tag (empty if none found yet), `s=<state>` OTA state string. **SFB only** — requires `OTA_AUTO_UPDATE`, ESP32 and WiFi in client mode. |
+| `F13` — OTA Status | `F13` | Query current OTA state without triggering a check. Response params: `v=<current>` current firmware version, `av=<available>` available version tag, `s=<state>` OTA state string (`idle`, `checking`, `available`, `downloading`, `rebooting`, `failed`, `uptodate`), `auto=<0\|1>` whether auto-apply is enabled. **SFB only** — requires `OTA_AUTO_UPDATE`, ESP32 and WiFi in client mode. |
 
 **Heartbeat Behavior:**
 - Sent every 1 second (1000ms) from both devices
@@ -30,7 +32,17 @@ These are commands used to configure the system settings and can only be sent fr
 ### Wifi System Commands (SFB)
 Only F0 is supported via wifi.
 Route: /api/system/{command}
-Example: Return free memory = /api/system/F2 
+Example: Return free memory = /api/system/F2
+
+### OTA Behavior (F12 / F13)
+- Automatic periodic check runs every 24 hours (first check fires 24 h after boot to allow WiFi to fully connect).
+- F12 without params (or `apply=0`) triggers an immediate check and broadcasts the result — it does **not** apply the update automatically.
+- F12 with `apply=1` downloads and applies immediately if an update is available; if a check is still in progress the apply is queued.
+- Auto-apply on each periodic check is **off by default**; enable it by setting bit `OtaFlagAutoApply (0x01)` in `SystemHeader::reserved[0]`.
+- State transitions broadcast an `F12` command automatically as they occur (e.g. `checking` → `available` → `downloading` → `rebooting`).
+- Debug and error messages are broadcast via the debug channel with source `OTA` at each key milestone: API query, tag found/not found, checksum fetch, binary size, download progress (25 / 50 / 75%), hash verification, and reboot.
+- F13 is read-only — it never triggers any OTA activity.
+- OTA is only active when `OTA_AUTO_UPDATE` is defined, the board is an ESP32, `WIFI_SUPPORT` is defined, and WiFi is in connected client mode.
 
 
 ------

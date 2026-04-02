@@ -72,6 +72,10 @@
 #include "LedMatrixManager.h"
 #endif
 
+#if defined(OTA_AUTO_UPDATE) && defined(ESP32) && defined(WIFI_SUPPORT)
+#include "OtaManager.h"
+#endif
+
 #include "BaseSensor.h"
 #include "RemoteSensor.h"
 #include "SensorFactory.h"
@@ -135,6 +139,10 @@ private:
 
 #if defined(LED_MANAGER)
     LedMatrixManager _ledManager;
+#endif
+
+#if defined(OTA_AUTO_UPDATE) && defined(ESP32) && defined(WIFI_SUPPORT)
+    OtaManager _otaManager;
 #endif
 
 #if defined(CARD_CONFIG_LOADER)

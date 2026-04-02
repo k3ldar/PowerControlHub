@@ -83,3 +83,13 @@
 #if defined(ARDUINO_UNO_R4) && defined(WIFI_SUPPORT) && defined(BLUETOOTH_SUPPORT)
   #error "WIFI_SUPPORT and BLUETOOTH_SUPPORT cannot both be active on Arduino Uno R4. Disable one in Local.h."
 #endif
+
+// ─── OTA Auto-Update Guard ───────────────────────────────────────────────────
+// OTA requires ESP32 (Update library) and an active WiFi client connection.
+// Silently strip the define on unsupported boards instead of erroring, so that
+// the same Local.h can be used across board types without manual edits.
+#if defined(OTA_AUTO_UPDATE)
+  #if !defined(ESP32) || !defined(WIFI_SUPPORT)
+    #undef OTA_AUTO_UPDATE
+  #endif
+#endif
