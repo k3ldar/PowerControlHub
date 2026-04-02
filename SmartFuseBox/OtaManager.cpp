@@ -33,6 +33,7 @@
 static constexpr size_t OtaHashHexLen = 64;   // SHA-256 hex string
 static constexpr size_t OtaDownloadBufSize = 512;  // streaming chunk size
 static constexpr int OtaHttpTimeout = 15000; // ms
+constexpr uint8_t MaxVersionSize = 18;
 
 // ─── OtaManager ───────────────────────────────────────────────────────────────
 
@@ -81,7 +82,7 @@ void OtaManager::update(unsigned long now)
         _state = OtaState::Checking;
         broadcastStatus();
 
-        char tag[16] = {};
+        char tag[MaxVersionSize] = {};
         bool found = fetchLatestTag(tag, sizeof(tag));
 
         if (!found)
@@ -144,7 +145,7 @@ void OtaManager::update(unsigned long now)
         _state = OtaState::Downloading;
         broadcastStatus();
 
-        char tag[16];
+        char tag[MaxVersionSize];
         strncpy(tag, _availableVersion, sizeof(tag) - 1);
         tag[sizeof(tag) - 1] = '\0';
 
@@ -222,7 +223,7 @@ bool OtaManager::fetchLatestTag(char* tagOut, size_t tagLen)
         OtaGithubOwner, OtaGithubRepo);
 
     WiFiClientSecure secureClient;
-    secureClient.setInsecure();  // integrity is verified by SHA-256 on the binary
+    secureClient.setCACert(OtaGithubRootCA);
 
     HTTPClient http;
     http.begin(secureClient, url);
@@ -320,7 +321,7 @@ bool OtaManager::parseTagName(const char* json, size_t jsonLen, char* tagOut, si
     //   "html_url": "https://github.com/.../releases/tag/v0.9.2.2"
     // The version tag is the final path segment — everything after the last /
     // and before the closing double-quote.
-    const char* key = "\"html_url\":\"";
+    const char* key = "\"html_url\":";
     const char* p   = nullptr;
 
     for (size_t i = 0; i + strlen(key) < jsonLen; ++i)
@@ -401,7 +402,7 @@ bool OtaManager::fetchChecksum(const char* tag, char* hashHexOut, size_t hashLen
         OtaGithubOwner, OtaGithubRepo, tag, CONFIG_IDF_TARGET, tag);
 
     WiFiClientSecure secureClient;
-    secureClient.setInsecure();
+    secureClient.setCACert(OtaGithubRootCA);
 
     HTTPClient http;
     http.begin(secureClient, url);
@@ -481,7 +482,7 @@ bool OtaManager::downloadAndApply(const char* tag, const char* expectedHash)
         OtaGithubOwner, OtaGithubRepo, tag, CONFIG_IDF_TARGET, tag);
 
     WiFiClientSecure secureClient;
-    secureClient.setInsecure();
+    secureClient.setCACert(OtaGithubRootCA);
 
     HTTPClient http;
     http.begin(secureClient, url);
@@ -634,7 +635,7 @@ void OtaManager::broadcastStatus()
         return;
 
     // Build current firmware version string once.
-    char current[16];
+    char current[MaxVersionSize];
     snprintf(current, sizeof(current), "v%u.%u.%u.%u",
         FirmwareMajor, FirmwareMinor, FirmwarePatch, FirmwareBuild);
 

@@ -258,9 +258,32 @@ bool SystemCommandHandler::handleCommand(SerialCommandManager* sender, const cha
             snprintf(current, sizeof(current), "v%u.%u.%u.%u",
                 FirmwareMajor, FirmwareMinor, FirmwarePatch, FirmwareBuild);
 
-            const char* stateStr = "checking";
-            if (_otaManager->getState() == OtaState::UpdateAvailable) stateStr = "available";
-            if (_otaManager->getState() == OtaState::Downloading)     stateStr = "downloading";
+            const char* stateStr = "idle";
+
+            switch (_otaManager->getState())
+            {
+                case OtaState::Idle:
+                    stateStr = "triggered";
+                    break;
+                case OtaState::Checking:
+                    stateStr = "checking";
+                    break;
+                case OtaState::UpdateAvailable:
+                    stateStr = "available";
+                    break;
+                case OtaState::Downloading:
+                    stateStr = "downloading";
+                    break;
+                case OtaState::Rebooting:
+                    stateStr = "rebooting";
+                    break;
+                case OtaState::Failed:
+                    stateStr = "failed";
+                    break;
+                case OtaState::UpToDate:
+                    stateStr = "uptodate";
+                    break;
+            }
 
             constexpr uint8_t argCount = 3;
             StringKeyValue respParams[argCount];
