@@ -55,18 +55,21 @@ jobs:
             --output-dir SmartFuseBox/build/${{ matrix.board.name }} \
             SmartFuseBox
 
-      - name: Generate checksum
+      - name: Rename and checksum firmware binary
         run: |
-          BIN_FILE=$(find SmartFuseBox/build/${{ matrix.board.name }} -name "*.bin" | head -n 1)
-          sha256sum "$BIN_FILE" | awk '{print $1}' > SmartFuseBox-${{ matrix.board.name }}.sha256
+          TAG="${GITHUB_REF#refs/tags/}"
+          SRC="SmartFuseBox/build/${{ matrix.board.name }}/SmartFuseBox.ino.bin"
+          DEST="SmartFuseBox-${{ matrix.board.name }}-${TAG}.bin"
+          cp "$SRC" "$DEST"
+          sha256sum "$DEST" | awk '{print $1}' > "SmartFuseBox-${{ matrix.board.name }}-${TAG}.sha256"
 
       - name: Upload firmware artifacts
         uses: actions/upload-artifact@v4
         with:
           name: firmware-${{ matrix.board.name }}
           path: |
-            SmartFuseBox/build/${{ matrix.board.name }}/*.bin
-            SmartFuseBox-${{ matrix.board.name }}.sha256
+            SmartFuseBox-${{ matrix.board.name }}-*.bin
+            SmartFuseBox-${{ matrix.board.name }}-*.sha256
 
   release:
     needs: build
