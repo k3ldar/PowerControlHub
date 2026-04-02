@@ -119,6 +119,7 @@ public:
 		_warningManager(warningManager), _sensorPin(sensorPin), _dht11Sensor(sensorPin), _humidityOffset(humidityOffset),
 		_temperatureOffset(temperatureOffset), _humidity(0.0f), _celsius(0.0f)
 	{
+		_dht11Sensor.setDelay(0);
 #if defined(MQTT_SUPPORT)
 		snprintf(_slugTemp, sizeof(_slugTemp), "%s_temperature", _safeSlug);
 		snprintf(_slugHumidity, sizeof(_slugHumidity), "%s_humidity", _safeSlug);
@@ -144,8 +145,8 @@ public:
 		dtostrf(_temperatureOffset, 1, 1, celsiusOffset);
 		dtostrf(_humidityOffset, 1, 1, humidityOffset);
 
-		int written = snprintf(buffer, size, "\"name\":\"%s\",\"SensorPin\":%u,\"temperature\":%s,\"humidity\":%s,\"humOffset\":%s,\"tempOffset\":%s",
-			_name, _sensorPin, celsius, humidity, humidityOffset, celsiusOffset);
+		int written = snprintf(buffer, size, "\"name\":\"%s\",\"SensorPin\":%u,\"temperature\":%s,\"tempOffset\":%s,\"humidity\":%s,\"humOffset\":%s",
+			_name, _sensorPin, celsius, celsiusOffset, humidity, humidityOffset);
 
 		if (written < 0 || (size_t)written >= size)
 		{

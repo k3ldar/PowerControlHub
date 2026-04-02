@@ -38,6 +38,10 @@
 #include "MQTTController.h"
 #endif
 
+#if defined(OTA_AUTO_UPDATE) && defined(ESP32) && defined(WIFI_SUPPORT)
+#include "OtaManager.h"
+#endif
+
 class SystemCommandHandler : public SharedBaseCommandHandler, public BaseConfigCommandHandler
 {
 private:
@@ -51,6 +55,10 @@ private:
 
 #if defined(MQTT_SUPPORT)
     MQTTController* _mqttController = nullptr;
+#endif
+
+#if defined(OTA_AUTO_UPDATE) && defined(ESP32) && defined(WIFI_SUPPORT)
+    OtaManager* _otaManager = nullptr;
 #endif
 
 public:
@@ -70,5 +78,9 @@ public:
 
 #if defined(MQTT_SUPPORT)
     void setMqttController(MQTTController* mqttController);
+#endif
+
+#if defined(OTA_AUTO_UPDATE) && defined(ESP32) && defined(WIFI_SUPPORT)
+    void setOtaManager(OtaManager* otaManager);
 #endif
 };

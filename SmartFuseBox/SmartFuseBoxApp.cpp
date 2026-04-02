@@ -89,6 +89,10 @@ SmartFuseBoxApp::SmartFuseBoxApp(SerialCommandManager* commandMgrComputer,
       , _ledManager(&_messageBus)
 #endif
 
+#if defined(OTA_AUTO_UPDATE) && defined(ESP32) && defined(WIFI_SUPPORT)
+      , _otaManager(&_wifiController, &_broadcastManager)
+#endif
+
 #if defined(CARD_CONFIG_LOADER)
       , _sdCardConfigLoader(commandMgrComputer, commandMgrLink, &_configController, &_relayController)
 #endif
@@ -228,6 +232,11 @@ void SmartFuseBoxApp::setup(RemoteSensor** remoteSensors, uint8_t remoteSensorCo
     _systemCommandHandler.setMqttController(&_mqttController);
 #endif
 
+#if defined(OTA_AUTO_UPDATE) && defined(ESP32) && defined(WIFI_SUPPORT)
+    _systemCommandHandler.setOtaManager(&_otaManager);
+    _otaManager.begin();
+#endif
+
 #if defined(SD_CARD_SUPPORT)
     MicroSdDriver& microSdDriver = MicroSdDriver::getInstance();
     microSdDriver.setWarningManager(&_warningManager);
@@ -320,6 +329,12 @@ void SmartFuseBoxApp::loop()
     SystemCpuMonitor::startTask();
     _scheduleController.update(now);
     SystemCpuMonitor::endTask();
+
+#if defined(OTA_AUTO_UPDATE) && defined(ESP32) && defined(WIFI_SUPPORT)
+    SystemCpuMonitor::startTask();
+    _otaManager.update(now);
+    SystemCpuMonitor::endTask();
+#endif
 
 #if defined(SD_CARD_SUPPORT)
     SystemCpuMonitor::startTask();

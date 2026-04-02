@@ -44,6 +44,9 @@ constexpr uint8_t ConfigMaxSensorPins = 4;
 
 constexpr uint32_t SystemHeaderMagic = 0x53464201;  // 'SFB\x01'
 
+// Flags stored in SystemHeader::reserved[0]
+constexpr uint8_t OtaFlagAutoApply = 0x01;  // bit0: automatically download and apply updates
+
 struct SystemHeader {
     uint32_t magic;               // offset 0  — must equal SystemHeaderMagic
     uint32_t bootCount;           // offset 4
@@ -52,7 +55,7 @@ struct SystemHeader {
     uint8_t  crashCounter;        // offset 11
     uint8_t  lastResetReason;     // offset 12
     uint8_t  safeModeFlagsf;      // offset 13
-    uint8_t  reserved[16];        // offset 14
+    uint8_t  reserved[16];        // offset 14 — reserved[0] = OTA flags (see OtaFlagAutoApply)
     uint16_t checksum;            // offset 30 — always last
 } __attribute__((packed));        // = 32 bytes
 

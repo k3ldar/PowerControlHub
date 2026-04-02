@@ -22,6 +22,9 @@
 #if defined(WIFI_SUPPORT)
 #include "WifiController.h"
 #endif
+#if defined(OTA_AUTO_UPDATE) && defined(ESP32) && defined(WIFI_SUPPORT)
+#include "FirmwareVersion.h"
+#endif
 
 
 SystemCommandHandler::SystemCommandHandler(BroadcastManager* broadcaster, WarningManager* warningManager)
@@ -38,7 +41,8 @@ const char* const* SystemCommandHandler::supportedCommands(size_t& count) const
     static const char* cmds[] = { 
         SystemHeartbeatCommand, SystemInitialized, SystemFreeMemory, SystemCpuUsage,
         SystemBluetoothStatus, SystemWifiStatus, SystemSetDateTime, SystemGetDateTime,
-        SystemSdCardPresent, SystemSdCardLogFileSize, SystemRtcDiagnostic, SystemUptime
+        SystemSdCardPresent, SystemSdCardLogFileSize, SystemRtcDiagnostic, SystemUptime,
+        SystemCheckForUpdate, SystemOtaStatus
     };
     count = sizeof(cmds) / sizeof(cmds[0]);
     return cmds;
@@ -239,6 +243,106 @@ bool SystemCommandHandler::handleCommand(SerialCommandManager* sender, const cha
         SystemFunctions::formatTimeParts(param.value, sizeof(param.value), tp);
         sendAckOk(sender, command, &param);
         }
+#if defined(OTA_AUTO_UPDATE) && defined(ESP32) && defined(WIFI_SUPPORT)
+    else if (SystemFunctions::commandMatches(command, SystemCheckForUpdate))
+    {
+        if (_otaManager)
+        {
+            // apply=1 triggers a check and immediately applies the update if one is found.
+            const char* applyStr = getParamValue(params, paramCount, "apply");
+            bool applyNow = applyStr && (applyStr[0] == '1');
+            _otaManager->triggerCheck(applyNow);
+
+            // Respond with the current state — the async result will be broadcast later.
+            char current[16];
+            snprintf(current, sizeof(current), "v%u.%u.%u.%u",
+                FirmwareMajor, FirmwareMinor, FirmwarePatch, FirmwareBuild);
+
+            const char* stateStr = "idle";
+
+            switch (_otaManager->getState())
+            {
+                case OtaState::Idle:
+                    stateStr = "triggered";
+                    break;
+                case OtaState::Checking:
+                    stateStr = "checking";
+                    break;
+                case OtaState::UpdateAvailable:
+                    stateStr = "available";
+                    break;
+                case OtaState::Downloading:
+                    stateStr = "downloading";
+                    break;
+                case OtaState::Rebooting:
+                    stateStr = "rebooting";
+                    break;
+                case OtaState::Failed:
+                    stateStr = "failed";
+                    break;
+                case OtaState::UpToDate:
+                    stateStr = "uptodate";
+                    break;
+            }
+
+            constexpr uint8_t argCount = 3;
+            StringKeyValue respParams[argCount];
+            strncpy(respParams[0].key, "v", sizeof(respParams[0].key));
+            strncpy(respParams[0].value, current, sizeof(respParams[0].value));
+            strncpy(respParams[1].key, "av", sizeof(respParams[1].key));
+            strncpy(respParams[1].value, _otaManager->getAvailableVersion(), sizeof(respParams[1].value));
+            strncpy(respParams[2].key, "s", sizeof(respParams[2].key));
+            strncpy(respParams[2].value, stateStr, sizeof(respParams[2].value));
+            sendAckOk(sender, command, respParams, argCount);
+        }
+        else
+        {
+            sendAckErr(sender, command, F("OTA not available"));
+        }
+    }
+    else if (SystemFunctions::commandMatches(command, SystemOtaStatus))
+    {
+        char current[16];
+        snprintf(current, sizeof(current), "v%u.%u.%u.%u",
+            FirmwareMajor, FirmwareMinor, FirmwarePatch, FirmwareBuild);
+
+        const char* stateStr   = "disabled";
+        const char* avVersion  = "";
+        char        autoApply  = '0';
+
+        if (_otaManager)
+        {
+            switch (_otaManager->getState())
+            {
+                case OtaState::Idle:             stateStr = "idle";        break;
+                case OtaState::Checking:         stateStr = "checking";    break;
+                case OtaState::UpdateAvailable:  stateStr = "available";   break;
+                case OtaState::Downloading:      stateStr = "downloading"; break;
+                case OtaState::Rebooting:        stateStr = "rebooting";   break;
+                case OtaState::Failed:           stateStr = "failed";      break;
+                case OtaState::UpToDate:         stateStr = "uptodate";    break;
+            }
+            avVersion = _otaManager->getAvailableVersion();
+
+            SystemHeader* hdr = ConfigManager::getHeaderPtr();
+            if (hdr && (hdr->reserved[0] & OtaFlagAutoApply))
+                autoApply = '1';
+        }
+
+        constexpr uint8_t argCount = 4;
+        StringKeyValue respParams[argCount];
+        strncpy(respParams[0].key, "v",  sizeof(respParams[0].key));
+        strncpy(respParams[0].value, current, sizeof(respParams[0].value));
+        strncpy(respParams[1].key, "av", sizeof(respParams[1].key));
+        strncpy(respParams[1].value, avVersion, sizeof(respParams[1].value));
+        strncpy(respParams[2].key, "s",  sizeof(respParams[2].key));
+        strncpy(respParams[2].value, stateStr, sizeof(respParams[2].value));
+        strncpy(respParams[3].key, "auto", sizeof(respParams[3].key));
+        respParams[3].value[0] = autoApply;
+        respParams[3].value[1] = '\0';
+        sendAckOk(sender, command, respParams, argCount);
+    }
+#endif // OTA_AUTO_UPDATE
     else
     {
         sendAckErr(sender, command, F("Unknown system command"));
@@ -265,5 +369,12 @@ void SystemCommandHandler::setWifiController(WifiController* wifiController)
 void SystemCommandHandler::setMqttController(MQTTController* mqttController)
 {
     _mqttController = mqttController;
+}
+#endif
+
+#if defined(OTA_AUTO_UPDATE) && defined(ESP32) && defined(WIFI_SUPPORT)
+void SystemCommandHandler::setOtaManager(OtaManager* otaManager)
+{
+    _otaManager = otaManager;
 }
 #endif

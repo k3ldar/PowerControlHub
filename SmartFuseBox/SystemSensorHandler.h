@@ -33,6 +33,8 @@
 #include "SdCardLogger.h"
 #endif
 
+#include "FirmwareVersion.h"
+
 constexpr unsigned long SystemSensorUpdateIntervalMs = 2500;
 
 /**
@@ -124,7 +126,7 @@ public:
 #if defined(MQTT_SUPPORT)
 	uint8_t getMqttChannelCount() const override
 	{
-		return 7;
+		return 8;
 	}
 
 	MqttSensorChannel getMqttChannel(uint8_t channelIndex) const override
@@ -138,6 +140,7 @@ public:
 			case 4: return { "Sys SD Log Size", "sd_log_size",   "sd_log_size", nullptr, "MB",    false };
 			case 5: return { "Sys Warnings", "warning_count", "warning_count", nullptr, nullptr, false };
 			case 6: return { "Sys Uptime", "uptime", "uptime", nullptr, nullptr, false };
+			case 7: return { "Sys Firmware", "firmware", "firmware", nullptr, nullptr, false };
 			default: return { nullptr, nullptr, nullptr, nullptr, nullptr, false };
 		}
 	}
@@ -182,13 +185,18 @@ public:
 				break;
 
 			case 6:
-			{
-				TimeParts timeParts = SystemFunctions::msToTimeParts(SystemFunctions::millis64());
-				SystemFunctions::formatTimeParts(buffer, size, timeParts);
-				break;
-			}
+				{
+					TimeParts timeParts = SystemFunctions::msToTimeParts(SystemFunctions::millis64());
+					SystemFunctions::formatTimeParts(buffer, size, timeParts);
+					break;
+				}
 
-			default:
+				case 7:
+					snprintf(buffer, size, "v%u.%u.%u.%u",
+						FirmwareMajor, FirmwareMinor, FirmwarePatch, FirmwareBuild);
+					break;
+
+				default:
 				snprintf(buffer, size, "0");
 				break;
 		}
