@@ -27,7 +27,7 @@
 #include "MessageBus.h"
 #include "Local.h"
 
-constexpr uint16_t MaximumRequestSize = 512;   // GET-only API, typical request ~200 bytes
+constexpr uint16_t MaximumRequestSize = 512;   // Headers ~200 bytes + POST body up to ~256 bytes
 constexpr uint8_t MaximumPathLength = 128;
 
 static constexpr unsigned long ConnectionRetryIntervalMs = 10000;
@@ -94,7 +94,7 @@ private:
 	void startServer();
 	void stopServer();
 	bool handleIndex(IWifiClient& client, bool isPersistent, const char* path);
-	bool dispatchToHandler(IWifiClient& client, INetworkCommandHandler* handler, const char* path, const char* method, const char* query, bool isPersistent);
+	bool dispatchToHandler(IWifiClient& client, INetworkCommandHandler* handler, const char* path, const char* method, const char* query, const char* body, bool isPersistent);
 	void registerJsonVisitors(NetworkJsonVisitor** jsonVisitors, uint8_t jsonVisitorCount);
 
 	// Multi-client helper functions

@@ -386,20 +386,6 @@ void WifiServer::handleClientState(uint8_t index, unsigned long now)
 					client.lastActivity = now;
 				}
 
-				// Check for end of HTTP headers (\r\n\r\n)
-				if (requestLen >= 4 && 
-					client.request[requestLen - 4] == '\r' &&
-					client.request[requestLen - 3] == '\n' &&
-					client.request[requestLen - 2] == '\r' &&
-					client.request[requestLen - 1] == '\n')
-				{
-					requestComplete = true;
-					char msg[48];
-					snprintf(msg, sizeof(msg), "Request complete [slot %d, %d bytes]", index, requestLen);
-					sendDebug(msg, F("WifiServer"));
-					break;
-				}
-
 				// Safety check for request size
 				if (requestLen >= MaximumRequestSize)
 				{
@@ -407,6 +393,31 @@ void WifiServer::handleClientState(uint8_t index, unsigned long now)
 					send400(*client.client, false);
 					cleanupClient(index);
 					return;
+				}
+			}
+
+			// Determine if the full request (headers + any body) has been received.
+			// For GET: complete once we see the blank line (\r\n\r\n).
+			// For POST: complete once Content-Length body bytes have also been read.
+			const char* headerEnd = strstr(client.request, "\r\n\r\n");
+			if (headerEnd)
+			{
+				size_t headerEndIdx = (headerEnd - client.request) + 4;
+				int32_t contentLength = 0;
+				const char* clHeader = strstr(client.request, "Content-Length:");
+				if (clHeader)
+				{
+					clHeader += 15;
+					while (*clHeader == ' ') clHeader++;
+					contentLength = atoi(clHeader);
+				}
+
+				if (requestLen >= headerEndIdx + static_cast<size_t>(contentLength))
+				{
+					requestComplete = true;
+					char msg[48];
+					snprintf(msg, sizeof(msg), "Request complete [slot %d, %d bytes]", index, requestLen);
+					sendDebug(msg, F("WifiServer"));
 				}
 			}
 
@@ -573,8 +584,8 @@ void WifiServer::processClientRequest(uint8_t index)
 		return;
 	}
 
-	// Only support GET for now
-	if (strcmp(method, "GET") != 0)
+	// Only support GET and POST
+	if (strcmp(method, "GET") != 0 && strcmp(method, "POST") != 0)
 	{
 		send404(*client.client, isPersistent);
 		if (!isPersistent)
@@ -671,6 +682,17 @@ void WifiServer::processClientRequest(uint8_t index)
 	sendDebug(F("Processing request"), F("WifiServer"));
 	bool handled = false;
 
+	// For POST requests, locate the body (bytes after the blank line \r\n\r\n)
+	const char* body = nullptr;
+	if (strcmp(method, "POST") == 0)
+	{
+		const char* bodyStart = strstr(client.request, "\r\n\r\n");
+		if (bodyStart)
+		{
+			body = bodyStart + 4;
+		}
+	}
+
 	if (SystemFunctions::startsWith(path, F("/api/index")))
 	{
 		handleIndex(*client.client, client.isPersistent, path);
@@ -684,7 +706,7 @@ void WifiServer::processClientRequest(uint8_t index)
 		{
 			if (_handlers[i] && SystemFunctions::startsWith(path, _handlers[i]->getRoute()))
 			{
-				handled = dispatchToHandler(*client.client, _handlers[i], path, method, query, isPersistent);
+				handled = dispatchToHandler(*client.client, _handlers[i], path, method, query, body, isPersistent);
 				break;
 			}
 		}
@@ -878,7 +900,7 @@ bool WifiServer::handleIndex(IWifiClient& client, bool isPersistent, const char*
 	return true;
 }
 
-bool WifiServer::dispatchToHandler(IWifiClient& client, INetworkCommandHandler* handler, const char* path, const char* method, const char* query, bool isPersistent)
+bool WifiServer::dispatchToHandler(IWifiClient& client, INetworkCommandHandler* handler, const char* path, const char* method, const char* query, const char* body, bool isPersistent)
 {
 	if (!handler)
 	{
@@ -924,39 +946,76 @@ bool WifiServer::dispatchToHandler(IWifiClient& client, INetworkCommandHandler* 
 	    }
 	}
 
-	// Parse query string into parameter array (max 6 parameters)
+	// Parse parameters:
+	//   POST requests → newline-delimited key=value lines from the body
+	//   GET  requests → '&'-delimited key=value pairs from the query string
 	StringKeyValue params[MaximumParameterCount] = {};
 	uint8_t paramCount = 0;
-	uint16_t queryLength = SystemFunctions::calculateLength(query);
 
-	if (queryLength > 0)
+	if (strcmp(method, "POST") == 0 && body && body[0] != '\0')
 	{
-		uint8_t startIdx = 0;
+		// Body format supports two styles:
+		//   Newline-delimited:  "key=value\nkey=value\n..."
+		//   Semicolon-delimited: "key=value;key=value;..."  (serial/dat-file style)
+		// Both styles are parsed identically — split on '\n', '\r', or ';'.
+		const char* lineStart = body;
 
-		while (paramCount < MaximumParameterCount && startIdx < queryLength)
+		while (paramCount < MaximumParameterCount && lineStart && *lineStart != '\0')
 		{
-			// Find the next '&' or end of string
-			int32_t ampIdx = SystemFunctions::indexOf(query, '&', startIdx);
-			if (ampIdx == -1)
+			// Find end of token (newline or semicolon delimiter)
+			const char* lineEnd = lineStart;
+			while (*lineEnd && *lineEnd != '\n' && *lineEnd != '\r' && *lineEnd != ';') lineEnd++;
+
+			size_t lineLen = lineEnd - lineStart;
+			if (lineLen > 0 && lineLen < DefaultMaxParamKeyLength + DefaultMaxParamValueLength + 1)
 			{
-				ampIdx = queryLength;
+				char line[DefaultMaxParamKeyLength + DefaultMaxParamValueLength + 2];
+				strncpy(line, lineStart, lineLen);
+				line[lineLen] = '\0';
+
+				int32_t eqIdx = SystemFunctions::indexOf(line, '=', 0);
+				if (eqIdx > 0)
+				{
+					SystemFunctions::substr(params[paramCount].key,   sizeof(params[paramCount].key),   line, 0, eqIdx);
+					SystemFunctions::substr(params[paramCount].value, sizeof(params[paramCount].value), line, eqIdx + 1);
+					paramCount++;
+				}
 			}
 
-			// Extract this parameter
-			char param[DefaultMaxParamKeyLength];
-			SystemFunctions::substr(param, sizeof(param), query, startIdx, ampIdx - startIdx);
+			// Advance past delimiter(s)
+			lineStart = lineEnd;
+			while (*lineStart == '\r' || *lineStart == '\n' || *lineStart == ';') lineStart++;
+		}
+	}
+	else
+	{
+		uint16_t queryLength = SystemFunctions::calculateLength(query);
 
-			// Split on '='
-			int32_t equalsIdx = SystemFunctions::indexOf(param, '=', 0);
+		if (queryLength > 0)
+		{
+			uint8_t startIdx = 0;
 
-			if (equalsIdx != -1)
+			while (paramCount < MaximumParameterCount && startIdx < queryLength)
 			{
-				SystemFunctions::substr(params[paramCount].key, sizeof(params[paramCount].key), param, 0, equalsIdx);
-				SystemFunctions::substr(params[paramCount].value, sizeof(params[paramCount].value), param, equalsIdx + 1);
-				paramCount++;
-			}
+				int32_t ampIdx = SystemFunctions::indexOf(query, '&', startIdx);
+				if (ampIdx == -1)
+				{
+					ampIdx = queryLength;
+				}
 
-			startIdx = ampIdx + 1;
+				char param[DefaultMaxParamKeyLength];
+				SystemFunctions::substr(param, sizeof(param), query, startIdx, ampIdx - startIdx);
+
+				int32_t equalsIdx = SystemFunctions::indexOf(param, '=', 0);
+				if (equalsIdx != -1)
+				{
+					SystemFunctions::substr(params[paramCount].key,   sizeof(params[paramCount].key),   param, 0, equalsIdx);
+					SystemFunctions::substr(params[paramCount].value, sizeof(params[paramCount].value), param, equalsIdx + 1);
+					paramCount++;
+				}
+
+				startIdx = ampIdx + 1;
+			}
 		}
 	}
 

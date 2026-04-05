@@ -84,6 +84,7 @@ SmartFuseBoxApp::SmartFuseBoxApp(SerialCommandManager* commandMgrComputer,
 
       , _schedulerCommandHandler(&_relayController)
       , _scheduleController(&_relayController, &_messageBus)
+      , _serialHandlerCount(0)
 
 #if defined(LED_MANAGER)
       , _ledManager(&_messageBus)
@@ -176,17 +177,23 @@ void SmartFuseBoxApp::setup(RemoteSensor** remoteSensors, uint8_t remoteSensorCo
     _relayHandler.setup();
 
     // serial command handlers
-    ISerialCommandHandler* linkHandlers[] = { &_relayHandler, &_soundHandler, &_configHandler, &_ackHandler,
-        &_systemCommandHandler, &_warningCommandHandler, &_sensorCommandHandler, &_sensorConfigHandler, &_schedulerCommandHandler
-        };
-    size_t linkHandlerCount = sizeof(linkHandlers) / sizeof(linkHandlers[0]);
-    _commandMgrLink->registerHandlers(linkHandlers, linkHandlerCount);
+    _serialHandlerCount = 0;
+    _serialHandlers[_serialHandlerCount++] = &_relayHandler;
+    _serialHandlers[_serialHandlerCount++] = &_soundHandler;
+    _serialHandlers[_serialHandlerCount++] = &_configHandler;
+    _serialHandlers[_serialHandlerCount++] = &_ackHandler;
+    _serialHandlers[_serialHandlerCount++] = &_systemCommandHandler;
+    _serialHandlers[_serialHandlerCount++] = &_warningCommandHandler;
+    _serialHandlers[_serialHandlerCount++] = &_sensorCommandHandler;
+    _serialHandlers[_serialHandlerCount++] = &_sensorConfigHandler;
+    _serialHandlers[_serialHandlerCount++] = &_schedulerCommandHandler;
 
-    ISerialCommandHandler* computerHandlers[] = { &_relayHandler, &_soundHandler, &_configHandler, &_ackHandler,
-        &_systemCommandHandler, &_warningCommandHandler, &_sensorCommandHandler, &_sensorConfigHandler, &_schedulerCommandHandler 
-        };
-    size_t computerHandlerCount = sizeof(computerHandlers) / sizeof(computerHandlers[0]);
-    _commandMgrComputer->registerHandlers(computerHandlers, computerHandlerCount);
+    _commandMgrLink->registerHandlers(_serialHandlers, _serialHandlerCount);
+    _commandMgrComputer->registerHandlers(_serialHandlers, _serialHandlerCount);
+
+    // Give the WiFi command bridge a pointer to the same handler array so
+    // POST /api/command/{cmd} delegates to the exact same implementations.
+    _wifiCommandBridge.setHandlers(_serialHandlers, _serialHandlerCount);
 
     // Link config sync manager to handlers so they can coordinate config synchronization
     _ackHandler.setConfigController(&_configController);
@@ -356,7 +363,8 @@ void SmartFuseBoxApp::configureWifiSupport(Config* config)
 {
     // network command handlers
     INetworkCommandHandler* networkHandlers[] = { &_relayNetworkHandler, &_soundNetworkHandler, &_warningNetworkHandler,
-        &_systemNetworkHandler, _sensorNetworkHandler, &_configNetworkHandler, &_schedulerNetworkHandler
+        &_systemNetworkHandler, _sensorNetworkHandler, &_configNetworkHandler, &_schedulerNetworkHandler,
+        &_wifiCommandBridge
     };
     size_t networkHandlerCount = sizeof(networkHandlers) / sizeof(networkHandlers[0]);
     _wifiController.registerHandlers(networkHandlers, networkHandlerCount);

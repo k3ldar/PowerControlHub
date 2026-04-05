@@ -50,6 +50,7 @@
 #include "SensorNetworkHandler.h"
 #include "WarningNetworkHandler.h"
 #include "SchedulerNetworkHandler.h"
+#include "WifiCommandBridge.h"
 
 #if defined(SD_CARD_SUPPORT)
 #include "SdCardLogger.h"
@@ -135,6 +136,13 @@ private:
 
 	SchedulerCommandHandler _schedulerCommandHandler;
 	SchedulerNetworkHandler _schedulerNetworkHandler;
+	WifiCommandBridge _wifiCommandBridge;
+
+	// Persistent storage for the serial handler array so WifiCommandBridge
+	// can hold a pointer to it safely beyond setup().
+	static constexpr uint8_t MaxSerialHandlerCount = 10;
+	ISerialCommandHandler* _serialHandlers[MaxSerialHandlerCount];
+	uint8_t _serialHandlerCount;
 	ScheduleController _scheduleController;
 
 #if defined(LED_MANAGER)

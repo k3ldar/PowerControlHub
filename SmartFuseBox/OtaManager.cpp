@@ -232,9 +232,20 @@ bool OtaManager::fetchLatestTag(char* tagOut, size_t tagLen)
     http.addHeader("Accept", "application/vnd.github+json");
 
     if (_broadcaster)
-        _broadcaster->sendDebug("OTA: querying GitHub releases API", "OTA");
+    {
+        char dbg[144];
+        snprintf(dbg, sizeof(dbg), "OTA: querying GitHub releases API: %s", url);
+        _broadcaster->sendDebug(dbg, "OTA");
+    }
 
     int code = http.GET();
+
+    if (_broadcaster)
+    {
+        char dbg[32];
+        snprintf(dbg, sizeof(dbg), "OTA: API HTTP code=%d", code);
+        _broadcaster->sendDebug(dbg, "OTA");
+    }
 
     if (code != HTTP_CODE_OK)
     {
@@ -248,17 +259,26 @@ bool OtaManager::fetchLatestTag(char* tagOut, size_t tagLen)
         return false;
     }
 
-    // html_url appears within the first ~200 bytes of the response, e.g.:
-    //   "html_url": "https://github.com/.../releases/tag/v0.9.2.2"
-    // Read until we have captured the closing quote of that value — far
-    // smaller than waiting for tag_name which is buried ~800 bytes in.
+    if (_broadcaster)
+    {
+        char dbg[40];
+        snprintf(dbg, sizeof(dbg), "OTA: content-length=%d", http.getSize());
+        _broadcaster->sendDebug(dbg, "OTA");
+    }
+
+    // html_url appears within the first ~300 bytes of the response, e.g.:
+    //   "html_url":"https://github.com/.../releases/tag/v0.9.0.4"
     // Read directly from secureClient — it IS the transport after http.GET().
     static constexpr size_t TagJsonBufSize = 512;
     char body[TagJsonBufSize] = {};
     size_t bodyLen = 0;
+    uint32_t loopIterations = 0;
+    bool earlyBreak = false;
 
     while (secureClient.connected() && bodyLen < TagJsonBufSize - 1)
     {
+        loopIterations++;
+
         if (!secureClient.available())
         {
             delay(1);
@@ -268,16 +288,29 @@ bool OtaManager::fetchLatestTag(char* tagOut, size_t tagLen)
         body[bodyLen++] = static_cast<char>(secureClient.read());
 
         // Stop as soon as the html_url value is fully received.
+        // Strategy: find "html_url", then locate the 2nd '"' after it
+        // (1st closes the key, 2nd opens the URL value) — whitespace-agnostic.
+        // We must have read past end (the URL closing quote) before breaking,
+        // so parseTagName sees a fully closed URL string in the buffer.
         if (bodyLen > 11)
         {
-            const char* key = "\"html_url\":\"";
-            const char* found = strstr(body, key);
+            const char* found = strstr(body, "\"html_url\"");
             if (found)
             {
-                const char* val = found + strlen(key);
-                const char* end = strchr(val, '"');
-                if (end)
-                    break;
+                const char* q1 = strchr(found + 10, '"');  // closing quote of "html_url"
+                if (q1)
+                {
+                    const char* q2 = strchr(q1 + 1, '"');  // opening quote of URL value
+                    if (q2)
+                    {
+                        const char* end = strchr(q2 + 1, '"');  // closing quote of URL value
+                        if (end && bodyLen > (size_t)(end - body))
+                        {
+                            earlyBreak = true;
+                            break;
+                        }
+                    }
+                }
             }
         }
     }
@@ -286,11 +319,16 @@ bool OtaManager::fetchLatestTag(char* tagOut, size_t tagLen)
 
     if (_broadcaster)
     {
-        char msg[48];
-        snprintf(msg, sizeof(msg), "OTA: read %u bytes from API", (unsigned)bodyLen);
-        _broadcaster->sendDebug(msg, "OTA");
+        char dbg[64];
+        snprintf(dbg, sizeof(dbg), "OTA: read %u bytes, iters=%lu earlyBreak=%s",
+            (unsigned)bodyLen, (unsigned long)loopIterations, earlyBreak ? "Y" : "N");
+        _broadcaster->sendDebug(dbg, "OTA");
+    }
 
-        if (strstr(body, "\"html_url\":\""))
+    const char* htmlUrlPos = strstr(body, "\"html_url\"");
+    if (_broadcaster)
+    {
+        if (htmlUrlPos)
             _broadcaster->sendDebug("OTA: html_url found in buffer", "OTA");
         else
             _broadcaster->sendError("OTA: html_url not found in buffer", "OTA");
@@ -317,39 +355,40 @@ bool OtaManager::fetchLatestTag(char* tagOut, size_t tagLen)
 
 bool OtaManager::parseTagName(const char* json, size_t jsonLen, char* tagOut, size_t tagLen)
 {
-    // Locate the html_url value, e.g.:
-    //   "html_url": "https://github.com/.../releases/tag/v0.9.2.2"
-    // The version tag is the final path segment — everything after the last /
-    // and before the closing double-quote.
-    const char* key = "\"html_url\":";
-    const char* p   = nullptr;
-
-    for (size_t i = 0; i + strlen(key) < jsonLen; ++i)
-    {
-        if (strncmp(json + i, key, strlen(key)) == 0)
-        {
-            p = json + i + strlen(key);
-            break;
-        }
-    }
-
-    if (!p)
+    // Locate the html_url value
+    //   "html_url": "https://github.com/.../releases/tag/v0.9.0.4"
+    //   "html_url":"https://github.com/.../releases/tag/v0.9.0.4"
+    // Whitespace between ':' and '"' is ignored — we find the 2nd '"' after
+    // the key to reach the opening quote of the URL value regardless of spacing.
+    const char* key = "\"html_url\"";
+    const char* found = strstr(json, key);
+    if (!found)
         return false;
 
-    // Find the closing quote of the URL value.
-    const char* endQuote = strchr(p, '"');
+    // q1 = closing quote
+    const char* q1 = strchr(found + strlen(key), '"');
+    if (!q1)
+        return false;
+
+    // q2 = opening quote
+    const char* q2 = strchr(q1 + 1, '"');
+    if (!q2)
+        return false;
+
+    // urlStart points to first character
+    const char* urlStart = q2 + 1;
+    const char* endQuote = strchr(urlStart, '"');
     if (!endQuote)
         return false;
 
-    // Walk back from the closing quote to the last '/'.
+    // The tag is the final path segment
     const char* lastSlash = endQuote - 1;
-    while (lastSlash > p && *lastSlash != '/')
+    while (lastSlash > urlStart && *lastSlash != '/')
         --lastSlash;
 
     if (*lastSlash != '/')
         return false;
 
-    // Copy the segment after the slash up to the closing quote.
     const char* start = lastSlash + 1;
     size_t len = static_cast<size_t>(endQuote - start);
 
@@ -396,28 +435,95 @@ void OtaManager::parseVersionTag(const char* tag, uint8_t& major, uint8_t& minor
 
 bool OtaManager::fetchChecksum(const char* tag, char* hashHexOut, size_t hashLen)
 {
+    // ── Step 1: ask github.com for the redirect URL ───────────────────────────
+    // github.com release downloads return a 302 to a CDN host
+    // (release-assets.githubusercontent.com).  The CDN host has a different TLS
+    // certificate chain, so we cannot follow the redirect with the same
+    // WiFiClientSecure that has OtaGithubRootCA pinned.  Instead we capture the
+    // Location header, then open a fresh insecure client for the CDN leg.  The
+    // CDN URL is already a signed, time-limited JWT so transport-only TLS is
+    // sufficient for that second hop.
+
     char url[256];
     snprintf(url, sizeof(url),
         "https://github.com/%s/%s/releases/download/%s/SmartFuseBox-%s-%s.sha256",
         OtaGithubOwner, OtaGithubRepo, tag, CONFIG_IDF_TARGET, tag);
 
-    WiFiClientSecure secureClient;
-    secureClient.setCACert(OtaGithubRootCA);
+    if (_broadcaster)
+    {
+        char dbg[272];
+        snprintf(dbg, sizeof(dbg), "OTA: checksum url=%s", url);
+        _broadcaster->sendDebug(dbg, "OTA");
+    }
 
-    HTTPClient http;
-    http.begin(secureClient, url);
-    http.setTimeout(OtaHttpTimeout);
-    http.setFollowRedirects(HTTPC_FORCE_FOLLOW_REDIRECTS);
-    http.addHeader("User-Agent", "SmartFuseBox-OTA");
+    WiFiClientSecure ghClient;
+    ghClient.setCACert(OtaGithubRootCA);
+
+    HTTPClient ghHttp;
+    ghHttp.begin(ghClient, url);
+    ghHttp.setTimeout(OtaHttpTimeout);
+    ghHttp.setFollowRedirects(HTTPC_DISABLE_FOLLOW_REDIRECTS);
+    ghHttp.addHeader("User-Agent", "SmartFuseBox-OTA");
+
+    int code = ghHttp.GET();
 
     if (_broadcaster)
     {
-        char msg[48];
-        snprintf(msg, sizeof(msg), "OTA: fetching checksum for %s", tag);
-        _broadcaster->sendDebug(msg, "OTA");
+        char dbg[40];
+        snprintf(dbg, sizeof(dbg), "OTA: checksum github.com code=%d", code);
+        _broadcaster->sendDebug(dbg, "OTA");
     }
 
-    int code = http.GET();
+    String cdnUrl = ghHttp.getLocation();
+    ghHttp.end();
+
+    if (cdnUrl.length() == 0)
+    {
+        if (code == HTTP_CODE_OK)
+        {
+            // Served directly — re-use the original URL.
+            if (_broadcaster)
+                _broadcaster->sendDebug("OTA: checksum no redirect, fetching directly", "OTA");
+            cdnUrl = url;
+        }
+        else
+        {
+            if (_broadcaster)
+            {
+                char dbg[64];
+                snprintf(dbg, sizeof(dbg), "OTA: checksum no redirect, error=%s",
+                    HTTPClient::errorToString(code).c_str());
+                _broadcaster->sendError(dbg, "OTA");
+            }
+
+            if (_broadcaster)
+            {
+                char msg[48];
+                snprintf(msg, sizeof(msg), "OTA: checksum request failed, HTTP %d", code);
+                _broadcaster->sendError(msg, "OTA");
+            }
+            return false;
+        }
+    }
+
+    // ── Step 2: fetch the actual content from the CDN URL
+    WiFiClientSecure cdnClient;
+    cdnClient.setInsecure();   // CDN URL is a signed JWT — transport TLS only
+
+    HTTPClient cdnHttp;
+    cdnHttp.begin(cdnClient, cdnUrl);
+    cdnHttp.setTimeout(OtaHttpTimeout);
+    cdnHttp.setFollowRedirects(HTTPC_FORCE_FOLLOW_REDIRECTS);
+    cdnHttp.addHeader("User-Agent", "SmartFuseBox-OTA");
+
+    code = cdnHttp.GET();
+
+    if (_broadcaster)
+    {
+        char dbg[40];
+        snprintf(dbg, sizeof(dbg), "OTA: checksum cdn code=%d", code);
+        _broadcaster->sendDebug(dbg, "OTA");
+    }
 
     if (code != HTTP_CODE_OK)
     {
@@ -428,30 +534,38 @@ bool OtaManager::fetchChecksum(const char* tag, char* hashHexOut, size_t hashLen
             _broadcaster->sendError(msg, "OTA");
         }
 
-        http.end();
+        cdnHttp.end();
         return false;
     }
 
     // checksum.sha256 format:  "<64-char-hex>  <filename>\n"  or just  "<64-char-hex>"
     // Read exactly OtaHashHexLen characters — that is all we need.
-    // Read directly from secureClient — it IS the transport after http.GET().
     char body[OtaHashHexLen + 1] = {};
     size_t bodyLen = 0;
+    uint32_t waitCount = 0;
 
-    while (secureClient.connected() && bodyLen < OtaHashHexLen)
+    while (cdnClient.connected() && bodyLen < OtaHashHexLen)
     {
-        if (!secureClient.available())
+        if (!cdnClient.available())
         {
+            waitCount++;
             delay(1);
             continue;
         }
-        body[bodyLen++] = static_cast<char>(secureClient.read());
+        body[bodyLen++] = static_cast<char>(cdnClient.read());
     }
 
     body[bodyLen] = '\0';
-    http.end();
+    cdnHttp.end();
 
-    // Extract the first 64 hex characters (the hash itself).
+    if (_broadcaster)
+    {
+        char dbg[48];
+        snprintf(dbg, sizeof(dbg), "OTA: checksum read=%u wait=%lu",
+            (unsigned)bodyLen, (unsigned long)waitCount);
+        _broadcaster->sendDebug(dbg, "OTA");
+    }
+
     if (bodyLen < OtaHashHexLen)
     {
         if (_broadcaster)
@@ -468,7 +582,23 @@ bool OtaManager::fetchChecksum(const char* tag, char* hashHexOut, size_t hashLen
         char c = hashHexOut[i];
 
         if (!((c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F')))
+        {
+            if (_broadcaster)
+            {
+                char dbg[48];
+                snprintf(dbg, sizeof(dbg), "OTA: checksum non-hex at %u (0x%02X)",
+                    (unsigned)i, (uint8_t)c);
+                _broadcaster->sendError(dbg, "OTA");
+            }
             return false;
+        }
+    }
+
+    if (_broadcaster)
+    {
+        char dbg[80];
+        snprintf(dbg, sizeof(dbg), "OTA: checksum hash=%s", hashHexOut);
+        _broadcaster->sendDebug(dbg, "OTA");
     }
 
     return true;
@@ -476,21 +606,79 @@ bool OtaManager::fetchChecksum(const char* tag, char* hashHexOut, size_t hashLen
 
 bool OtaManager::downloadAndApply(const char* tag, const char* expectedHash)
 {
+    // ── Step 1: resolve the CDN redirect URL from github.com ─────────────────
+    // github.com release downloads redirect to a CDN host with a different TLS
+    // certificate chain.  Capture the Location header here, then open a fresh
+    // insecure client for the CDN leg (the CDN URL is a signed, time-limited
+    // JWT so transport-only TLS is sufficient).
+
     char url[256];
     snprintf(url, sizeof(url),
         "https://github.com/%s/%s/releases/download/%s/SmartFuseBox-%s-%s.bin",
         OtaGithubOwner, OtaGithubRepo, tag, CONFIG_IDF_TARGET, tag);
 
+    if (_broadcaster)
+    {
+        char dbg[272];
+        snprintf(dbg, sizeof(dbg), "OTA: binary url=%s", url);
+        _broadcaster->sendDebug(dbg, "OTA");
+    }
+
+    WiFiClientSecure ghClient;
+    ghClient.setCACert(OtaGithubRootCA);
+
+    HTTPClient ghHttp;
+    ghHttp.begin(ghClient, url);
+    ghHttp.setTimeout(OtaHttpTimeout);
+    ghHttp.setFollowRedirects(HTTPC_DISABLE_FOLLOW_REDIRECTS);
+    ghHttp.addHeader("User-Agent", "SmartFuseBox-OTA");
+
+    int code = ghHttp.GET();
+
+    if (_broadcaster)
+    {
+        char dbg[40];
+        snprintf(dbg, sizeof(dbg), "OTA: binary github.com code=%d", code);
+        _broadcaster->sendDebug(dbg, "OTA");
+    }
+
+    String cdnUrl = ghHttp.getLocation();
+    ghHttp.end();
+
+    if (cdnUrl.length() == 0)
+    {
+        if (code != HTTP_CODE_OK)
+        {
+            if (_broadcaster)
+            {
+                char msg[48];
+                snprintf(msg, sizeof(msg), "OTA: binary request failed, HTTP %d", code);
+                _broadcaster->sendError(msg, "OTA");
+            }
+            return false;
+        }
+        // Served directly — re-use the original URL.
+        cdnUrl = url;
+    }
+
+    // ── Step 2: stream the binary from the CDN URL
     WiFiClientSecure secureClient;
-    secureClient.setCACert(OtaGithubRootCA);
+    secureClient.setInsecure();   // CDN URL is a signed JWT — transport TLS only
 
     HTTPClient http;
-    http.begin(secureClient, url);
+    http.begin(secureClient, cdnUrl);
     http.setTimeout(30000);
     http.setFollowRedirects(HTTPC_FORCE_FOLLOW_REDIRECTS);
     http.addHeader("User-Agent", "SmartFuseBox-OTA");
 
-    int code = http.GET();
+    code = http.GET();
+
+    if (_broadcaster)
+    {
+        char dbg[40];
+        snprintf(dbg, sizeof(dbg), "OTA: binary cdn code=%d", code);
+        _broadcaster->sendDebug(dbg, "OTA");
+    }
 
     if (code != HTTP_CODE_OK)
     {
