@@ -190,7 +190,7 @@ void MQTTSystemHandler::handleTimeUpdate(const char* payload)
 
     // Parse Unix timestamp from payload
     char* endPtr;
-    uint64_t timestamp = strtoul(payload, &endPtr, 10);
+    uint64_t timestamp = strtoull(payload, &endPtr, 10);
 
     // Validate the timestamp
     if (endPtr == payload || timestamp == 0)

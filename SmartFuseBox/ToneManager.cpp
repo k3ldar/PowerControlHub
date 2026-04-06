@@ -75,7 +75,7 @@ void ToneManager::update(uint64_t now)
     if (!_playing)
         return;
 
-    if (SystemFunctions::hasElapsed(_stepStartTime, _steps[_currentStep].durationMs))
+    if (SystemFunctions::hasElapsed(now, _stepStartTime, _steps[_currentStep].durationMs))
     {
         _currentStep++;
 

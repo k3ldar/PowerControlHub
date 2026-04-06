@@ -217,9 +217,6 @@
     <ClCompile Include="BinaryPresenceSensor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="BinaryPresenceSensor.h">
-      <Filter>Header Files</Filter>
-    </ClCompile>
     <ClCompile Include="WifiCommandBridge.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -232,6 +229,9 @@
       <Filter>Header Files\SerialCommandHandlers</Filter>
     </ClInclude>
     <ClInclude Include="WaterSensorHandler.h">
+      <Filter>Header Files\Sensors</Filter>
+    </ClInclude>
+    <ClInclude Include="BinaryPresenceSensor.h">
       <Filter>Header Files\Sensors</Filter>
     </ClInclude>
     <ClInclude Include="Local.h">

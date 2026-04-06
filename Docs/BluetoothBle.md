@@ -275,7 +275,7 @@ public:
 private:
     BLEService* _service = nullptr;
     BLEIntCharacteristic* _charValue = nullptr;
-    uint64_t_lastUpdate = 0;
+    uint64_t _lastUpdate = 0;
 };
 ```
 
