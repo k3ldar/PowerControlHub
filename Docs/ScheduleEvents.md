@@ -215,7 +215,7 @@ The scheduler overview is also included in the main status response at `GET /`.
 _scheduleController.begin();   // subscribes to MessageBus events
 
 // loop()
-_scheduleController.update(millis64());
+_scheduleController.update(SystemFunctions::millis64());
 ```
 
 ### Evaluation Cycle
