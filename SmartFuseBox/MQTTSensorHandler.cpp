@@ -196,11 +196,6 @@ void MQTTSensorHandler::onMessage(const char* topic, const char* payload)
     if (topic == nullptr || payload == nullptr)
         return;
 
-    Serial.print(F("[MQTTSensorHandler] Received topic: "));
-    Serial.println(topic);
-    Serial.print(F("[MQTTSensorHandler] Received payload: "));
-    Serial.println(payload);
-
     if (_config == nullptr || _sensorController == nullptr)
         return;
 
@@ -212,16 +207,15 @@ void MQTTSensorHandler::onMessage(const char* topic, const char* payload)
             continue;
 
         snprintf_P(expectedTopic, sizeof(expectedTopic), SetTopicFormat, _config->mqtt.deviceId, sensor->getSafeSlug());
+
         if (strcmp(topic, expectedTopic) != 0)
             continue;
-
-        Serial.print(F("[MQTTSensorHandler] Matched RemoteSensor topic: "));
-        Serial.println(expectedTopic);
 
         // Parse "lat=X;lon=Y" payload — order-independent
         double lat = 0.0, lon = 0.0;
         bool hasLat = false, hasLon = false;
         const char* p = payload;
+
         while (*p)
         {
             if (strncmp(p, "lat=", 4) == 0) { lat = atof(p + 4); hasLat = true; }
@@ -230,14 +224,8 @@ void MQTTSensorHandler::onMessage(const char* topic, const char* payload)
             if (*p == ';') p++;
         }
 
-        Serial.print(F("[MQTTSensorHandler] Parsed lat: "));
-        Serial.println(lat, 6);
-        Serial.print(F("[MQTTSensorHandler] Parsed lon: "));
-        Serial.println(lon, 6);
-
         if (!hasLat || !hasLon)
         {
-            Serial.println(F("[MQTTSensorHandler] Missing lat or lon in payload!"));
             return;
         }
 
@@ -251,12 +239,10 @@ void MQTTSensorHandler::onMessage(const char* topic, const char* payload)
         params[1].key[sizeof(params[1].key) - 1] = '\0';
         dtostrf(lon, 1, 6, params[1].value);
 
-        Serial.println(F("[MQTTSensorHandler] Updating RemoteSensor values..."));
         static_cast<RemoteSensor*>(sensor)->handleRemoteCommand(params, 2);
 
         if (sensor->getSensorIdType() == SensorIdList::GpsSensor && _messageBus != nullptr)
         {
-            Serial.println(F("[MQTTSensorHandler] Publishing GpsLocationUpdated event..."));
             _messageBus->publish<GpsLocationUpdated>(lat, lon);
         }
 
@@ -266,46 +252,44 @@ void MQTTSensorHandler::onMessage(const char* topic, const char* payload)
         {
             if (_channelMap[i].sensor == sensor)
             {
-                Serial.print(F("[MQTTSensorHandler] Republish state for channel index: "));
-                Serial.println(i);
                 publishSensorState(i);
                 _channelMap[i].lastPublishTime = now;
             }
         }
 
-        Serial.println(F("[MQTTSensorHandler] Done processing incoming GPS update."));
         return;
     }
 }
 
 bool MQTTSensorHandler::subscribe()
 {
-    if (_mqttController != nullptr && _config != nullptr && _sensorController != nullptr)
+    if (_mqttController == nullptr || _config == nullptr || _sensorController == nullptr)
+        return false;
+
+    MQTTClient* client = _mqttController->getClient();
+    if (client == nullptr || !client->isConnected())
+        return false;
+
+    bool result = true;
+    char topic[MqttMaxTopicLength];
+
+    for (uint8_t s = 0; s < _sensorController->sensorCount(); s++)
     {
-        MQTTClient* client = _mqttController->getClient();
-        if (client != nullptr && client->isConnected())
-        {
-            char topic[MqttMaxTopicLength];
-            for (uint8_t s = 0; s < _sensorController->sensorCount(); s++)
-            {
-                BaseSensor* sensor = _sensorController->sensorGet(s);
-                if (sensor == nullptr || sensor->getSensorType() != SensorType::Remote)
-                    continue;
+        BaseSensor* sensor = _sensorController->sensorGet(s);
+        if (sensor == nullptr || sensor->getSensorType() != SensorType::Remote)
+            continue;
 
-                snprintf_P(topic, sizeof(topic), SetTopicFormat, _config->mqtt.deviceId, sensor->getSafeSlug());
-                client->subscribe(topic, MqttQoS::AtMostOnce);
+        snprintf_P(topic, sizeof(topic), SetTopicFormat, _config->mqtt.deviceId, sensor->getSafeSlug());
 
-                Serial.print(F("[MQTTSensorHandler] Subscribing to topic: "));
-                Serial.println(topic);
+        if (!client->subscribe(topic, MqttQoS::AtMostOnce))
+            result = false;
 
-                if (_commandMgr != nullptr)
-                    _commandMgr->sendDebug(topic, F("MQTT Sensor Subscribe"));
-            }
-        }
+        if (_commandMgr != nullptr)
+            _commandMgr->sendDebug(topic, F("MQTT Sensor Subscribe"));
     }
 
-    _isSubscribed = true;
-    return true;
+    _isSubscribed = result;
+    return result;
 }
 
 void MQTTSensorHandler::unsubscribe()

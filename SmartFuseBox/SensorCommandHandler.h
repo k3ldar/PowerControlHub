@@ -21,10 +21,8 @@
 #include "SerialCommandManager.h"
 #include "Local.h"
 
-#include "RemoteSensor.h"
 #include "SharedBaseCommandHandler.h"
 
- //forward declaration
 class RemoteSensor;
 
 class SensorCommandHandler : public SharedBaseCommandHandler
