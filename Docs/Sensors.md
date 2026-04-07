@@ -193,8 +193,8 @@ This sensor does not read any hardware pin. It exposes internal device health me
 | 2 | Sys Bluetooth | `bluetooth` | `connectivity` | — | Yes (`ON` / `OFF`) |
 | 3 | Sys WiFi | `wifi` | `connectivity` | — | Yes (`ON` / `OFF`) |
 | 4 | Sys SD Log Size | `sd_log_size` | — | MB | No |
-| 5 | Sys Warnings | `warning_count` | — | — | No |
-| 6 | Sys Uptime | `uptime` | — | — | No |
+| 5 | Sys Warnings | `warning_count` | — | - | No |
+| 6 | Sys Uptime | `uptime` | — | - | No |
 
 **Messages Published (MessageBus)**
 
@@ -538,3 +538,16 @@ All sensor serial command identifiers are defined in `SystemDefinitions.h`:
 | `SensorGpsSpeed` | `S12` | GPS speed and course |
 | `SensorGpsSatellites` | `S13` | GPS satellite count |
 | `SensorGpsDistance` | `S14` | Cumulative GPS distance (km) |
+
+## Home Assistant Automation Example
+
+The remote GPS sensor is used so Home Assistant can set the device’s latitude and longitude, which supports correct sunrise/sunset calculations and more reliable time‑based automations.
+
+```yaml
+action:
+  - service: mqtt.publish
+    data:
+      topic: "home/<your-device-id>>/sensor/gps/set"
+      payload: >-
+        lat={{ state_attr('zone.home', 'latitude') }};lon={{ state_attr('zone.home', 'longitude') }}
+```

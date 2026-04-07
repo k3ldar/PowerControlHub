@@ -19,6 +19,7 @@
 #include "IWifiRadio.h"
 #include <SerialCommandManager.h>
 #include <string.h>
+#include <inttypes.h>
 
 MQTTClient::MQTTClient(IWifiRadio* wifiRadio)
     : _wifiClient(nullptr)
@@ -292,7 +293,7 @@ bool MQTTClient::update()
             if (_commandMgr != nullptr)
             {
                 char buf[48];
-                snprintf(buf, sizeof(buf), "Sending PINGREQ (no send for %lums)", timeSinceLastSend);
+                snprintf(buf, sizeof(buf), "Sending PINGREQ (no send for %" PRIu64 "ms)", timeSinceLastSend);
                 _commandMgr->sendDebug(buf, F("MQTT Client"));
             }
             uint16_t packetLength = buildPingReqPacket(_txBuffer, sizeof(_txBuffer));
@@ -314,8 +315,9 @@ bool MQTTClient::update()
             if (_commandMgr != nullptr)
             {
                 char buf[80];
-                int len = snprintf(buf, sizeof(buf), "Keep-alive timeout: no packet for %lums (threshold=%lums)",
+                int len = snprintf(buf, sizeof(buf), "Keep-alive timeout: no packet for %" PRIu64 "ms (threshold=%" PRIu64 "ms)",
                     timeSinceLastReceive, keepAliveMs + MqttPingTimeout);
+
                 if (len > 0 && len < static_cast<int>(sizeof(buf)))
                 {
                     _commandMgr->sendError(buf, F("MQTT Client"));
@@ -325,6 +327,7 @@ bool MQTTClient::update()
                     _commandMgr->sendError(F("Keep-alive timeout (msg truncated)"), F("MQTT Client"));
                 }
             }
+
             raiseEvent(MqttEvent::KeepAliveTimeout);
             setError(MqttError::Timeout);
             disconnect();

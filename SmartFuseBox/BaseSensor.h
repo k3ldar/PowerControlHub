@@ -108,6 +108,8 @@ public:
 	}
 
 #if defined(MQTT_SUPPORT)
+	const char* getSafeSlug() const { return _safeSlug; }
+
 	virtual uint8_t getMqttChannelCount() const = 0;
 
 	virtual MqttSensorChannel getMqttChannel(uint8_t channelIndex) const = 0;

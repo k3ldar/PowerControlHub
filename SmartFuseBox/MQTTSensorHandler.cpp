@@ -19,6 +19,7 @@
 
 #if defined(MQTT_SUPPORT)
 #include "MQTTSensorHandler.h"
+#include "RemoteSensor.h"
 #include "SystemDefinitions.h"
 #include "SystemFunctions.h"
 #include <SerialCommandManager.h>
@@ -32,6 +33,7 @@ const char PROGMEM JsonUnit[] = ",\"unit_of_measurement\":\"%s\"";
 const char PROGMEM JsonFooter[] = ",\"unique_id\":\"%s_%s\",\"device\":{\"ids\":[\"%s\"],\"name\":\"Smart Fuse Box\",\"mf\":\"Simon Carter\",\"mdl\":\"SFB v1\"}}";
 const char PROGMEM DiscoveryTopicFormat[] = "%s/%s/%s/%s/config";
 const char PROGMEM StateTopicFormat[] = "home/%s/sensor/%s/state";
+const char PROGMEM SetTopicFormat[] = "home/%s/sensor/%s/set";
 const char PROGMEM EntityTypeBinarySensor[] = "binary_sensor";
 const char PROGMEM EntityTypeSensor[] = "sensor";
 
@@ -146,6 +148,13 @@ bool MQTTSensorHandler::begin()
         }
     );
 
+    _messageBus->subscribe<MqttMessageReceived>(
+        [this](const char* topic, const char* payload)
+        {
+            this->onMessage(topic, payload);
+        }
+    );
+
     return true;
 }
 
@@ -184,20 +193,125 @@ void MQTTSensorHandler::end()
 
 void MQTTSensorHandler::onMessage(const char* topic, const char* payload)
 {
-    // Sensors are read-only; no commands expected
-    (void)topic;
-    (void)payload;
+    if (topic == nullptr || payload == nullptr)
+        return;
+
+    if (_config == nullptr || _sensorController == nullptr)
+        return;
+
+    char expectedTopic[MqttMaxTopicLength];
+    for (uint8_t s = 0; s < _sensorController->sensorCount(); s++)
+    {
+        BaseSensor* sensor = _sensorController->sensorGet(s);
+        if (sensor == nullptr || sensor->getSensorType() != SensorType::Remote)
+            continue;
+
+        snprintf_P(expectedTopic, sizeof(expectedTopic), SetTopicFormat, _config->mqtt.deviceId, sensor->getSafeSlug());
+
+        if (strcmp(topic, expectedTopic) != 0)
+            continue;
+
+        // Parse "lat=X;lon=Y" payload — order-independent
+        double lat = 0.0, lon = 0.0;
+        bool hasLat = false, hasLon = false;
+        const char* p = payload;
+
+        while (*p)
+        {
+            if (strncmp(p, "lat=", 4) == 0) { lat = atof(p + 4); hasLat = true; }
+            else if (strncmp(p, "lon=", 4) == 0) { lon = atof(p + 4); hasLon = true; }
+            while (*p && *p != ';') p++;
+            if (*p == ';') p++;
+        }
+
+        if (!hasLat || !hasLon)
+        {
+            return;
+        }
+
+        // Build params matching GPS channel order: [0]=lat, [1]=lon
+        StringKeyValue params[2];
+        strncpy(params[0].key, "lat", sizeof(params[0].key) - 1);
+        params[0].key[sizeof(params[0].key) - 1] = '\0';
+        dtostrf(lat, 1, 6, params[0].value);
+
+        strncpy(params[1].key, "lon", sizeof(params[1].key) - 1);
+        params[1].key[sizeof(params[1].key) - 1] = '\0';
+        dtostrf(lon, 1, 6, params[1].value);
+
+        static_cast<RemoteSensor*>(sensor)->handleRemoteCommand(params, 2);
+
+        if (sensor->getSensorIdType() == SensorIdList::GpsSensor && _messageBus != nullptr)
+        {
+            _messageBus->publish<GpsLocationUpdated>(lat, lon);
+        }
+
+        // Republish updated state channels so HA reflects the new values
+        uint64_t now = SystemFunctions::millis64();
+        for (uint8_t i = 0; i < _channelMap.size(); i++)
+        {
+            if (_channelMap[i].sensor == sensor)
+            {
+                publishSensorState(i);
+                _channelMap[i].lastPublishTime = now;
+            }
+        }
+
+        return;
+    }
 }
 
 bool MQTTSensorHandler::subscribe()
 {
-    // Sensors publish only; no MQTT topics to subscribe to
-    _isSubscribed = true;
-    return true;
+    if (_mqttController == nullptr || _config == nullptr || _sensorController == nullptr)
+        return false;
+
+    MQTTClient* client = _mqttController->getClient();
+    if (client == nullptr || !client->isConnected())
+        return false;
+
+    bool result = true;
+    char topic[MqttMaxTopicLength];
+
+    for (uint8_t s = 0; s < _sensorController->sensorCount(); s++)
+    {
+        BaseSensor* sensor = _sensorController->sensorGet(s);
+        if (sensor == nullptr || sensor->getSensorType() != SensorType::Remote)
+            continue;
+
+        snprintf_P(topic, sizeof(topic), SetTopicFormat, _config->mqtt.deviceId, sensor->getSafeSlug());
+
+        if (!client->subscribe(topic, MqttQoS::AtMostOnce))
+            result = false;
+
+        if (_commandMgr != nullptr)
+            _commandMgr->sendDebug(topic, F("MQTT Sensor Subscribe"));
+    }
+
+    _isSubscribed = result;
+    return result;
 }
 
 void MQTTSensorHandler::unsubscribe()
 {
+    if (_mqttController != nullptr && _config != nullptr && _sensorController != nullptr)
+    {
+        MQTTClient* client = _mqttController->getClient();
+        if (client != nullptr)
+        {
+            char topic[MqttMaxTopicLength];
+            for (uint8_t s = 0; s < _sensorController->sensorCount(); s++)
+            {
+                BaseSensor* sensor = _sensorController->sensorGet(s);
+                if (sensor == nullptr || sensor->getSensorType() != SensorType::Remote)
+                    continue;
+
+                snprintf_P(topic, sizeof(topic), SetTopicFormat, _config->mqtt.deviceId, sensor->getSafeSlug());
+                client->unsubscribe(topic);
+            }
+        }
+    }
+
     _isSubscribed = false;
 }
 

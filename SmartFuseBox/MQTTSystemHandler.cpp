@@ -24,6 +24,7 @@
 #include <SerialCommandManager.h>
 #include <string.h>
 #include <stdio.h>
+#include <inttypes.h>
 
 MQTTSystemHandler::MQTTSystemHandler(MQTTController* mqttController, MessageBus* messageBus, SerialCommandManager* commandMgr)
     : MQTTHandler(mqttController, messageBus)
@@ -210,7 +211,7 @@ void MQTTSystemHandler::handleTimeUpdate(const char* payload)
     if (_commandMgr != nullptr)
     {
         char buf[100];
-        snprintf(buf, sizeof(buf), "Time synced: %lu", timestamp);
+        snprintf(buf, sizeof(buf), "Time synced: %" PRIu64, timestamp);
         _commandMgr->sendDebug(buf, F("MQTT System"));
     }
 }

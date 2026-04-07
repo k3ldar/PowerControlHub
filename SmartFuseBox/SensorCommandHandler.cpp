@@ -16,6 +16,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 #include "SensorCommandHandler.h"
+#include "RemoteSensor.h"
 #include "SystemFunctions.h"
 
 #if defined(BOAT_CONTROL_PANEL)
