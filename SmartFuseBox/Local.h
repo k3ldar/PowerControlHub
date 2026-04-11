@@ -48,6 +48,17 @@
 #endif
 
 
+// CONFIGURE_SPI gates the board-specific SPI.begin(sck, miso, mosi) overload used
+// by cores that support custom pin assignment at bus-init time (e.g. ESP32).
+// When undefined, the portable SPI.begin() is called with the core's default pins.
+// Pin values passed to beginInitialize() are always stored regardless of this flag,
+// so board-specific code can still apply them (e.g. via SPI.setSCK/setMISO/setMOSI)
+// if the target core provides those helpers.
+#define CONFIGURE_SPI
+#if defined(ARDUINO_UNO_R4) || defined(ARDUINO_R4_MINIMA)
+#undef CONFIGURE_SPI
+#endif
+
 // ─── Controller Mode ──────────────────────────────────────────────────────────
 // Undefine to use only the underlying components (WiFi, MQTT etc.) without
 // the fuse box relay controller logic.

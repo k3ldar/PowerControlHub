@@ -39,7 +39,7 @@ void BroadcastManager::update(uint64_t now)
 		char buffer[10];
 		snprintf_P(buffer, sizeof(buffer), PSTR("v=%u"), config->sound.hornRelayIndex);
         sendCommand(ConfigSoundRelayId, buffer, true);
-		snprintf_P(buffer, sizeof(buffer), PSTR("v=%u"), static_cast<uint8_t>(config->location.vesselType));
+		snprintf_P(buffer, sizeof(buffer), PSTR("v=%u"), static_cast<uint8_t>(config->location.locationType));
         sendCommand(ConfigBoatType, buffer, true);
     }
 }

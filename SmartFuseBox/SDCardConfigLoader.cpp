@@ -272,7 +272,7 @@ bool SdCardConfigLoader::applyConfigCommand(const char* line)
     }
     else if (SystemFunctions::commandMatches(command, ConfigBoatType) && paramCount >= 1)
     {
-        result = _configController->setVesselType(static_cast<uint8_t>(atoi(params[0].value)));
+        result = _configController->setLocationType(static_cast<uint8_t>(atoi(params[0].value)));
     }
     else if (SystemFunctions::commandMatches(command, ConfigSoundStartDelay) && paramCount >= 1)
     {
@@ -695,7 +695,7 @@ bool SdCardConfigLoader::exportConfigToSd()
     // C7 - Vessel type
     configFile->print(ConfigBoatType);
     configFile->print(":v=");
-    configFile->println(static_cast<uint8_t>(config->location.vesselType));
+    configFile->println(static_cast<uint8_t>(config->location.locationType));
 
     // C9 - Sound delay
     configFile->print(ConfigSoundStartDelay);

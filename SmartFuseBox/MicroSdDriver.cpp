@@ -98,7 +98,17 @@ void MicroSdDriver::beginInitialize(uint8_t misoPin, uint8_t mosiPin, uint8_t sc
     pinMode(_csPin, OUTPUT);
     digitalWrite(_csPin, HIGH);
 
+#if defined(CONFIGURE_SPI)
+    // Cores that support custom pin assignment (e.g. ESP32): pass stored pin values
+    // directly to SPI.begin() so the bus uses the configured SCK/MISO/MOSI lines.
     SPI.begin(_sckPin, _misoPin, _mosiPin);
+#else
+    // Cores without the pin-overload (e.g. AVR, UNO R4): initialise with default pins.
+    // _sckPin/_misoPin/_mosiPin are still stored by beginInitialize() and remain
+    // available for board-specific configuration (e.g. SPI.setSCK/setMISO/setMOSI)
+    // if the target core provides those helpers.
+    SPI.begin();
+#endif
 }
 
 void MicroSdDriver::reinitialize()

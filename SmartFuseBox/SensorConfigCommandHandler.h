@@ -121,10 +121,17 @@ public:
         if (SystemFunctions::commandMatches(command, SensorConfigAddUpdate))
         {
             // N1:i=<idx>;t=<type>;o0=<opt0>;o1=<opt1>
-            uint8_t idx  = getParamValueU8t(params, paramCount, "i");
-            uint8_t type = getParamValueU8t(params, paramCount, "t");
-            int8_t opt0 = getParamValue8t(params, paramCount, "o0");
-            int8_t opt1 = getParamValue8t(params, paramCount, "o1");
+            uint8_t idx, type;
+            int8_t opt0, opt1;
+
+            if (!getParamValueU8t(params, paramCount, "i", idx) ||
+                !getParamValueU8t(params, paramCount, "t", type) ||
+                !getParamValue8t(params, paramCount, "o0", opt0) ||
+                !getParamValue8t(params, paramCount, "o1", opt1))
+            {
+                sendAckErr(sender, command, F("Invalid or missing parameters"));
+                return true;
+            }
 
             if (idx >= ConfigMaxSensors)
             {
@@ -133,7 +140,7 @@ public:
             }
 
             SensorEntry& entry = config->sensors.sensors[idx];
-            entry.enabled    = true;
+            entry.enabled = true;
             entry.sensorType = static_cast<SensorIdList>(type);
             entry.options1[0] = opt0;
             entry.options1[1] = opt1;
@@ -217,9 +224,14 @@ public:
                 return true;
             }
 
-            uint8_t idx = getParamValueU8t(params, paramCount, "i");
-            uint8_t slot = getParamValueU8t(params, paramCount, "s");
-            uint8_t pin = getParamValueU8t(params, paramCount, "v");
+            uint8_t idx, slot, pin;
+            if (!getParamValueU8t(params, paramCount, "i", idx) ||
+                !getParamValueU8t(params, paramCount, "s", slot) ||
+                !getParamValueU8t(params, paramCount, "v", pin))
+            {
+                sendAckErr(sender, command, F("Invalid or missing parameters"));
+                return true;
+            }
 
             if (idx >= ConfigMaxSensors || idx >= config->sensors.count)
             {
@@ -274,9 +286,14 @@ public:
                 return true;
             }
 
-            uint8_t idx = getParamValueU8t(params, paramCount, "i");
-            uint8_t slot = getParamValueU8t(params, paramCount, "s");
-            uint8_t option = getParamValueU8t(params, paramCount, "o");
+            uint8_t idx, slot, option;
+            if (!getParamValueU8t(params, paramCount, "i", idx) ||
+                !getParamValueU8t(params, paramCount, "s", slot) ||
+                !getParamValueU8t(params, paramCount, "o", option))
+            {
+                sendAckErr(sender, command, F("Invalid or missing parameters"));
+                return true;
+            }
 
             if (idx >= ConfigMaxSensors || idx >= config->sensors.count)
             {
@@ -301,13 +318,23 @@ public:
             if (option == 0)
             {
                 // options1 are int8_t
-                int8_t val8 = getParamValue8t(params, paramCount, "v");
+                int8_t val8;
+                if (!getParamValue8t(params, paramCount, "v", val8))
+                {
+                    sendAckErr(sender, command, F("Invalid or missing value"));
+                    return true;
+                }
                 config->sensors.sensors[idx].options1[slot] = val8;
             }
             else
             {
                 // options2 are int16_t and may exceed int8 range (e.g. 180 => 18.0)
-                int16_t val16 = getParamValue16t(params, paramCount, "v");
+                int16_t val16;
+                if (!getParamValue16t(params, paramCount, "v", val16))
+                {
+                    sendAckErr(sender, command, F("Invalid or missing value"));
+                    return true;
+                }
                 config->sensors.sensors[idx].options2[slot] = val16;
             }
 

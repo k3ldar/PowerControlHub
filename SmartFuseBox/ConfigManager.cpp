@@ -185,8 +185,10 @@ void ConfigManager::migrateV4toV5()
     _cfg.auth.apiKey[0] = '\0';
     _cfg.auth.hmacKey[0] = '\0';
     memset(_cfg.auth.reserved, 0x00, sizeof(_cfg.auth.reserved));
-
+    
     _cfg.version = ConfigVersion5;
+    _cfg.system.rebootOnSave = false;
+    _cfg.sdCard.csPin = PinDisabled;
 }
 
 bool ConfigManager::save()
@@ -248,7 +250,7 @@ void ConfigManager::resetToDefaults()
         _cfg.relay.homePageMapping[i] = i; // map slot i -> relay i
     }
 
-	_cfg.location.vesselType = LocationType::Other;
+	_cfg.location.locationType = LocationType::Other;
 	_cfg.sound.hornRelayIndex = PinDisabled; // none
     _cfg.lightSensor.nightRelayIndex = PinDisabled; // none
     _cfg.lightSensor.daytimeThreshold = 512;

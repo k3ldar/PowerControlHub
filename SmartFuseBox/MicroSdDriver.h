@@ -242,8 +242,21 @@ public:
      * Call this once to begin initialization, then call update() in loop()
      * to progress through initialization steps.
      * 
-     * @param csPin Chip select pin for SD card
+     * @param misoPin SPI MISO pin number (Master In, Slave Out). Pass PinDisabled (0xFF)
+     *                if the pin should remain disabled or is not provided by the board.
+     * @param mosiPin SPI MOSI pin number (Master Out, Slave In). Pass PinDisabled (0xFF)
+     *                if the pin should remain disabled or is not provided by the board.
+     * @param sckPin  SPI SCK pin number (Serial Clock). Pass PinDisabled (0xFF)
+     *                if the pin should remain disabled or is not provided by the board.
+     * @param csPin   Chip select pin for SD card (active low).
      * @param speedMhz SPI speed in MHz (4, 8, 12, 16, 20, or 24)
+     *
+     * Note: The pin parameter order is explicitly (miso, mosi, sck, cs). This ordering
+     * reduces the risk of mixing MOSI/MISO/SCK when calling the function — ensure callers
+     * follow the same order. The function stores the provided pin values even on platforms
+     * that do not support configuring SPI pins at bus init; in that case the portable
+     * SPI.begin() is used and pins remain available for any board-specific configuration
+     * helpers if provided by the core.
      */
     void beginInitialize(uint8_t misoPin, uint8_t mosiPin, uint8_t sckPin, uint8_t csPin, uint32_t speedMhz);
 

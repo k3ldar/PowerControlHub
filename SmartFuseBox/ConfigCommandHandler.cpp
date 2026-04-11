@@ -98,7 +98,7 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
 		}
 
 		// C7 Boat type
-		snprintf(buffer, sizeof(buffer), "v=%d", static_cast<uint8_t>(config->location.vesselType));
+		snprintf(buffer, sizeof(buffer), "v=%d", static_cast<uint8_t>(config->location.locationType));
 		sender->sendCommand(ConfigBoatType, buffer);
 
 		// C9 Sound start delay
@@ -267,13 +267,12 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
 	}
   else if (SystemFunctions::commandMatches(command, ConfigSpiPins))
 	{
-        if (paramCount >= 3)
+		if (paramCount >= 3)
 		{
-			uint8_t sckPin = getParamValueU8t(params, paramCount, "sck");
-			uint8_t mosiPin = getParamValueU8t(params, paramCount, "mosi");
-			uint8_t misoPin = getParamValueU8t(params, paramCount, "miso");
-
-			if (sckPin == PinDisabled || mosiPin == PinDisabled || misoPin == PinDisabled)
+			uint8_t sckPin, mosiPin, misoPin;
+			if (!getParamValueU8t(params, paramCount, "sck", sckPin) ||
+				!getParamValueU8t(params, paramCount, "mosi", mosiPin) ||
+				!getParamValueU8t(params, paramCount, "miso", misoPin))
 			{
 				result = ConfigResult::InvalidParameter;
 			}
@@ -293,7 +292,7 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
 		if (paramCount >= 1)
 		{
 			uint8_t type = atoi(params[0].value);
-			result = _configController->setVesselType(type);
+			result = _configController->setLocationType(type);
 		}
 		else
 		{
@@ -475,13 +474,19 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
 		// t=type (0=day, 1=night), c=colorset (0=good, 1=bad), r/g/b=0-255
 		if (paramCount >= 5)
 		{
-			uint8_t type = getParamValueU8t(params, paramCount, "t");
-			uint8_t colorSet = getParamValueU8t(params, paramCount, "c");
-			uint8_t r = getParamValueU8t(params, paramCount, "r");
-			uint8_t g = getParamValueU8t(params, paramCount, "g");
-			uint8_t b = getParamValueU8t(params, paramCount, "b");
-
-			result = _configController->setLedColor(type, colorSet, r, g, b);
+			uint8_t type, colorSet, r, g, b;
+			if (!getParamValueU8t(params, paramCount, "t", type) ||
+				!getParamValueU8t(params, paramCount, "c", colorSet) ||
+				!getParamValueU8t(params, paramCount, "r", r) ||
+				!getParamValueU8t(params, paramCount, "g", g) ||
+				!getParamValueU8t(params, paramCount, "b", b))
+			{
+				result = ConfigResult::InvalidParameter;
+			}
+			else
+			{
+				result = _configController->setLedColor(type, colorSet, r, g, b);
+			}
 		}
 		else
 		{
@@ -495,10 +500,16 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
 		// t=type (0=day, 1=night), b=brightness (0-100)
 		if (paramCount >= 2)
 		{
-			uint8_t type = getParamValueU8t(params, paramCount, "t");
-			uint8_t brightness = getParamValueU8t(params, paramCount, "b");
-
-			result = _configController->setLedBrightness(type, brightness);
+			uint8_t type, brightness;
+			if (!getParamValueU8t(params, paramCount, "t", type) ||
+				!getParamValueU8t(params, paramCount, "b", brightness))
+			{
+				result = ConfigResult::InvalidParameter;
+			}
+			else
+			{
+				result = _configController->setLedBrightness(type, brightness);
+			}
 		}
 		else
 		{
@@ -526,9 +537,14 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
 		// g=GPS LED, w=Warning LED, s=System LED
 		if (paramCount >= 3)
 		{
-			bool gps = getParamValueBool(params, paramCount, "g");
-			bool warning = getParamValueBool(params, paramCount, "w");
-			bool system = getParamValueBool(params, paramCount, "s");
+			bool gps, warning, system;
+
+			if (!getParamValueBool(params, paramCount, "g", gps) ||
+				!getParamValueBool(params, paramCount, "w", warning) ||
+				!getParamValueBool(params, paramCount, "s", system))
+			{
+				result = ConfigResult::InvalidParameter;
+			}
 
 			result = _configController->setLedEnableStates(gps, warning, system);
 		}
@@ -544,13 +560,21 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
 		// t=type (0=good, 1=bad), h=tone Hz, d=duration ms, p=preset, r=repeat interval ms (bad only)
 		if (paramCount >= 4)
 		{
-			uint8_t type = getParamValueU8t(params, paramCount, "t");
-			uint8_t preset = getParamValueU8t(params, paramCount, "p");
-			uint16_t toneHz = getParamValueU16t(params, paramCount, "h");
-			uint16_t durationMs = getParamValueU16t(params, paramCount, "d");
-			uint32_t repeatMs = getParamValueU32t(params, paramCount, "r");
-
-			result = _configController->setControlPanelTones(type, preset, toneHz, durationMs, repeatMs);
+			uint8_t type, preset;
+			uint16_t toneHz, durationMs;
+			uint32_t repeatMs;
+			if (!getParamValueU8t(params, paramCount, "t", type) ||
+				!getParamValueU8t(params, paramCount, "p", preset) ||
+				!getParamValueU16t(params, paramCount, "h", toneHz) ||
+				!getParamValueU16t(params, paramCount, "d", durationMs) ||
+				!getParamValueU32t(params, paramCount, "r", repeatMs))
+			{
+				result = ConfigResult::InvalidParameter;
+			}
+			else
+			{
+				result = _configController->setControlPanelTones(type, preset, toneHz, durationMs, repeatMs);
+			}
 		}
 		else
 		{

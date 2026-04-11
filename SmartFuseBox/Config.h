@@ -147,7 +147,7 @@ struct SystemConfig {
 
 struct LocationConfig {
     char name[ConfigMaxNameLength];
-    LocationType vesselType;
+    LocationType locationType;
     char mmsi[ConfigMmsiLength];
     char callSign[ConfigCallSignLength];
     char homePort[ConfigHomePortLength];

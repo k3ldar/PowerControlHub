@@ -86,6 +86,16 @@ Enables the BLE stack (`BluetoothController`, `BluetoothManager`) and all three 
 
 ---
 
+### `SD_CARD_SUPPORT`
+
+```cpp
+#define SD_CARD_SUPPORT
+```
+
+Enables SD card support via the `MicroSdDriver` singleton. When defined, the system can log data to the SD card and optionally load configuration from `config.txt`. This feature requires the SD card SPI pins to be configured correctly (see section 6).
+
+---
+
 ### `CARD_CONFIG_LOADER`
 
 ```cpp
@@ -144,14 +154,40 @@ When adding new sensors, define additional pin constants here and use them when 
 
 ## 6. SD Card SPI Pins
 
-Used by `MicroSdDriver` for SD card access (logging and optional config loading).
+Used by `MicroSdDriver` for SD card access (logging and optional config loading). Requires `SD_CARD_SUPPORT` to be defined.
+
+> **Note:** The `CONFIGURE_SPI` flag in `Local.h` gates platform-specific SPI pin configuration:
+> - **Defined** (ESP32): Calls `SPI.begin(sck, miso, mosi)` with the configured pins.
+> - **Undefined** (Arduino UNO R4, AVR): Calls the portable `SPI.begin()` with core-default pins.
+> 
+> Pin values passed to `beginInitialize()` are always stored regardless of the flag, so they remain available for board-specific helpers like `SPI.setSCK()` / `setMISO()` / `setMOSI()` if the target core provides them.
 
 | Constant | Default | SPI Signal |
 |---|---|---|
 | `SdCardCsPin` | `D10` | Chip Select |
-| `SdCardMosiPin` | `D11` | MOSI |
-| `SdCardMisoPin` | `D12` | MISO |
+| `SdCardMosiPin` | `D11` | MOSI (Master Out, Slave In) |
+| `SdCardMisoPin` | `D12` | MISO (Master In, Slave Out) |
 | `SdCardSckPin` | `D13` | Clock |
+
+### Configuration via Serial Commands
+
+SD card pins can be configured at runtime:
+
+| Command | ID | Format | Description |
+|---|---|---|---|
+| SPI Pins | `C4` | `s=<sck>;o=<mosi>;i=<miso>` | Set SPI pins (SCK, MOSI, MISO). Note the parameter order: `s` = SCK, `o` = MOSI, `i` = MISO |
+| CS Pin | `C32` | `v=<pin>` | Set chip select pin |
+| SD Speed | `C31` | `v=<4\|8\|12\|16\|20\|24>` | Set SPI speed in MHz |
+
+**Example:**
+
+```
+C4:s=13;o=11;i=12    ← Configure SPI pins
+C32:v=10              ← Set CS pin to D10
+C31:v=8               ← Set SPI speed to 8 MHz
+```
+
+All four pins (MISO, MOSI, SCK, CS) must be set to valid pin numbers (not `0xFF` / `PinDisabled`) before `MicroSdDriver::beginInitialize()` will proceed. If any pin is invalid, the `SpiPinConfigError` warning is raised.
 
 ---
 

@@ -37,64 +37,64 @@ protected:
 		return nullptr;
 	}
 
-	uint8_t getParamValueU8t(const StringKeyValue params[], uint8_t paramCount, const char* key) const
+	bool getParamValueU8t(const StringKeyValue params[], uint8_t paramCount, const char* key, uint8_t& out) const
 	{
 		const char* v = getParamValue(params, paramCount, key);
 
 		if (!v)
-			return DefaultValue;
+			return false;
 
-		uint8_t out;
-		return SystemFunctions::parseUnsigned(v, out) ? out : DefaultValue;
+		return SystemFunctions::parseUnsigned(v, out);
 	}
 
-	int8_t getParamValue8t(const StringKeyValue params[], uint8_t paramCount, const char* key) const
+	bool getParamValue8t(const StringKeyValue params[], uint8_t paramCount, const char* key, int8_t& out) const
 	{
 		const char* v = getParamValue(params, paramCount, key);
 
 		if (!v)
-			return 0;
+			return false;
 
-		int8_t out;
-		return SystemFunctions::parseSigned(v, out) ? out : 0;
+		return SystemFunctions::parseSigned(v, out);
 	}
 
-	int16_t getParamValue16t(const StringKeyValue params[], uint8_t paramCount, const char* key) const
+	bool getParamValue16t(const StringKeyValue params[], uint8_t paramCount, const char* key, int16_t& out) const
 	{
 		const char* v = getParamValue(params, paramCount, key);
 
 		if (!v)
-			return 0;
+			return false;
 
-		int16_t out;
-		return SystemFunctions::parseSigned(v, out) ? out : 0;
+		return SystemFunctions::parseSigned(v, out);
 	}
 
-	uint16_t getParamValueU16t(const StringKeyValue params[], uint8_t paramCount, const char* key) const
+	bool getParamValueU16t(const StringKeyValue params[], uint8_t paramCount, const char* key, uint16_t& out) const
 	{
 		const char* v = getParamValue(params, paramCount, key);
 
 		if (!v)
-			return 0;
+			return false;
 
-		uint16_t out;
-		return SystemFunctions::parseUnsigned(v, out) ? out : 0;
+		return SystemFunctions::parseUnsigned(v, out);
 	}
 
-	uint32_t getParamValueU32t(const StringKeyValue params[], uint8_t paramCount, const char* key) const
+	bool getParamValueU32t(const StringKeyValue params[], uint8_t paramCount, const char* key, uint32_t& out) const
 	{
 		const char* v = getParamValue(params, paramCount, key);
 
 		if (!v)
-			return 0;
+			return false;
 
-		uint32_t out;
-		return SystemFunctions::parseUnsigned(v, out) ? out : 0;
+		return SystemFunctions::parseUnsigned(v, out);
 	}
 
-	bool getParamValueBool(const StringKeyValue params[], uint8_t paramCount, const char* key) const
+	bool getParamValueBool(const StringKeyValue params[], uint8_t paramCount, const char* key, bool& out) const
 	{
 		const char* v = getParamValue(params, paramCount, key);
-		return v ? SystemFunctions::parseBooleanValue(v) : false;
+
+		if (!v)
+			return false;
+
+		out = SystemFunctions::parseBooleanValue(v);
+		return true;
 	}
 };

@@ -59,7 +59,7 @@ public:
 	ConfigResult reset();
 	ConfigResult rename(const char* name);
 	ConfigResult mapHomeButton(const uint8_t homeButtonIndex, const uint8_t relayIndex);
-	ConfigResult setVesselType(const uint8_t vesselType);
+	ConfigResult setLocationType(const uint8_t vesselType);
 	ConfigResult setsoundDelayStart(const uint16_t delayMilliSeconds);
 	ConfigResult setBluetoothEnabled(const bool enabled);
 	ConfigResult setWifiEnabled(const bool enabled);

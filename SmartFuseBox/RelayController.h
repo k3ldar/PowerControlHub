@@ -141,7 +141,6 @@ public:
 			_relayStatus[i] = false;
 			if (!isRelayDisabled(i))
 			{
-				Serial.println("Setting up relay pin " + String(_relays[i]) + " (index " + String(i) + ")");
 				pinMode(_relays[i], OUTPUT);
 				digitalWrite(_relays[i], HIGH);
 			}

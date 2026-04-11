@@ -94,15 +94,15 @@ ConfigResult ConfigController::mapHomeButton(const uint8_t homeButtonIndex, cons
 	return ConfigResult::Success;
 }
 
-ConfigResult ConfigController::setVesselType(const uint8_t vesselType)
+ConfigResult ConfigController::setLocationType(const uint8_t locationlType)
 {
 	if (_config == nullptr)
 		return ConfigResult::InvalidConfig;
 
-	if (vesselType > static_cast<uint8_t>(LocationType::Yacht))
+	if (locationlType > static_cast<uint8_t>(LocationType::Yacht))
 		return ConfigResult::InvalidParameter;
 
-	_config->location.vesselType = static_cast<LocationType>(vesselType);
+	_config->location.locationType = static_cast<LocationType>(locationlType);
 	updateSoundControllerConfig();
 	return ConfigResult::Success;
 }

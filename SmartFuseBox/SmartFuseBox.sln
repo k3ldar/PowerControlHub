@@ -13,10 +13,8 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{B2F18220-A117-4398-ABED-D0C31F1F5844}"
 	ProjectSection(SolutionItems) = preProject
 		..\Docs\BluetoothBle.md = ..\Docs\BluetoothBle.md
-		..\BOM.md = ..\BOM.md
 		..\Docs\Commands.md = ..\Docs\Commands.md
 		..\Docs\DateTime.md = ..\Docs\DateTime.md
-		..\ExternalUpdatePattern.md = ..\ExternalUpdatePattern.md
 		..\Docs\LedManager.md = ..\Docs\LedManager.md
 		..\LICENSE = ..\LICENSE
 		..\Docs\Local.md = ..\Docs\Local.md
@@ -25,9 +23,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{B2F18220-A
 		..\Docs\RestApi.md = ..\Docs\RestApi.md
 		..\Docs\ScheduleEvents.md = ..\Docs\ScheduleEvents.md
 		..\Docs\Sensors.md = ..\Docs\Sensors.md
-		..\SETUP.md = ..\SETUP.md
 		..\Docs\Warnings.md = ..\Docs\Warnings.md
-		..\Wifi.md = ..\Wifi.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{4C870D05-33E2-48BE-9DE2-5F88724C77CD}"

@@ -38,10 +38,11 @@ Bit ranges are reserved as follows:
 | 7 | `0x00000080` | `WifiInvalidConfig` | Wifi Invalid Config | SSID empty or port is zero | Manually / on valid config applied |
 | 8 | `0x00000100` | `WeakWifiSignal` | Weak Wifi Signal | RSSI drops below −70 dBm | Automatically when signal recovers |
 | 9 | `0x00000200` | `SyncFailed` | Synchronization Failed | Config sync with BCP fails or times out | Automatically on next successful sync |
-| 10 | `0x00000400` | `SdCardError` | SD Card Error | SD card read/write error | Manually |
-| 11 | `0x00000800` | `SdCardMissing` | SD Card Not Found | SD card not detected at initialisation | Automatically when card is inserted |
-| 12 | `0x00001000` | `SdCardLowSpace` | SD Card Low Space | Free space falls below 10% | Automatically when space recovers |
-| 13–19 | — | *(reserved)* | — | — | — |
+| 10 | `0x00000400` | `SpiPinConfigError` | SPI Pin Config Error | One or more required SPI pins (MISO/MOSI/SCK/CS) are set to `PinDisabled` (0xFF) when calling `MicroSdDriver::beginInitialize()` | Manually / on valid pin config applied |
+| 11 | `0x00000800` | `SdCardError` | SD Card Error | SD card read/write error | Manually |
+| 12 | `0x00001000` | `SdCardMissing` | SD Card Not Found | SD card not detected at initialisation | Automatically when card is inserted |
+| 13 | `0x00002000` | `SdCardLowSpace` | SD Card Low Space | Free space falls below 10% | Automatically when space recovers |
+| 14–19 | — | *(reserved)* | — | — | — |
 | 20 | `0x00100000` | `SensorFailure` | Sensor Failure | **Auto-raised** when any sensor warning (bits 21–31) is raised | **Auto-cleared** when all sensor warnings are cleared |
 | 21 | `0x00200000` | `TemperatureSensorFailure` | Temperature Sensor Failure | DHT11 returns a read error | Automatically on next successful DHT11 read |
 | 22 | `0x00400000` | `CompassFailure` | Compass Failure | Compass module fails to initialise | Manually |
