@@ -38,7 +38,7 @@ jobs:
         arduino-cli compile \
           --fqbn esp32:esp32:esp32s3 \
           --output-dir SmartFuseBox/Build \
-          src
+          src/SmartFuseBox.ino
 
     - name: Upload firmware artifact
       uses: actions/upload-artifact@v4
