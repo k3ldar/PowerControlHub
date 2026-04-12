@@ -44,4 +44,4 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: SmartFuseBox-firmware
-        path: src/Build/SmartFuseBox.ino.bin
+        path: src/Build/src.ino.bin

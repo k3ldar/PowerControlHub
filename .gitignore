@@ -336,3 +336,5 @@ StaticElectrics/__vm/
 /SmartFuseBox/__vm/Compile.vmps.xml
 /SmartFuseBox/__vm/Upload.vmps.xml
 /SmartFuseBox/__vm/.SmartFuseBox.vsarduino.h
+/__vm/
+/src/__vm/
