@@ -1,0 +1,687 @@
+# Smart Fuse Box Test Commands
+# Lines starting with # are comments
+# Format: COMMAND -> EXPECTED_RESPONSE
+# Use | to separate multiple valid responses
+# Use * as wildcard for variable content
+
+# ============================================================
+# SYSTEM COMMANDS - Query Commands
+# ============================================================
+F2 -> ACK:F2=ok:v=*
+F3 -> ACK:F3=ok:v=*
+F4 -> ACK:F4=ok:v=*
+F5 -> ACK:F5=ok:v=*
+F7 -> ACK:F7=ok:v=*
+F8 -> ACK:F8=ok:v=*
+F9 -> ACK:F9=ok:v=*
+F11 -> ACK:F11=ok:v=*
+
+# RTC Diagnostic - returns status message
+F10 -> ACK:F10=ok:*
+
+# OTA Status (SFB only, requires WiFi)
+# F13 -> ACK:F13:v=*;av=*;s=*;auto=*
+
+# ============================================================
+# SYSTEM COMMANDS - Set Commands
+# ============================================================
+# Set DateTime (Unix timestamp)
+F6:v=1733328600 -> ACK:F6=ok:v=*
+
+# Heartbeat (SFB sends warnings only)
+F0:w=0x00 -> ACK:F0=ok
+
+# ============================================================
+# CONFIGURATION COMMANDS - Boat Info
+# ============================================================
+C3:Test Boat -> ACK:C3=ok:*
+C3:name=Test Boat 2 -> ACK:C3=ok:*
+C21:123456789 -> ACK:C21=ok|ACK:C21=Invalid parameter:*
+C22:TEST123 -> ACK:C22=ok:*
+C23:Test Port -> ACK:C23=ok:*
+
+# ============================================================
+# CONFIGURATION COMMANDS - Vessel Settings
+# ============================================================
+# Vessel Type: 0=Motor, 1=Sail, 2=Fishing, 3=Yacht
+C7:v=0 -> ACK:C7=ok:*
+C7:v=1 -> ACK:C7=ok:*
+C7:v=2 -> ACK:C7=ok:*
+C7:v=3 -> ACK:C7=ok:*
+
+# Timezone offset
+C20:v=-5 -> ACK:C20=ok:*
+C20:v=0 -> ACK:C20=ok:*
+C20:v=8 -> ACK:C20=ok:*
+
+# Sound delay
+C9:v=100 -> ACK:C9=ok:*
+C9:v=255 -> ACK:C9=ok:*
+
+# ============================================================
+# CONFIGURATION COMMANDS - WiFi Settings (SFB)
+# ============================================================
+C11:v=0 -> ACK:C11=ok:*
+C11:v=1 -> ACK:C11=ok:*
+C12:v=0 -> ACK:C12=ok:*
+C12:v=1 -> ACK:C12=ok:*
+C13:TestSSID -> ACK:C13=ok:*
+C14:TestPassword -> ACK:C14=ok:*
+C15:v=80 -> ACK:C15=ok:*
+C15:v=8080 -> ACK:C15=ok:*
+C17:192.168.4.1 -> ACK:C17=ok:*
+
+# ============================================================
+# CONFIGURATION COMMANDS - Bluetooth Settings (SFB)
+# ============================================================
+C10:v=0 -> ACK:C10=ok:*|ACK:C10=Bluetooth init failed:*
+C10:v=1 -> ACK:C10=ok:*|ACK:C10=Bluetooth init failed:*
+
+# ============================================================
+# CONFIGURATION COMMANDS - SPI Settings
+# ============================================================
+C4:sck=12;mosi=11;miso=13 -> ACK:C4=ok:*
+C31:v=4 -> ACK:C31=ok:*
+C31:v=8 -> ACK:C31=ok:*
+C31:v=12 -> ACK:C31=ok:*
+
+# ============================================================
+# CONFIGURATION COMMANDS - LED Settings
+# ============================================================
+C24:t=0;c=0;r=255;g=50;b=213 -> ACK:C24=ok:*
+C24:t=1;c=1;r=100;g=0;b=0 -> ACK:C24=ok:*
+C25:t=0;b=75 -> ACK:C25=ok:*
+C25:t=1;b=30 -> ACK:C25=ok:*
+C26:v=1 -> ACK:C26=ok:*
+C26:v=0 -> ACK:C26=ok:*
+C27:g=1;w=1;s=1 -> ACK:C27=ok:*
+C27:g=0;w=0;s=0 -> ACK:C27=ok:*
+
+# ============================================================
+# CONFIGURATION COMMANDS - Control Panel Tones
+# ============================================================
+C28:t=0;h=400;d=500;p=0;r=0 -> ACK:C28=ok:*
+C28:t=1;h=400;d=500;p=2;r=30000 -> ACK:C28=ok:*
+C33:v=512 -> ACK:C33=ok:*
+
+# ============================================================
+# MQTT CONFIGURATION COMMANDS
+# ============================================================
+M0:v=0 -> ACK:M0=ok:*
+M0:v=1 -> ACK:M0=ok:*
+M1:192.168.1.100 -> ACK:M1=ok:*
+M2:v=1883 -> ACK:M2=ok:*
+M3:testuser -> ACK:M3=ok:*|ACK:M3=Invalid parameter:*
+M4:testpass -> ACK:M4=ok:*|ACK:M4=Invalid parameter:*
+M5:test_device -> ACK:M5=ok:*
+M6:v=0 -> ACK:M6=ok:*
+M6:v=1 -> ACK:M6=ok:*
+M7:v=60 -> ACK:M7=ok:*
+M9:homeassistant -> ACK:M9=ok:*
+
+# MQTT Query Commands
+M0 -> ACK:M0=ok:v=*
+M1 -> ACK:M1=ok:v=*
+M2 -> ACK:M2=ok:v=*
+M3 -> ACK:M3=ok:v=*
+M4 -> ACK:M4=ok:v=*
+M5 -> ACK:M5=ok:v=*
+M6 -> ACK:M6=ok:v=*
+M7 -> ACK:M7=ok:v=*
+M9 -> ACK:M9=ok:v=*
+M8 -> ACK:M8=ok:v=*
+
+# ============================================================
+# RELAY CONTROL COMMANDS
+# ============================================================
+R0 -> ACK:R0=ok
+R1 -> ACK:R1=ok
+R2 -> ACK:R2=ok:*
+R3:0=0 -> ACK:R3=ok:*|ACK:R3=Invalid relay index:*
+R3:0=1 -> ACK:R3=ok:*|ACK:R3=Invalid relay index:*
+R3:7=1 -> ACK:R3=ok:*|ACK:R3=Invalid relay index:*
+R4:0 -> ACK:R4=ok:0=*
+R4:7 -> ACK:R4=ok:7=*
+R5 -> ACK:R5=ok*
+
+# ============================================================
+# RELAY CONFIGURATION COMMANDS
+# ============================================================
+R6:0=Test -> ACK:R6=ok:*
+R6:1=Test|Test Name -> ACK:R6=ok:*
+R7:0=0 -> ACK:R7=ok:*
+R7:1=4 -> ACK:R7=ok:*
+R7:2=255 -> ACK:R7=ok:*
+R8:0=0 -> ACK:R8=ok:*
+R8:1=1 -> ACK:R8=ok:*
+R9:0=1 -> ACK:R9=ok:*
+R9:0=255 -> ACK:R9=ok:*
+R10:0=0 -> ACK:R10=ok:*
+R10:1=1 -> ACK:R10=ok:*
+R10:2=2 -> ACK:R10=ok:*
+R11:0=15 -> ACK:R11=ok:*
+R11:7=22 -> ACK:R11=ok:*
+
+# ============================================================
+# SENSOR CONFIGURATION COMMANDS
+# ============================================================
+S0 -> ACK:S0=ok|ACK:S0=ok:*
+S1:i=0;t=1;o0=0;o1=0 -> ACK:S1=ok:reboot=1
+S2:0 -> ACK:S2=ok:reboot=1
+S3:0=Test Sensor -> ACK:S3=ok:reboot=1
+S4:i=0;s=0;v=34 -> ACK:S4=ok:reboot=1
+S5:0=0 -> ACK:S5=ok:reboot=1
+S5:0=1 -> ACK:S5=ok:reboot=1
+S6:i=0;s=0;v=1 -> ACK:S6=ok:reboot=1|ACK:S6=Invalid or missing parameters
+
+# ============================================================
+# WARNING COMMANDS
+# ============================================================
+W1 -> ACK:W1=ok:*
+W3 -> ACK:W3=ok
+W4:0x05=1 -> ACK:W4=ok|ACK:W4=Invalid warning type
+W4:0x05=0 -> ACK:W4=ok|ACK:W4=Invalid warning type
+
+# ============================================================
+# SOUND SIGNAL COMMANDS (Fog Horn)
+# ============================================================
+H0 -> ACK:H0=ok
+H1 -> ACK:H1=ok:*
+H2 -> ACK:H2=ok
+H3 -> ACK:H3=ok
+H4 -> ACK:H4=ok
+H5 -> ACK:H5=ok
+H6 -> ACK:H6=ok
+H7 -> ACK:H7=ok
+H8 -> ACK:H8=ok
+H9 -> ACK:H9=ok
+H10 -> ACK:H10=ok
+H11 -> ACK:H11=ok
+H12 -> ACK:H12=ok
+
+# ============================================================
+# TIMER/SCHEDULER COMMANDS
+# ============================================================
+T0 -> T0:count=*
+T1:v=0 -> ACK:T1=Slot is empty:*|ACK:T1=ok:*
+T2:i=0;e=1;t=1,18,30,0,0;c=0,0,0,0,0;a=2,2,0,0,0 -> ACK:T2=ok
+T3:v=0 -> ACK:T3=ok:*
+T4:i=0;v=1 -> ACK:T4=ok
+T4:i=0;v=0 -> ACK:T4=ok
+T5 -> ACK:T5=ok
+T6:v=0 -> ACK:T6=ok|ACK:T6=No action defined
+
+# ============================================================
+# ERROR RESPONSE TESTS
+# ============================================================
+# Test invalid parameters
+C7:v=99 -> ACK:C7=Invalid parameter:*
+C20:v=99 -> ACK:C20=Invalid parameter:*
+C21:123 -> ACK:C21=Invalid parameter:*
+R3:99=1 -> ACK:R3=Invalid relay index
+R7:0=99 -> ACK:R7=Invalid color:*
+M2:v=0 -> ACK:M2=Invalid parameter:*
+
+# Test missing parameters
+C3 -> ACK:C3=Invalid parameter:*
+C7 -> ACK:C7=Invalid parameter:*
+C20 -> ACK:C20=Invalid parameter:*
+
+# ============================================================
+# CONFIGURATION GET/SAVE/RESET
+# ============================================================
+# Get all settings (returns multiple commands)
+C1 -> C*
+
+# Save settings to EEPROM
+C0 -> ACK:C0=ok:*
+
+# Reset all settings
+C2 -> ACK:C2=ok:*
+
+# ============================================================
+# EXTENDED TESTS - BOUNDARY VALUES
+# ============================================================
+
+# Timezone boundaries
+C20:v=-12 -> ACK:C20=ok:*
+C20:v=14 -> ACK:C20=ok:*
+C20:v=-13 -> ACK:C20=Invalid parameter:*
+C20:v=15 -> ACK:C20=Invalid parameter:*
+
+# LED Brightness boundaries
+C25:t=0;b=0 -> ACK:C25=ok:*
+C25:t=0;b=100 -> ACK:C25=ok:*
+C25:t=0;b=101 -> ACK:C25=Invalid parameter:*
+C25:t=1;b=50 -> ACK:C25=ok:*
+
+# LED Type boundaries
+C24:t=0;c=0;r=0;g=0;b=0 -> ACK:C24=ok:*
+C24:t=0;c=0;r=255;g=255;b=255 -> ACK:C24=ok:*
+C24:t=2;c=0;r=255;g=0;b=0 -> ACK:C24=Invalid parameter:*
+C24:t=0;c=2;r=255;g=0;b=0 -> ACK:C24=Invalid parameter:*
+
+# Relay color boundaries (0-5 valid, 255 clear)
+R7:0=0 -> ACK:R7=ok:*
+R7:0=5 -> ACK:R7=ok:*
+R7:0=6 -> ACK:R7=Invalid color:*
+
+# WiFi Port boundaries
+C15:v=1 -> ACK:C15=ok:*
+C15:v=65535 -> ACK:C15=ok:*
+
+# MQTT Port boundaries
+M2:v=1 -> ACK:M2=ok:*
+M2:v=65535 -> ACK:M2=ok:*
+
+# MQTT Keep Alive boundaries
+M7:v=1 -> ACK:M7=ok:*
+M7:v=3600 -> ACK:M7=ok:*
+
+# ============================================================
+# EXTENDED TESTS - ALL SENSOR TYPES
+# ============================================================
+
+# Sensor Type 0: Water Sensor
+S1:i=0;t=0;o0=0;o1=0 -> ACK:S1=ok:reboot=1
+
+# Sensor Type 1: Dht11 (already tested)
+
+# Sensor Type 2: Light Sensor (digital mode)
+S1:i=1;t=2;o0=1;o1=0 -> ACK:S1=ok:reboot=1
+
+# Sensor Type 3: System Sensor
+S1:i=2;t=3;o0=0;o1=0 -> ACK:S1=ok:reboot=1
+
+# Sensor Type 5: Binary Presence Sensor
+S1:i=3;t=5;o0=1;o1=0 -> ACK:S1=ok:reboot=1
+
+# Remove all test sensors
+S2:0 -> ACK:S2=ok:reboot=1
+S2:1 -> ACK:S2=ok:reboot=1
+S2:2 -> ACK:S2=ok:reboot=1
+S2:3 -> ACK:S2=ok:reboot=1
+
+# ============================================================
+# EXTENDED TESTS - HOME BUTTON MAPPING
+# ============================================================
+
+# Map home buttons to relays
+C5:0=0 -> ACK:C5=ok:*
+C5:1=1 -> ACK:C5=ok:*
+C5:2=2 -> ACK:C5=ok:*
+C5:3=3 -> ACK:C5=ok:*
+
+# Unmap home buttons
+C5:0=255 -> ACK:C5=ok:*
+C5:1=255 -> ACK:C5=ok:*
+
+# Invalid slot (only 0-3 valid for HOME_BUTTONS)
+C5:4=0 -> ACK:C5=Invalid parameter:*|ACK:C5=Button out of range
+
+# Invalid relay (0-7 or 255 only)
+C5:0=8 -> ACK:C5=Invalid parameter:*|ACK:C5=Relay out of range
+
+# ============================================================
+# EXTENDED TESTS - CONTROL PANEL TONE PRESETS
+# ============================================================
+
+# Preset 0: Custom tone
+C28:t=0;h=1000;d=250;p=0;r=0 -> ACK:C28=ok:*
+
+# Preset 1: Submarine ping
+C28:t=0;h=0;d=0;p=1;r=0 -> ACK:C28=ok:*
+
+# Preset 2: Double beep
+C28:t=0;h=0;d=0;p=2;r=0 -> ACK:C28=ok:*
+
+# Preset 3: Rising chirp
+C28:t=0;h=0;d=0;p=3;r=0 -> ACK:C28=ok:*
+
+# Preset 4: Descending alert
+C28:t=0;h=0;d=0;p=4;r=0 -> ACK:C28=ok:*
+
+# Preset 5: Nautical bell
+C28:t=0;h=0;d=0;p=5;r=0 -> ACK:C28=ok:*
+
+# Preset 0xFF: No sound
+C28:t=0;h=0;d=0;p=255;r=0 -> ACK:C28=ok:*
+
+# Bad tone with repeat interval
+C28:t=1;h=400;d=500;p=0;r=30000 -> ACK:C28=ok:*
+
+# ============================================================
+# EXTENDED TESTS - STRING EDGE CASES
+# ============================================================
+
+# Long boat name (should be truncated)
+C3:VeryLongBoatNameThatExceedsMaximumAllowedLength -> ACK:C3=ok:*
+
+# Long call sign (should be truncated)
+C22:VERYLONGCALLSIGN123 -> ACK:C22=ok:*
+
+# Long home port (should be truncated)
+C23:Very Long Home Port Name That Exceeds Maximum -> ACK:C23=ok:*
+
+# Boat name with special characters
+C3:Boat-Name -> ACK:C3=ok:*
+
+# WiFi SSID with spaces
+C13:SSID With Spaces -> ACK:C13=ok:*
+
+# MQTT Device ID with underscores
+M5:device_id_test -> ACK:M5=ok:*
+
+# ============================================================
+# EXTENDED TESTS - RELAY ACTION TYPES
+# ============================================================
+
+# Test all relay action types (0=Default, 1=Horn, 2=NightRelay)
+R10:0=0 -> ACK:R10=ok:*
+R10:1=0 -> ACK:R10=ok:*
+R10:2=1 -> ACK:R10=ok:*
+R10:3=0 -> ACK:R10=ok:*
+R10:4=2 -> ACK:R10=ok:*
+R10:5=0 -> ACK:R10=ok:*
+
+# Invalid action type
+R10:0=3 -> ACK:R10=Invalid parameter:*
+
+# ============================================================
+# EXTENDED TESTS - TIMER/SCHEDULER COMPREHENSIVE
+# ============================================================
+
+# Trigger Type 1: TimeOfDay (hour, minute)
+T2:i=0;e=1;t=1,18,30,0,0;c=0,0,0,0,0;a=2,2,0,0,0 -> ACK:T2=ok
+
+# Trigger Type 2: Sunrise with offset (+10 minutes)
+T2:i=1;e=1;t=2,10,0,0,0;c=0,0,0,0,0;a=1,0,0,0,0 -> ACK:T2=ok
+
+# Trigger Type 3: Sunset with offset (-10 minutes)
+T2:i=2;e=1;t=3,246,255,0,0;c=0,0,0,0,0;a=1,1,0,0,0 -> ACK:T2=ok
+
+# Trigger Type 4: Interval (every 30 minutes)
+T2:i=3;e=1;t=4,30,0,0,0;c=0,0,0,0,0;a=1,2,0,0,0 -> ACK:T2=ok
+
+# Trigger Type 5: DayOfWeek (Monday-Friday = 31)
+T2:i=4;e=1;t=5,31,0,0,0;c=0,0,0,0,0;a=1,3,0,0,0 -> ACK:T2=ok
+
+# Trigger Type 6: Date (December 25)
+T2:i=5;e=1;t=6,25,12,0,0;c=0,0,0,0,0;a=1,4,0,0,0 -> ACK:T2=ok
+
+# Condition Type 1: TimeWindow (9:00-17:00)
+T2:i=6;e=1;t=1,12,0,0,0;c=1,9,0,17,0;a=1,5,0,0,0 -> ACK:T2=ok
+
+# Condition Type 2: DayOfWeek in condition (weekends = 96)
+T2:i=7;e=1;t=1,12,0,0,0;c=2,96,0,0,0;a=1,6,0,0,0 -> ACK:T2=ok
+
+# Condition Type 3: IsDark
+T2:i=8;e=1;t=1,20,0,0,0;c=3,0,0,0,0;a=1,7,0,0,0 -> ACK:T2=ok
+
+# Condition Type 4: IsDaylight
+T2:i=9;e=1;t=1,12,0,0,0;c=4,0,0,0,0;a=2,0,0,0,0 -> ACK:T2=ok
+
+# Condition Type 5: RelayIsOn (relay 0)
+T2:i=10;e=1;t=1,12,0,0,0;c=5,0,0,0,0;a=2,1,0,0,0 -> ACK:T2=ok
+
+# Condition Type 6: RelayIsOff (relay 1)
+T2:i=11;e=1;t=1,12,0,0,0;c=6,1,0,0,0;a=2,2,0,0,0 -> ACK:T2=ok
+
+# Action Type 3: RelayToggle (relay 3)
+T2:i=12;e=1;t=1,12,0,0,0;c=0,0,0,0,0;a=3,3,0,0,0 -> ACK:T2=ok
+
+# Action Type 4: RelayPulse (relay 4, 10 seconds)
+T2:i=13;e=1;t=1,12,0,0,0;c=0,0,0,0,0;a=4,4,10,0,0 -> ACK:T2=ok
+
+# Action Type 5: AllRelaysOn
+T2:i=14;e=1;t=1,12,0,0,0;c=0,0,0,0,0;a=5,0,0,0,0 -> ACK:T2=ok
+
+# Action Type 6: AllRelaysOff
+T2:i=15;e=1;t=1,12,0,0,0;c=0,0,0,0,0;a=6,0,0,0,0 -> ACK:T2=ok
+
+# Action Type 7: SetPinHigh (GPIO 15)
+T2:i=16;e=1;t=1,12,0,0,0;c=0,0,0,0,0;a=7,15,0,0,0 -> ACK:T2=ok
+
+# Action Type 8: SetPinLow (GPIO 15)
+T2:i=17;e=1;t=1,12,0,0,0;c=0,0,0,0,0;a=8,15,0,0,0 -> ACK:T2=ok
+
+# Enable/disable specific events
+T4:i=0;v=1 -> ACK:T4=ok
+T4:i=0;v=0 -> ACK:T4=ok
+
+# Get specific event details
+T1:v=0 -> ACK:T1=ok:*|ACK:T1=Slot is empty:*
+
+# Delete specific event
+T3:v=0 -> ACK:T3=ok:*
+
+# ============================================================
+# EXTENDED TESTS - SEQUENTIAL VALIDATION
+# ============================================================
+
+# Set vessel type and verify
+C7:v=2 -> ACK:C7=ok:*
+C7 -> ACK:C7=ok:v=2
+
+# Set timezone and verify
+C20:v=-5 -> ACK:C20=ok:*
+C20 -> ACK:C20=ok:v=-5
+
+# Set MQTT enabled and verify
+M0:v=1 -> ACK:M0=ok:*
+M0 -> ACK:M0=ok:v=1
+
+# Set relay state and verify
+R3:0=1 -> ACK:R3=ok:*|ACK:R3=Invalid relay index:*
+R4:0 -> ACK:R4=ok:0=*
+
+# Set relay default state and verify through R5
+R8:0=1 -> ACK:R8=ok:*
+R5 -> ACK:R5=ok*
+
+# ============================================================
+# EXTENDED TESTS - ALL VESSEL TYPES
+# ============================================================
+
+# Vessel type 0: Motor
+C7:v=0 -> ACK:C7=ok:*
+
+# Vessel type 1: Sail
+C7:v=1 -> ACK:C7=ok:*
+
+# Vessel type 2: Fishing
+C7:v=2 -> ACK:C7=ok:*
+
+# Vessel type 3: Yacht
+C7:v=3 -> ACK:C7=ok:*
+
+# Invalid vessel type
+C7:v=4 -> ACK:C7=Invalid parameter:*
+
+# ============================================================
+# EXTENDED TESTS - LED CONFIGURATION COMPLETE
+# ============================================================
+
+# Day mode, Good colorset, RGB values
+C24:t=0;c=0;r=0;g=255;b=0 -> ACK:C24=ok:*
+
+# Day mode, Bad colorset, RGB values
+C24:t=0;c=1;r=255;g=0;b=0 -> ACK:C24=ok:*
+
+# Night mode, Good colorset, dimmed
+C24:t=1;c=0;r=0;g=100;b=0 -> ACK:C24=ok:*
+
+# Night mode, Bad colorset, dimmed
+C24:t=1;c=1;r=100;g=0;b=0 -> ACK:C24=ok:*
+
+# Invalid type (only 0=day, 1=night)
+C24:t=2;c=0;r=255;g=0;b=0 -> ACK:C24=Invalid parameter:*
+
+# Invalid colorset (only 0=good, 1=bad)
+C24:t=0;c=2;r=255;g=0;b=0 -> ACK:C24=Invalid parameter:*
+
+# LED Auto Switch enabled
+C26:v=1 -> ACK:C26=ok:*
+C26:v=true -> ACK:C26=ok:*
+
+# LED Auto Switch disabled
+C26:v=0 -> ACK:C26=ok:*
+C26:v=false -> ACK:C26=ok:*
+
+# LED Enable all
+C27:g=1;w=1;s=1 -> ACK:C27=ok:*
+C27:g=true;w=true;s=true -> ACK:C27=ok:*
+
+# LED Disable all
+C27:g=0;w=0;s=0 -> ACK:C27=ok:*
+C27:g=false;w=false;s=false -> ACK:C27=ok:*
+
+# LED mixed state
+C27:g=1;w=0;s=1 -> ACK:C27=ok:*
+
+# ============================================================
+# EXTENDED TESTS - SOUND DELAY BOUNDARIES
+# ============================================================
+
+C9:v=0 -> ACK:C9=ok:*
+C9:v=50 -> ACK:C9=ok:*
+C9:v=100 -> ACK:C9=ok:*
+C9:v=255 -> ACK:C9=ok:*
+
+# ============================================================
+# EXTENDED TESTS - LIGHT SENSOR THRESHOLD
+# ============================================================
+
+C33:v=0 -> ACK:C33=ok:*
+C33:v=256 -> ACK:C33=ok:*
+C33:v=512 -> ACK:C33=ok:*
+C33:v=768 -> ACK:C33=ok:*
+C33:v=1023 -> ACK:C33=ok:*
+C33:v=1024 -> ACK:C33=Invalid parameter:*
+
+# ============================================================
+# EXTENDED TESTS - SD CARD INITIALIZATION SPEEDS
+# ============================================================
+
+C31:v=4 -> ACK:C31=ok:*
+C31:v=8 -> ACK:C31=ok:*
+C31:v=12 -> ACK:C31=ok:*
+C31:v=16 -> ACK:C31=ok:*
+C31:v=20 -> ACK:C31=ok:*
+C31:v=24 -> ACK:C31=ok:*
+C31:v=5 -> ACK:C31=Invalid parameter:*
+
+# ============================================================
+# EXTENDED TESTS - RELAY LINKING COMPREHENSIVE
+# ============================================================
+
+# Link relay 0 to relay 1
+R9:0=1 -> ACK:R9=ok:*
+
+# Link relay 2 to relay 3
+R9:2=3 -> ACK:R9=ok:*
+
+# Unlink relay 0
+R9:0=255 -> ACK:R9=ok:*
+
+# Invalid linked relay
+R9:0=8 -> ACK:R9=Invalid parameter:*|ACK:R9=No available link slots
+
+# ============================================================
+# EXTENDED TESTS - OTA FIRMWARE COMMANDS (SFB only)
+# ============================================================
+
+# Check OTA status (requires WiFi enabled and ESP32)
+# F13 -> ACK:F13=ok:v=*;av=*;s=*;auto=*
+
+# Check for OTA update without applying
+# F12 -> ACK:F12=ok:v=*;av=*;s=*
+# F12:apply=0 -> ACK:F12=ok:v=*;av=*;s=*
+
+# Check and apply OTA update
+# F12:apply=1 -> ACK:F12=ok:v=*;av=*;s=*
+
+# ============================================================
+# EXTENDED TESTS - MMSI VALIDATION
+# ============================================================
+
+# Valid MMSI (exactly 9 digits)
+C21:123456789 -> ACK:C21=ok|ACK:C21=Invalid parameter:*
+C21:000000000 -> ACK:C21=ok|ACK:C21=Invalid parameter:*
+C21:999999999 -> ACK:C21=ok|ACK:C21=Invalid parameter:*
+
+# Invalid MMSI (not 9 digits)
+C21:12345678 -> ACK:C21=Invalid parameter:*
+C21:1234567890 -> ACK:C21=Invalid parameter:*
+
+# ============================================================
+# EXTENDED TESTS - SENSOR PIN AND OPTION CONFIGURATION
+# ============================================================
+
+# Set sensor pin slot 0
+S4:i=0;s=0;v=34 -> ACK:S4=ok:reboot=1
+
+# Set sensor pin slot 1
+S4:i=0;s=1;v=35 -> ACK:S4=ok:reboot=1
+
+# Clear sensor pin (255 = PinDisabled)
+S4:i=0;s=0;v=255 -> ACK:S4=ok:reboot=1
+
+# Set sensor option
+S6:i=0;s=0;v=1 -> ACK:S6=ok:reboot=1|ACK:S6=Invalid or missing parameters
+
+# Invalid sensor index
+S4:i=10;s=0;v=34 -> ACK:S4=Invalid sensor index|ACK:S4=Invalid parameter:*
+
+# Invalid pin slot
+S4:i=0;s=5;v=34 -> ACK:S4=Invalid parameter:*|ACK:S4=Invalid pin slot
+
+# ============================================================
+# EXTENDED TESTS - WIFI AP MODE
+# ============================================================
+
+# Set to AP mode
+C12:v=0 -> ACK:C12=ok:*
+
+# Set AP IP address
+C17:192.168.4.1 -> ACK:C17=ok:*
+C17:10.0.0.1 -> ACK:C17=ok:*
+
+# Set back to Client mode
+C12:v=1 -> ACK:C12=ok:*
+
+# ============================================================
+# EXTENDED TESTS - MQTT DISCOVERY PREFIX
+# ============================================================
+
+M9:homeassistant -> ACK:M9=ok:*
+M9:myboat -> ACK:M9=ok:*
+M9:custom_prefix -> ACK:M9=ok:*
+
+# ============================================================
+# EXTENDED TESTS - ALL BUTTON COLORS
+# ============================================================
+
+# BTN_COLOR_BLUE = 0
+R7:0=0 -> ACK:R7=ok:*
+
+# BTN_COLOR_GREEN = 1
+R7:1=1 -> ACK:R7=ok:*
+
+# BTN_COLOR_ORANGE = 2
+R7:2=2 -> ACK:R7=ok:*
+
+# BTN_COLOR_PINK = 3
+R7:3=3 -> ACK:R7=ok:*
+
+# BTN_COLOR_RED = 4
+R7:4=4 -> ACK:R7=ok:*
+
+# BTN_COLOR_YELLOW = 5
+R7:5=5 -> ACK:R7=ok:*
+
+# Clear color (255)
+R7:6=255 -> ACK:R7=ok:*
+
+# Invalid color
+R7:7=6 -> ACK:R7=Invalid color:*

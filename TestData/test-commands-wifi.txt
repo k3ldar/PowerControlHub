@@ -1,0 +1,310 @@
+# SmartFuseBox WiFi API Test Commands
+# Lines starting with # are comments
+# Format: METHOD /endpoint [body] -> JSON_PATTERN
+# Use | to separate multiple valid responses
+# Use * as wildcard for variable content in JSON
+
+# ============================================================
+# INDEX / ROOT ENDPOINTS
+# ============================================================
+GET / -> {*}
+GET /api/index -> {*}
+
+# ============================================================
+# SYSTEM COMMANDS - Query (POST not GET - WiFi API uses POST for queries)
+# ============================================================
+POST /api/system/F2 -> {"v":*}|{"error":"Not Found","message":*}
+POST /api/system/F3 -> {"v":*}|{"error":"Not Found","message":*}
+POST /api/system/F4 -> {"v":*}|{"error":"Not Found","message":*}
+POST /api/system/F5 -> {"v":*}|{"error":"Not Found","message":*}
+POST /api/system/F7 -> {"v":"*"}|{"error":"Not Found","message":*}
+POST /api/system/F8 -> {"v":*}|{"error":"Not Found","message":*}
+POST /api/system/F9 -> {"v":*}|{"error":"Not Found","message":*}
+POST /api/system/F11 -> {"v":"*"}|{"error":"Not Found","message":*}
+GET /api/system/F10 -> {*}
+
+# OTA Commands (SFB only, requires WiFi)
+# GET /api/system/F13 -> {"v":"*","av":"*","s":"*","auto":*}
+
+# ============================================================
+# SYSTEM COMMANDS - Set (POST)
+# ============================================================
+POST /api/system/F6 v=1733328600 -> {"success":true}|{*}
+POST /api/system/F0 w=0x00 -> {"success":true}|{*}
+
+# ============================================================
+# RELAY COMMANDS - Query (GET)
+# ============================================================
+# Get all relay states and configuration
+GET /api/relay/R2 -> {"relays":*}
+
+# Get specific relay state
+GET /api/relay/R4 0 -> {"*":*}
+
+# Get all relay configuration
+GET /api/relay/R5 -> {*}
+
+# ============================================================
+# RELAY COMMANDS - Control (POST)
+# ============================================================
+# Turn all relays off/on
+POST /api/relay/R0 -> {"relays":*}
+POST /api/relay/R1 -> {"relays":*}
+
+# Set specific relay state (0-7) - Note: May return 404 if relays not configured
+POST /api/relay/R3 0=0 -> {"relays":*}|{"error":"Invalid relay index"}|{"error":"Not Found","message":*}
+POST /api/relay/R3 0=1 -> {"relays":*}|{"error":"Invalid relay index"}|{"error":"Not Found","message":*}
+POST /api/relay/R3 7=1 -> {"relays":*}|{"error":"Invalid relay index"}|{"error":"Not Found","message":*}
+
+# Invalid relay index
+POST /api/relay/R3 99=1 -> {"error":*}
+
+# ============================================================
+# RELAY CONFIGURATION - (POST)
+# ============================================================
+# Rename relay
+POST /api/relay/R6 0=NavLight -> {"success":true}|{*}
+POST /api/relay/R6 1=Bilge|Bilge Pump -> {"success":true}|{*}
+
+# Set button color (0-5 or 255)
+POST /api/relay/R7 0=0 -> {"success":true}|{*}
+POST /api/relay/R7 1=4 -> {"success":true}|{*}
+POST /api/relay/R7 2=255 -> {"success":true}|{*}
+
+# Invalid color
+POST /api/relay/R7 0=99 -> {"error":*}
+
+# Set default state
+POST /api/relay/R8 0=0 -> {"success":true}|{*}
+POST /api/relay/R8 1=1 -> {"success":true}|{*}
+
+# Link relays
+POST /api/relay/R9 0=1 -> {"success":true}|{*}
+POST /api/relay/R9 0=255 -> {"success":true}|{*}
+
+# Set action type
+POST /api/relay/R10 0=0 -> {"success":true}|{*}
+POST /api/relay/R10 1=1 -> {"success":true}|{*}
+POST /api/relay/R10 2=2 -> {"success":true}|{*}
+
+# Set relay pin
+POST /api/relay/R11 0=15 -> {"success":true}|{*}
+POST /api/relay/R11 7=22 -> {"success":true}|{*}
+
+# ============================================================
+# CONFIGURATION COMMANDS - Boat Info (POST)
+# ============================================================
+POST /api/config/C3 Test Boat -> {"success":true}|{*}
+POST /api/config/C3 name=Test Boat 2 -> {"success":true}|{*}
+POST /api/config/C21 123456789 -> {"success":true}|{"error":*}
+POST /api/config/C22 TEST123 -> {"success":true}|{*}
+POST /api/config/C23 Test Port -> {"success":true}|{*}
+
+# ============================================================
+# CONFIGURATION COMMANDS - Vessel Settings (POST)
+# ============================================================
+POST /api/config/C7 v=0 -> {"success":true}|{*}
+POST /api/config/C7 v=1 -> {"success":true}|{*}
+POST /api/config/C7 v=2 -> {"success":true}|{*}
+POST /api/config/C7 v=3 -> {"success":true}|{*}
+
+# Timezone
+POST /api/config/C20 v=-5 -> {"success":true}|{*}
+POST /api/config/C20 v=0 -> {"success":true}|{*}
+POST /api/config/C20 v=8 -> {"success":true}|{*}
+
+# Sound delay
+POST /api/config/C9 v=100 -> {"success":true}|{*}
+
+# ============================================================
+# CONFIGURATION COMMANDS - Bluetooth (POST)
+# ============================================================
+POST /api/config/C10 v=0 -> {"success":true}|{"error":"Bluetooth init failed"}|{*}
+POST /api/config/C10 v=1 -> {"success":true}|{"error":"Bluetooth init failed"}|{*}
+
+# ============================================================
+# CONFIGURATION COMMANDS - SPI (POST)
+# ============================================================
+POST /api/config/C4 sck=12;mosi=11;miso=13 -> {"success":true}|{*}
+POST /api/config/C31 v=4 -> {"success":true}|{*}
+POST /api/config/C31 v=8 -> {"success":true}|{*}
+
+# ============================================================
+# CONFIGURATION COMMANDS - LED Settings (POST)
+# ============================================================
+POST /api/config/C24 t=0;c=0;r=255;g=50;b=213 -> {"success":true}|{*}
+POST /api/config/C25 t=0;b=75 -> {"success":true}|{*}
+POST /api/config/C26 v=1 -> {"success":true}|{*}
+POST /api/config/C27 g=1;w=1;s=1 -> {"success":true}|{*}
+
+# ============================================================
+# CONFIGURATION COMMANDS - Control Panel Tones (POST)
+# ============================================================
+POST /api/config/C28 t=0;h=400;d=500;p=0;r=0 -> {"success":true}|{*}
+POST /api/config/C33 v=512 -> {"success":true}|{*}
+
+# ============================================================
+# MQTT CONFIGURATION (POST)
+# ============================================================
+POST /api/config/M0 v=0 -> {"success":true}|{*}
+POST /api/config/M0 v=1 -> {"success":true}|{*}
+POST /api/config/M1 192.168.1.100 -> {"success":true}|{*}
+POST /api/config/M2 v=1883 -> {"success":true}|{*}
+POST /api/config/M3 testuser -> {"success":true}|{"error":*}
+POST /api/config/M4 testpass -> {"success":true}|{"error":*}
+POST /api/config/M5 test_device -> {"success":true}|{*}
+POST /api/config/M6 v=0 -> {"success":true}|{*}
+POST /api/config/M6 v=1 -> {"success":true}|{*}
+POST /api/config/M7 v=60 -> {"success":true}|{*}
+POST /api/config/M9 homeassistant -> {"success":true}|{*}
+
+# ============================================================
+# SENSOR COMMANDS (GET)
+# ============================================================
+GET /api/sensor -> {*}
+
+# ============================================================
+# SENSOR CONFIGURATION (POST)
+# ============================================================
+POST /api/config/S0 -> {*}
+POST /api/config/S1 i=0;t=1;o0=0;o1=0 -> {"success":true}|{*}
+POST /api/config/S2 0 -> {"success":true}|{*}
+POST /api/config/S3 0=Test Sensor -> {"success":true}|{*}
+POST /api/config/S4 i=0;s=0;v=34 -> {"success":true}|{*}
+POST /api/config/S5 0=0 -> {"success":true}|{*}
+POST /api/config/S5 0=1 -> {"success":true}|{*}
+
+# ============================================================
+# WARNING COMMANDS (GET)
+# ============================================================
+GET /api/warning/W1 -> {"status":*}|{*}
+
+# ============================================================
+# WARNING COMMANDS (POST)
+# ============================================================
+POST /api/warning/W3 -> {"success":true}|{*}
+POST /api/warning/W4 0x05=1 -> {"success":true}|{"success":false,"message":"Invalid parameters"}
+POST /api/warning/W4 0x05=0 -> {"success":true}|{"success":false,"message":"Invalid parameters"}
+
+# ============================================================
+# SOUND SIGNAL COMMANDS (POST)
+# ============================================================
+POST /api/sound/H0 -> {"success":true}|{*}
+GET /api/sound/H1 -> {*}
+POST /api/sound/H2 -> {"success":true}|{*}
+POST /api/sound/H3 -> {"success":true}|{*}
+POST /api/sound/H4 -> {"success":true}|{*}
+POST /api/sound/H5 -> {"success":true}|{*}
+POST /api/sound/H6 -> {"success":true}|{*}
+POST /api/sound/H7 -> {"success":true}|{*}
+POST /api/sound/H8 -> {"success":true}|{*}
+POST /api/sound/H9 -> {"success":true}|{*}
+POST /api/sound/H10 -> {"success":true}|{*}
+POST /api/sound/H11 -> {"success":true}|{*}
+POST /api/sound/H12 -> {"success":true}|{*}
+
+# ============================================================
+# TIMER/SCHEDULER COMMANDS (GET)
+# ============================================================
+GET /api/timer/T0 -> {*}
+GET /api/timer/T1 v=0 -> {*}
+
+# ============================================================
+# TIMER/SCHEDULER COMMANDS (POST)
+# ============================================================
+POST /api/timer/T2 i=0;e=1;t=1,18,30,0,0;c=0,0,0,0,0;a=2,2,0,0,0 -> {"success":true}|{*}
+POST /api/timer/T3 v=0 -> {"success":true}|{*}
+POST /api/timer/T4 i=0;v=1 -> {"success":true}|{*}
+POST /api/timer/T4 i=0;v=0 -> {"success":true}|{*}
+POST /api/timer/T5 -> {"success":true}|{*}
+POST /api/timer/T6 v=0 -> {"success":true}|{"success":false,"message":"Unknown timer command"}
+
+# ============================================================
+# ERROR RESPONSE TESTS
+# ============================================================
+# Invalid endpoints
+GET /api/invalid -> {"error":*}
+GET /api/relay/R99 -> {"error":*}
+POST /api/config/X99 test -> {"error":*}
+
+# Invalid parameters
+POST /api/config/C7 v=99 -> {"error":*}
+POST /api/config/C20 v=99 -> {"error":*}
+POST /api/relay/R3 99=1 -> {"error":*}
+
+# Method not allowed (using wrong HTTP method)
+# POST / -> {"error":*}
+
+# Not found errors
+GET /api/relay/R3/10=1 -> {"error":"Not Found"}|{"error":*}
+
+# ============================================================
+# CONFIGURATION GET/SAVE/RESET (POST)
+# ============================================================
+# Get all settings
+POST /api/config/C1 -> {*}
+
+# Save settings to EEPROM
+POST /api/config/C0 -> {"success":true}|{*}
+
+# Reset all settings
+POST /api/config/C2 -> {"success":true}|{*}
+
+# ============================================================
+# EXTENDED TESTS - BOUNDARY VALUES
+# ============================================================
+POST /api/config/C20 v=-12 -> {"success":true}|{*}
+POST /api/config/C20 v=14 -> {"success":true}|{*}
+POST /api/config/C20 v=-13 -> {"error":*}
+POST /api/config/C20 v=15 -> {"error":*}
+
+POST /api/config/C25 t=0;b=0 -> {"success":true}|{*}
+POST /api/config/C25 t=0;b=100 -> {"success":true}|{*}
+POST /api/config/C25 t=0;b=101 -> {"error":*}
+
+POST /api/relay/R7 0=0 -> {"success":true}|{*}
+POST /api/relay/R7 0=5 -> {"success":true}|{*}
+POST /api/relay/R7 0=6 -> {"error":*}
+
+# ============================================================
+# EXTENDED TESTS - HOME BUTTON MAPPING
+# ============================================================
+POST /api/config/C5 0=0 -> {"success":true}|{*}
+POST /api/config/C5 1=1 -> {"success":true}|{*}
+POST /api/config/C5 2=2 -> {"success":true}|{*}
+POST /api/config/C5 3=3 -> {"success":true}|{*}
+POST /api/config/C5 0=255 -> {"success":true}|{*}
+POST /api/config/C5 4=0 -> {"error":*}
+
+# ============================================================
+# EXTENDED TESTS - TONE PRESETS
+# ============================================================
+POST /api/config/C28 t=0;h=1000;d=250;p=0;r=0 -> {"success":true}|{*}
+POST /api/config/C28 t=0;h=0;d=0;p=1;r=0 -> {"success":true}|{*}
+POST /api/config/C28 t=0;h=0;d=0;p=2;r=0 -> {"success":true}|{*}
+POST /api/config/C28 t=0;h=0;d=0;p=3;r=0 -> {"success":true}|{*}
+POST /api/config/C28 t=0;h=0;d=0;p=4;r=0 -> {"success":true}|{*}
+POST /api/config/C28 t=0;h=0;d=0;p=5;r=0 -> {"success":true}|{*}
+POST /api/config/C28 t=0;h=0;d=0;p=255;r=0 -> {"success":true}|{*}
+
+# ============================================================
+# EXTENDED TESTS - STRING EDGE CASES
+# ============================================================
+POST /api/config/C3 VeryLongBoatNameThatExceedsMaximum -> {"success":true}|{*}
+POST /api/config/C22 VERYLONGCALLSIGN -> {"success":true}|{*}
+POST /api/config/M5 device_id_test -> {"success":true}|{*}
+
+# ============================================================
+# EXTENDED TESTS - LED CONFIGURATION COMPLETE
+# ============================================================
+POST /api/config/C24 t=0;c=0;r=0;g=255;b=0 -> {"success":true}|{*}
+POST /api/config/C24 t=0;c=1;r=255;g=0;b=0 -> {"success":true}|{*}
+POST /api/config/C24 t=1;c=0;r=0;g=100;b=0 -> {"success":true}|{*}
+POST /api/config/C24 t=2;c=0;r=255;g=0;b=0 -> {"error":*}
+
+POST /api/config/C26 v=1 -> {"success":true}|{*}
+POST /api/config/C26 v=true -> {"success":true}|{*}
+POST /api/config/C26 v=0 -> {"success":true}|{*}
+
+POST /api/config/C27 g=1;w=1;s=1 -> {"success":true}|{*}
+POST /api/config/C27 g=0;w=0;s=0 -> {"success":true}|{*}

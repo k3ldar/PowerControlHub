@@ -1,0 +1,197 @@
+# Smart Fuse Box Configuration Commands
+# Lines starting with # are comments
+# Format: COMMAND:parameters
+# Send these commands sequentially and wait for ACK before proceeding to next
+
+# ============================================================
+# SYSTEM IDENTIFICATION
+# ============================================================
+C3:Sea Wolf
+C21:123456789
+C22:ABCD123
+C23:Miami
+
+# ============================================================
+# VESSEL CONFIGURATION
+# ============================================================
+# Vessel Type: 0=Motor, 1=Sail, 2=Fishing, 3=Yacht
+C7:v=1
+
+# Timezone offset (hours from UTC)
+C20:v=-5
+
+# ============================================================
+# WIFI CONFIGURATION
+# ============================================================
+# Enable WiFi (0=disabled, 1=enabled)
+C11:v=1
+
+# WiFi Access Mode (0=AP, 1=Client)
+C12:v=1
+
+# WiFi SSID (only in Client mode)
+C13:{{WIFI_SSID}}
+
+# WiFi Password (only in Client mode)
+C14:{{WIFI_PASSWORD}}
+
+# WiFi Port (default 80)
+C15:v=80
+
+# WiFi AP IP Address (only in AP mode, default 192.168.4.1)
+# C17:192.168.4.1
+
+# ============================================================
+# BLUETOOTH CONFIGURATION
+# ============================================================
+# Enable Bluetooth (0=disabled, 1=enabled)
+C10:v=1
+
+# ============================================================
+# MQTT CONFIGURATION
+# ============================================================
+# Enable MQTT (0=disabled, 1=enabled)
+M0:v=1
+
+# MQTT Broker IP
+M1:192.168.50.110
+
+# MQTT Port (default 1883)
+M2:v=1883
+
+# MQTT Username
+M3:mqtt_user
+
+# MQTT Password
+M4:Passw0rd
+
+# MQTT Device ID
+M5:boat_seawolf_01
+
+# Home Assistant Discovery (0=disabled, 1=enabled)
+M6:v=1
+
+# MQTT Keep Alive Interval (seconds)
+M7:v=60
+
+# Discovery Prefix (default "homeassistant")
+M9:homeassistant
+
+# ============================================================
+# RELAY CONFIGURATION
+# ============================================================
+# Rename relays (format: index=ShortName|LongName)
+R6:0=Light|Navigation Light
+R6:1=Bilge|Bilge Pump
+R6:2=Horn|Fog Horn
+R6:3=Radio|VHF Radio
+R6:4=Nav|Nav System
+R6:5=Fish|Fish Finder
+R6:6=Cabin|Cabin Light
+R6:7=Deck|Deck Light
+
+# Set relay button colors (0-5 for colors, 255 to clear)
+# Colors: 0=Blue, 1=Green, 2=Orange, 3=Pink, 4=Red, 5=Yellow
+R7:0=1
+R7:1=2
+R7:2=4
+R7:3=0
+R7:4=1
+R7:5=3
+R7:6=5
+R7:7=5
+
+# Set relay default power-on states (0=off, 1=on)
+R8:0=1
+R8:1=0
+R8:2=0
+R8:3=0
+R8:4=0
+R8:5=0
+R8:6=0
+R8:7=0
+
+# Set relay GPIO pins
+R11:0=15
+R11:1=16
+R11:2=17
+R11:3=18
+R11:4=19
+R11:5=20
+R11:6=21
+R11:7=22
+
+# Link relays (relay=linkedrelay, 255 to unlink)
+# R9:0=1
+
+# Set relay action types (0=Default, 1=Horn, 2=NightRelay)
+R10:2=1
+
+# ============================================================
+# SPI CONFIGURATION (SD CARD)
+# ============================================================
+# SPI pins: sck, mosi, miso
+C4:sck=12;mosi=11;miso=13
+
+# SD Card Initialize Speed (4, 8, 12, 16, 20, 24 MHz)
+C31:v=4
+
+# ============================================================
+# CONTROL PANEL SETTINGS
+# ============================================================
+# Sound delay start (milliseconds)
+C9:v=100
+
+# Home button mapping (slot=relay, 255 to unmap)
+# C5:0=0
+# C5:1=1
+# C5:2=2
+# C5:3=3
+
+# ============================================================
+# LED CONFIGURATION
+# ============================================================
+# LED Colors: type (0=day, 1=night), colorset (0=good, 1=bad), RGB (0-255)
+C24:t=0;c=0;r=0;g=255;b=0
+C24:t=0;c=1;r=255;g=0;b=0
+C24:t=1;c=0;r=0;g=100;b=0
+C24:t=1;c=1;r=100;g=0;b=0
+
+# LED Brightness: type (0=day, 1=night), brightness (0-100)
+C25:t=0;b=75
+C25:t=1;b=30
+
+# LED Auto Day/Night Switch (0/false=disabled, 1/true=enabled)
+C26:v=1
+
+# LED Enable States: g=GPS, w=Warning, s=System (0/false=disabled, 1/true=enabled)
+C27:g=1;w=1;s=1
+
+# Control Panel Tones
+# t=type (0=good, 1=bad), h=Hz, d=duration ms, p=preset (0=custom, 1-5=presets, 0xFF=no sound), r=repeat interval ms
+C28:t=0;h=800;d=200;p=0;r=0
+C28:t=1;h=400;d=500;p=0;r=5000
+
+# Light Sensor Daytime Threshold (0-1023, default 512)
+C33:v=512
+
+# ============================================================
+# SENSOR CONFIGURATION
+# ============================================================
+# Add/Update Sensor: index, type, option0, option1
+# Types: 0=Water, 1=Dht11, 2=Light, 3=System, 5=BinaryPresence
+# S1:i=0;t=0;o0=0;o1=0
+
+# Rename Sensor
+# S3:0=Bilge Sensor
+
+# Set Sensor Pin: index, slot, pin
+# S4:i=0;s=0;v=34
+
+# Enable Sensor (index=0/1)
+# S5:0=1
+
+# ============================================================
+# SAVE CONFIGURATION TO EEPROM
+# ============================================================
+C0

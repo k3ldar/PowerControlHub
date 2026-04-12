@@ -34,6 +34,15 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{
 		..\.github\workflows\release.yml = ..\.github\workflows\release.yml
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TestData", "TestData", "{AB95BD17-B702-40AE-B173-81CA10BAB122}"
+	ProjectSection(SolutionItems) = preProject
+		..\TestData\config-commands.txt = ..\TestData\config-commands.txt
+		..\TestData\README.md = ..\TestData\README.md
+		..\TestData\RESPONSE_FORMAT.md = ..\TestData\RESPONSE_FORMAT.md
+		..\TestData\test-commands-wifi.txt = ..\TestData\test-commands-wifi.txt
+		..\TestData\test-commands.txt = ..\TestData\test-commands.txt
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|ARM = Debug|ARM

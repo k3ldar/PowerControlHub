@@ -220,6 +220,9 @@
     <ClCompile Include="WifiCommandBridge.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="BinaryPresenceSensor.h">
+      <Filter>Header Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="__vm\.SmartFuseBox.vsarduino.h">
@@ -229,9 +232,6 @@
       <Filter>Header Files\SerialCommandHandlers</Filter>
     </ClInclude>
     <ClInclude Include="WaterSensorHandler.h">
-      <Filter>Header Files\Sensors</Filter>
-    </ClInclude>
-    <ClInclude Include="BinaryPresenceSensor.h">
       <Filter>Header Files\Sensors</Filter>
     </ClInclude>
     <ClInclude Include="Local.h">
@@ -486,5 +486,12 @@
     <None Include="Docs\Sensors.md" />
     <None Include="Docs\Commands.md" />
     <None Include="SmartFuseBox\Docs\Commands.md" />
+    <None Include="Docs\Local.md" />
+    <None Include="Docs\Warnings.md" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="SmartFuseSync\TestData\config-commands.txt" />
+    <Text Include="SmartFuseSync\TestData\test-commands.txt" />
+    <Text Include="TestData\test-commands-wifi.txt" />
   </ItemGroup>
 </Project>
