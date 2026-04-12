@@ -331,10 +331,10 @@ ASALocalRun/
 /StaticElectrics/__vm/
 BoatControlPanel/__vm/
 StaticElectrics/__vm/
-/SmartFuseBox/__vm/
-/SmartFuseBox/__vm
-/SmartFuseBox/__vm/Compile.vmps.xml
-/SmartFuseBox/__vm/Upload.vmps.xml
-/SmartFuseBox/__vm/.SmartFuseBox.vsarduino.h
+__vm/
+__vm
+__vm/Compile.vmps.xml
+__vm/Upload.vmps.xml
+__vm/.SmartFuseBox.vsarduino.h
 /__vm/
 /src/__vm/

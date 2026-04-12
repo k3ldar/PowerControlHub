@@ -46,13 +46,13 @@ jobs:
         run: |
           arduino-cli compile \
             --fqbn esp32:esp32:esp32 \
-            --output-dir src/build/esp32 \
+            --output-dir build/esp32 \
             src
 
       - name: Rename and checksum ESP32 firmware
         run: |
           TAG="${GITHUB_REF#refs/tags/}"
-          SRC="src/build/esp32/SmartFuseBox.ino.bin"
+          SRC="build/esp32/src.ino.bin"
           DEST="SmartFuseBox-esp32-${TAG}.bin"
           cp "$SRC" "$DEST"
           sha256sum "$DEST" | awk '{print $1}' > "SmartFuseBox-esp32-${TAG}.sha256"
@@ -105,13 +105,13 @@ jobs:
         run: |
           arduino-cli compile \
             --fqbn esp32:esp32:esp32s3 \
-            --output-dir src/build/esp32s3 \
+            --output-dir build/esp32s3 \
             src
 
       - name: Rename and checksum ESP32-S3 firmware
         run: |
           TAG="${GITHUB_REF#refs/tags/}"
-          SRC="src/build/esp32s3/SmartFuseBox.ino.bin"
+          SRC="build/esp32s3/src.ino.bin"
           DEST="SmartFuseBox-esp32s3-${TAG}.bin"
           cp "$SRC" "$DEST"
           sha256sum "$DEST" | awk '{print $1}' > "SmartFuseBox-esp32s3-${TAG}.sha256"
