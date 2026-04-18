@@ -33,6 +33,7 @@ jobs:
         arduino-cli lib install "SdFat"
         arduino-cli lib install "DHT11"
         arduino-cli lib install "NextionControl"
+        arduino-cli lib install "TinyGPS"
 
     - name: Compile SmartFuseBox firmware
       run: |
