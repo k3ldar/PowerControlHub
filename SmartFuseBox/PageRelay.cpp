@@ -192,7 +192,7 @@ void PageRelay::configUpdated()
         _buttonImage[button] = ImageButtonColorGrey + ImageButtonColorOffset;
 
         char relayPrefix[15];
-        snprintf_P(relayPrefix, sizeof(relayPrefix), PSTR("%s%d"), RelayButtonPrefix, button);
+        snprintf_P(relayPrefix, sizeof(relayPrefix), PSTR("%s%d"), RelayButtonPrefix, button + 1);
 
         setPicture(relayPrefix, ImageButtonColorGrey + ImageButtonColorOffset);
         setPicture2(relayPrefix, ImageButtonColorGrey + ImageButtonColorOffset);

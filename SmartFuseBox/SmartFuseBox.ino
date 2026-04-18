@@ -78,10 +78,3 @@ void onComputerCommandReceived(SerialCommandManager* mgr)
 	SystemFunctions::resetSerial(COMPUTER_SERIAL);
 }
 
-#if defined(NEXTION_DISPLAY_DEVICE) && defined(NEXTION_DEBUG)
-nextion.setDebugCallback([](const String& msg)
-	{
-		commandMgrComputer.sendCommand(msg.c_str(), "NEXTION");
-	});
-#endif
-

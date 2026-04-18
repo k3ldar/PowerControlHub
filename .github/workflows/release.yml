@@ -35,7 +35,7 @@ jobs:
           arduino-cli lib install "SdFat"
           arduino-cli lib install "NextionControl"
           arduino-cli lib install "TinyGPSPlus"
-          arduino-cli lib install "Rtc_by_Makuna"
+          arduino-cli lib install "RTC"
 
       - name: Generate FirmwareVersion.h
         run: |

@@ -18,6 +18,7 @@
 #include "RtcDS1302Driver.h"
 #include "Local.h"
 #include "SystemDefinitions.h"
+#include "ConfigManager.h"
 
 #include <ThreeWire.h>
 #include <RtcDS1302.h>
@@ -40,8 +41,23 @@ RtcDS1302Driver::~RtcDS1302Driver()
 
 bool RtcDS1302Driver::begin()
 {
-    _available = false;
-    return false;
+    // Attempt to initialise using runtime configuration if available.
+    Config* cfg = ConfigManager::getConfigPtr();
+    if (cfg == nullptr)
+    {
+        _available = false;
+        return false;
+    }
+
+    // If pins are not configured, report unavailable rather than silently disabling.
+    if (cfg->rtc.dataPin == PinDisabled || cfg->rtc.clockPin == PinDisabled || cfg->rtc.resetPin == PinDisabled)
+    {
+        _available = false;
+        return false;
+    }
+
+    // Delegate to the pin-overload which performs full initialisation.
+    return begin(cfg->rtc.dataPin, cfg->rtc.clockPin, cfg->rtc.resetPin);
 }
 
 bool RtcDS1302Driver::begin(uint8_t dataPin, uint8_t clockPin, uint8_t resetPin)
@@ -74,8 +90,6 @@ bool RtcDS1302Driver::begin(uint8_t dataPin, uint8_t clockPin, uint8_t resetPin)
 
     _available = rtc->IsDateTimeValid();
     return _available;
-    _available = false;
-    return false;
 }
 
 bool RtcDS1302Driver::isAvailable() const
