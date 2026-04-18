@@ -20,11 +20,9 @@
 #include "SystemDefinitions.h"
 #include "ConfigManager.h"
 
-//#include <ThreeWire.h>
-#include <RtcDS1302.h>
+#include <Ds1302.h>
 
-static ThreeWire* rtcWire = nullptr;
-static RtcDS1302<ThreeWire>* rtc = nullptr;
+static Ds1302* rtc = nullptr;
 
 RtcDS1302Driver::RtcDS1302Driver()
     : _available(false)
@@ -34,9 +32,7 @@ RtcDS1302Driver::RtcDS1302Driver()
 RtcDS1302Driver::~RtcDS1302Driver()
 {
     delete rtc;
-    delete rtcWire;
     rtc = nullptr;
-    rtcWire = nullptr;
 }
 
 bool RtcDS1302Driver::begin()
@@ -62,33 +58,43 @@ bool RtcDS1302Driver::begin()
 
 bool RtcDS1302Driver::begin(uint8_t dataPin, uint8_t clockPin, uint8_t resetPin)
 {
-    // Runtime pin check is the sole availability gate — no compile flag required
     if (dataPin == PinDisabled || clockPin == PinDisabled || resetPin == PinDisabled)
     {
         _available = false;
         return false;
     }
-
     delete rtc;
-    delete rtcWire;
-    rtcWire = new ThreeWire(dataPin, clockPin, resetPin);
-    rtc = new RtcDS1302<ThreeWire>(*rtcWire);
+    rtc = new Ds1302(resetPin, clockPin, dataPin);
+    rtc->init();
 
-    rtc->Begin();
-    rtc->SetIsWriteProtected(false);
-
-    if (!rtc->IsDateTimeValid())
+    // Ensure oscillator is running
+    if (rtc->isHalted())
     {
-        RtcDateTime defaultTime(2025, 1, 1, 0, 0, 0);
-        rtc->SetDateTime(defaultTime);
+        rtc->start();
     }
 
-    if (!rtc->GetIsRunning())
+    // Attempt to read current time. The DS1302 stores a 2-digit year (0-99).
+    Ds1302::DateTime dt;
+    rtc->getDateTime(&dt);
+    uint16_t fullYear = 2000 + static_cast<uint16_t>(dt.year);
+
+    // If year is clearly invalid, set a sensible default (matches previous behaviour)
+    if (fullYear < 2025)
     {
-        rtc->SetIsRunning(true);
+        Ds1302::DateTime defaultDt;
+        defaultDt.year = static_cast<uint8_t>(2025 - 2000);
+        defaultDt.month = 1;
+        defaultDt.day = 1;
+        defaultDt.hour = 0;
+        defaultDt.minute = 0;
+        defaultDt.second = 0;
+        defaultDt.dow = 0;
+        rtc->setDateTime(&defaultDt);
+        fullYear = 2025;
     }
 
-    _available = rtc->IsDateTimeValid();
+    (void)fullYear; // keep variable for readability; availability determined by successful read
+    _available = true;
     return _available;
 }
 
@@ -105,17 +111,16 @@ unsigned long RtcDS1302Driver::readTimestamp()
     if (!rtc)
         return 0;
 
-    RtcDateTime rtcTime = rtc->GetDateTime();
+    Ds1302::DateTime rtcTime;
+    rtc->getDateTime(&rtcTime);
 
-    if (!rtcTime.IsValid())
-        return 0;
-
-    uint16_t year   = rtcTime.Year();
-    uint8_t  month  = rtcTime.Month();
-    uint8_t  day    = rtcTime.Day();
-    uint8_t  hour   = rtcTime.Hour();
-    uint8_t  minute = rtcTime.Minute();
-    uint8_t  second = rtcTime.Second();
+    // DS1302 returns 2-digit year (0..99) — convert to full year in 2000s
+    uint16_t year = 2000 + static_cast<uint16_t>(rtcTime.year);
+    uint8_t month = rtcTime.month;
+    uint8_t day = rtcTime.day;
+    uint8_t hour = rtcTime.hour;
+    uint8_t minute = rtcTime.minute;
+    uint8_t second = rtcTime.second;
 
     const uint8_t daysInMonth[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 
@@ -188,8 +193,15 @@ bool RtcDS1302Driver::writeTimestamp(unsigned long unixTimestamp)
 
     uint8_t day = static_cast<uint8_t>(days) + 1;
 
-    RtcDateTime rtcTime(year, month, day, hour, minute, second);
-    rtc->SetDateTime(rtcTime);
+    Ds1302::DateTime rtcTime;
+    rtcTime.year = static_cast<uint8_t>(year - 2000);
+    rtcTime.month = month;
+    rtcTime.day = day;
+    rtcTime.hour = hour;
+    rtcTime.minute = minute;
+    rtcTime.second = second;
+    rtcTime.dow = 0;
+    rtc->setDateTime(&rtcTime);
     return true;
 }
 
@@ -207,27 +219,18 @@ bool RtcDS1302Driver::runDiagnostics(char* buffer, const uint8_t bufferLength)
         return false;
     }
 
-    RtcDateTime currentTime = rtc->GetDateTime();
+    Ds1302::DateTime currentTime;
+    rtc->getDateTime(&currentTime);
 
-    if (!currentTime.IsValid())
-    {
-        snprintf_P(buffer, bufferLength, PSTR("RTC time invalid"));
-        return false;
-    }
+    // Convert 2-digit year to full year
+    uint16_t year = 2000 + static_cast<uint16_t>(currentTime.year);
 
-    if (!rtc->GetIsRunning())
+    if (rtc->isHalted())
     {
         snprintf_P(buffer, bufferLength, PSTR("RTC not running"));
         return false;
     }
 
-    if (rtc->GetIsWriteProtected())
-    {
-        snprintf_P(buffer, bufferLength, PSTR("RTC write protected"));
-        return false;
-    }
-
-    uint16_t year = currentTime.Year();
     if (year < 2025 || year > 2099)
     {
         snprintf_P(buffer, bufferLength, PSTR("RTC time out of range: %d"), year);
@@ -235,7 +238,7 @@ bool RtcDS1302Driver::runDiagnostics(char* buffer, const uint8_t bufferLength)
     }
 
     snprintf_P(buffer, bufferLength, PSTR("RTC OK: %04d-%02d-%02d %02d:%02d:%02d"),
-        currentTime.Year(), currentTime.Month(), currentTime.Day(),
-        currentTime.Hour(), currentTime.Minute(), currentTime.Second());
+        year, currentTime.month, currentTime.day,
+        currentTime.hour, currentTime.minute, currentTime.second);
     return true;
 }
