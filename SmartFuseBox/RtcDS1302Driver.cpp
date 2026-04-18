@@ -20,7 +20,7 @@
 #include "SystemDefinitions.h"
 #include "ConfigManager.h"
 
-#include <ThreeWire.h>
+//#include <ThreeWire.h>
 #include <RtcDS1302.h>
 
 static ThreeWire* rtcWire = nullptr;
