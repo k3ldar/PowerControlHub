@@ -34,7 +34,7 @@ jobs:
           arduino-cli lib install "SensorManager"
           arduino-cli lib install "SdFat"
           arduino-cli lib install "NextionControl"
-          arduino-cli lib install "TinyGPS"
+          arduino-cli lib install "TinyGPSPlus"
 
       - name: Generate FirmwareVersion.h
         run: |
