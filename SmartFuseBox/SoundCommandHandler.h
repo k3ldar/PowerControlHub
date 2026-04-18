@@ -27,11 +27,10 @@ class SoundCommandHandler : public BaseCommandHandler
 {
 private:
     SerialCommandManager* _commandMgrComputer;
-    SerialCommandManager* _commandMgrLink;
     SoundController* _soundController;
 
 public:
-    SoundCommandHandler(SerialCommandManager* commandMgrComputer, SerialCommandManager* commandMgrLink, SoundController* soundController);
+    SoundCommandHandler(SerialCommandManager* commandMgrComputer, SoundController* soundController);
     bool handleCommand(SerialCommandManager* sender, const char* command, const StringKeyValue params[], uint8_t paramCount) override;
 
     const char* const* supportedCommands(size_t& count) const override;

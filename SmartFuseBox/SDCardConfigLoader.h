@@ -50,7 +50,7 @@ constexpr uint16_t SD_CONFIG_MAX_LINE_LENGTH = 128;
  * 
  * Usage:
  * @code
- * SdCardConfigLoader loader(&commandMgrComputer, &commandMgrLink, &configController);
+ * SdCardConfigLoader loader(&commandMgrComputer, &configController);
  * 
  * void setup()
  * {
@@ -66,7 +66,6 @@ class SdCardConfigLoader
 {
 private:
     SerialCommandManager* _computerSerial;
-    SerialCommandManager* _linkSerial;
     ConfigController* _configController;
     RelayController* _relayController;
     bool _sdConfigPresent;
@@ -91,11 +90,6 @@ private:
     bool applyConfigCommand(const char* line);
 
     /**
-     * @brief Send config to LINK serial to sync control panel
-     */
-    void syncConfigToLink();
-
-    /**
      * @brief Log error message to serial
      * @param message Error message
      * @param line Optional line content that caused error
@@ -116,7 +110,6 @@ public:
      * @param configController Configuration controller
      */
     SdCardConfigLoader(SerialCommandManager* computerSerial,
-                       SerialCommandManager* linkSerial,
                        ConfigController* configController,
                        RelayController* relayController);
 

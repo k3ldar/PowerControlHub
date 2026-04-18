@@ -50,7 +50,6 @@ class SensorConfigCommandHandler : public virtual BaseCommandHandler, public Bas
 {
 private:
     SerialCommandManager* _commandMgrComputer;
-    SerialCommandManager* _commandMgrLink;
 
     void broadcastSensorConfig(SerialCommandManager* sender, uint8_t index, const SensorEntry& entry)
     {
@@ -68,16 +67,11 @@ private:
 
         if (_commandMgrComputer)
             _commandMgrComputer->sendCommand(SensorConfigGetAll, buf);
-
-        if (_commandMgrLink && _commandMgrLink != _commandMgrComputer)
-            _commandMgrLink->sendCommand(SensorConfigGetAll, buf);
     }
 
 public:
-    SensorConfigCommandHandler(SerialCommandManager* commandMgrComputer,
-                               SerialCommandManager* commandMgrLink)
-        : _commandMgrComputer(commandMgrComputer),
-          _commandMgrLink(commandMgrLink)
+    explicit SensorConfigCommandHandler(SerialCommandManager* commandMgrComputer)
+        : _commandMgrComputer(commandMgrComputer)
     {
     }
 

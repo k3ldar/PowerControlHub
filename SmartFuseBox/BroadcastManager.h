@@ -22,34 +22,20 @@
 #include "SystemDefinitions.h"
 
 /**
- * @brief Centralized manager for broadcasting commands to multiple serial ports.
- *
- * Simplifies sending commands/debug/errors to both computer (debug) and link (relay controller)
- * serial connections simultaneously.
+ * @brief Centralized manager for broadcasting commands to the computer serial port.
  */
 class BroadcastManager
 {
 private:
-    SerialCommandManager* _computerSerial;
-    SerialCommandManager* _linkSerial;
-
-    uint64_t _nextUpdateTime;
+	SerialCommandManager* _computerSerial;
 
 public:
-    /**
-     * @brief Construct a broadcast manager with two serial command managers.
-     *
-     * @param computerSerial Pointer to computer serial (debug) manager (can be nullptr)
-     * @param linkSerial Pointer to link serial (relay controller) manager (can be nullptr)
-     */
-    BroadcastManager(SerialCommandManager* computerSerial, SerialCommandManager* linkSerial);
-
-    /**
-     * @brief allows for specific updates at regulated intervals.
-     *
-	 * @param now current time in milliseconds
-     */
-    void update(uint64_t now);
+	/**
+	 * @brief Construct a broadcast manager.
+	 *
+	 * @param computerSerial Pointer to computer serial (debug) manager (can be nullptr)
+	 */
+	explicit BroadcastManager(SerialCommandManager* computerSerial);
 
     /**
      * @brief Send a command to all registered serial managers.
@@ -57,7 +43,7 @@ public:
      * @param command The command string to send
      * @param params Optional parameters string (default: empty string)
      */
-    void sendCommand(const char* command, const char* params = "", bool linkOnly = false);
+    void sendCommand(const char* command, const char* params = "");
 
     /**
      * @brief Send a command to all registered serial managers.
@@ -99,9 +85,4 @@ public:
      * @brief Get pointer to computer serial manager (for selective operations).
      */
     SerialCommandManager* getComputerSerial() const { return _computerSerial; }
-
-    /**
-     * @brief Get pointer to link serial manager (for selective operations).
-     */
-    SerialCommandManager* getLinkSerial() const { return _linkSerial; }
 };

@@ -22,9 +22,7 @@
 
 #include "SystemDefinitions.h"
 
-#if defined(FUSE_BOX_CONTROLLER)
 #include "SmartFuseBoxConstants.h"
-#endif
 #include "WarningManager.h"
 #include "WarningType.h"
 #include "BaseSensor.h"
@@ -138,7 +136,7 @@ private:
 		}
 
 		// Convert to Unix timestamp using ISO format (setDateTimeISO handles the conversion)
-		char isoDateTime[20];
+		char isoDateTime[32];
 		snprintf_P(isoDateTime, sizeof(isoDateTime), PSTR("%04d-%02d-%02dT%02d:%02d:%02d"),
 			year, month, day, hour, minute, second);
 
@@ -290,7 +288,7 @@ protected:
 		_lastFixTime = 0;
 	}
 
-	unsigned long update() override
+	uint64_t update() override
 	{
 		if (!_gpsSerial || !_gps)
 		{
@@ -445,7 +443,6 @@ public:
 		}
 	}
 
-#if defined(FUSE_BOX_CONTROLLER)
 	void formatStatusJson(char* buffer, size_t size) override
 	{
 		char lat[16];
@@ -464,7 +461,6 @@ public:
 			PSTR("\"gps\":{\"lat\":%s,\"lon\":%s,\"alt\":%s,\"speed\":%s,\"course\":%s,\"sats\":%lu,\"valid\":%s}"),
 			lat, lon, alt, speed, course, _satellites, _hasValidFix ? "true" : "false");
 	}
-#endif
 
 	SensorIdList getSensorIdType() const override
 	{
@@ -497,9 +493,44 @@ public:
 	const char* getDirection() const { return compassDirections[static_cast<int>((_courseDeg + 11.25) / 22.5) % 16]; }
 	double getTotalDistance() const { return _totalDistanceKm; }
     
-    void resetTotalDistance()
+	void resetTotalDistance()
 	{ 
-        _totalDistanceKm = 0.0; 
-        _firstFix = true;
-    }
+		_totalDistanceKm = 0.0; 
+		_firstFix = true;
+	}
+
+#if defined(MQTT_SUPPORT)
+	uint8_t getMqttChannelCount() const override
+	{
+		return 6;
+	}
+
+	MqttSensorChannel getMqttChannel(uint8_t channelIndex) const override
+	{
+		switch (channelIndex)
+		{
+			case 0: return { "GPS Latitude",   "gps_latitude",   "gps_latitude",   nullptr, "°",   false };
+			case 1: return { "GPS Longitude",  "gps_longitude",  "gps_longitude",  nullptr, "°",   false };
+			case 2: return { "GPS Altitude",   "gps_altitude",   "gps_altitude",   nullptr, "m",   false };
+			case 3: return { "GPS Speed",      "gps_speed",      "gps_speed",      nullptr, "km/h",false };
+			case 4: return { "GPS Satellites", "gps_satellites", "gps_satellites", nullptr, nullptr,false };
+			case 5: return { "GPS Fix",        "gps_fix",        "gps_fix",        nullptr, nullptr,true };
+			default: return { nullptr, nullptr, nullptr, nullptr, nullptr, false };
+		}
+	}
+
+	void getMqttValue(uint8_t channelIndex, char* buffer, size_t size) const override
+	{
+		switch (channelIndex)
+		{
+			case 0: dtostrf(_latitude,  1, 6, buffer); break;
+			case 1: dtostrf(_longitude, 1, 6, buffer); break;
+			case 2: dtostrf(_altitude,  1, 2, buffer); break;
+			case 3: dtostrf(_speedKmh,  1, 2, buffer); break;
+			case 4: snprintf(buffer, size, "%lu", _satellites); break;
+			case 5: snprintf(buffer, size, "%s", _hasValidFix ? "true" : "false"); break;
+			default: if (size > 0) buffer[0] = '\0'; break;
+		}
+	}
+#endif
 };

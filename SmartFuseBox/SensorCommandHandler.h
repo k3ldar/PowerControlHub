@@ -21,11 +21,15 @@
 #include "SerialCommandManager.h"
 #include "Local.h"
 
-#include "SharedBaseCommandHandler.h"
+#if defined(NEXTION_DISPLAY_DEVICE)
+#include <NextionControl.h>
+#endif
+
+#include "BaseNextionCommandHandler.h"
 
 class RemoteSensor;
 
-class SensorCommandHandler : public SharedBaseCommandHandler
+class SensorCommandHandler : public BaseNextionCommandHandler
 {
 private:
 	float _lastTemperature = NAN;
@@ -48,7 +52,11 @@ private:
 	size_t _remoteSensorCount;
 
 public:
-	explicit SensorCommandHandler(BroadcastManager* broadcastManager, WarningManager* warningManager);
+	explicit SensorCommandHandler(BroadcastManager* broadcastManager, 
+#if defined(NEXTION_DISPLAY_DEVICE)
+		NextionControl* nextionControl,
+#endif
+		WarningManager* warningManager);
 
     bool handleCommand(SerialCommandManager* sender, const char* command, const StringKeyValue params[], uint8_t paramCount) override;
     const char* const* supportedCommands(size_t& count) const override;

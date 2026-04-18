@@ -19,19 +19,20 @@
 #include "RemoteSensor.h"
 #include "SystemFunctions.h"
 
-#if defined(BOAT_CONTROL_PANEL)
-SensorCommandHandler::SensorCommandHandler(BroadcastManager* broadcastManager, 
-	NextionControl* nextionControl, WarningManager* warningManager)
-    : BaseBoatCommandHandler(broadcastManager, nextionControl, warningManager)
-#if defined(FUSE_BOX_CONTROLLER)
-    , _remoteSensors(nullptr), 
-    _remoteSensorCount(0)
+#if defined(NEXTION_DISPLAY_DEVICE)
+#include "BasePage.h"
 #endif
 
-#elif defined(FUSE_BOX_CONTROLLER)
-SensorCommandHandler::SensorCommandHandler(BroadcastManager* broadcastManager, WarningManager* warningManager)
-    : SharedBaseCommandHandler(broadcastManager, warningManager), _remoteSensors(nullptr), _remoteSensorCount(0)
+SensorCommandHandler::SensorCommandHandler(BroadcastManager* broadcastManager, 
+#if defined(NEXTION_DISPLAY_DEVICE)
+    NextionControl* nextionControl,
 #endif
+    WarningManager* warningManager)
+    : BaseNextionCommandHandler(broadcastManager, 
+#if defined(NEXTION_DISPLAY_DEVICE)
+        nextionControl,
+#endif
+        warningManager), _remoteSensors(nullptr), _remoteSensorCount(0)
 {
 }
 
@@ -120,8 +121,8 @@ bool SensorCommandHandler::getHornActive() const
 void SensorCommandHandler::setTemperature(float value)
 {
 	_lastTemperature = value;
-#if defined(BOAT_CONTROL_PANEL)
-	FloatStateUpdate update = { _lastTemperature };
+#if defined(NEXTION_DISPLAY_DEVICE)
+        FloatStateUpdate update = { _lastTemperature };
 	notifyCurrentPage(static_cast<uint8_t>(PageUpdateType::Temperature), &update);
 #endif
 }
@@ -129,8 +130,8 @@ void SensorCommandHandler::setTemperature(float value)
 void SensorCommandHandler::setHumidity(uint8_t value)
 {
 	_lastHumidity = value;
-#if defined(BOAT_CONTROL_PANEL)
-	UInt16Update update = { _lastHumidity };
+#if defined(NEXTION_DISPLAY_DEVICE)
+    UInt16Update update = { _lastHumidity };
 	notifyCurrentPage(static_cast<uint8_t>(PageUpdateType::Humidity), &update);
 #endif
 }
@@ -138,8 +139,8 @@ void SensorCommandHandler::setHumidity(uint8_t value)
 void SensorCommandHandler::setBearing(float value)
 {
 	_lastBearing = value;
-#if defined(BOAT_CONTROL_PANEL)
-	FloatStateUpdate update = { _lastBearing };
+#if defined(NEXTION_DISPLAY_DEVICE)
+    FloatStateUpdate update = { _lastBearing };
 	notifyCurrentPage(static_cast<uint8_t>(PageUpdateType::Bearing), &update);
 #endif
 }
@@ -147,8 +148,8 @@ void SensorCommandHandler::setBearing(float value)
 void SensorCommandHandler::setCompassTemperature(float value)
 {
 	_lastCompassTemp = value;
-#if defined(BOAT_CONTROL_PANEL)
-	FloatStateUpdate update = { _lastCompassTemp };
+#if defined(NEXTION_DISPLAY_DEVICE)
+    FloatStateUpdate update = { _lastCompassTemp };
 	notifyCurrentPage(static_cast<uint8_t>(PageUpdateType::CompassTemp), &update);
 #endif
 }
@@ -156,8 +157,8 @@ void SensorCommandHandler::setCompassTemperature(float value)
 void SensorCommandHandler::setSpeed(uint8_t value)
 {
 	_lastSpeed = value;
-#if defined(BOAT_CONTROL_PANEL)
-	UInt16Update update = { _lastSpeed };
+#if defined(NEXTION_DISPLAY_DEVICE)
+    UInt16Update update = { _lastSpeed };
 	notifyCurrentPage(static_cast<uint8_t>(PageUpdateType::Speed), &update);
 #endif
 }
@@ -165,8 +166,8 @@ void SensorCommandHandler::setSpeed(uint8_t value)
 void SensorCommandHandler::setWaterLevel(uint16_t value)
 {
 	_lastWaterLevel = value;
-#if defined(BOAT_CONTROL_PANEL)
-	UInt16Update update = { _lastWaterLevel };
+#if defined(NEXTION_DISPLAY_DEVICE)
+    UInt16Update update = { _lastWaterLevel };
 	notifyCurrentPage(static_cast<uint8_t>(PageUpdateType::WaterLevel), &update);
 #endif
 }
@@ -174,8 +175,8 @@ void SensorCommandHandler::setWaterLevel(uint16_t value)
 void SensorCommandHandler::setWaterPumpActive(bool value)
 {
 	_lastWaterPumpActive = value;
-#if defined(BOAT_CONTROL_PANEL)
-	BoolStateUpdate update = { _lastWaterPumpActive };
+#if defined(NEXTION_DISPLAY_DEVICE)
+    BoolStateUpdate update = { _lastWaterPumpActive };
 	notifyCurrentPage(static_cast<uint8_t>(PageUpdateType::WaterPumpActive), &update);
 #endif
 }
@@ -183,8 +184,8 @@ void SensorCommandHandler::setWaterPumpActive(bool value)
 void SensorCommandHandler::setDaytime(bool isDaytime)
 {
 	_isDaytime = isDaytime;
-#if defined(BOAT_CONTROL_PANEL)
-	BoolStateUpdate update = { _isDaytime };
+#if defined(NEXTION_DISPLAY_DEVICE)
+    BoolStateUpdate update = { _isDaytime };
 	notifyCurrentPage(static_cast<uint8_t>(PageUpdateType::Daytime), &update);
 #endif
 }
@@ -193,8 +194,8 @@ void SensorCommandHandler::setGpsLocation(double lat, double lon)
 {
 	_gpsLatitude = lat;
 	_gpsLongitude = lon;
-#if defined(BOAT_CONTROL_PANEL)
-	FloatStateUpdate updateLat = { static_cast<float>(_gpsLatitude) };
+#if defined(NEXTION_DISPLAY_DEVICE)
+    FloatStateUpdate updateLat = { static_cast<float>(_gpsLatitude) };
 	notifyCurrentPage(static_cast<uint8_t>(PageUpdateType::GpsLatitude), &updateLat);
 	
 	FloatStateUpdate updateLon = { static_cast<float>(_gpsLongitude) };
@@ -205,8 +206,8 @@ void SensorCommandHandler::setGpsLocation(double lat, double lon)
 void SensorCommandHandler::setGpsAltitude(double alt)
 {
 	_altitude = alt;
-#if defined(BOAT_CONTROL_PANEL)
-	FloatStateUpdate update = { static_cast<float>(_altitude) };
+#if defined(NEXTION_DISPLAY_DEVICE)
+    FloatStateUpdate update = { static_cast<float>(_altitude) };
 	notifyCurrentPage(static_cast<uint8_t>(PageUpdateType::GpsAltitude), &update);
 #endif
 }
@@ -214,8 +215,8 @@ void SensorCommandHandler::setGpsAltitude(double alt)
 void SensorCommandHandler::setGpsCourse(double course)
 {
 	_gpsCourse = course;
-#if defined(BOAT_CONTROL_PANEL)
-	FloatStateUpdate update = { static_cast<float>(_gpsCourse) };
+#if defined(NEXTION_DISPLAY_DEVICE)
+    FloatStateUpdate update = { static_cast<float>(_gpsCourse) };
 	notifyCurrentPage(static_cast<uint8_t>(PageUpdateType::Bearing), &update);
 #endif
 }
@@ -223,8 +224,8 @@ void SensorCommandHandler::setGpsCourse(double course)
 void SensorCommandHandler::setGpsSatellites(uint32_t sats)
 {
 	_gpsSatellites = sats;
-#if defined(BOAT_CONTROL_PANEL)
-	UInt16Update update = { static_cast<uint16_t>(_gpsSatellites) };
+#if defined(NEXTION_DISPLAY_DEVICE)
+    UInt16Update update = { static_cast<uint16_t>(_gpsSatellites) };
 	notifyCurrentPage(static_cast<uint8_t>(PageUpdateType::GpsSatellites), &update);
 #endif
 }
@@ -232,8 +233,8 @@ void SensorCommandHandler::setGpsSatellites(uint32_t sats)
 void SensorCommandHandler::setGpsDirection(const char* dir)
 {
 	_gpsDirection = dir;
-#if defined(BOAT_CONTROL_PANEL)
-	CharStateUpdate update = {};
+#if defined(NEXTION_DISPLAY_DEVICE)
+    CharStateUpdate update = {};
 	update.length = min(SystemFunctions::calculateLength(dir), static_cast<unsigned int>((CharStateUpdate::MaxLength - 1)));
 	snprintf_P(update.value, CharStateUpdate::MaxLength, PSTR("%s"), dir);
 	notifyCurrentPage(static_cast<uint8_t>(PageUpdateType::Direction), &update);
@@ -243,7 +244,7 @@ void SensorCommandHandler::setGpsDirection(const char* dir)
 void SensorCommandHandler::setGpsDistance(double distance)
 {
     _gpsDistance = distance;
-#if defined(BOAT_CONTROL_PANEL)
+#if defined(NEXTION_DISPLAY_DEVICE)
     DoubleStateUpdate update = {};
     update.value = getGpsDistance();
     notifyCurrentPage(static_cast<uint8_t>(PageUpdateType::GpsDistance), &update);
@@ -253,23 +254,20 @@ void SensorCommandHandler::setGpsDistance(double distance)
 void SensorCommandHandler::setHornActive(bool value)
 {
     _lastHornActive = value;
-#if defined(BOAT_CONTROL_PANEL)
+#if defined(NEXTION_DISPLAY_DEVICE)
     BoolStateUpdate update = { _lastHornActive };
     notifyCurrentPage(static_cast<uint8_t>(PageUpdateType::HornActive), &update);
 #endif
 }
 
-#if defined(FUSE_BOX_CONTROLLER)
 void SensorCommandHandler::setup(RemoteSensor* remoteSensors[], size_t remoteSensorCount)
 {
     _remoteSensors = remoteSensors;
 	_remoteSensorCount = remoteSensorCount;
 }
-#endif
 
 bool SensorCommandHandler::handleCommand(SerialCommandManager* sender, const char* command, const StringKeyValue params[], uint8_t paramCount)
 {
-#if defined(FUSE_BOX_CONTROLLER)
     if (_remoteSensors != nullptr && _remoteSensorCount > 0)
     {
         for (size_t i = 0; i < _remoteSensorCount; i++)
@@ -280,8 +278,6 @@ bool SensorCommandHandler::handleCommand(SerialCommandManager* sender, const cha
             }
         }
     }
-#endif
-
 
     // Handle query requests (no parameters) - return current sensor values
     if (paramCount == 0)

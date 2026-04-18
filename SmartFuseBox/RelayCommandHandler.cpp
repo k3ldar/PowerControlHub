@@ -21,8 +21,8 @@
 #include "SystemFunctions.h"
 
 
-RelayCommandHandler::RelayCommandHandler(SerialCommandManager* commandMgrComputer, SerialCommandManager* commandMgrLink, RelayController* relayController)
-    : _commandMgrComputer(commandMgrComputer), _commandMgrLink(commandMgrLink), _relayController(relayController),
+RelayCommandHandler::RelayCommandHandler(SerialCommandManager* commandMgrComputer, RelayController* relayController)
+    : _commandMgrComputer(commandMgrComputer), _relayController(relayController),
       _config(nullptr)
 {
 }
@@ -379,11 +379,6 @@ void RelayCommandHandler::configUpdated(Config* config)
 
 void RelayCommandHandler::broadcastRelayStatus(const char* cmd, const StringKeyValue* param)
 {
-    if (_commandMgrLink != nullptr)
-    {
-        sendAckOk(_commandMgrLink, cmd, param);
-    }
-
     if (_commandMgrComputer != nullptr)
     {
         sendAckOk(_commandMgrComputer, cmd, param);

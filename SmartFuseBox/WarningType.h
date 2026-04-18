@@ -38,7 +38,7 @@ enum class WarningType : uint32_t
     // System warnings (bits 0-19)
     DefaultConfigurationFuseBox = 1UL << 0,           // 0x00000001 - Using default config
     DefaultConfigurationControlPanel = 1UL << 1,      // 0x00000002 - Using default config
-    ConnectionLost = 1UL << 2,                        // 0x00000004 - Link heartbeat lost
+    ConnectionLost = 1UL << 2,                        // 0x00000004 - Connection lost warning
     HighCompassTemperature = 1UL << 3,                // 0x00000008 - Compass temperature threshold exceeded
     LowBattery = 1UL << 4,                            // 0x00000010 - Battery voltage low
 	BluetoothInitFailed = 1UL << 5,                   // 0x00000020 - Bluetooth initialization failed
@@ -50,6 +50,7 @@ enum class WarningType : uint32_t
 	SdCardError = 1UL << 11,                          // 0x00000800 - SD card read/write error
 	SdCardMissing = 1UL << 12,                        // 0x00001000 - SD card not detected
 	SdCardLowSpace = 1UL << 13,                       // 0x00002000 - SD card free space below 10%
+	NextionInvalidConfig = 1UL << 14,                 // 0x00004000 - Nextion display configuration invalid
 
     // Sensor warnings (bits 20+)
     SensorFailure = 1UL << 20,                        // 0x00100000 - Sensor communication failure
@@ -74,7 +75,7 @@ static const char WT_10[] PROGMEM = "SPI Pin Config Error";
 static const char WT_11[] PROGMEM = "SD Card Error";
 static const char WT_12[] PROGMEM = "SD Card Not Found";
 static const char WT_13[] PROGMEM = "SD Card Low Space";
-static const char WT_14[] PROGMEM = "";
+static const char WT_14[] PROGMEM = "Nextion Invalid Config";
 static const char WT_15[] PROGMEM = "";
 static const char WT_16[] PROGMEM = "";
 static const char WT_17[] PROGMEM = "";

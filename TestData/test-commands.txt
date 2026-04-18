@@ -685,3 +685,151 @@ R7:6=255 -> ACK:R7=ok:*
 
 # Invalid color
 R7:7=6 -> ACK:R7=Invalid color:*
+
+# ============================================================
+# XPDZ TONE PIN CONFIGURATION (C6)
+# ============================================================
+
+# Set XpdzTone pin to a valid GPIO
+C6:v=25 -> ACK:C6=ok:*
+C6:v=26 -> ACK:C6=ok:*
+
+# Set XpdzTone pin to PinDisabled (255 = not fitted)
+C6:v=255 -> ACK:C6=ok:*
+
+# Missing parameter
+C6 -> ACK:C6=Invalid parameter:*
+
+# Verify C1 includes C6
+C1 -> C*
+
+# ============================================================
+# HW479 RGB LED PIN CONFIGURATION (C8)
+# ============================================================
+
+# Set all three RGB pins
+C8:r=25;g=26;b=27 -> ACK:C8=ok:*
+C8:r=16;g=17;b=18 -> ACK:C8=ok:*
+
+# Disable all pins (PinDisabled = 255)
+C8:r=255;g=255;b=255 -> ACK:C8=ok:*
+
+# Mixed: some disabled, some active
+C8:r=25;g=255;b=255 -> ACK:C8=ok:*
+
+# Missing parameter(s)
+C8:r=25;g=26 -> ACK:C8=Invalid parameter:*
+C8 -> ACK:C8=Invalid parameter:*
+
+# ============================================================
+# RTC DS1302 PIN CONFIGURATION (C18)
+# ============================================================
+
+# Set all three DS1302 pins
+C18:dat=4;clk=5;rst=6 -> ACK:C18=ok:*
+C18:dat=14;clk=15;rst=16 -> ACK:C18=ok:*
+
+# Disable all pins (PinDisabled = 255)
+C18:dat=255;clk=255;rst=255 -> ACK:C18=ok:*
+
+# Mixed: some disabled
+C18:dat=4;clk=255;rst=255 -> ACK:C18=ok:*
+
+# Missing parameter(s)
+C18:dat=4;clk=5 -> ACK:C18=Invalid parameter:*
+C18 -> ACK:C18=Invalid parameter:*
+
+# ============================================================
+# NEXTION DISPLAY CONFIGURATION (N0-N6)
+# ============================================================
+
+# Get all Nextion config (returns N1-N6 values then ACK)
+N0 -> ACK:N0=ok
+
+# N1: Enable/disable Nextion display
+N1:v=1 -> ACK:N1=ok:*
+N1:v=0 -> ACK:N1=ok:*
+N1:v=true -> ACK:N1=ok:*
+N1:v=false -> ACK:N1=ok:*
+
+# Missing parameter
+N1 -> ACK:N1=Invalid parameter:*
+
+# N2: Hardware serial vs software serial
+N2:v=1 -> ACK:N2=ok:*
+N2:v=0 -> ACK:N2=ok:*
+
+# Missing parameter
+N2 -> ACK:N2=Invalid parameter:*
+
+# N3: RX pin (255 = PinDisabled)
+N3:v=16 -> ACK:N3=ok:*
+N3:v=255 -> ACK:N3=ok:*
+
+# Missing parameter
+N3 -> ACK:N3=Invalid parameter:*
+
+# N4: TX pin (255 = PinDisabled)
+N4:v=17 -> ACK:N4=ok:*
+N4:v=255 -> ACK:N4=ok:*
+
+# Missing parameter
+N4 -> ACK:N4=Invalid parameter:*
+
+# N5: Baud rate (common values)
+N5:v=9600 -> ACK:N5=ok:*
+N5:v=115200 -> ACK:N5=ok:*
+N5:v=921600 -> ACK:N5=ok:*
+
+# Missing parameter
+N5 -> ACK:N5=Invalid parameter:*
+
+# N6: UART number (only 1 or 2 are valid; UART0 reserved)
+N6:v=1 -> ACK:N6=ok:*
+N6:v=2 -> ACK:N6=ok:*
+
+# Invalid UART number
+N6:v=0 -> ACK:N6=Invalid parameter:*
+N6:v=3 -> ACK:N6=Invalid parameter:*
+
+# Missing parameter
+N6 -> ACK:N6=Invalid parameter:*
+
+# ============================================================
+# EXTERNAL / REMOTE SENSOR CONFIGURATION (E0-E4)
+# ============================================================
+
+# E0: Get all external sensor config entries
+E0 -> ACK:E0=ok:*
+
+# E1: Set core fields for a new external sensor
+E1:i=0;id=7;n=TempSensor;mn=temperature;ms=temp -> ACK:E1=ok:reboot=1
+
+# E1: Add a second sensor
+E1:i=1;id=8;n=HumSensor;mn=humidity;ms=hum -> ACK:E1=ok:reboot=1
+
+# E2: Set MQTT detail fields (sensor must exist first via E1)
+E2:i=0;mt=sensor;md=temperature;mu=C;bin=0 -> ACK:E2=ok:reboot=1
+E2:i=1;mt=sensor;md=humidity;mu=%;bin=0 -> ACK:E2=ok:reboot=1
+
+# E2: Binary sensor
+E2:i=0;mt=binary_sensor;md=motion;mu=;bin=1 -> ACK:E2=ok:reboot=1
+
+# E4: Rename an existing sensor
+E4:0=Outside Temp -> ACK:E4=ok:reboot=1
+
+# E3: Remove sensor at index 1
+E3:1 -> ACK:E3=ok:reboot=1
+
+# E3: Remove sensor at index 0
+E3:0 -> ACK:E3=ok:reboot=1
+
+# Error cases - invalid sensor index
+E1:i=8;id=7;n=TooMany;mn=x;ms=x -> ACK:E1=Invalid sensor index:*|ACK:E1=Invalid parameter:*
+E2:i=8;mt=sensor;md=temperature;mu=C;bin=0 -> ACK:E2=Invalid sensor index:*|ACK:E2=Invalid parameter:*
+E3:8 -> ACK:E3=Invalid sensor index:*
+E4:8=NewName -> ACK:E4=Invalid sensor index:*
+
+# Error cases - missing parameters
+E1:i=0 -> ACK:E1=Invalid or missing parameters:*|ACK:E1=Invalid parameter:*
+E2 -> ACK:E2=Invalid or missing parameters:*|ACK:E2=Invalid parameter:*

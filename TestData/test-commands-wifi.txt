@@ -308,3 +308,122 @@ POST /api/config/C26 v=0 -> {"success":true}|{*}
 
 POST /api/config/C27 g=1;w=1;s=1 -> {"success":true}|{*}
 POST /api/config/C27 g=0;w=0;s=0 -> {"success":true}|{*}
+
+# ============================================================
+# XPDZ TONE PIN CONFIGURATION (C6)
+# ============================================================
+
+# Set XpdzTone pin to a valid GPIO
+POST /api/config/C6 v=25 -> {"success":true}|{*}
+POST /api/config/C6 v=26 -> {"success":true}|{*}
+
+# Set XpdzTone pin to PinDisabled (255 = not fitted)
+POST /api/config/C6 v=255 -> {"success":true}|{*}
+
+# Missing parameter
+POST /api/config/C6 -> {"error":*}
+
+# ============================================================
+# HW479 RGB LED PIN CONFIGURATION (C8)
+# ============================================================
+
+# Set all three RGB pins
+POST /api/config/C8 r=25;g=26;b=27 -> {"success":true}|{*}
+POST /api/config/C8 r=16;g=17;b=18 -> {"success":true}|{*}
+
+# Disable all pins (PinDisabled = 255)
+POST /api/config/C8 r=255;g=255;b=255 -> {"success":true}|{*}
+
+# Mixed: some disabled
+POST /api/config/C8 r=25;g=255;b=255 -> {"success":true}|{*}
+
+# Missing parameter(s)
+POST /api/config/C8 r=25;g=26 -> {"error":*}
+
+# ============================================================
+# RTC DS1302 PIN CONFIGURATION (C18)
+# ============================================================
+
+# Set all three DS1302 pins
+POST /api/config/C18 dat=4;clk=5;rst=6 -> {"success":true}|{*}
+POST /api/config/C18 dat=14;clk=15;rst=16 -> {"success":true}|{*}
+
+# Disable all pins (PinDisabled = 255)
+POST /api/config/C18 dat=255;clk=255;rst=255 -> {"success":true}|{*}
+
+# Missing parameter(s)
+POST /api/config/C18 dat=4;clk=5 -> {"error":*}
+
+# ============================================================
+# NEXTION DISPLAY CONFIGURATION (N0-N6) via /api/config
+# ============================================================
+
+# N0: Get all Nextion config as JSON object
+GET /api/config/N0 -> {*}
+
+# N1: Enable/disable Nextion display
+POST /api/config/N1 v=1 -> {"success":true}|{*}
+POST /api/config/N1 v=0 -> {"success":true}|{*}
+POST /api/config/N1 v=true -> {"success":true}|{*}
+POST /api/config/N1 v=false -> {"success":true}|{*}
+
+# N2: Hardware serial vs software serial
+POST /api/config/N2 v=1 -> {"success":true}|{*}
+POST /api/config/N2 v=0 -> {"success":true}|{*}
+
+# N3: RX pin
+POST /api/config/N3 v=16 -> {"success":true}|{*}
+POST /api/config/N3 v=255 -> {"success":true}|{*}
+
+# N4: TX pin
+POST /api/config/N4 v=17 -> {"success":true}|{*}
+POST /api/config/N4 v=255 -> {"success":true}|{*}
+
+# N5: Baud rate
+POST /api/config/N5 v=9600 -> {"success":true}|{*}
+POST /api/config/N5 v=115200 -> {"success":true}|{*}
+POST /api/config/N5 v=921600 -> {"success":true}|{*}
+
+# N6: UART number (1 or 2 only)
+POST /api/config/N6 v=1 -> {"success":true}|{*}
+POST /api/config/N6 v=2 -> {"success":true}|{*}
+
+# Invalid UART number
+POST /api/config/N6 v=0 -> {"error":*}
+POST /api/config/N6 v=3 -> {"error":*}
+
+# ============================================================
+# EXTERNAL / REMOTE SENSOR CONFIGURATION (E0-E4) via /api/externalsensor
+# ============================================================
+
+# E0: Get all external sensor config (GET returns JSON array)
+GET /api/externalsensor -> {"success":true,"count":*,"sensors":*}
+GET /api/externalsensor/E0 -> {"success":true,"count":*,"sensors":*}
+
+# E1: Set core fields for a new external sensor
+POST /api/externalsensor/E1 i=0;id=7;n=TempSensor;mn=temperature;ms=temp -> {"success":true}|{*}
+POST /api/externalsensor/E1 i=1;id=8;n=HumSensor;mn=humidity;ms=hum -> {"success":true}|{*}
+
+# E2: Set MQTT detail fields (sensor must exist via E1 first)
+POST /api/externalsensor/E2 i=0;mt=sensor;md=temperature;mu=C;bin=0 -> {"success":true}|{*}
+POST /api/externalsensor/E2 i=1;mt=sensor;md=humidity;mu=%;bin=0 -> {"success":true}|{*}
+
+# E2: Binary sensor
+POST /api/externalsensor/E2 i=0;mt=binary_sensor;md=motion;mu=;bin=1 -> {"success":true}|{*}
+
+# E4: Rename an existing sensor
+POST /api/externalsensor/E4 0=Outside Temp -> {"success":true}|{*}
+
+# E3: Remove sensors
+POST /api/externalsensor/E3 1 -> {"success":true}|{*}
+POST /api/externalsensor/E3 0 -> {"success":true}|{*}
+
+# Error cases - invalid sensor index
+POST /api/externalsensor/E1 i=8;id=7;n=TooMany;mn=x;ms=x -> {"error":*}
+POST /api/externalsensor/E2 i=8;mt=sensor;md=temperature;mu=C;bin=0 -> {"error":*}
+POST /api/externalsensor/E3 8 -> {"error":*}
+POST /api/externalsensor/E4 8=NewName -> {"error":*}
+
+# Error cases - missing parameters
+POST /api/externalsensor/E1 i=0 -> {"error":*}
+POST /api/externalsensor/E2 -> {"error":*}

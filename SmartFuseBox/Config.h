@@ -127,7 +127,8 @@ constexpr uint8_t ConfigVersion2 = 2;
 constexpr uint8_t ConfigVersion3 = 3;
 constexpr uint8_t ConfigVersion4 = 4;
 constexpr uint8_t ConfigVersion5 = 5;
-constexpr uint8_t ConfigVersion = ConfigVersion5;
+constexpr uint8_t ConfigVersion6 = 6;
+constexpr uint8_t ConfigVersion = ConfigVersion6;
 
 constexpr uint8_t ConfigHomeButtons = 4;
 constexpr uint8_t ConfigMaxNameLength = 31; // max characters (inc null)
@@ -280,6 +281,30 @@ struct SensorsConfig {
     int8_t reserved2[2];
 } __attribute__((packed));
 
+// XpdzTone: buzzer/piezo tone alert configuration
+struct XpdzTone {
+    uint8_t pin;
+    uint8_t reserved[4];
+} __attribute__((packed));
+
+// Hw479Rgb: RGB LED warning indicator pin configuration, PinDisabled = not fitted
+struct Hw479Rgb {
+    uint8_t rPin;
+    uint8_t gPin;
+    uint8_t bPin;
+    uint8_t reserved1[3];
+    int8_t  reserved2[2];
+} __attribute__((packed));
+
+// RtcConfig: DS1302 real-time clock pin configuration, PinDisabled = not fitted
+struct RtcConfig {
+    uint8_t dataPin;          // DS1302 DAT pin; 
+    uint8_t clockPin;         // DS1302 CLK pin
+    uint8_t resetPin;         // DS1302 RST/CE pin
+    uint8_t reserved1[3];
+    int8_t  reserved2[2];
+} __attribute__((packed));
+
 struct SpiPins {
     uint8_t sckPin;
     uint8_t misoPin;
@@ -292,6 +317,37 @@ struct NetworkAuthConfig {
     char apiKey[ConfigAuthApiKeyLength];
     char hmacKey[ConfigAuthHmacKeyLength];
     uint8_t reserved[4];
+} __attribute__((packed));
+
+struct NextionConfig {
+	bool enabled;
+	bool isHardwareSerial;  // if false, use SoftwareSerial on rxPin/txPin
+	uint8_t rxPin;
+	uint8_t txPin;
+	uint32_t baudRate;
+	uint8_t uartNum;        // ESP32: UART peripheral index — valid values 1 or 2 only (UART0 is reserved for USB/debug)
+	uint8_t reserved[4];
+} __attribute__((packed));
+
+struct RemoteSensorConfig
+{
+    SensorIdList sensorId;
+	char name[21];   // friendly name for UI
+    char mqttName[16];
+    char mqttSlug[16];
+    char mqttTypeSlug[16];
+    char mqttDeviceClass[16];
+    char mqttUnit[11];
+    bool mqttIsBinary;
+    uint8_t reserved[8];
+} __attribute__((packed));
+
+
+struct RemoteSensorsConfig {
+    uint8_t count;
+    RemoteSensorConfig sensors[ConfigMaxSensors];
+    uint8_t reserved1[2];
+    int8_t reserved2[2];
 } __attribute__((packed));
 
 struct Config {
@@ -309,6 +365,11 @@ struct Config {
     SensorsConfig sensors;
     SpiPins spiPins;
     NetworkAuthConfig auth;
+	XpdzTone xpdzTone;
+	Hw479Rgb hw479Rgb;
+    RtcConfig rtc;
+    NextionConfig nextion;
+    RemoteSensorsConfig remoteSensors;
     uint8_t reserved1[2];
     int8_t reserved2[2];
     uint16_t checksum;          // always last

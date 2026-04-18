@@ -28,7 +28,6 @@ class RelayCommandHandler : public BaseCommandHandler
 {
 private:
     SerialCommandManager* _commandMgrComputer;
-    SerialCommandManager* _commandMgrLink;
     RelayController* _relayController;
     Config* _config;
 
@@ -36,7 +35,7 @@ private:
     void sendAllRelayConfig(SerialCommandManager* sender);
 
 public:
-    RelayCommandHandler(SerialCommandManager* commandMgrComputer, SerialCommandManager* commandMgrLink, RelayController* relayController);
+    RelayCommandHandler(SerialCommandManager* commandMgrComputer, RelayController* relayController);
     ~RelayCommandHandler();
     bool handleCommand(SerialCommandManager* sender, const char* command, const StringKeyValue params[], uint8_t paramCount) override;
 

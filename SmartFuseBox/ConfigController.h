@@ -81,4 +81,13 @@ public:
 	ConfigResult setSdCardCsPin(const uint8_t csPin);
 	ConfigResult setSpiPins(const uint8_t sckPin, const uint8_t mosiPin, const uint8_t misoPin);
 	ConfigResult setLightSensorThreshold(const uint16_t threshold);
+	ConfigResult setXpdzTonePin(const uint8_t pin);
+	ConfigResult setHw479RgbPins(const uint8_t rPin, const uint8_t gPin, const uint8_t bPin);
+	ConfigResult setRtcPins(const uint8_t dataPin, const uint8_t clockPin, const uint8_t resetPin);
+	ConfigResult setNextionEnabled(const bool enabled);
+	ConfigResult setNextionHardwareSerial(const bool isHardwareSerial);
+	ConfigResult setNextionRxPin(const uint8_t rxPin);
+	ConfigResult setNextionTxPin(const uint8_t txPin);
+	ConfigResult setNextionBaudRate(const uint32_t baudRate);
+	ConfigResult setNextionUartNum(const uint8_t uartNum);
 };

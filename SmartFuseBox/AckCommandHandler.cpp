@@ -19,16 +19,23 @@
 #include "SystemFunctions.h"
 #include "ConfigController.h"
 
+#if defined(NEXTION_DISPLAY_DEVICE)
+#include <NextionControl.h>
+#include "BasePage.h"
+#endif
 
 const char AckCommand[] = "ACK";
 
-#if defined(BOAT_CONTROL_PANEL)
-AckCommandHandler::AckCommandHandler(BroadcastManager* broadcastManager, NextionControl* nextionControl, WarningManager* warningManager)
-    : BaseBoatCommandHandler(broadcastManager, nextionControl, warningManager)
-#elif defined(FUSE_BOX_CONTROLLER)
-AckCommandHandler::AckCommandHandler(BroadcastManager* broadcastManager, WarningManager* warningManager)
-    : SharedBaseCommandHandler(broadcastManager, warningManager), _configController(nullptr)
+AckCommandHandler::AckCommandHandler(BroadcastManager* broadcastManager, 
+#if defined(NEXTION_DISPLAY_DEVICE)
+    NextionControl* nextionControl, 
 #endif
+    WarningManager* warningManager)
+    : BaseNextionCommandHandler(broadcastManager, 
+#if defined(NEXTION_DISPLAY_DEVICE)
+        nextionControl, 
+#endif
+        warningManager)
 {
 
 }
@@ -92,18 +99,8 @@ bool AckCommandHandler::handleCommand(SerialCommandManager* sender, const char* 
 
     // only process known ACK keys if you need to take action
 
-#if defined(BOAT_CONTROL_PANEL)
-    if (SystemFunctions::commandMatches(params[0].key, SystemHeartbeatCommand) && strcmp(params[0].value, AckSuccess) == 0)
-    {
-        // Heartbeat acknowledgement
-        processHeartbeatAck(sender, params[0].key, params[0].value);
-	}
-    else if (strcmp(params[0].key, WarningsList) == 0 && strcmp(params[0].value, AckSuccess) == 0)
-    {
-        // Warnings list acknowledgement - merge remote warnings
-        processWarningsListAck(sender, params[0].key, params[0].value, params, paramCount);
-    }
-    else if (strcmp(params[0].key, RelayRetrieveStates) == 0 && strcmp(params[0].value, AckSuccess) == 0)
+#if defined(NEXTION_DISPLAY_DEVICE)
+    if (strcmp(params[0].key, RelayRetrieveStates) == 0 && strcmp(params[0].value, AckSuccess) == 0)
     {
         // Relay state acknowledgement - handle both formats:
         // 1. ACK:R2=ok (just acknowledgement, no relay state - paramCount == 1)
@@ -180,7 +177,7 @@ bool AckCommandHandler::handleCommand(SerialCommandManager* sender, const char* 
 			sendDebugMessage(F("Invalid F2 ACK format free memory"), AckCommand);
 		}
 	}
-#elif defined(FUSE_BOX_CONTROLLER)
+#else
 	processConfigAck(sender, params[0].key, params[0].value);
 #endif
 

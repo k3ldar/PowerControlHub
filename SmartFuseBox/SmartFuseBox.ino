@@ -26,69 +26,42 @@
 #include "Dht11SensorHandler.h"
 #include "LightSensorHandler.h"
 #include "SystemSensorHandler.h"
+#include "GpsSensorHandler.h"
 
-#include "RemoteSensor.h"
-
- // BaseSensor.h is required here because the localSensors[] array below is typed
- // as BaseSensorHandler*. When MQTT_SUPPORT is active, RemoteSensor inherits from
- // a different base that is not pulled in by the sensor-specific headers above.
-#if defined(MQTT_SUPPORT)
-#include "BaseSensor.h"
-#endif
-
-// Hardware UART selection. Change these two defines if your board routes its
-// serial ports differently (e.g. swap Serial1 for Serial2 on a Mega-class board).
+ // Hardware UART selection. Change this define if your board routes its serial
+// port differently.
 // COMPUTER_SERIAL – connected to the host PC / debug monitor.
-// LINK_SERIAL     – connected to a secondary controller or companion board.
+// GPS_SERIAL      – connected to the GPS module.
 #define COMPUTER_SERIAL Serial
-#define LINK_SERIAL Serial1
+#define GPS_SERIAL Serial2
 
 // forward declares
 void onComputerCommandReceived(SerialCommandManager* mgr);
-void onLinkCommandReceived(SerialCommandManager* mgr);
 
 
 // Consumer note:
-// - `commandMgrComputer` and `commandMgrLink` are local to your .ino so you can
-//   select the hardware Serial instances (Serial, Serial1, etc.) and baud rates
-//   appropriate for your board. Keep the callbacks `onComputerCommandReceived` and
-//   `onLinkCommandReceived` in this file so they can access these serial managers.
-// - Construct `SmartFuseBoxApp` with pointers to these serial managers and your
-//   relay pin mapping. Then construct any board-specific sensors using the
-//   accessors from `app` (e.g. `app.messageBus()`, `app.broadcastManager()`,
-//   `app.sensorCommandHandler()`). Finally call `app.setup(...)` with your
-//   sensor arrays from `setup()` and call `app.loop()` from `loop()`.
+// - `commandMgrComputer` is local to your .ino so you can select the hardware
+//   Serial instance and baud rate appropriate for your board. Keep the callback
+//   `onComputerCommandReceived` in this file so it can access the serial manager.
+// - Construct `SmartFuseBoxApp` with a pointer to the serial manager. Then
+//   configure board-specific resources (e.g. GPS serial) via app accessors before
+//   calling `app.setup()`. Call `app.loop()` from `loop()`.
 
 SerialCommandManager commandMgrComputer(&COMPUTER_SERIAL, onComputerCommandReceived, '\n', ':', ';', '=', 500, 64);
-SerialCommandManager commandMgrLink(&LINK_SERIAL, onLinkCommandReceived, '\n', ':', ';', '=', 500, 64);
 
-SmartFuseBoxApp app(&commandMgrComputer, &commandMgrLink);
-
-// Project specific remote sensors
-#if defined(MQTT_SUPPORT)
-MqttSensorChannel gpsMqttChannels[] = {
-	{ "Latitude", "latitude", "latitude", nullptr, "°", false},
-	{ "Longitude", "longitude", "longitude", nullptr, "°", false}
-};
-RemoteSensor gpsLatLonSensor(SensorIdList::GpsSensor, "Gps", SensorGpsLatLong, "Gps", gpsMqttChannels, 2);
-#else
-RemoteSensor gpsLatLonSensor(SensorIdList::GpsSensor, "Gps", SensorGpsLatLong, 2);
-#endif
-
-RemoteSensor* remoteSensors[] = {
-	&gpsLatLonSensor
-};
-constexpr uint8_t remoteSensorCount = sizeof(remoteSensors) / sizeof(remoteSensors[0]);
+SmartFuseBoxApp app(&commandMgrComputer);
 
 void setup()
 {
 	// Serial initialization is performed first to ensure that any logging or error messages
 	// from DateTimeManager or ConfigManager during initialization are properly output.
 	SystemFunctions::initializeSerial(COMPUTER_SERIAL, 115200, true);
-	SystemFunctions::initializeSerial(LINK_SERIAL, 19200, true);
+	SystemFunctions::initializeSerial(GPS_SERIAL, GpsBaudRate, false);
+
+	app.setGpsSerial(&GPS_SERIAL);
 
 	// configure app
-	app.setup(remoteSensors, remoteSensorCount);
+	app.setup(nullptr, 0);
 }
 
 void loop()
@@ -105,12 +78,10 @@ void onComputerCommandReceived(SerialCommandManager* mgr)
 	SystemFunctions::resetSerial(COMPUTER_SERIAL);
 }
 
-// Called when a command arrives on LINK_SERIAL that no registered handler
-// claimed. Forwards the error notification to the computer-side monitor
-// (not the link serial) so the host can log it, then resets the link buffer.
-void onLinkCommandReceived(SerialCommandManager* mgr)
-{
-	commandMgrComputer.sendError(mgr->getRawMessage(), F("STATLNK"));
-	SystemFunctions::resetSerial(LINK_SERIAL);
-}
+#if defined(NEXTION_DISPLAY_DEVICE) && defined(NEXTION_DEBUG)
+nextion.setDebugCallback([](const String& msg)
+	{
+		commandMgrComputer.sendCommand(msg.c_str(), "NEXTION");
+	});
+#endif
 

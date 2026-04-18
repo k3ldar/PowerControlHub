@@ -18,42 +18,16 @@
 #include "BroadcastManager.h"
 #include "BaseCommandHandler.h"
 
-constexpr uint64_t UpdateIntervalMs = 60000;
-
-BroadcastManager::BroadcastManager(SerialCommandManager* computerSerial, SerialCommandManager* linkSerial)
-	: _computerSerial(computerSerial), _linkSerial(linkSerial), _nextUpdateTime(0)
+BroadcastManager::BroadcastManager(SerialCommandManager* computerSerial)
+	: _computerSerial(computerSerial)
 {
 }
 
-void BroadcastManager::update(uint64_t now)
+void BroadcastManager::sendCommand(const char* command, const char* params)
 {
-    // Perform periodic updates every 1 minute: send configuration values to serial interfaces
-	if (now > _nextUpdateTime)
-    {
-        _nextUpdateTime = now + UpdateIntervalMs;
-
-		Config* config = ConfigManager::getConfigPtr();
-        
-        if (!config)
-			return;
-		char buffer[10];
-		snprintf_P(buffer, sizeof(buffer), PSTR("v=%u"), config->sound.hornRelayIndex);
-        sendCommand(ConfigSoundRelayId, buffer, true);
-		snprintf_P(buffer, sizeof(buffer), PSTR("v=%u"), static_cast<uint8_t>(config->location.locationType));
-        sendCommand(ConfigBoatType, buffer, true);
-    }
-}
-
-void BroadcastManager::sendCommand(const char* command, const char* params, bool linkOnly)
-{
-    if (_computerSerial && !linkOnly)
+    if (_computerSerial)
     {
         _computerSerial->sendCommand(command, params);
-    }
-
-    if (_linkSerial)
-    {
-        _linkSerial->sendCommand(command, params);
     }
 }
 
@@ -62,10 +36,6 @@ void BroadcastManager::sendCommand(const char* command, const char* message, con
     if (_computerSerial)
     {
         _computerSerial->sendCommand(command, message, identifier, params, argLength);
-    }
-    if (_linkSerial)
-    {
-        _linkSerial->sendCommand(command, message, identifier, params, argLength);
     }
 }
 
