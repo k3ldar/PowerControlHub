@@ -34,6 +34,7 @@ jobs:
         arduino-cli lib install "DHT11"
         arduino-cli lib install "NextionControl"
         arduino-cli lib install "TinyGPSPlus"
+        arduino-cli lib install "RTC"
 
     - name: Compile SmartFuseBox firmware
       run: |
