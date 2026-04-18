@@ -32,6 +32,7 @@ jobs:
         arduino-cli lib install "SensorManager"
         arduino-cli lib install "SdFat"
         arduino-cli lib install "DHT11"
+        arduino-cli lib install "NextionControl"
 
     - name: Compile SmartFuseBox firmware
       run: |
