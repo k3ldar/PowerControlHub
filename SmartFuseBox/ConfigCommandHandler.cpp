@@ -97,9 +97,20 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
 			sender->sendCommand(ConfigMapHomeButton, buffer);
 		}
 
+		// C6 XpdzTone pin
+		snprintf(buffer, sizeof(buffer), "v=%u", config->xpdzTone.pin);
+		sender->sendCommand(ConfigXpdzTonePin, buffer);
+
 		// C7 Boat type
 		snprintf(buffer, sizeof(buffer), "v=%d", static_cast<uint8_t>(config->location.locationType));
 		sender->sendCommand(ConfigBoatType, buffer);
+
+		// C8 Hw479Rgb pins
+		snprintf(buffer, sizeof(buffer), "r=%u;g=%u;b=%u",
+			config->hw479Rgb.rPin,
+			config->hw479Rgb.gPin,
+			config->hw479Rgb.bPin);
+		sender->sendCommand(ConfigHw479RgbPins, buffer);
 
 		// C9 Sound start delay
 		snprintf(buffer, sizeof(buffer), "v=%u", static_cast<unsigned int>(config->sound.startDelayMs));
@@ -144,6 +155,32 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
 			snprintf(buffer, sizeof(buffer), "v=%s", ipBuffer);
 			sender->sendCommand(ConfigWifiApIpAddress, buffer);
 		}
+
+		// C18 RTC pins
+		snprintf(buffer, sizeof(buffer), "dat=%u;clk=%u;rst=%u",
+			config->rtc.dataPin,
+			config->rtc.clockPin,
+			config->rtc.resetPin);
+		sender->sendCommand(ConfigRtcPins, buffer);
+
+		// N1–N6 Nextion display config (broadcast as individual commands)
+		snprintf(buffer, sizeof(buffer), "v=%u", config->nextion.enabled ? 1u : 0u);
+		sender->sendCommand(NextionEnabled, buffer);
+
+		snprintf(buffer, sizeof(buffer), "v=%u", config->nextion.isHardwareSerial ? 1u : 0u);
+		sender->sendCommand(NextionHardwareSerial, buffer);
+
+		snprintf(buffer, sizeof(buffer), "v=%u", config->nextion.rxPin);
+		sender->sendCommand(NextionRxPin, buffer);
+
+		snprintf(buffer, sizeof(buffer), "v=%u", config->nextion.txPin);
+		sender->sendCommand(NextionTxPin, buffer);
+
+		snprintf(buffer, sizeof(buffer), "v=%lu", config->nextion.baudRate);
+		sender->sendCommand(NextionBaudRate, buffer);
+
+		snprintf(buffer, sizeof(buffer), "v=%u", config->nextion.uartNum);
+		sender->sendCommand(NextionUartNum, buffer);
 
 		// C20 Timezone offset
 		snprintf(buffer, sizeof(buffer), "v=%d", config->system.timezoneOffset);
@@ -265,6 +302,27 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
 			result = ConfigResult::InvalidParameter;
 		}
 	}
+	else if (SystemFunctions::commandMatches(command, ConfigXpdzTonePin))
+	{
+		// C6 - Set XpdzTone pin
+		// Format: C6:v=<pin> (use 255/PinDisabled to disable)
+		if (paramCount >= 1)
+		{
+			uint8_t pin;
+			if (!getParamValueU8t(params, paramCount, "v", pin))
+			{
+				result = ConfigResult::InvalidParameter;
+			}
+			else
+			{
+				result = _configController->setXpdzTonePin(pin);
+			}
+		}
+		else
+		{
+			result = ConfigResult::InvalidParameter;
+		}
+	}
   else if (SystemFunctions::commandMatches(command, ConfigSpiPins))
 	{
 		if (paramCount >= 3)
@@ -293,6 +351,29 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
 		{
 			uint8_t type = atoi(params[0].value);
 			result = _configController->setLocationType(type);
+		}
+		else
+		{
+			result = ConfigResult::InvalidParameter;
+		}
+	}
+	else if (SystemFunctions::commandMatches(command, ConfigHw479RgbPins))
+	{
+		// C8 - Set Hw479Rgb RGB LED pins
+		// Format: C8:r=<pin>;g=<pin>;b=<pin> (use 255/PinDisabled to disable)
+		if (paramCount >= 3)
+		{
+			uint8_t rPin, gPin, bPin;
+			if (!getParamValueU8t(params, paramCount, "r", rPin) ||
+				!getParamValueU8t(params, paramCount, "g", gPin) ||
+				!getParamValueU8t(params, paramCount, "b", bPin))
+			{
+				result = ConfigResult::InvalidParameter;
+			}
+			else
+			{
+				result = _configController->setHw479RgbPins(rPin, gPin, bPin);
+			}
 		}
 		else
 		{
@@ -408,6 +489,29 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
 		if (paramCount >= 1)
 		{
 			result = _configController->setWifiIpAddress(params[0].value);
+		}
+		else
+		{
+			result = ConfigResult::InvalidParameter;
+		}
+	}
+	else if (SystemFunctions::commandMatches(command, ConfigRtcPins))
+	{
+		// C18 - Set RtcConfig DS1302 pins
+		// Format: C18:dat=<pin>;clk=<pin>;rst=<pin> (use 255/PinDisabled for any unfit pin)
+		if (paramCount >= 3)
+		{
+			uint8_t dataPin, clockPin, resetPin;
+			if (!getParamValueU8t(params, paramCount, "dat", dataPin) ||
+				!getParamValueU8t(params, paramCount, "clk", clockPin) ||
+				!getParamValueU8t(params, paramCount, "rst", resetPin))
+			{
+				result = ConfigResult::InvalidParameter;
+			}
+			else
+			{
+				result = _configController->setRtcPins(dataPin, clockPin, resetPin);
+			}
 		}
 		else
 		{
@@ -537,7 +641,9 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
 		// g=GPS LED, w=Warning LED, s=System LED
 		if (paramCount >= 3)
 		{
-			bool gps, warning, system;
+			bool gps = false;
+			bool warning = false;
+			bool system = false;
 
 			if (!getParamValueBool(params, paramCount, "g", gps) ||
 				!getParamValueBool(params, paramCount, "w", warning) ||
@@ -870,11 +976,12 @@ const char* const* ConfigCommandHandler::supportedCommands(size_t& count) const
 {
 	static const char* cmds[] = {
 		ConfigSaveSettings, ConfigGetSettings, ConfigResetSettings,
-		ConfigRename, ConfigMapHomeButton,
-      ConfigSpiPins,
-		ConfigBoatType, ConfigSoundStartDelay,
+		ConfigRename, ConfigMapHomeButton, ConfigXpdzTonePin,
+	  ConfigSpiPins,
+		ConfigBoatType, ConfigHw479RgbPins, ConfigSoundStartDelay,
 		ConfigBluetoothEnable, ConfigWifiEnable, ConfigWifiMode, ConfigWifiSSID,
 		ConfigWifiPassword, ConfigWifiPort, ConfigWifiState, ConfigWifiApIpAddress,
+		ConfigRtcPins,
 #if defined(MQTT_SUPPORT)
 		MqttConfigEnable, MqttConfigBroker, MqttConfigPort, MqttConfigUsername,
 		MqttConfigPassword, MqttConfigDeviceId, MqttConfigHADiscovery, MqttConfigKeepAlive,

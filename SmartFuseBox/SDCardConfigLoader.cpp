@@ -25,11 +25,9 @@
 #include <string.h>
 
 SdCardConfigLoader::SdCardConfigLoader(SerialCommandManager* computerSerial,
-                                       SerialCommandManager* linkSerial,
                                        ConfigController* configController,
                                        RelayController* relayController)
     : _computerSerial(computerSerial),
-      _linkSerial(linkSerial),
       _configController(configController),
       _relayController(relayController),
       _sdConfigPresent(false)
@@ -423,16 +421,6 @@ bool SdCardConfigLoader::applyConfigCommand(const char* line)
     return true;
 }
 
-void SdCardConfigLoader::syncConfigToLink()
-{
-    // Send C1 (get settings) to trigger config broadcast via LINK
-    // This will make the control panel receive the new config
-    if (_linkSerial)
-    {
-        _linkSerial->sendCommand("C1", "");
-    }
-}
-
 void SdCardConfigLoader::logError(const char* message, const char* line)
 {
     if (_computerSerial)
@@ -527,10 +515,6 @@ bool SdCardConfigLoader::loadConfigFromSd()
         if (saveResult == ConfigResult::Success)
         {
             logInfo("Config saved to EEPROM");
-
-            // Sync to control panel via LINK
-            logInfo("Syncing config to control panel...");
-            syncConfigToLink();
 
             _sdConfigPresent = true;
 

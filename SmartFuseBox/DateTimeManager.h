@@ -21,10 +21,9 @@
 
 #include "Local.h"
 #include "SystemFunctions.h"
+#include "Config.h"
 
-#if defined(BOAT_CONTROL_PANEL)
 #include "RtcDS1302Driver.h"
-#endif
 
 constexpr uint8_t DateTimeBufferLength = 20;     // "YYYY-MM-DD HH:MM:SS" + null terminator
 constexpr uint8_t DateTimeISOBufferLength = 20;  // "YYYY-MM-DDTHH:MM:SS" + null terminator
@@ -73,12 +72,13 @@ class DateTimeManager
 {
 public:
     /**
-     * @brief Initialize the RTC hardware and read time from it.
-     * Call this once in setup() before any other DateTimeManager methods.
-     * If RTC is present and has valid time, loads it into DateTimeManager.
-     * If RTC is not present or time is invalid, uses default time.
+     * @brief Initialize with runtime RTC pin configuration from config.
+     * If all pins in rtcConfig are valid (not PinDisabled), attempts to
+     * initialize DS1302 and read time from hardware. Falls back to default
+     * timestamp if RTC is absent or time is invalid.
+     * @param rtcConfig RTC pin configuration from Config::rtc
      */
-    static void begin();
+    static void begin(const RtcConfig& rtcConfig);
 
     /**
      * @brief Set date/time to default value (January 1, 2025 00:00:00).
@@ -209,9 +209,7 @@ public:
     static bool rtcDiagnostic(char* buffer, const uint8_t bufferLength);
 
 private:
-#if defined(BOAT_CONTROL_PANEL)
     static RtcDS1302Driver _rtcDriver;
-#endif
     static uint64_t _syncedTimestamp;
     static uint64_t _syncedMillis;
     static bool _isSet;

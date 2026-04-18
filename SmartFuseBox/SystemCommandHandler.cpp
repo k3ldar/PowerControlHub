@@ -217,7 +217,6 @@ bool SystemCommandHandler::handleCommand(SerialCommandManager* sender, const cha
     }
     else if (SystemFunctions::commandMatches(command, SystemRtcDiagnostic))
     {
-#if defined(BOAT_CONTROL_PANEL)
         char diagnosticMsg[64];
 
         bool success = DateTimeManager::rtcDiagnostic(diagnosticMsg, sizeof(diagnosticMsg));
@@ -233,7 +232,6 @@ bool SystemCommandHandler::handleCommand(SerialCommandManager* sender, const cha
         {
             sendAckErr(sender, command, param.value);
         }
-#endif
     }
     else if (SystemFunctions::commandMatches(command, SystemUptime))
     {

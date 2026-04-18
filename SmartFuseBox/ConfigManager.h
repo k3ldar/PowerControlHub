@@ -32,6 +32,7 @@ private:
 	static void migrateV2toV3();
 	static void migrateV3toV4();
 	static void migrateV4toV5();
+	static void migrateV5toV6();
 	static Config _cfg;
 	static SystemHeader _hdr;
 

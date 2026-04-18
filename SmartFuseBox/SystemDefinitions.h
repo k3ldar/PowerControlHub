@@ -77,9 +77,9 @@ constexpr char ConfigResetSettings[] = "C2";
 constexpr char ConfigRename[] = "C3";
 constexpr char ConfigSpiPins[] = "C4";
 constexpr char ConfigMapHomeButton[] = "C5";
-constexpr char ConfigSetButtonColor[] = "C6";  // Retired — use RelaySetButtonColor (R7)
+constexpr char ConfigXpdzTonePin[] = "C6";
 constexpr char ConfigBoatType[] = "C7";
-constexpr char ConfigSoundRelayId[] = "C8";    // Retired — use RelaySetActionType (R10)
+constexpr char ConfigHw479RgbPins[] = "C8";
 constexpr char ConfigSoundStartDelay[] = "C9";
 
 constexpr char ConfigBluetoothEnable[] = "C10";
@@ -92,8 +92,8 @@ constexpr char ConfigWifiPort[] = "C15";
 constexpr char ConfigWifiState[] = "C16";
 constexpr char ConfigWifiApIpAddress[] = "C17";
 
-constexpr char ConfigDefaultRelayState[] = "C18"; // Retired — use RelaySetDefaultState (R8)
-constexpr char ConfigLinkRelays[] = "C19";        // Retired — use RelayLink (R9)
+constexpr char ConfigRtcPins[] = "C18";
+constexpr char ConfigNextion[] = "C19";
 constexpr char ConfigTimeZoneOffset[] = "C20";
 constexpr char ConfigMmsi[] = "C21";
 constexpr char ConfigCallSign[] = "C22";
@@ -158,13 +158,22 @@ constexpr char SensorGpsSatellites[] = "S20";
 constexpr char SensorGpsDistance[] = "S21";
 constexpr char SensorBinaryPresence[] = "S22";
 
+constexpr char NextionGetConfig[] = "N0";
+constexpr char NextionEnabled[] = "N1";
+constexpr char NextionHardwareSerial[] = "N2";
+constexpr char NextionRxPin[] = "N3";
+constexpr char NextionTxPin[] = "N4";
+constexpr char NextionBaudRate[] = "N5";
+constexpr char NextionUartNum[] = "N6";
+
+constexpr char ExternalSensorGetAll[] = "E0";
+constexpr char ExternalSensorSetCore[] = "E1";
+constexpr char ExternalSensorSetMqtt[] = "E2";
+constexpr char ExternalSensorRemove[] = "E3";
+constexpr char ExternalSensorRename[] = "E4";
 
 constexpr char AckSuccess[] = "ok";
 constexpr char ValueParamName[] = "v";
-
-
-constexpr uint64_t HeartbeatIntervalMs = 1000;
-constexpr uint64_t HeartbeatTimeoutMs = 3000;
 
 
 constexpr uint8_t ConfigMaxLinkedRelays = 2;
@@ -224,6 +233,8 @@ enum class SensorIdList : uint8_t
     GpsSensor = 0x3,
     SystemSensor = 0x4,
     BinaryPresenceSensor = 0x5,
+
+    None = 0xFF
 };
 
 struct CommandResult {

@@ -59,11 +59,10 @@
 #undef CONFIGURE_SPI
 #endif
 
-// ─── Controller Mode ──────────────────────────────────────────────────────────
-// Undefine to use only the underlying components (WiFi, MQTT etc.) without
-// the fuse box relay controller logic.
-#define FUSE_BOX_CONTROLLER
 
+// ─── Display Support ───────────────────────────────────────────────────────
+// Enable support for Nextion displays.
+#define NEXTION_DISPLAY_DEVICE
 
 // ─── Optional Features ────────────────────────────────────────────────────────
 // Remove the trailing underscore to enable each feature.

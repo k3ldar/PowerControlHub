@@ -21,13 +21,17 @@
 
 #include "Local.h"
 #include "ConfigManager.h"
-#include "SharedBaseCommandHandler.h"
+#include "BaseNextionCommandHandler.h"
+
+#if defined(NEXTION_DISPLAY_DEVICE)
+#include <NextionControl.h>
+#endif
 
 // Forward declarations
 class ConfigController;
 
 
-class AckCommandHandler : public SharedBaseCommandHandler
+class AckCommandHandler : public BaseNextionCommandHandler
 {
 private:
     bool processConfigAck(SerialCommandManager* sender, const char* key, const char* value);
@@ -35,7 +39,11 @@ private:
     ConfigController* _configController;
 
 public:
-    explicit AckCommandHandler(BroadcastManager* broadcastManager, WarningManager* warningManager);
+    explicit AckCommandHandler(BroadcastManager* broadcastManager, 
+#if defined(NEXTION_DISPLAY_DEVICE)
+        NextionControl* nextionControl,
+#endif
+        WarningManager* warningManager);
 
     // Set the config sync manager (optional - needed for config sync feature)
     void setConfigController(ConfigController* configController);

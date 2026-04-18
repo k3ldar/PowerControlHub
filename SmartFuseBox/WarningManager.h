@@ -18,41 +18,30 @@
 #pragma once
 
 #include <Arduino.h>
-#include <SerialCommandManager.h>
 #include <stdint.h>
 
 #include "Local.h"
 #include "SystemDefinitions.h"
 #include "WarningType.h"
 
-#if defined(BOAT_CONTROL_PANEL)
 #include "RgbLedFade.h"
 class ToneManager;
-#endif
 
 /**
  * @class WarningManager
- * @brief Simple, centralized warning management with built-in heartbeat monitoring.
+ * @brief Simple, centralized warning management.
  * 
- * This class manages all system warnings including connection heartbeat monitoring.
- * Warnings can be raised/cleared from anywhere in the code. The heartbeat functionality
- * is built-in and automatically manages the ConnectionLost warning.
+ * This class manages all system warnings.
+ * Warnings can be raised/cleared from anywhere in the code.
  * 
  * Features:
  * - Bitmap-based warning tracking using bit flags (supports up to 32 warnings)
- * - Built-in heartbeat monitoring with automatic F0 command transmission
  * - Extensible WarningType enum for adding new warnings
  * - Query methods to check active warnings
  * 
  * Usage:
  * @code
- * WarningManager warningMgr(&commandMgrLink);
- * 
- * // In loop or refresh:
- * warningMgr.update(SystemFunctions::millis64());
- * 
- * // When ACK:F0=ok received:
- * warningMgr.notifyHeartbeatAck();
+ * WarningManager warningMgr;
  * 
  * // Raise warnings from anywhere:
  * warningMgr.raiseWarning(WarningType::HighCompassTemperature);
@@ -67,76 +56,31 @@ class ToneManager;
 class WarningManager
 {
 private:
-	SerialCommandManager* _commandMgr;      // For sending heartbeat commands
-#if defined(BOAT_CONTROL_PANEL)
 	RgbLedFade* _warningStatus;			    // LED indicator for warnings
 	ToneManager* _toneManager;              // Sound alert manager
-#endif
 	uint32_t _localWarnings;                // Bitmap of LOCAL warnings (raised by this device)
-	uint32_t _remoteWarnings;               // Bitmap of REMOTE warnings (from connected device)
-#if defined(BOAT_CONTROL_PANEL)
 	uint32_t _previousWarnings;             // Previous warning state for change detection
-    uint64_t _lastTonePlayed;          // Last time bad tone was played
-#endif
+	uint64_t _lastTonePlayed;               // Last time bad tone was played
 
-    // Heartbeat state
-    uint64_t _heartbeatInterval;       // How often to send heartbeat (ms)
-    uint64_t _heartbeatTimeout;        // Timeout before connection lost (ms)
-    uint64_t _lastHeartbeatSent;       // When last heartbeat was sent
-    uint64_t _lastHeartbeatReceived;   // When last ack was received
-    bool _heartbeatEnabled;                 // Is heartbeat active
-
-    /**
-     * @brief Send a heartbeat command.
-     */
-    void sendHeartbeat();
-
-    /**
-     * @brief Update connection state based on heartbeat.
-     * @param now Current time in milliseconds
-     */
-    void updateConnection(uint64_t now);
-
-    /**
-     * @brief Broadcast warning change to connected device via LINK.
-     * Sends W2 command with warning status.
-     * @param type The warning type that changed
-     * @param isActive True if warning is now active, false if cleared
-     */
-    void broadcastWarningChange(WarningType type, bool isActive);
-
-#if defined(BOAT_CONTROL_PANEL)
-    void updateLedStatus();
-#endif
+	void updateLedStatus();
 
 public:
-    /**
-     * @brief Constructor.
-	 * @param ledManager Pointer to LedMatrixManager for updating warning indicators
-     * @param commandMgr Pointer to SerialCommandManager for heartbeat commands (optional)
-     * @param heartbeatInterval How often to send heartbeat in milliseconds
-     * @param heartbeatTimeout Timeout before connection considered lost in milliseconds
+	/**
+	 * @brief Constructor.
 	 * @param warningStatus Pointer to RgbLedFade for warning status LED
-     */
-    explicit WarningManager(SerialCommandManager* commandMgr, uint64_t heartbeatInterval,
-        uint64_t heartbeatTimeout
-#if defined(BOAT_CONTROL_PANEL)
-        , RgbLedFade* warningStatus, ToneManager* toneManager = nullptr);
-#else
-        );
-#endif
+	 */
+    explicit WarningManager();
+
+    // Set runtime-owned LED indicator (can be attached after construction)
+    void setWarningStatus(RgbLedFade* warningStatus);
+
+    // Set runtime-owned ToneManager (can be attached after construction)
+    void setToneManager(ToneManager* toneManager);
     /**
-     * @brief Update heartbeat and check for timeouts.
-     * Call this periodically (e.g., from refresh()).
+     * @brief Update warning state.
      * @param now Current time in milliseconds (SystemFunctions::millis64())
      */
     void update(uint64_t now);
-
-    /**
-     * @brief Notify that a heartbeat acknowledgement was received.
-     * Call this when ACK:F0=ok is received.
-     */
-    void notifyHeartbeatAck();
 
     /**
      * @brief Raise (activate) a warning.
@@ -169,27 +113,8 @@ public:
     bool isWarningActive(WarningType type) const;
 
     /**
-     * @brief Get the complete bitmask of all active warnings (local + remote).
+     * @brief Get the bitmask of all active warnings.
      * @return uint32_t containing all active warning flags
      */
     uint32_t getActiveWarningsMask() const;
-
-    /**
-     * @brief Update remote warning bitmask from connected device.
-     * This replaces (not merges) the remote warnings with the new state.
-     * @param remoteWarningMask Bitmask of warnings from remote device
-     */
-    void updateRemoteWarnings(uint32_t remoteWarningMask);
-
-    /**
-     * @brief Get only the local warning bitmask.
-     * @return uint32_t containing only locally-raised warning flags
-     */
-    uint32_t getLocalWarningsMask() const;
-
-    /**
-     * @brief Get only the remote warning bitmask.
-     * @return uint32_t containing only remotely-raised warning flags
-     */
-    uint32_t getRemoteWarningsMask() const;
 };

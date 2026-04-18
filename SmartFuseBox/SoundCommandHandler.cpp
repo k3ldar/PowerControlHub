@@ -24,9 +24,9 @@
 
 
 
-SoundCommandHandler::SoundCommandHandler(SerialCommandManager* commandMgrComputer, SerialCommandManager* commandMgrLink, 
-    SoundController* soundController)
-	: _commandMgrComputer(commandMgrComputer), _commandMgrLink(commandMgrLink), _soundController(soundController)
+SoundCommandHandler::SoundCommandHandler(SerialCommandManager* commandMgrComputer,
+	SoundController* soundController)
+	: _commandMgrComputer(commandMgrComputer), _soundController(soundController)
 {
 
 }
@@ -135,11 +135,6 @@ bool SoundCommandHandler::handleCommand(SerialCommandManager* sender, const char
 
 void SoundCommandHandler::broadcast(const char* cmd, const StringKeyValue* param)
 {
-    if (_commandMgrLink != nullptr)
-    {
-        sendAckOk(_commandMgrLink, cmd, param);
-    }
-
     if (_commandMgrComputer != nullptr)
     {
         sendAckOk(_commandMgrComputer, cmd, param);

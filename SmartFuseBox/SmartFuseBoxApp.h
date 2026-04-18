@@ -19,6 +19,8 @@
 
 #include "Local.h"
 
+#include <memory>
+
 #include <SerialCommandManager.h>
 #include <SensorManager.h>
 
@@ -37,6 +39,9 @@
 #include "AckCommandHandler.h"
 #include "SystemCommandHandler.h"
 #include "ConfigCommandHandler.h"
+#include "NextionConfigCommandHandler.h"
+#include "ExternalSensorConfigCommandHandler.h"
+#include "ExternalSensorNetworkHandler.h"
 #include "BluetoothRadioBridge.h"
 #include "IBluetoothRadio.h"
 #include "WifiController.h"
@@ -77,6 +82,10 @@
 #include "OtaManager.h"
 #endif
 
+#if defined(NEXTION_DISPLAY_DEVICE)
+#include <NextionControl.h>
+#endif
+
 #include "BaseSensor.h"
 #include "RemoteSensor.h"
 #include "SensorFactory.h"
@@ -85,13 +94,16 @@ class SmartFuseBoxApp
 {
 private:
     SerialCommandManager* _commandMgrComputer;
-    SerialCommandManager* _commandMgrLink;
 
     MessageBus _messageBus;
     RelayController _relayController;
     SoundController _soundController;
     BroadcastManager _broadcastManager;
     WarningManager _warningManager;
+
+#if defined(NEXTION_DISPLAY_DEVICE)
+    NextionControl* _nextionControl;
+#endif
 
     RelayCommandHandler _relayHandler;
     SoundCommandHandler _soundHandler;
@@ -108,6 +120,8 @@ private:
 
     ConfigController _configController;
     ConfigCommandHandler _configHandler;
+    NextionConfigCommandHandler _nextionConfigHandler;
+    ExternalSensorConfigCommandHandler _externalSensorConfigHandler;
 
     ConfigNetworkHandler _configNetworkHandler;
     RelayNetworkHandler _relayNetworkHandler;
@@ -124,6 +138,9 @@ private:
     SensorController* _sensorController;
     BaseSensor** _factorySensors;
     uint8_t _factorySensorCount;
+    Stream* _gpsSerial;
+    RemoteSensor** _remoteSensors;
+    uint8_t _remoteSensorCount;
 
 #if defined(MQTT_SUPPORT)
     MQTTController _mqttController;
@@ -136,11 +153,12 @@ private:
 
 	SchedulerCommandHandler _schedulerCommandHandler;
 	SchedulerNetworkHandler _schedulerNetworkHandler;
+	ExternalSensorNetworkHandler _externalSensorNetworkHandler;
 	WifiCommandBridge _wifiCommandBridge;
 
 	// Persistent storage for the serial handler array so WifiCommandBridge
 	// can hold a pointer to it safely beyond setup().
-	static constexpr uint8_t MaxSerialHandlerCount = 10;
+	static constexpr uint8_t MaxSerialHandlerCount = 12;
 	ISerialCommandHandler* _serialHandlers[MaxSerialHandlerCount];
 	uint8_t _serialHandlerCount;
 	ScheduleController _scheduleController;
@@ -163,11 +181,12 @@ private:
     void configureBluetoothSupport(Config* config);
 
 public:
-    SmartFuseBoxApp(SerialCommandManager* commandMgrComputer,
-        SerialCommandManager* commandMgrLink);
+    explicit SmartFuseBoxApp(SerialCommandManager* commandMgrComputer);
 
     void setup(RemoteSensor** remoteSensors, uint8_t remoteSensorCount);
     void loop();
+
+    void setGpsSerial(Stream* gpsSerial) { _gpsSerial = gpsSerial; }
 
     MessageBus* messageBus() { return &_messageBus; }
     BroadcastManager* broadcastManager() { return &_broadcastManager; }

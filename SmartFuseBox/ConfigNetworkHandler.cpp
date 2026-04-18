@@ -57,7 +57,28 @@ CommandResult ConfigNetworkHandler::handleRequest(const char* method,
 			result = ConfigResult::InvalidParameter;
 		}
 	}
-    else if (SystemFunctions::commandMatches(command, ConfigSpiPins))
+	else if (SystemFunctions::commandMatches(command, ConfigXpdzTonePin))
+	{
+		// C6 - Set XpdzTone pin
+		// Format: C6:v=<pin> (use 255/PinDisabled to disable)
+		if (paramCount >= 1)
+		{
+			uint8_t pin;
+			if (!getParamValueU8t(params, paramCount, "v", pin))
+			{
+				result = ConfigResult::InvalidParameter;
+			}
+			else
+			{
+				result = _configController->setXpdzTonePin(pin);
+			}
+		}
+		else
+		{
+			result = ConfigResult::InvalidParameter;
+		}
+	}
+	else if (SystemFunctions::commandMatches(command, ConfigSpiPins))
 	{
 		if (paramCount >= 3)
 		{
@@ -164,6 +185,29 @@ CommandResult ConfigNetworkHandler::handleRequest(const char* method,
 			else
 			{
 				result = _configController->setLocationType(type);
+			}
+		}
+		else
+		{
+			result = ConfigResult::InvalidParameter;
+		}
+	}
+	else if (SystemFunctions::commandMatches(command, ConfigHw479RgbPins))
+	{
+		// C8 - Set Hw479Rgb RGB LED pins
+		// Format: C8:r=<pin>;g=<pin>;b=<pin> (use 255/PinDisabled to disable)
+		if (paramCount >= 3)
+		{
+			uint8_t rPin, gPin, bPin;
+			if (!getParamValueU8t(params, paramCount, "r", rPin) ||
+				!getParamValueU8t(params, paramCount, "g", gPin) ||
+				!getParamValueU8t(params, paramCount, "b", bPin))
+			{
+				result = ConfigResult::InvalidParameter;
+			}
+			else
+			{
+				result = _configController->setHw479RgbPins(rPin, gPin, bPin);
 			}
 		}
 		else
@@ -309,6 +353,141 @@ CommandResult ConfigNetworkHandler::handleRequest(const char* method,
 		if (paramCount >= 1)
 		{
 			result = _configController->setWifiIpAddress(params[0].value);
+		}
+		else
+		{
+			result = ConfigResult::InvalidParameter;
+		}
+	}
+	else if (SystemFunctions::commandMatches(command, ConfigRtcPins))
+	{
+		// C18 - Set RtcConfig DS1302 pins
+		// Format: C18:dat=<pin>;clk=<pin>;rst=<pin> (use 255/PinDisabled for any unfit pin)
+		if (paramCount >= 3)
+		{
+			uint8_t dataPin, clockPin, resetPin;
+			if (!getParamValueU8t(params, paramCount, "dat", dataPin) ||
+				!getParamValueU8t(params, paramCount, "clk", clockPin) ||
+				!getParamValueU8t(params, paramCount, "rst", resetPin))
+			{
+				result = ConfigResult::InvalidParameter;
+			}
+			else
+			{
+				result = _configController->setRtcPins(dataPin, clockPin, resetPin);
+			}
+		}
+		else
+		{
+			result = ConfigResult::InvalidParameter;
+		}
+	}
+	else if (SystemFunctions::commandMatches(command, NextionGetConfig))
+	{
+		// N0 - returns all nextion settings as a JSON-style response in responseBuffer
+		Config* config = ConfigManager::getConfigPtr();
+		if (config == nullptr)
+		{
+			result = ConfigResult::InvalidConfig;
+		}
+		else
+		{
+			int len = snprintf(responseBuffer, bufferSize,
+				"en=%u;hw=%u;rx=%u;tx=%u;baud=%lu;uart=%u",
+				config->nextion.enabled ? 1u : 0u,
+				config->nextion.isHardwareSerial ? 1u : 0u,
+				config->nextion.rxPin,
+				config->nextion.txPin,
+				config->nextion.baudRate,
+				config->nextion.uartNum);
+			result = (len > 0 && len < static_cast<int>(bufferSize))
+				? ConfigResult::Success : ConfigResult::InvalidParameter;
+		}
+	}
+	else if (SystemFunctions::commandMatches(command, NextionEnabled))
+	{
+		if (paramCount >= 1)
+		{
+			bool enabled;
+			if (!getParamValueBool(params, paramCount, "v", enabled))
+				result = ConfigResult::InvalidParameter;
+			else
+				result = _configController->setNextionEnabled(enabled);
+		}
+		else
+		{
+			result = ConfigResult::InvalidParameter;
+		}
+	}
+	else if (SystemFunctions::commandMatches(command, NextionHardwareSerial))
+	{
+		if (paramCount >= 1)
+		{
+			bool hwSerial;
+			if (!getParamValueBool(params, paramCount, "v", hwSerial))
+				result = ConfigResult::InvalidParameter;
+			else
+				result = _configController->setNextionHardwareSerial(hwSerial);
+		}
+		else
+		{
+			result = ConfigResult::InvalidParameter;
+		}
+	}
+	else if (SystemFunctions::commandMatches(command, NextionRxPin))
+	{
+		if (paramCount >= 1)
+		{
+			uint8_t pin;
+			if (!getParamValueU8t(params, paramCount, "v", pin))
+				result = ConfigResult::InvalidParameter;
+			else
+				result = _configController->setNextionRxPin(pin);
+		}
+		else
+		{
+			result = ConfigResult::InvalidParameter;
+		}
+	}
+	else if (SystemFunctions::commandMatches(command, NextionTxPin))
+	{
+		if (paramCount >= 1)
+		{
+			uint8_t pin;
+			if (!getParamValueU8t(params, paramCount, "v", pin))
+				result = ConfigResult::InvalidParameter;
+			else
+				result = _configController->setNextionTxPin(pin);
+		}
+		else
+		{
+			result = ConfigResult::InvalidParameter;
+		}
+	}
+	else if (SystemFunctions::commandMatches(command, NextionBaudRate))
+	{
+		if (paramCount >= 1)
+		{
+			uint32_t baud;
+			if (!getParamValueU32t(params, paramCount, "v", baud))
+				result = ConfigResult::InvalidParameter;
+			else
+				result = _configController->setNextionBaudRate(baud);
+		}
+		else
+		{
+			result = ConfigResult::InvalidParameter;
+		}
+	}
+	else if (SystemFunctions::commandMatches(command, NextionUartNum))
+	{
+		if (paramCount >= 1)
+		{
+			uint8_t uartNum;
+			if (!getParamValueU8t(params, paramCount, "v", uartNum))
+				result = ConfigResult::InvalidParameter;
+			else
+				result = _configController->setNextionUartNum(uartNum);
 		}
 		else
 		{
@@ -525,6 +704,205 @@ CommandResult ConfigNetworkHandler::handleRequest(const char* method,
 		else
 		{
 			result = ConfigResult::InvalidParameter;
+		}
+	}
+	else if (SystemFunctions::commandMatches(command, ExternalSensorGetAll))
+	{
+		// E0 — return all remote sensor config entries as JSON array
+		Config* config = ConfigManager::getConfigPtr();
+		if (config == nullptr)
+		{
+			result = ConfigResult::InvalidConfig;
+		}
+		else
+		{
+			int written = snprintf(responseBuffer, bufferSize,
+				"\"count\":%u,\"sensors\":[", config->remoteSensors.count);
+
+			for (uint8_t i = 0; i < config->remoteSensors.count && i < ConfigMaxSensors; i++)
+			{
+				const RemoteSensorConfig& e = config->remoteSensors.sensors[i];
+				int n = snprintf(responseBuffer + written, bufferSize - written,
+					"%s{\"i\":%u,\"id\":%u,\"n\":\"%s\",\"mn\":\"%s\",\"ms\":\"%s\","
+					"\"mt\":\"%s\",\"md\":\"%s\",\"mu\":\"%s\",\"bin\":%u}",
+					i > 0 ? "," : "",
+					i,
+					static_cast<uint8_t>(e.sensorId),
+					e.name,
+					e.mqttName,
+					e.mqttSlug,
+					e.mqttTypeSlug,
+					e.mqttDeviceClass,
+					e.mqttUnit,
+					e.mqttIsBinary ? 1u : 0u);
+				if (n < 0 || written + n >= static_cast<int>(bufferSize))
+					break;
+				written += n;
+			}
+
+			snprintf(responseBuffer + written, bufferSize - written, "]");
+			result = ConfigResult::Success;
+		}
+	}
+	else if (SystemFunctions::commandMatches(command, ExternalSensorSetCore))
+	{
+		// E1:i=<idx>;id=<sensorId>;n=<name>;mn=<mqttName>;ms=<mqttSlug>
+		Config* config = ConfigManager::getConfigPtr();
+		if (config == nullptr)
+		{
+			result = ConfigResult::InvalidConfig;
+		}
+		else
+		{
+			uint8_t idx, sensorId;
+			if (!getParamValueU8t(params, paramCount, "i", idx) ||
+				!getParamValueU8t(params, paramCount, "id", sensorId) ||
+				idx >= ConfigMaxSensors)
+			{
+				result = ConfigResult::InvalidParameter;
+			}
+			else
+			{
+				RemoteSensorConfig& entry = config->remoteSensors.sensors[idx];
+				entry.sensorId = static_cast<SensorIdList>(sensorId);
+
+				const char* n = getParamValue(params, paramCount, "n");
+				if (n && n[0] != '\0')
+				{
+					strncpy(entry.name, n, sizeof(entry.name) - 1);
+					entry.name[sizeof(entry.name) - 1] = '\0';
+				}
+
+				const char* mn = getParamValue(params, paramCount, "mn");
+				if (mn)
+				{
+					strncpy(entry.mqttName, mn, sizeof(entry.mqttName) - 1);
+					entry.mqttName[sizeof(entry.mqttName) - 1] = '\0';
+				}
+
+				const char* ms = getParamValue(params, paramCount, "ms");
+				if (ms)
+				{
+					strncpy(entry.mqttSlug, ms, sizeof(entry.mqttSlug) - 1);
+					entry.mqttSlug[sizeof(entry.mqttSlug) - 1] = '\0';
+				}
+
+				if (idx >= config->remoteSensors.count)
+					config->remoteSensors.count = idx + 1;
+
+				result = ConfigResult::Success;
+			}
+		}
+	}
+	else if (SystemFunctions::commandMatches(command, ExternalSensorSetMqtt))
+	{
+		// E2:i=<idx>;mt=<mqttTypeSlug>;md=<mqttDeviceClass>;mu=<mqttUnit>;bin=<0|1>
+		Config* config = ConfigManager::getConfigPtr();
+		if (config == nullptr)
+		{
+			result = ConfigResult::InvalidConfig;
+		}
+		else
+		{
+			uint8_t idx;
+			if (!getParamValueU8t(params, paramCount, "i", idx) ||
+				idx >= ConfigMaxSensors || idx >= config->remoteSensors.count)
+			{
+				result = ConfigResult::InvalidParameter;
+			}
+			else
+			{
+				RemoteSensorConfig& entry = config->remoteSensors.sensors[idx];
+
+				const char* mt = getParamValue(params, paramCount, "mt");
+				if (mt)
+				{
+					strncpy(entry.mqttTypeSlug, mt, sizeof(entry.mqttTypeSlug) - 1);
+					entry.mqttTypeSlug[sizeof(entry.mqttTypeSlug) - 1] = '\0';
+				}
+
+				const char* md = getParamValue(params, paramCount, "md");
+				if (md)
+				{
+					strncpy(entry.mqttDeviceClass, md, sizeof(entry.mqttDeviceClass) - 1);
+					entry.mqttDeviceClass[sizeof(entry.mqttDeviceClass) - 1] = '\0';
+				}
+
+				const char* mu = getParamValue(params, paramCount, "mu");
+				if (mu)
+				{
+					strncpy(entry.mqttUnit, mu, sizeof(entry.mqttUnit) - 1);
+					entry.mqttUnit[sizeof(entry.mqttUnit) - 1] = '\0';
+				}
+
+				bool isBinary;
+				if (getParamValueBool(params, paramCount, "bin", isBinary))
+					entry.mqttIsBinary = isBinary;
+
+				result = ConfigResult::Success;
+			}
+		}
+	}
+	else if (SystemFunctions::commandMatches(command, ExternalSensorRemove))
+	{
+		// E3:<idx>
+		Config* config = ConfigManager::getConfigPtr();
+		if (config == nullptr)
+		{
+			result = ConfigResult::InvalidConfig;
+		}
+		else if (paramCount < 1)
+		{
+			result = ConfigResult::InvalidParameter;
+		}
+		else
+		{
+			uint8_t idx = static_cast<uint8_t>(atoi(params[0].value));
+			if (idx >= ConfigMaxSensors || idx >= config->remoteSensors.count)
+			{
+				result = ConfigResult::InvalidParameter;
+			}
+			else
+			{
+				for (uint8_t j = idx; j + 1 < config->remoteSensors.count; j++)
+					config->remoteSensors.sensors[j] = config->remoteSensors.sensors[j + 1];
+
+				if (config->remoteSensors.count > 0)
+					config->remoteSensors.count--;
+
+				memset(&config->remoteSensors.sensors[config->remoteSensors.count], 0,
+					sizeof(RemoteSensorConfig));
+
+				result = ConfigResult::Success;
+			}
+		}
+	}
+	else if (SystemFunctions::commandMatches(command, ExternalSensorRename))
+	{
+		// E4:<idx>=<name>
+		Config* config = ConfigManager::getConfigPtr();
+		if (config == nullptr)
+		{
+			result = ConfigResult::InvalidConfig;
+		}
+		else if (paramCount < 1)
+		{
+			result = ConfigResult::InvalidParameter;
+		}
+		else
+		{
+			uint8_t idx = static_cast<uint8_t>(strtoul(params[0].key, nullptr, 0));
+			if (idx >= ConfigMaxSensors || idx >= config->remoteSensors.count || params[0].value[0] == '\0')
+			{
+				result = ConfigResult::InvalidParameter;
+			}
+			else
+			{
+				RemoteSensorConfig& entry = config->remoteSensors.sensors[idx];
+				strncpy(entry.name, params[0].value, sizeof(entry.name) - 1);
+				entry.name[sizeof(entry.name) - 1] = '\0';
+				result = ConfigResult::Success;
+			}
 		}
 	}
 	else

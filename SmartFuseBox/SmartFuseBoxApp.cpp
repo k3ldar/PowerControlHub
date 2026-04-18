@@ -22,6 +22,11 @@
 #include "ConfigManager.h"
 #include "SensorFactory.h"
 
+#if defined(NEXTION_DISPLAY_DEVICE)
+#include "NextionFactory.h"
+#include <NextionControl.h>
+#endif
+
 #if defined(CARD_CONFIG_LOADER)
 #include "SDCardConfigLoader.h"
 
@@ -34,22 +39,32 @@ constexpr uint8_t DefaultDelay = 5;
 // Actual pins are loaded from config in setup() via syncPinsFromConfig().
 static uint8_t _disabledRelayPins[ConfigRelayCount];
 
-SmartFuseBoxApp::SmartFuseBoxApp(SerialCommandManager* commandMgrComputer,
-    SerialCommandManager* commandMgrLink)
+SmartFuseBoxApp::SmartFuseBoxApp(SerialCommandManager* commandMgrComputer)
     : _commandMgrComputer(commandMgrComputer),
-    _commandMgrLink(commandMgrLink),
     _messageBus(),
     _relayController(&_messageBus, (memset(_disabledRelayPins, DefaultValue, sizeof(_disabledRelayPins)), _disabledRelayPins), ConfigRelayCount),
     _soundController(),
-    _broadcastManager(commandMgrComputer, commandMgrLink),
-    _warningManager(commandMgrLink, HeartbeatIntervalMs, HeartbeatTimeoutMs),
-    _relayHandler(commandMgrComputer, commandMgrLink, &_relayController),
-    _soundHandler(commandMgrComputer, commandMgrLink, &_soundController),
+    _broadcastManager(commandMgrComputer),
+    _warningManager(),
+#if defined(NEXTION_DISPLAY_DEVICE)
+    _nextionControl(NextionFactory::Create(&_warningManager, commandMgrComputer, &_soundController, &_relayController,
+        ConfigManager::getConfigPtr() ? ConfigManager::getConfigPtr()->location.locationType : LocationType::Other)),
+#endif
+    _relayHandler(commandMgrComputer, &_relayController),
+    _soundHandler(commandMgrComputer, &_soundController),
     _interceptDebugHandler(&_broadcastManager),
-    _sensorCommandHandler(&_broadcastManager, &_warningManager),
-    _sensorConfigHandler(commandMgrComputer, commandMgrLink),
+    _sensorCommandHandler(&_broadcastManager,
+#if defined(NEXTION_DISPLAY_DEVICE)
+        _nextionControl,
+#endif
+        &_warningManager),
+    _sensorConfigHandler(commandMgrComputer),
     _warningCommandHandler(&_broadcastManager, &_warningManager),
-    _ackHandler(&_broadcastManager, &_warningManager),
+    _ackHandler(&_broadcastManager,
+#if defined(NEXTION_DISPLAY_DEVICE)
+        _nextionControl,
+#endif
+        &_warningManager),
     _systemCommandHandler(&_broadcastManager, &_warningManager),
     _bluetoothController(&_systemCommandHandler, &_sensorCommandHandler, &_relayController, &_warningManager, commandMgrComputer),
     _wifiController(&_messageBus, commandMgrComputer, &_warningManager),
@@ -57,6 +72,8 @@ SmartFuseBoxApp::SmartFuseBoxApp(SerialCommandManager* commandMgrComputer,
         &_bluetoothController,
         &_wifiController),
     _configHandler(&_wifiController, &_configController),
+    _nextionConfigHandler(&_configController),
+    _externalSensorConfigHandler(commandMgrComputer),
     _configNetworkHandler(&_configController, &_wifiController, &_relayController),
     _relayNetworkHandler(&_relayController),
     _soundNetworkHandler(&_soundController),
@@ -72,6 +89,9 @@ SmartFuseBoxApp::SmartFuseBoxApp(SerialCommandManager* commandMgrComputer,
       , _sensorController(nullptr)
       , _factorySensors(nullptr)
       , _factorySensorCount(0)
+      , _gpsSerial(nullptr)
+      , _remoteSensors(nullptr)
+      , _remoteSensorCount(0)
 
 #if defined(MQTT_SUPPORT)
       , _mqttController(&_messageBus, ConfigManager::getConfigPtr(), _wifiController.getRadio(), commandMgrComputer)
@@ -95,7 +115,7 @@ SmartFuseBoxApp::SmartFuseBoxApp(SerialCommandManager* commandMgrComputer,
 #endif
 
 #if defined(CARD_CONFIG_LOADER)
-      , _sdCardConfigLoader(commandMgrComputer, commandMgrLink, &_configController, &_relayController)
+      , _sdCardConfigLoader(commandMgrComputer, &_configController, &_relayController)
 #endif
 {
 #if defined(CARD_CONFIG_LOADER)
@@ -105,8 +125,6 @@ SmartFuseBoxApp::SmartFuseBoxApp(SerialCommandManager* commandMgrComputer,
 
 void SmartFuseBoxApp::setup(RemoteSensor** remoteSensors, uint8_t remoteSensorCount)
 {
-    DateTimeManager::setDateTime();
-
     // retrieve config settings
     ConfigManager::begin();
 
@@ -121,14 +139,63 @@ void SmartFuseBoxApp::setup(RemoteSensor** remoteSensors, uint8_t remoteSensorCo
 	_relayController.setSoundController(&_soundController);
 
 	if (remoteSensorCount > 0 && remoteSensors != nullptr)
-    {
-        _sensorCommandHandler.setup(remoteSensors, remoteSensorCount);
-    }
+	{
+		_sensorCommandHandler.setup(remoteSensors, remoteSensorCount);
+	}
+
+	Config* config = ConfigManager::getConfigPtr();
+
+	DateTimeManager::begin(config->rtc);
+
+	// Build remote sensors from RemoteSensorsConfig (populated by ConfigManager::load()).
+	// Sensors are created dynamically here; ownership stays with SmartFuseBoxApp (_remoteSensors).
+	// Any sensors passed in by the caller are ignored when config has entries.
+	if (config->remoteSensors.count > 0)
+	{
+		_remoteSensorCount = config->remoteSensors.count;
+		_remoteSensors = new RemoteSensor*[_remoteSensorCount];
+
+#if defined(MQTT_SUPPORT)
+		// Allocate one MqttSensorChannel per sensor; stored in a flat array.
+		MqttSensorChannel* channels = new MqttSensorChannel[_remoteSensorCount];
+#endif
+
+		for (uint8_t i = 0; i < _remoteSensorCount; i++)
+		{
+			const RemoteSensorConfig& entry = config->remoteSensors.sensors[i];
+
+#if defined(MQTT_SUPPORT)
+			channels[i].name        = entry.mqttName;
+			channels[i].slug        = entry.mqttSlug;
+			channels[i].typeSlug    = entry.mqttTypeSlug;
+			channels[i].deviceClass = entry.mqttDeviceClass[0] != '\0' ? entry.mqttDeviceClass : nullptr;
+			channels[i].unit        = entry.mqttUnit[0]        != '\0' ? entry.mqttUnit        : nullptr;
+			channels[i].isBinary    = entry.mqttIsBinary;
+
+			_remoteSensors[i] = new RemoteSensor(
+				entry.sensorId,
+				entry.name,
+				entry.name,     // commandId: external devices push updates using the sensor name
+				entry.name,     // mqttTopic
+				&channels[i],
+				1);
+#else
+			_remoteSensors[i] = new RemoteSensor(
+				entry.sensorId,
+				entry.name,
+				entry.name,     // commandId
+				1);
+#endif
+		}
+
+		remoteSensors     = _remoteSensors;
+		remoteSensorCount = _remoteSensorCount;
+		_sensorCommandHandler.setup(_remoteSensors, _remoteSensorCount);
+	}
+
 
     // Build local sensors from SensorsConfig (populated by ConfigManager::load() above).
     // SensorFactory allocates each enabled entry once; ownership stays with SmartFuseBoxApp.
-    Config* config = ConfigManager::getConfigPtr();
-
     {
         SensorFactoryContext ctx;
         ctx.messageBus = &_messageBus;
@@ -138,6 +205,7 @@ void SmartFuseBoxApp::setup(RemoteSensor** remoteSensors, uint8_t remoteSensorCo
         ctx.relayController = &_relayController;
         ctx.wifiController = &_wifiController;
         ctx.bluetoothRadio = &_bluetoothController;
+        ctx.gpsSerial = _gpsSerial;
 #if defined(SD_CARD_SUPPORT)
         ctx.sdCardLogger = &_sdCardLogger;
 #endif
@@ -180,6 +248,8 @@ void SmartFuseBoxApp::setup(RemoteSensor** remoteSensors, uint8_t remoteSensorCo
     _serialHandlers[_serialHandlerCount++] = &_relayHandler;
     _serialHandlers[_serialHandlerCount++] = &_soundHandler;
     _serialHandlers[_serialHandlerCount++] = &_configHandler;
+    _serialHandlers[_serialHandlerCount++] = &_nextionConfigHandler;
+    _serialHandlers[_serialHandlerCount++] = &_externalSensorConfigHandler;
     _serialHandlers[_serialHandlerCount++] = &_ackHandler;
     _serialHandlers[_serialHandlerCount++] = &_systemCommandHandler;
     _serialHandlers[_serialHandlerCount++] = &_warningCommandHandler;
@@ -187,7 +257,6 @@ void SmartFuseBoxApp::setup(RemoteSensor** remoteSensors, uint8_t remoteSensorCo
     _serialHandlers[_serialHandlerCount++] = &_sensorConfigHandler;
     _serialHandlers[_serialHandlerCount++] = &_schedulerCommandHandler;
 
-    _commandMgrLink->registerHandlers(_serialHandlers, _serialHandlerCount);
     _commandMgrComputer->registerHandlers(_serialHandlers, _serialHandlerCount);
 
     // Give the WiFi command bridge
@@ -285,7 +354,6 @@ void SmartFuseBoxApp::loop()
 
     SystemCpuMonitor::startTask();
     _commandMgrComputer->readCommands();
-    _commandMgrLink->readCommands();
     SystemCpuMonitor::endTask();
 
 #if defined(LED_MANAGER)
@@ -366,6 +434,7 @@ void SmartFuseBoxApp::configureWifiSupport(Config* config)
     // network command handlers
     INetworkCommandHandler* networkHandlers[] = { &_relayNetworkHandler, &_soundNetworkHandler, &_warningNetworkHandler,
         &_systemNetworkHandler, _sensorNetworkHandler, &_configNetworkHandler, &_schedulerNetworkHandler,
+        &_externalSensorNetworkHandler,
         &_wifiCommandBridge
     };
     size_t networkHandlerCount = sizeof(networkHandlers) / sizeof(networkHandlers[0]);
@@ -380,6 +449,7 @@ void SmartFuseBoxApp::configureWifiSupport(Config* config)
         &_warningNetworkHandler,
         _sensorNetworkHandler,
         &_schedulerNetworkHandler,
+        &_externalSensorNetworkHandler,
     };
     uint8_t jsonVisitorCount = sizeof(jsonVisitors) / sizeof(jsonVisitors[0]);
     _wifiController.registerJsonVisitors(jsonVisitors, jsonVisitorCount);

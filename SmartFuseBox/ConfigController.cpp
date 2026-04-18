@@ -22,12 +22,9 @@
 #include "IWifiController.h"
 #include "SystemFunctions.h"
 
-#if defined(FUSE_BOX_CONTROLLER)
 // from NextionIds.h
 constexpr uint8_t ImageButtonColorBlue = 2;
 constexpr uint8_t ImageButtonColorYellow = 7;
-
-#endif
 
 
 ConfigController::ConfigController(SoundController* soundController, 
@@ -482,5 +479,97 @@ ConfigResult ConfigController::setLightSensorThreshold(const uint16_t threshold)
 		return ConfigResult::InvalidParameter;
 
 	_config->lightSensor.daytimeThreshold = threshold;
+	return ConfigResult::Success;
+}
+
+// C6: Set XpdzTone pin
+ConfigResult ConfigController::setXpdzTonePin(const uint8_t pin)
+{
+	if (_config == nullptr)
+		return ConfigResult::InvalidConfig;
+
+	_config->xpdzTone.pin = pin;
+	return ConfigResult::Success;
+}
+
+// C8: Set Hw479Rgb RGB LED pins
+ConfigResult ConfigController::setHw479RgbPins(const uint8_t rPin, const uint8_t gPin, const uint8_t bPin)
+{
+	if (_config == nullptr)
+		return ConfigResult::InvalidConfig;
+
+	_config->hw479Rgb.rPin = rPin;
+	_config->hw479Rgb.gPin = gPin;
+	_config->hw479Rgb.bPin = bPin;
+	return ConfigResult::Success;
+}
+
+// C18: Set RtcConfig DS1302 pins
+ConfigResult ConfigController::setRtcPins(const uint8_t dataPin, const uint8_t clockPin, const uint8_t resetPin)
+{
+	if (_config == nullptr)
+		return ConfigResult::InvalidConfig;
+
+	_config->rtc.dataPin = dataPin;
+	_config->rtc.clockPin = clockPin;
+	_config->rtc.resetPin = resetPin;
+	return ConfigResult::Success;
+}
+
+// C19 (N commands): Set NextionConfig display configuration — individual setters
+ConfigResult ConfigController::setNextionEnabled(const bool enabled)
+{
+	if (_config == nullptr)
+		return ConfigResult::InvalidConfig;
+
+	_config->nextion.enabled = enabled;
+	return ConfigResult::Success;
+}
+
+ConfigResult ConfigController::setNextionHardwareSerial(const bool isHardwareSerial)
+{
+	if (_config == nullptr)
+		return ConfigResult::InvalidConfig;
+
+	_config->nextion.isHardwareSerial = isHardwareSerial;
+	return ConfigResult::Success;
+}
+
+ConfigResult ConfigController::setNextionRxPin(const uint8_t rxPin)
+{
+	if (_config == nullptr)
+		return ConfigResult::InvalidConfig;
+
+	_config->nextion.rxPin = rxPin;
+	return ConfigResult::Success;
+}
+
+ConfigResult ConfigController::setNextionTxPin(const uint8_t txPin)
+{
+	if (_config == nullptr)
+		return ConfigResult::InvalidConfig;
+
+	_config->nextion.txPin = txPin;
+	return ConfigResult::Success;
+}
+
+ConfigResult ConfigController::setNextionBaudRate(const uint32_t baudRate)
+{
+	if (_config == nullptr)
+		return ConfigResult::InvalidConfig;
+
+	_config->nextion.baudRate = baudRate;
+	return ConfigResult::Success;
+}
+
+ConfigResult ConfigController::setNextionUartNum(const uint8_t uartNum)
+{
+	if (_config == nullptr)
+		return ConfigResult::InvalidConfig;
+
+	if (uartNum != 1 && uartNum != 2)
+		return ConfigResult::InvalidParameter;
+
+	_config->nextion.uartNum = uartNum;
 	return ConfigResult::Success;
 }

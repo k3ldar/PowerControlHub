@@ -33,6 +33,7 @@
 
 #include "WaterSensorHandler.h"
 #include "Dht11SensorHandler.h"
+#include "GpsSensorHandler.h"
 #include "LightSensorHandler.h"
 #include "SystemSensorHandler.h"
 #include "BinaryPresenceSensor.h"
@@ -52,6 +53,7 @@ struct SensorFactoryContext
     RelayController* relayController;
     IWifiController* wifiController;
     IBluetoothRadio* bluetoothRadio;
+    Stream* gpsSerial;
 
 #if defined(SD_CARD_SUPPORT)
     SdCardLogger*         sdCardLogger;
@@ -233,6 +235,22 @@ private:
 						onClearPayload,
 						pulseDurationSec);
 			}
+
+            case SensorIdList::GpsSensor:
+            {
+                if (ctx.gpsSerial == nullptr)
+                    return nullptr;
+
+                return new GpsSensorHandler(
+                    ctx.gpsSerial,
+#if defined(MESSAGE_BUS)
+                    ctx.messageBus,
+#endif
+                    ctx.broadcastManager,
+                    ctx.sensorCommandHandler,
+                    ctx.warningManager,
+                    entry.name);
+            }
 
             default:
                 return nullptr;
