@@ -262,7 +262,7 @@ The handler reads NMEA sentences from any `Stream*` (hardware UART, `SoftwareSer
 | Bearing | `S2` | Course in degrees |
 | GPS Distance | `S14` | Cumulative distance travelled in km |
 
-**Messages Published (MessageBus)** *(requires `MESSAGE_BUS` define)*
+**Messages Published (MessageBus)** 
 
 - `GpsLocationUpdated` – latitude and longitude on each new fix.
 - `GpsAltitudeUpdated` – altitude on each new fix.

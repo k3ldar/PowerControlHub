@@ -54,16 +54,12 @@ SmartFuseBoxApp::SmartFuseBoxApp(SerialCommandManager* commandMgrComputer)
     _soundHandler(commandMgrComputer, &_soundController),
     _interceptDebugHandler(&_broadcastManager),
     _sensorCommandHandler(&_broadcastManager,
-#if defined(NEXTION_DISPLAY_DEVICE)
         &_messageBus,
-#endif
         &_warningManager),
     _sensorConfigHandler(commandMgrComputer),
     _warningCommandHandler(&_broadcastManager, &_warningManager),
     _ackHandler(&_broadcastManager,
-#if defined(NEXTION_DISPLAY_DEVICE)
         &_messageBus,
-#endif
         &_warningManager),
     _systemCommandHandler(&_broadcastManager, &_warningManager),
     _bluetoothController(&_systemCommandHandler, &_sensorCommandHandler, &_relayController, &_warningManager, commandMgrComputer),

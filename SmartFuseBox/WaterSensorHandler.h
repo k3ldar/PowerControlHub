@@ -24,7 +24,6 @@
 #include "LoggingSupport.h"
 #include "JsonVisitor.h"
 #include "BaseSensor.h"
-#include "MessageBus.h"
 
 constexpr uint64_t WaterSensorCheckIntervalMs = 5000;
 constexpr uint64_t WaterSensorStabilizeMs = 10;
@@ -38,7 +37,6 @@ constexpr uint64_t WaterSensorStabilizeMs = 10;
 class WaterSensorHandler : public BaseSensor, public BroadcastLoggerSupport
 {
 private:
-	MessageBus* _messageBus;
 	SensorCommandHandler* _sensorCommandHandler;
 	const uint8_t _sensorPin;
 	const uint8_t _activePin;
@@ -83,10 +81,6 @@ protected:
 		strncpy(params[1].key, "v", sizeof(params[1].key));
 		snprintf(params[1].value, sizeof(params[1].value), "%u", static_cast<unsigned int>(sensorValue));
 
-		if (_messageBus)
-		{
-			_messageBus->publish<WaterLevelUpdated>(_latestWaterLevel, _waterPumpQueue.average());
-		}
 		sendCommand(SensorWaterLevel, params, 2);
 
 		if (_sensorCommandHandler)
@@ -97,9 +91,9 @@ protected:
 		return WaterSensorCheckIntervalMs;
 	}
 public:
-	WaterSensorHandler(MessageBus* messageBus, BroadcastManager* broadcastManager,
+	WaterSensorHandler(BroadcastManager* broadcastManager,
 		SensorCommandHandler* sensorCommandHandler, uint8_t sensorPin, uint8_t activePin, const char* name = "WaterLevel")
-		: BaseSensor(name), BroadcastLoggerSupport(broadcastManager), _messageBus(messageBus), _sensorCommandHandler(sensorCommandHandler),
+		: BaseSensor(name), BroadcastLoggerSupport(broadcastManager), _sensorCommandHandler(sensorCommandHandler),
 			_sensorPin(sensorPin), _activePin(activePin), _waterPumpQueue(15, 0),
 			_latestWaterLevel(0), _waitingForStabilization(false)
 	{

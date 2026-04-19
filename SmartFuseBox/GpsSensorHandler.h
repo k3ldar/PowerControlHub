@@ -26,11 +26,6 @@
 #include "WarningManager.h"
 #include "WarningType.h"
 #include "BaseSensor.h"
-
-#if defined(MESSAGE_BUS)
-#include "MessageBus.h"
-#endif
-
 #include "DateTimeManager.h"
 #include "SensorCommandHandler.h"
 
@@ -53,9 +48,6 @@ class GpsSensorHandler : public BaseSensor, public BroadcastLoggerSupport
 {
 private:
 	Stream* _gpsSerial;
-#if defined(MESSAGE_BUS)
-	MessageBus* _messageBus;
-#endif
 	SensorCommandHandler* _sensorCommandHandler;
 	WarningManager* _warningManager;
 	TinyGPSPlus* _gps;
@@ -158,15 +150,6 @@ private:
 
 	void processGpsUpdate(unsigned long now)
 	{
-#if defined(MESSAGE_BUS)
-		// Publish to message bus
-		if (_messageBus)
-		{
-			_messageBus->publish<GpsLocationUpdated>(_latitude, _longitude);
-			_messageBus->publish<GpsAltitudeUpdated>(_altitude);
-			_messageBus->publish<GpsSpeedUpdated>(_speedKmh, _courseDeg);
-		}
-#endif
 		if (now - _lastStatusUpdate < StatusUpdateMs)
 		{
 			return;
@@ -403,17 +386,9 @@ public:
 	GpsSensorHandler(
 		Stream* gpsSerial,
 
-#if defined(MESSAGE_BUS)
-		MessageBus* messageBus, 
-#endif
-
 		BroadcastManager* broadcastManager, SensorCommandHandler* sensorCommandHandler, WarningManager* warningManager, const char* name = "Gps")
 		: BaseSensor(name), BroadcastLoggerSupport(broadcastManager), 
 		  _gpsSerial(gpsSerial),
-
-#if defined(MESSAGE_BUS)
-		_messageBus(messageBus), 
-#endif
 		_sensorCommandHandler(sensorCommandHandler),
 		_warningManager(warningManager),
 		_gps(nullptr),

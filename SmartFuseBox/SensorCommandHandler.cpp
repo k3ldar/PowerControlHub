@@ -149,9 +149,11 @@ void SensorCommandHandler::setSpeed(uint8_t value)
 
 void SensorCommandHandler::setWaterLevel(uint16_t value)
 {
+	uint16_t lastLevel = _lastWaterLevel;
 	_lastWaterLevel = value;
+
 	if (_messageBus)
-        _messageBus->publish<WaterLevelUpdated>(_lastWaterLevel, _lastWaterLevel);
+        _messageBus->publish<WaterLevelUpdated>(_lastWaterLevel, lastLevel);
 }
 
 void SensorCommandHandler::setWaterPumpActive(bool value)

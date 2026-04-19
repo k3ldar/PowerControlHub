@@ -99,26 +99,36 @@ bool AckCommandHandler::handleCommand(SerialCommandManager* sender, const char* 
 				return true;
 			}
 
-			uint8_t relayIndex = static_cast<uint8_t>(strtoul(params[1].key, nullptr, 0));
-			bool isOn = SystemFunctions::parseBooleanValue(params[1].value);
-			uint8_t changedMask = 1 << relayIndex;
-			(void)isOn;
+            uint8_t relayIndex = static_cast<uint8_t>(strtoul(params[1].key, nullptr, 0));
+			if (relayIndex < ConfigRelayCount)
+			{
+				uint8_t changedMask = 1 << relayIndex;
 
-			if (_messageBus)
-				_messageBus->publish<RelayStatusChanged>(changedMask);
+				if (_messageBus)
+					_messageBus->publish<RelayStatusChanged>(changedMask);
+			}
+			else
+			{
+				_broadcaster->sendDebug("ACK relay index out of range", AckCommand);
+			}
 		}
 	}
 	else if (strcmp(params[0].key, RelayStatusGet) == 0 && strcmp(params[0].value, AckSuccess) == 0)
 	{
 		if (paramCount >= 2)
 		{
-			uint8_t relayIndex = static_cast<uint8_t>(strtoul(params[1].key, nullptr, 0));
-			bool isOn = SystemFunctions::parseBooleanValue(params[1].value);
-			uint8_t changedMask = 1 << relayIndex;
+            uint8_t relayIndex = static_cast<uint8_t>(strtoul(params[1].key, nullptr, 0));
+			if (relayIndex < ConfigRelayCount)
+			{
+				uint8_t changedMask = 1 << relayIndex;
 
-			(void)isOn;
-			if (_messageBus)
-				_messageBus->publish<RelayStatusChanged>(changedMask);
+				if (_messageBus)
+					_messageBus->publish<RelayStatusChanged>(changedMask);
+			}
+			else
+			{
+				_broadcaster->sendDebug("ACK relay index out of range", AckCommand);
+			}
 		}
 		else
 		{
