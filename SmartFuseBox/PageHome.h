@@ -22,7 +22,6 @@
 #if defined(NEXTION_DISPLAY_DEVICE)
 
 #include <SerialCommandManager.h>
-#include <NextionControl.h>
 #include <stdint.h>
 
 #include "Config.h"
@@ -68,33 +67,33 @@ private:
     void updateAllDisplayItems();
     void updateAllButtons();
 
-protected:
-    // Required overrides
-    uint8_t getPageId() const override { return PageIdHome; }
-    void begin() override;
-    void refresh(unsigned long now) override;
-
-    //optional overrides
-	void onEnterPage() override;
-    void handleTouch(uint8_t compId, uint8_t eventType) override;
-    void handleExternalUpdate(uint8_t updateType, const void* data) override;
-
-public:
-    explicit PageHome(Stream* serialPort,
-        WarningManager* warningMgr,
-        SerialCommandManager* commandMgrComputer,
-        RelayController* relayController);
-
-    // Override configUpdated from BasePage
-    void configUpdated() override;
-
-    // Setters for updating values
+    // Private setters used by MessageBus callbacks
     void setTemperature(float tempC);
     void setHumidity(float humPerc);
     void setBearing(float dir);
     void setSpeed(float speedKn);
     void setDirection(const char* dir);
     void setCompassTemperature(float tempC);
+
+protected:
+    // Required overrides
+    uint8_t getPageId() const override { return PageIdHome; }
+    void begin() override;
+    void refresh(unsigned long now) override;
+
+	//optional overrides
+	void onEnterPage() override;
+	void handleTouch(uint8_t compId, uint8_t eventType) override;
+
+public:
+	explicit PageHome(Stream* serialPort,
+		WarningManager* warningMgr,
+		SerialCommandManager* commandMgrComputer,
+		RelayController* relayController,
+		MessageBus* messageBus = nullptr);
+
+	// Override configUpdated from BasePage
+	void configUpdated() override;
 };
 
 #endif // NEXTION_DISPLAY_DEVICE

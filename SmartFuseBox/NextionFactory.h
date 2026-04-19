@@ -35,6 +35,7 @@
 #include "WarningType.h"
 #include "NavigationController.h"
 #include <SerialCommandManager.h>
+#include "MessageBus.h"
 #include "PageAbout.h"
 #include "PageBuoys.h"
 #include "PageCardinalMarkers.h"
@@ -72,7 +73,8 @@ public:
 		SerialCommandManager* commandMgrComputer,
 		SoundController* soundController,
 		RelayController* relayController,
-		LocationType locationType);
+		LocationType locationType,
+		MessageBus* messageBus);
 
 private:
 	// Initialises and returns the serial port for the Nextion display.
@@ -128,7 +130,8 @@ inline NextionControl* NextionFactory::Create(
 	SerialCommandManager* commandMgrComputer,
 	SoundController* soundController,
 	RelayController* relayController,
-	LocationType locationType)
+	LocationType locationType,
+	MessageBus* messageBus)
 {
 	// Singleton: factory owns the instance for the program lifetime.
 	static std::unique_ptr<NextionControl> s_instance;
@@ -173,26 +176,26 @@ inline NextionControl* NextionFactory::Create(
 	{
 		// Order must match the page numbering expected by the Nextion UI!
 		s_pages.emplace_back(std::make_unique<PageSplash>(serialPort));
-		s_pages.emplace_back(std::make_unique<PageHome>(serialPort, warningManager, commandMgrComputer, relayController));
-		s_pages.emplace_back(std::make_unique<PageWarning>(serialPort, warningManager, commandMgrComputer));
-		s_pages.emplace_back(std::make_unique<PageRelay>(serialPort, warningManager, commandMgrComputer, relayController));
-		s_pages.emplace_back(std::make_unique<PageSoundSignals>(serialPort, warningManager, commandMgrComputer, soundController));
+		s_pages.emplace_back(std::make_unique<PageHome>(serialPort, warningManager, commandMgrComputer, relayController, messageBus));
+		s_pages.emplace_back(std::make_unique<PageWarning>(serialPort, warningManager, commandMgrComputer, messageBus));
+		s_pages.emplace_back(std::make_unique<PageRelay>(serialPort, warningManager, commandMgrComputer, relayController, messageBus));
+		s_pages.emplace_back(std::make_unique<PageSoundSignals>(serialPort, warningManager, commandMgrComputer, soundController, messageBus));
 		s_pages.emplace_back(std::make_unique<PageSoundOvertaking>(serialPort, warningManager, commandMgrComputer, soundController));
 		s_pages.emplace_back(std::make_unique<PageSoundFog>(serialPort, warningManager, commandMgrComputer, soundController));
 		s_pages.emplace_back(std::make_unique<PageSoundManeuvering>(serialPort, warningManager, commandMgrComputer, soundController));
 		s_pages.emplace_back(std::make_unique<PageSoundEmergency>(serialPort, warningManager, commandMgrComputer, soundController));
 		s_pages.emplace_back(std::make_unique<PageSoundOther>(serialPort, warningManager, commandMgrComputer, soundController));
-		s_pages.emplace_back(std::make_unique<PageSystem>(serialPort, warningManager, commandMgrComputer));
+		s_pages.emplace_back(std::make_unique<PageSystem>(serialPort, warningManager, commandMgrComputer, messageBus));
 		s_pages.emplace_back(std::make_unique<PageFlags>(serialPort, warningManager, commandMgrComputer));
 		s_pages.emplace_back(std::make_unique<PageCardinalMarkers>(serialPort, warningManager, commandMgrComputer));
 		s_pages.emplace_back(std::make_unique<PageBuoys>(serialPort, warningManager, commandMgrComputer));
 		s_pages.emplace_back(std::make_unique<PageMoonPhase>(serialPort, warningManager, commandMgrComputer));
 		s_pages.emplace_back(std::make_unique<PageVhfRadio>(serialPort, warningManager, commandMgrComputer));
-		s_pages.emplace_back(std::make_unique<PageVhfDistress>(serialPort, warningManager, commandMgrComputer));
+		s_pages.emplace_back(std::make_unique<PageVhfDistress>(serialPort, warningManager, commandMgrComputer, messageBus));
 		s_pages.emplace_back(std::make_unique<PageVhfChannels>(serialPort, warningManager, commandMgrComputer));
 		s_pages.emplace_back(std::make_unique<PageRelaySettings>(serialPort, warningManager, commandMgrComputer));
 		s_pages.emplace_back(std::make_unique<PageSettings>(serialPort, warningManager, commandMgrComputer));
-		s_pages.emplace_back(std::make_unique<PageEnvironment>(serialPort, warningManager, commandMgrComputer));
+		s_pages.emplace_back(std::make_unique<PageEnvironment>(serialPort, warningManager, commandMgrComputer, messageBus));
 		s_pages.emplace_back(std::make_unique<PageAbout>(serialPort, warningManager, commandMgrComputer));
 
 		// Build raw pointer array for NextionControl (non-owning).

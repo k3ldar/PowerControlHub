@@ -19,12 +19,9 @@
 
 #include <Arduino.h>
 
-#if defined(NEXTION_DISPLAY_DEVICE)
-#include <NextionControl.h>
-#endif
-
 #include "SharedBaseCommandHandler.h"
 #include "WarningManager.h"
+#include "MessageBus.h"
 
 /**
  * @brief Base class for command handlers that interact with boat-specific systems.
@@ -56,39 +53,10 @@ protected:
      */
     BaseNextionCommandHandler(
         BroadcastManager* broadcaster,
-#if defined(NEXTION_DISPLAY_DEVICE)
-        NextionControl* nextionControl,
-#endif
+        MessageBus* messageBus,
         WarningManager* warningManager = nullptr
     );
 
-    /**
-     * @brief Notify the current display page of an external update.
-     * 
-     * This is a convenience wrapper that safely gets the current page from
-     * NextionControl and calls handleExternalUpdate on it.
-     * 
-     * @param updateType Type of update (cast to uint8_t from PageUpdateType enum)
-     * @param data Optional pointer to update-specific data structure
-     */
-    void notifyCurrentPage(uint8_t updateType, const void* data)
-    {
-#if defined(NEXTION_DISPLAY_DEVICE)
-        if (!_nextionControl)
-            return;
-
-        BaseDisplayPage* p = _nextionControl->getCurrentPage();
-
-        if (!p)
-            return;
-
-        p->handleExternalUpdate(updateType, data);
-#endif
-    }
-
-#if defined(NEXTION_DISPLAY_DEVICE)
-    // Protected member variables for derived classes to access
-    // Note: _broadcaster is inherited from SharedBaseCommandHandler
-    NextionControl* _nextionControl;
-#endif
+protected:
+    MessageBus* _messageBus;
 };

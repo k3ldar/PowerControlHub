@@ -55,9 +55,31 @@ constexpr uint8_t ButtonPrevious = 2;
 
 PageEnvironment::PageEnvironment(Stream* serialPort,
     WarningManager* warningMgr,
-    SerialCommandManager* commandMgrComputer)
-    : BasePage(serialPort, warningMgr, commandMgrComputer)
+    SerialCommandManager* commandMgrComputer,
+    MessageBus* messageBus)
+    : BasePage(serialPort, warningMgr, commandMgrComputer, messageBus)
 {
+    if (messageBus)
+    {
+        messageBus->subscribe<TemperatureUpdated>([this](float newTemp) {
+            if (!isActive()) return;
+            _previousTemp = _lastTemp;
+            _lastTemp = newTemp;
+            updateTemperature();
+        });
+        messageBus->subscribe<HumidityUpdated>([this](uint8_t newHumidity) {
+            if (!isActive()) return;
+            _previousHumidity = _lastHumidity;
+            _lastHumidity = static_cast<float>(newHumidity);
+            updateHumidity();
+        });
+        messageBus->subscribe<GpsLocationUpdated>([this](double lat, double lon) {
+            if (!isActive()) return;
+            _lastLatitude = lat;
+            _lastLongitude = lon;
+            updateLatLon();
+        });
+    }
 }
 
 void PageEnvironment::onEnterPage()
@@ -88,40 +110,6 @@ void PageEnvironment::handleTouch(uint8_t compId, uint8_t eventType)
     case ButtonPrevious:
         navigatePrevious();
         return;
-    }
-}
-
-void PageEnvironment::handleExternalUpdate(uint8_t updateType, const void* data)
-{
-    // Call base class first to handle heartbeat ACKs
-    BasePage::handleExternalUpdate(updateType, data);
-
-    if (updateType == static_cast<uint8_t>(PageUpdateType::Temperature) && data != nullptr)
-    {
-        const FloatStateUpdate* update = static_cast<const FloatStateUpdate*>(data);
-		_previousTemp = _lastTemp;
-        _lastTemp = update->value;
-		updateTemperature();
-    }
-    else if (updateType == static_cast<uint8_t>(PageUpdateType::Humidity) && data != nullptr)
-    {
-        const UInt16Update* update = static_cast<const UInt16Update*>(data);
-		_previousHumidity = _lastHumidity;
-        _lastHumidity = static_cast<float>(update->value);
-		updateHumidity();
-    }
-    else if (updateType == static_cast<uint8_t>(PageUpdateType::GpsLatitude) && data != nullptr)
-    {
-        // FloatStateUpdate is used for GPS lat/lon notifications
-        const FloatStateUpdate* update = static_cast<const FloatStateUpdate*>(data);
-        _lastLatitude = update->value;
-        updateLatLon();
-    }
-    else if (updateType == static_cast<uint8_t>(PageUpdateType::GpsLongitude) && data != nullptr)
-    {
-        const FloatStateUpdate* update = static_cast<const FloatStateUpdate*>(data);
-        _lastLongitude = update->value;
-        updateLatLon();
     }
 }
 

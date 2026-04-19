@@ -36,11 +36,19 @@ constexpr unsigned long RefreshIntervalMs = 10000;
 
 
 PageSoundSignals::PageSoundSignals(Stream* serialPort,
-    WarningManager* warningMgr,
-    SerialCommandManager* commandMgrComputer,
-    SoundController* soundController)
-	: BasePage(serialPort, warningMgr, commandMgrComputer), _soundController(soundController)
+	WarningManager* warningMgr,
+	SerialCommandManager* commandMgrComputer,
+	SoundController* soundController,
+	MessageBus* messageBus)
+	: BasePage(serialPort, warningMgr, commandMgrComputer, messageBus), _soundController(soundController)
 {
+	if (messageBus)
+	{
+		messageBus->subscribe<SoundSignalUpdated>([this](bool active) {
+			if (isActive())
+                updateButtonStates(active);
+		});
+	}
 }
 
 void PageSoundSignals::begin()
@@ -134,18 +142,6 @@ void PageSoundSignals::updateButtonStates(bool isActive)
         setPicture2(CancelButton, ImageButtonColorGrey + ImageButtonColorOffset);
     }
 
-}
-
-void PageSoundSignals::handleExternalUpdate(uint8_t updateType, const void* data)
-{
-    // Call base class first to handle heartbeat ACKs
-    BasePage::handleExternalUpdate(updateType, data);
-
-    if (updateType == static_cast<uint8_t>(PageUpdateType::SoundSignal) && data != nullptr)
-    {
-        const BoolStateUpdate* update = static_cast<const BoolStateUpdate*>(data);
-		updateButtonStates(update->value);
-    }
 }
 
 #endif // NEXTION_DISPLAY_DEVICE

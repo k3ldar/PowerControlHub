@@ -19,20 +19,10 @@
 #include "RemoteSensor.h"
 #include "SystemFunctions.h"
 
-#if defined(NEXTION_DISPLAY_DEVICE)
-#include "BasePage.h"
-#endif
-
 SensorCommandHandler::SensorCommandHandler(BroadcastManager* broadcastManager, 
-#if defined(NEXTION_DISPLAY_DEVICE)
-    NextionControl* nextionControl,
-#endif
+    MessageBus* messageBus,
     WarningManager* warningManager)
-    : BaseNextionCommandHandler(broadcastManager, 
-#if defined(NEXTION_DISPLAY_DEVICE)
-        nextionControl,
-#endif
-        warningManager), _remoteSensors(nullptr), _remoteSensorCount(0)
+    : BaseNextionCommandHandler(broadcastManager, messageBus, warningManager), _remoteSensors(nullptr), _remoteSensorCount(0)
 {
 }
 
@@ -121,143 +111,122 @@ bool SensorCommandHandler::getHornActive() const
 void SensorCommandHandler::setTemperature(float value)
 {
 	_lastTemperature = value;
-#if defined(NEXTION_DISPLAY_DEVICE)
-        FloatStateUpdate update = { _lastTemperature };
-	notifyCurrentPage(static_cast<uint8_t>(PageUpdateType::Temperature), &update);
-#endif
+
+	if (_messageBus)
+        _messageBus->publish<TemperatureUpdated>(_lastTemperature);
 }
 
 void SensorCommandHandler::setHumidity(uint8_t value)
 {
 	_lastHumidity = value;
-#if defined(NEXTION_DISPLAY_DEVICE)
-    UInt16Update update = { _lastHumidity };
-	notifyCurrentPage(static_cast<uint8_t>(PageUpdateType::Humidity), &update);
-#endif
+
+    if (_messageBus)
+        _messageBus->publish<HumidityUpdated>(_lastHumidity);
 }
 
 void SensorCommandHandler::setBearing(float value)
 {
 	_lastBearing = value;
-#if defined(NEXTION_DISPLAY_DEVICE)
-    FloatStateUpdate update = { _lastBearing };
-	notifyCurrentPage(static_cast<uint8_t>(PageUpdateType::Bearing), &update);
-#endif
+
+    if (_messageBus)
+        _messageBus->publish<BearingUpdated>(_lastBearing);
 }
 
 void SensorCommandHandler::setCompassTemperature(float value)
 {
 	_lastCompassTemp = value;
-#if defined(NEXTION_DISPLAY_DEVICE)
-    FloatStateUpdate update = { _lastCompassTemp };
-	notifyCurrentPage(static_cast<uint8_t>(PageUpdateType::CompassTemp), &update);
-#endif
+
+	if (_messageBus)
+        _messageBus->publish<CompassTemperatureUpdated>(_lastCompassTemp);
 }
 
 void SensorCommandHandler::setSpeed(uint8_t value)
 {
 	_lastSpeed = value;
-#if defined(NEXTION_DISPLAY_DEVICE)
-    UInt16Update update = { _lastSpeed };
-	notifyCurrentPage(static_cast<uint8_t>(PageUpdateType::Speed), &update);
-#endif
+	if (_messageBus)
+        _messageBus->publish<SpeedUpdated>(static_cast<double>(_lastSpeed));
 }
 
 void SensorCommandHandler::setWaterLevel(uint16_t value)
 {
+	uint16_t lastLevel = _lastWaterLevel;
 	_lastWaterLevel = value;
-#if defined(NEXTION_DISPLAY_DEVICE)
-    UInt16Update update = { _lastWaterLevel };
-	notifyCurrentPage(static_cast<uint8_t>(PageUpdateType::WaterLevel), &update);
-#endif
+
+	if (_messageBus)
+        _messageBus->publish<WaterLevelUpdated>(_lastWaterLevel, lastLevel);
 }
 
 void SensorCommandHandler::setWaterPumpActive(bool value)
 {
 	_lastWaterPumpActive = value;
-#if defined(NEXTION_DISPLAY_DEVICE)
-    BoolStateUpdate update = { _lastWaterPumpActive };
-	notifyCurrentPage(static_cast<uint8_t>(PageUpdateType::WaterPumpActive), &update);
-#endif
+
+    if (_messageBus)
+        _messageBus->publish<WaterPumpActiveUpdated>(_lastWaterPumpActive);
 }
 
 void SensorCommandHandler::setDaytime(bool isDaytime)
 {
 	_isDaytime = isDaytime;
-#if defined(NEXTION_DISPLAY_DEVICE)
-    BoolStateUpdate update = { _isDaytime };
-	notifyCurrentPage(static_cast<uint8_t>(PageUpdateType::Daytime), &update);
-#endif
+
+    if (_messageBus)
+        _messageBus->publish<DaytimeUpdated>(_isDaytime);
 }
 
 void SensorCommandHandler::setGpsLocation(double lat, double lon)
 {
 	_gpsLatitude = lat;
 	_gpsLongitude = lon;
-#if defined(NEXTION_DISPLAY_DEVICE)
-    FloatStateUpdate updateLat = { static_cast<float>(_gpsLatitude) };
-	notifyCurrentPage(static_cast<uint8_t>(PageUpdateType::GpsLatitude), &updateLat);
-	
-	FloatStateUpdate updateLon = { static_cast<float>(_gpsLongitude) };
-	notifyCurrentPage(static_cast<uint8_t>(PageUpdateType::GpsLongitude), &updateLon);
-#endif
+
+	if (_messageBus)
+        _messageBus->publish<GpsLocationUpdated>(_gpsLatitude, _gpsLongitude);
 }
 
 void SensorCommandHandler::setGpsAltitude(double alt)
 {
 	_altitude = alt;
-#if defined(NEXTION_DISPLAY_DEVICE)
-    FloatStateUpdate update = { static_cast<float>(_altitude) };
-	notifyCurrentPage(static_cast<uint8_t>(PageUpdateType::GpsAltitude), &update);
-#endif
+
+    if (_messageBus)
+        _messageBus->publish<GpsAltitudeUpdated>(_altitude);
 }
 
 void SensorCommandHandler::setGpsCourse(double course)
 {
 	_gpsCourse = course;
-#if defined(NEXTION_DISPLAY_DEVICE)
-    FloatStateUpdate update = { static_cast<float>(_gpsCourse) };
-	notifyCurrentPage(static_cast<uint8_t>(PageUpdateType::Bearing), &update);
-#endif
+
+	if (_messageBus)
+        _messageBus->publish<BearingUpdated>(static_cast<float>(_gpsCourse));
 }
 
 void SensorCommandHandler::setGpsSatellites(uint32_t sats)
 {
 	_gpsSatellites = sats;
-#if defined(NEXTION_DISPLAY_DEVICE)
-    UInt16Update update = { static_cast<uint16_t>(_gpsSatellites) };
-	notifyCurrentPage(static_cast<uint8_t>(PageUpdateType::GpsSatellites), &update);
-#endif
+
+    if (_messageBus)
+        _messageBus->publish<GpsSatellitesUpdated>(_gpsSatellites);
 }
 
 void SensorCommandHandler::setGpsDirection(const char* dir)
 {
 	_gpsDirection = dir;
-#if defined(NEXTION_DISPLAY_DEVICE)
-    CharStateUpdate update = {};
-	update.length = min(SystemFunctions::calculateLength(dir), static_cast<unsigned int>((CharStateUpdate::MaxLength - 1)));
-	snprintf_P(update.value, CharStateUpdate::MaxLength, PSTR("%s"), dir);
-	notifyCurrentPage(static_cast<uint8_t>(PageUpdateType::Direction), &update);
-#endif
+
+    if (_messageBus)
+        _messageBus->publish<GpsDirectionUpdated>(_gpsDirection);
 }
 
 void SensorCommandHandler::setGpsDistance(double distance)
 {
     _gpsDistance = distance;
-#if defined(NEXTION_DISPLAY_DEVICE)
-    DoubleStateUpdate update = {};
-    update.value = getGpsDistance();
-    notifyCurrentPage(static_cast<uint8_t>(PageUpdateType::GpsDistance), &update);
-#endif
+
+    if (_messageBus)
+        _messageBus->publish<GpsDistanceUpdated>(_gpsDistance);
 }
 
 void SensorCommandHandler::setHornActive(bool value)
 {
     _lastHornActive = value;
-#if defined(NEXTION_DISPLAY_DEVICE)
-    BoolStateUpdate update = { _lastHornActive };
-    notifyCurrentPage(static_cast<uint8_t>(PageUpdateType::HornActive), &update);
-#endif
+    
+    if (_messageBus)
+        _messageBus->publish<HornActiveUpdated>(_lastHornActive);
 }
 
 void SensorCommandHandler::setup(RemoteSensor* remoteSensors[], size_t remoteSensorCount)

@@ -36,28 +36,18 @@ static const char DistressPosition[] PROGMEM = "My position is %d degrees, %s mi
 
 PageVhfDistress::PageVhfDistress(Stream* serialPort,
     WarningManager* warningMgr,
-    SerialCommandManager* commandMgrComputer)
-    : BasePage(serialPort, warningMgr, commandMgrComputer)
+    SerialCommandManager* commandMgrComputer,
+    MessageBus* messageBus)
+    : BasePage(serialPort, warningMgr, commandMgrComputer, messageBus)
 {
-}
-
-void PageVhfDistress::handleExternalUpdate(uint8_t updateType, const void* data)
-{
-    // Call base class first to handle heartbeat ACKs
-    BasePage::handleExternalUpdate(updateType, data);
-
-    if (updateType == static_cast<uint8_t>(PageUpdateType::GpsLatitude) && data != nullptr)
+    if (messageBus)
     {
-        // FloatStateUpdate is used for GPS lat/lon notifications
-        const FloatStateUpdate* update = static_cast<const FloatStateUpdate*>(data);
-        _lastLatitude = update->value;
-        updateDisplay();
-    }
-    else if (updateType == static_cast<uint8_t>(PageUpdateType::GpsLongitude) && data != nullptr)
-    {
-        const FloatStateUpdate* update = static_cast<const FloatStateUpdate*>(data);
-        _lastLongitude = update->value;
-        updateDisplay();
+        messageBus->subscribe<GpsLocationUpdated>([this](double lat, double lon) {
+            _lastLatitude = lat;
+            _lastLongitude = lon;
+            if (isActive())
+                updateDisplay();
+        });
     }
 }
 

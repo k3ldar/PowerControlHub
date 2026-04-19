@@ -48,22 +48,18 @@ SmartFuseBoxApp::SmartFuseBoxApp(SerialCommandManager* commandMgrComputer)
     _warningManager(),
 #if defined(NEXTION_DISPLAY_DEVICE)
     _nextionControl(NextionFactory::Create(&_warningManager, commandMgrComputer, &_soundController, &_relayController,
-        ConfigManager::getConfigPtr() ? ConfigManager::getConfigPtr()->location.locationType : LocationType::Other)),
+        ConfigManager::getConfigPtr() ? ConfigManager::getConfigPtr()->location.locationType : LocationType::Other, &_messageBus)),
 #endif
     _relayHandler(commandMgrComputer, &_relayController),
     _soundHandler(commandMgrComputer, &_soundController),
     _interceptDebugHandler(&_broadcastManager),
     _sensorCommandHandler(&_broadcastManager,
-#if defined(NEXTION_DISPLAY_DEVICE)
-        _nextionControl,
-#endif
+        &_messageBus,
         &_warningManager),
     _sensorConfigHandler(commandMgrComputer),
     _warningCommandHandler(&_broadcastManager, &_warningManager),
     _ackHandler(&_broadcastManager,
-#if defined(NEXTION_DISPLAY_DEVICE)
-        _nextionControl,
-#endif
+        &_messageBus,
         &_warningManager),
     _systemCommandHandler(&_broadcastManager, &_warningManager),
     _bluetoothController(&_systemCommandHandler, &_sensorCommandHandler, &_relayController, &_warningManager, commandMgrComputer),

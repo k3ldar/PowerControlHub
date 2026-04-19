@@ -24,11 +24,13 @@
 
 BasePage::BasePage(Stream* serialPort,
                     WarningManager* warningMgr,
-                    SerialCommandManager* commandMgrComputer) 
+                    SerialCommandManager* commandMgrComputer,
+                    MessageBus* messageBus) 
     : BaseDisplayPage(serialPort), 
       _config(nullptr),
       _commandMgrComputer(commandMgrComputer),
-      _warningManager(warningMgr)
+      _warningManager(warningMgr),
+      _messageBus(messageBus)
 {
 }
 

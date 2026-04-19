@@ -163,7 +163,6 @@ private:
                 uint8_t activePin = entry.pins[1];
 
                 return new WaterSensorHandler(
-                    ctx.messageBus,
                     ctx.broadcastManager,
                     ctx.sensorCommandHandler,
                     sensorPin,
@@ -179,7 +178,6 @@ private:
                 float temperatureOffset = static_cast<float>(entry.options2[1]) / 10.0f;
 
                 return new Dht11SensorHandler(
-                    ctx.messageBus,
                     ctx.broadcastManager,
                     ctx.sensorCommandHandler,
                     ctx.warningManager,
@@ -243,9 +241,6 @@ private:
 
                 return new GpsSensorHandler(
                     ctx.gpsSerial,
-#if defined(MESSAGE_BUS)
-                    ctx.messageBus,
-#endif
                     ctx.broadcastManager,
                     ctx.sensorCommandHandler,
                     ctx.warningManager,

@@ -25,7 +25,6 @@
 #include "WarningManager.h"
 #include "WarningType.h"
 #include "BaseSensor.h"
-#include "MessageBus.h"
 
 constexpr uint64_t TempHumidityCheckMs = 2500;
 
@@ -38,7 +37,6 @@ constexpr uint64_t TempHumidityCheckMs = 2500;
 class Dht11SensorHandler : public BaseSensor, public BroadcastLoggerSupport
 {
 private:
-	MessageBus* _messageBus;
 	SensorCommandHandler* _sensorCommandHandler;
 	WarningManager* _warningManager;
 	const uint8_t _sensorPin;
@@ -128,10 +126,12 @@ protected:
 
 		// Sensor acknowledgement (80 µs LOW + 80 µs HIGH) — every loop is bounded
 		unsigned int loopCnt = Dht11MaxLoopCount;
+
 		while (digitalRead(pin) == LOW)
 			if (loopCnt-- == 0) return Dht11Timeout;
 
 		loopCnt = Dht11MaxLoopCount;
+
 		while (digitalRead(pin) == HIGH)
 			if (loopCnt-- == 0) return Dht11Timeout;
 
@@ -164,10 +164,12 @@ protected:
 		uint8_t sum = (bits[Dht11HumIntIdx] + bits[Dht11HumDecIdx]
 					 + bits[Dht11TmpIntIdx]  + bits[Dht11TmpDecIdx]) & 0xFF;
 
-		if (bits[Dht11ChecksumIdx] != sum) return Dht11Checksum;
+		if (bits[Dht11ChecksumIdx] != sum)
+			return Dht11Checksum;
 
 		outHumidity    = bits[Dht11HumIntIdx] + (bits[Dht11HumDecIdx] * Dht11DecimalScale);
 		outTemperature = bits[Dht11TmpIntIdx]  + (bits[Dht11TmpDecIdx] * Dht11DecimalScale);
+
 		return Dht11Ok;
 	}
 
@@ -202,12 +204,6 @@ protected:
 		_humidity = humidity + _humidityOffset;
 		_celsius  = temperature + _temperatureOffset;
 
-		if (_messageBus)
-		{
-			_messageBus->publish<TemperatureUpdated>(_celsius);
-			_messageBus->publish<HumidityUpdated>(static_cast<uint8_t>(_humidity));
-		}
-
 		StringKeyValue params[2];
 		strncpy(params[0].key, ValueParamName, sizeof(params[0].key));
 		strncpy(params[1].key, "n", sizeof(params[1].key));
@@ -227,9 +223,9 @@ protected:
 		return TempHumidityCheckMs;
 	}
 public:
-	Dht11SensorHandler(MessageBus* messageBus, BroadcastManager* broadcastManager, SensorCommandHandler* sensorCommandHandler,
+	Dht11SensorHandler(BroadcastManager* broadcastManager, SensorCommandHandler* sensorCommandHandler,
 		WarningManager* warningManager, uint8_t sensorPin, float humidityOffset, float temperatureOffset, const char* name = "Dht11")
-		: BaseSensor(name), BroadcastLoggerSupport(broadcastManager), _messageBus(messageBus), _sensorCommandHandler(sensorCommandHandler),
+		: BaseSensor(name), BroadcastLoggerSupport(broadcastManager), _sensorCommandHandler(sensorCommandHandler),
 		_warningManager(warningManager), _sensorPin(sensorPin), _humidityOffset(humidityOffset),
 		_temperatureOffset(temperatureOffset), _humidity(0.0f), _celsius(0.0f)
 	{
