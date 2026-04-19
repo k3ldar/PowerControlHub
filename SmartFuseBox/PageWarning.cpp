@@ -30,13 +30,26 @@ constexpr char WarningHeader[] = "t2";
 
 PageWarning::PageWarning(Stream* serialPort,
     WarningManager* warningMgr,
-    SerialCommandManager* commandMgrComputer)
-    : BasePage(serialPort, warningMgr, commandMgrComputer),
+    SerialCommandManager* commandMgrComputer,
+    MessageBus* messageBus)
+    : BasePage(serialPort, warningMgr, commandMgrComputer, messageBus),
     _lastActiveWarnings(0),
     _lastUpdateTime(0)
 {
     // Initialize cached text as empty
     _lastWarningText[0] = '\0';
+
+    if (messageBus)
+    {
+        messageBus->subscribe<WarningChanged>([this](uint32_t) {
+            if (isActive())
+            {
+                _lastActiveWarnings = 0;
+                updateWarningDisplay();
+                _lastUpdateTime = millis();
+            }
+        });
+    }
 }
 
 void PageWarning::begin()
@@ -184,21 +197,6 @@ void PageWarning::handleTouch(uint8_t compId, uint8_t eventType)
     case ButtonNext:
         navigateNext();
         break;
-    }
-}
-
-void PageWarning::handleExternalUpdate(uint8_t updateType, const void* data)
-{
-    // Call base class first to handle heartbeat ACKs
-    BasePage::handleExternalUpdate(updateType, data);
-
-    // If warning state changed, force immediate update
-    if (updateType == static_cast<uint8_t>(PageUpdateType::Warning))
-    {
-        // Reset the cached state to force an update
-        _lastActiveWarnings = 0;
-        updateWarningDisplay();
-        _lastUpdateTime = millis();
     }
 }
 

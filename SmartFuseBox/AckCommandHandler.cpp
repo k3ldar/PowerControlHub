@@ -19,23 +19,12 @@
 #include "SystemFunctions.h"
 #include "ConfigController.h"
 
-#if defined(NEXTION_DISPLAY_DEVICE)
-#include <NextionControl.h>
-#include "BasePage.h"
-#endif
-
 const char AckCommand[] = "ACK";
 
 AckCommandHandler::AckCommandHandler(BroadcastManager* broadcastManager, 
-#if defined(NEXTION_DISPLAY_DEVICE)
-    NextionControl* nextionControl, 
-#endif
+    MessageBus* messageBus,
     WarningManager* warningManager)
-    : BaseNextionCommandHandler(broadcastManager, 
-#if defined(NEXTION_DISPLAY_DEVICE)
-        nextionControl, 
-#endif
-        warningManager)
+    : BaseNextionCommandHandler(broadcastManager, messageBus, warningManager)
 {
 
 }
@@ -100,80 +89,78 @@ bool AckCommandHandler::handleCommand(SerialCommandManager* sender, const char* 
     // only process known ACK keys if you need to take action
 
 #if defined(NEXTION_DISPLAY_DEVICE)
-    if (strcmp(params[0].key, RelayRetrieveStates) == 0 && strcmp(params[0].value, AckSuccess) == 0)
-    {
-        // Relay state acknowledgement - handle both formats:
-        // 1. ACK:R2=ok (just acknowledgement, no relay state - paramCount == 1)
-        // 2. ACK:R2=ok:0=0 (acknowledgement with relay state - paramCount == 2)
-        
-        if (paramCount >= 2)
-        {
-            // Format: ACK:R2=ok:0=0 (with relay index and state)
-            if (!SystemFunctions::isAllDigits(params[1].key) || !SystemFunctions::isAllDigits(params[1].value))
-            {
-                sendDebugMessage(F("Invalid R2 Ack response"), F("AckCommandHandler"));
-                return true;
-            }
+	if (strcmp(params[0].key, RelayRetrieveStates) == 0 && strcmp(params[0].value, AckSuccess) == 0)
+	{
+		if (paramCount >= 2)
+		{
+			if (!SystemFunctions::isAllDigits(params[1].key) || !SystemFunctions::isAllDigits(params[1].value))
+			{
+				sendDebugMessage(F("Invalid R2 Ack response"), F("AckCommandHandler"));
+				return true;
+			}
 
-            uint8_t relayIndex = static_cast<uint8_t>(strtoul(params[1].key, nullptr, 0));
-            bool isOn = SystemFunctions::parseBooleanValue(params[1].value);
-            
-            RelayStateUpdate update = { relayIndex, isOn };
-            notifyCurrentPage(static_cast<uint8_t>(PageUpdateType::RelayState), &update);
-        }
-    }
-    else if (strcmp(params[0].key, RelayStatusGet) == 0 && strcmp(params[0].value, AckSuccess) == 0)
-    {
-        if (paramCount >= 2)
-        {
-            uint8_t relayIndex = static_cast<uint8_t>(strtoul(params[1].key, nullptr, 0));
-            bool isOn = SystemFunctions::parseBooleanValue(params[1].value);
+			uint8_t relayIndex = static_cast<uint8_t>(strtoul(params[1].key, nullptr, 0));
+			bool isOn = SystemFunctions::parseBooleanValue(params[1].value);
+			uint8_t changedMask = 1 << relayIndex;
+			(void)isOn;
 
-            RelayStateUpdate update = { relayIndex, isOn };
-            notifyCurrentPage(static_cast<uint8_t>(PageUpdateType::RelayState), &update);
-        }
-        else
-        {
+			if (_messageBus)
+				_messageBus->publish<RelayStatusChanged>(changedMask);
+		}
+	}
+	else if (strcmp(params[0].key, RelayStatusGet) == 0 && strcmp(params[0].value, AckSuccess) == 0)
+	{
+		if (paramCount >= 2)
+		{
+			uint8_t relayIndex = static_cast<uint8_t>(strtoul(params[1].key, nullptr, 0));
+			bool isOn = SystemFunctions::parseBooleanValue(params[1].value);
+			uint8_t changedMask = 1 << relayIndex;
+
+			(void)isOn;
+			if (_messageBus)
+				_messageBus->publish<RelayStatusChanged>(changedMask);
+		}
+		else
+		{
 			sendDebugMessage(F("Invalid R4 ACK format RelayStatusGet"), AckCommand);
-        }
-    }
-    else if (strcmp(params[0].key, SoundSignalActive) == 0 && strcmp(params[0].value, AckSuccess) == 0)
-    {
-        if (paramCount >= 2)
-        {
-            bool isOn = SystemFunctions::parseBooleanValue(params[1].value);
-
-            BoolStateUpdate update = { isOn };
-            notifyCurrentPage(static_cast<uint8_t>(PageUpdateType::SoundSignal), &update);
-        }
-        else
-        {
+		}
+	}
+	else if (strcmp(params[0].key, SoundSignalActive) == 0 && strcmp(params[0].value, AckSuccess) == 0)
+	{
+		if (paramCount >= 2)
+		{
+			bool isOn = SystemFunctions::parseBooleanValue(params[1].value);
+			if (_messageBus)
+				_messageBus->publish<SoundSignalUpdated>(isOn);
+		}
+		else
+		{
             sendDebugMessage(F("Invalid R4 ACK format Sound Signal Active"), AckCommand);
         }
     }
 	else if (strcmp(params[0].key, SystemCpuUsage) == 0 && strcmp(params[0].value, AckSuccess) == 0)
-    {
-        if (paramCount >= 2)
-        {
-            uint8_t cpuUsage = static_cast<uint8_t>(strtoul(params[1].value, nullptr, 0));
-			UInt8Update update = { cpuUsage };
-            notifyCurrentPage(static_cast<uint8_t>(PageUpdateType::CpuUsage), &update);
-        }
-        else
-        {
-            sendDebugMessage(F("Invalid F3 ACK format: cpu"), AckCommand);
-        }
-    }
-    else if (strcmp(params[0].key, SystemFreeMemory) == 0 && strcmp(params[0].value, AckSuccess) == 0)
-    {
-        if (paramCount >= 2)
-        {
-            uint16_t freeMemory = static_cast<uint16_t>(strtoul(params[1].value, nullptr, 0));
-            UInt16Update update = { freeMemory };
-            notifyCurrentPage(static_cast<uint8_t>(PageUpdateType::MemoryUsage), &update);
-        }
-        else
-        {
+	{
+		if (paramCount >= 2)
+		{
+			uint8_t cpuUsage = static_cast<uint8_t>(strtoul(params[1].value, nullptr, 0));
+			if (_messageBus)
+				_messageBus->publish<CpuUsageUpdated>(cpuUsage);
+		}
+		else
+		{
+			sendDebugMessage(F("Invalid F3 ACK format: cpu"), AckCommand);
+		}
+	}
+	else if (strcmp(params[0].key, SystemFreeMemory) == 0 && strcmp(params[0].value, AckSuccess) == 0)
+	{
+		if (paramCount >= 2)
+		{
+			uint16_t freeMemory = static_cast<uint16_t>(strtoul(params[1].value, nullptr, 0));
+			if (_messageBus)
+				_messageBus->publish<MemoryUsageUpdated>(freeMemory);
+		}
+		else
+		{
 			sendDebugMessage(F("Invalid F2 ACK format free memory"), AckCommand);
 		}
 	}

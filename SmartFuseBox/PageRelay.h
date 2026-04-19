@@ -22,7 +22,6 @@
 #if defined(NEXTION_DISPLAY_DEVICE)
 
 #include <SerialCommandManager.h>
-#include <NextionControl.h>
 #include <stdint.h>
 
 #include "Config.h"
@@ -52,13 +51,13 @@ protected:
     //optional overrides
     void onEnterPage() override;
     void handleTouch(uint8_t compId, uint8_t eventType) override;
-    void handleExternalUpdate(uint8_t updateType, const void* data) override;
 
 public:
     explicit PageRelay(Stream* serialPort,
         WarningManager* warningMgr,
         SerialCommandManager* commandMgrComputer,
-        RelayController* relayController);
+        RelayController* relayController,
+        MessageBus* messageBus = nullptr);
 
     // Override configUpdated from BasePage
     void configUpdated() override;

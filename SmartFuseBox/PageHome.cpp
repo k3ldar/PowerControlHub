@@ -63,12 +63,44 @@ constexpr double GpsNoiseThresholdDegrees = 0.00001;
 
 
 PageHome::PageHome(Stream* serialPort,
-    WarningManager* warningMgr,
-    SerialCommandManager* commandMgrComputer,
-    RelayController* relayController)
-	: BasePage(serialPort, warningMgr, commandMgrComputer), _relayController(relayController)
+	WarningManager* warningMgr,
+	SerialCommandManager* commandMgrComputer,
+	RelayController* relayController,
+	MessageBus* messageBus)
+	: BasePage(serialPort, warningMgr, commandMgrComputer, messageBus), _relayController(relayController)
 {
-    
+#if defined(NEXTION_DISPLAY_DEVICE)
+	if (messageBus)
+	{
+		messageBus->subscribe<RelayStatusChanged>([this](uint8_t) {
+			if (isActive()) updateAllButtons();
+		});
+		messageBus->subscribe<TemperatureUpdated>([this](float newTemp) {
+			if (isActive()) setTemperature(newTemp);
+		});
+		messageBus->subscribe<HumidityUpdated>([this](uint8_t newHumidity) {
+			if (isActive()) setHumidity(static_cast<float>(newHumidity));
+		});
+		messageBus->subscribe<BearingUpdated>([this](float bearing) {
+			if (isActive()) setBearing(bearing);
+		});
+		messageBus->subscribe<GpsDirectionUpdated>([this](const char* dir) {
+			if (isActive()) setDirection(dir);
+		});
+		messageBus->subscribe<SpeedUpdated>([this](double speedKmh) {
+			if (isActive()) setSpeed(static_cast<float>(speedKmh));
+		});
+		messageBus->subscribe<CompassTemperatureUpdated>([this](float temp) {
+			if (isActive()) setCompassTemperature(temp);
+		});
+		messageBus->subscribe<GpsLocationUpdated>([this](double lat, double lon) {
+			if (isActive()) { _lastLatitude = lat; _lastLongitude = lon; updateLatLon(); }
+		});
+		messageBus->subscribe<GpsDistanceUpdated>([this](double distKm) {
+			if (isActive()) { _lastDistance = static_cast<float>(distKm); updateDistance(); }
+		});
+	}
+#endif
 }
 
 void PageHome::begin()
@@ -262,74 +294,6 @@ void PageHome::handleTouch(uint8_t compId, uint8_t eventType)
 		{
 			_relayController->setRelayState(relayIndex, _buttonOn[buttonIndex]);
 		}
-    }
-}
-
-void PageHome::handleExternalUpdate(uint8_t updateType, const void* data)
-{
-	char debugMsg[64];
-	snprintf_P(debugMsg, sizeof(debugMsg), PSTR("HomePage::handleExternalUpdate type=%u"), updateType);
-	SerialCommandManager* commandMgrComputer = getCommandMgrComputer();
-    if (commandMgrComputer)
-    {
-        commandMgrComputer->sendDebug(debugMsg, F("HomePage"));
-    }
-
-    // Call base class first to handle heartbeat ACKs
-    BasePage::handleExternalUpdate(updateType, data);
-
-    if (updateType == static_cast<uint8_t>(PageUpdateType::RelayState))
-    {
-        updateAllButtons();
-    }
-    else if (updateType == static_cast<uint8_t>(PageUpdateType::Temperature) && data != nullptr)
-    {
-        const FloatStateUpdate* update = static_cast<const FloatStateUpdate*>(data);
-        setTemperature(update->value);
-    }
-    else if (updateType == static_cast<uint8_t>(PageUpdateType::Humidity) && data != nullptr)
-    {
-        const UInt16Update* update = static_cast<const UInt16Update*>(data);
-        setHumidity(static_cast<float>(update->value));
-    }
-    else if (updateType == static_cast<uint8_t>(PageUpdateType::Bearing) && data != nullptr)
-    {
-        const FloatStateUpdate* update = static_cast<const FloatStateUpdate*>(data);
-        setBearing(update->value);
-    }
-    else if (updateType == static_cast<uint8_t>(PageUpdateType::Direction) && data != nullptr)
-    {
-        const CharStateUpdate* update = static_cast<const CharStateUpdate*>(data);
-        setDirection(update->value);
-    }
-    else if (updateType == static_cast<uint8_t>(PageUpdateType::Speed) && data != nullptr)
-    {
-        const UInt16Update* update = static_cast<const UInt16Update*>(data);
-        setSpeed(static_cast<float>(update->value));
-    }
-    else if (updateType == static_cast<uint8_t>(PageUpdateType::CompassTemp) && data != nullptr)
-    {
-        const FloatStateUpdate* update = static_cast<const FloatStateUpdate*>(data);
-        setCompassTemperature(update->value);
-    }
-    else if (updateType == static_cast<uint8_t>(PageUpdateType::GpsLatitude) && data != nullptr)
-    {
-        // FloatStateUpdate is used for GPS lat/lon notifications
-        const FloatStateUpdate* update = static_cast<const FloatStateUpdate*>(data);
-        _lastLatitude = update->value;
-        updateLatLon();
-    }
-    else if (updateType == static_cast<uint8_t>(PageUpdateType::GpsLongitude) && data != nullptr)
-    {
-        const FloatStateUpdate* update = static_cast<const FloatStateUpdate*>(data);
-        _lastLongitude = update->value;
-        updateLatLon();
-    }
-	else if (updateType == static_cast<uint8_t>(PageUpdateType::GpsDistance) && data != nullptr)
-    {
-        const FloatStateUpdate* update = static_cast<const FloatStateUpdate*>(data);
-        _lastDistance = update->value;
-        updateDistance();
     }
 }
 

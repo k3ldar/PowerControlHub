@@ -23,10 +23,6 @@
 #include "ConfigManager.h"
 #include "BaseNextionCommandHandler.h"
 
-#if defined(NEXTION_DISPLAY_DEVICE)
-#include <NextionControl.h>
-#endif
-
 // Forward declarations
 class ConfigController;
 
@@ -40,9 +36,7 @@ private:
 
 public:
     explicit AckCommandHandler(BroadcastManager* broadcastManager, 
-#if defined(NEXTION_DISPLAY_DEVICE)
-        NextionControl* nextionControl,
-#endif
+        MessageBus* messageBus,
         WarningManager* warningManager);
 
     // Set the config sync manager (optional - needed for config sync feature)

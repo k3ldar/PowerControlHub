@@ -92,6 +92,66 @@ struct BinaryPresenceUpdated
     using Callback = std::function<void(bool detected, const char* sensorName)>;
 };
 
+struct BearingUpdated
+{
+    using Callback = std::function<void(float bearing)>;
+};
+
+struct CompassTemperatureUpdated
+{
+    using Callback = std::function<void(float temp)>;
+};
+
+struct SpeedUpdated
+{
+    using Callback = std::function<void(double speedKmh)>;
+};
+
+struct GpsDirectionUpdated
+{
+    using Callback = std::function<void(const char* direction)>;
+};
+
+struct GpsDistanceUpdated
+{
+    using Callback = std::function<void(double distanceKm)>;
+};
+
+struct GpsSatellitesUpdated
+{
+    using Callback = std::function<void(uint32_t satellites)>;
+};
+
+struct WaterPumpActiveUpdated
+{
+    using Callback = std::function<void(bool active)>;
+};
+
+struct DaytimeUpdated
+{
+    using Callback = std::function<void(bool isDaytime)>;
+};
+
+struct HornActiveUpdated
+{
+    using Callback = std::function<void(bool active)>;
+};
+
+struct SoundSignalUpdated
+{
+    using Callback = std::function<void(bool active)>;
+};
+
+struct CpuUsageUpdated
+{
+    using Callback = std::function<void(uint8_t usage)>;
+};
+
+struct MemoryUsageUpdated
+{
+    using Callback = std::function<void(uint16_t freeBytes)>;
+};
+
 struct MqttConnected
 {
     using Callback = std::function<void()>;

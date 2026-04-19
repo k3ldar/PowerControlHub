@@ -20,13 +20,9 @@
 
 BaseNextionCommandHandler::BaseNextionCommandHandler(
     BroadcastManager* broadcaster,
-#if defined(NEXTION_DISPLAY_DEVICE)
-    NextionControl* nextionControl,
-#endif
+    MessageBus* messageBus,
     WarningManager* warningManager)
-    : SharedBaseCommandHandler(broadcaster, warningManager)
-#if defined(NEXTION_DISPLAY_DEVICE)
-    , _nextionControl(nextionControl)
-#endif
+    : SharedBaseCommandHandler(broadcaster, warningManager),
+      _messageBus(messageBus)
 {
 }

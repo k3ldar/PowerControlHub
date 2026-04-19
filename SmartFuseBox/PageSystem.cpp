@@ -40,10 +40,19 @@ const char CpuFormat[] PROGMEM = "%d%%";
 
 PageSystem::PageSystem(Stream* serialPort,
     WarningManager* warningMgr,
-    SerialCommandManager* commandMgrComputer)
-    : BasePage(serialPort, warningMgr, commandMgrComputer)
+    SerialCommandManager* commandMgrComputer,
+    MessageBus* messageBus)
+    : BasePage(serialPort, warningMgr, commandMgrComputer, messageBus)
 {
-
+    if (messageBus)
+    {
+        messageBus->subscribe<CpuUsageUpdated>([this](uint8_t usage) {
+            if (isActive()) setFuseBoxCpu(usage);
+        });
+        messageBus->subscribe<MemoryUsageUpdated>([this](uint16_t freeBytes) {
+            if (isActive()) setFuseBoxMemory(freeBytes);
+        });
+    }
 }
 
 void PageSystem::begin()
@@ -106,23 +115,6 @@ void PageSystem::handleTouch(uint8_t compId, uint8_t eventType)
 
     default:
         return;
-    }
-}
-
-void PageSystem::handleExternalUpdate(uint8_t updateType, const void* data)
-{
-    // Call base class first to handle heartbeat ACKs
-    BasePage::handleExternalUpdate(updateType, data);
-
-    if (updateType == static_cast<uint8_t>(PageUpdateType::CpuUsage) && data != nullptr)
-    {
-        const UInt8Update* update = static_cast<const UInt8Update*>(data);
-		setFuseBoxCpu(update->value);
-    }
-    else if (updateType == static_cast<uint8_t>(PageUpdateType::MemoryUsage) && data != nullptr)
-    {
-        const UInt16Update* update = static_cast<const UInt16Update*>(data);
-        setFuseBoxMemory(update->value);
     }
 }
 

@@ -46,12 +46,12 @@ protected:
 
     //optional overrides
     void handleTouch(uint8_t compId, uint8_t eventType) override;
-    void handleExternalUpdate(uint8_t updateType, const void* data) override;
 
 public:
     explicit PageVhfDistress(Stream* serialPort,
         WarningManager* warningMgr,
-        SerialCommandManager* commandMgrComputer = nullptr);
+        SerialCommandManager* commandMgrComputer = nullptr,
+        MessageBus* messageBus = nullptr);
 };
 
 #endif // NEXTION_DISPLAY_DEVICE

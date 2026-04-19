@@ -41,18 +41,18 @@ private:
     
     // Helper to build warning text into a buffer
     bool buildWarningText(char* buffer, size_t bufferSize);
-    
+
 public:
     PageWarning(Stream* serialPort,
         WarningManager* warningMgr,
-        SerialCommandManager* commandMgrComputer);
+        SerialCommandManager* commandMgrComputer,
+        MessageBus* messageBus = nullptr);
 
     void begin() override;
     void onEnterPage() override;
     void refresh(unsigned long now) override;
     void handleTouch(uint8_t compId, uint8_t eventType) override;
-    void handleExternalUpdate(uint8_t updateType, const void* data) override;
-    
+
     uint8_t getPageId() const override { return PageIdWarning; }
 };
 

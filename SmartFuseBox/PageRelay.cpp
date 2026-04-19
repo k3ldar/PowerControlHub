@@ -40,15 +40,23 @@ constexpr unsigned long RefreshIntervalMs = 10000;
 
 
 PageRelay::PageRelay(Stream* serialPort,
-    WarningManager* warningMgr,
-    SerialCommandManager* commandMgrComputer,
-    RelayController* relayController)
-	: BasePage(serialPort, warningMgr, commandMgrComputer), _relayController(relayController)
+	WarningManager* warningMgr,
+	SerialCommandManager* commandMgrComputer,
+	RelayController* relayController,
+	MessageBus* messageBus)
+	: BasePage(serialPort, warningMgr, commandMgrComputer, messageBus), _relayController(relayController)
 {
-    for (uint8_t i = 0; i < ConfigRelayCount; ++i)
-    {
-        _buttonImage[i] = ImageButtonColorGrey + ImageButtonColorOffset;
-        _buttonImageOn[i] = ImageButtonColorBlue + ImageButtonColorOffset;
+	for (uint8_t i = 0; i < ConfigRelayCount; ++i)
+	{
+		_buttonImage[i] = ImageButtonColorGrey + ImageButtonColorOffset;
+		_buttonImageOn[i] = ImageButtonColorBlue + ImageButtonColorOffset;
+	}
+
+	if (messageBus)
+	{
+		messageBus->subscribe<RelayStatusChanged>([this](uint8_t) {
+			if (isActive()) updateAllButtons();
+		});
 	}
 }
 
@@ -161,17 +169,6 @@ void PageRelay::handleTouch(uint8_t compId, uint8_t eventType)
             updateAllButtons();
         }
     }
-}
-
-void PageRelay::handleExternalUpdate(uint8_t updateType, const void* data)
-{
-    // Call base class first to handle heartbeat ACKs
-    BasePage::handleExternalUpdate(updateType, data);
-
-	if (updateType == static_cast<uint8_t>(PageUpdateType::RelayState))
-	{
-		updateAllButtons();
-	}
 }
 
 void PageRelay::configUpdated()

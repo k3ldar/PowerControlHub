@@ -20,11 +20,6 @@
 #include <Arduino.h>
 #include "SerialCommandManager.h"
 #include "Local.h"
-
-#if defined(NEXTION_DISPLAY_DEVICE)
-#include <NextionControl.h>
-#endif
-
 #include "BaseNextionCommandHandler.h"
 
 class RemoteSensor;
@@ -53,9 +48,7 @@ private:
 
 public:
 	explicit SensorCommandHandler(BroadcastManager* broadcastManager, 
-#if defined(NEXTION_DISPLAY_DEVICE)
-		NextionControl* nextionControl,
-#endif
+		MessageBus* messageBus,
 		WarningManager* warningManager);
 
     bool handleCommand(SerialCommandManager* sender, const char* command, const StringKeyValue params[], uint8_t paramCount) override;

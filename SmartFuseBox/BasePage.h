@@ -23,71 +23,13 @@
 
 #include <Arduino.h>
 #include <BaseDisplayPage.h>
+#include <NextionControl.h>
 #include <SerialCommandManager.h>
 #include "Config.h"
 #include "INavigationDelegate.h"
 #include "WarningManager.h"
 #include "NextionIds.h"
-
-// Update type constants for external updates
-enum class PageUpdateType : uint8_t
-{
-    None = 0x00,
-    Warning = 0x01,
-    RelayState = 0x02,
-    HeartbeatAck = 0x03,
-    Temperature = 0x04,
-    Humidity = 0x05,
-    Bearing = 0x06,
-    Direction = 0x07,
-    Speed = 0x08,
-    CompassTemp = 0x09,
-    WaterLevel = 0x0A,
-    WaterPumpActive = 0x0B,
-    SoundSignal = 0x0C,
-	CpuUsage = 0x0D,
-	MemoryUsage = 0x0E,
-	GpsLatitude = 0x0F,
-	GpsLongitude = 0x10,
-	GpsSatellites = 0x11,
-	GpsAltitude = 0x12,
-    GpsDistance = 0x13,
-	Daytime = 0x14,
-	HornActive = 0x15
-};
-
-// Data structure for relay state updates
-struct RelayStateUpdate {
-    uint8_t relayIndex;  // 0-based relay index (0..7)
-    bool isOn;           // true = relay on, false = relay off
-};
-
-struct FloatStateUpdate {
-    float value;
-};
-
-struct DoubleStateUpdate {
-    double value;
-};
-
-struct UInt8Update {
-    uint8_t value;
-};
-
-struct UInt16Update {
-    uint16_t value;
-};
-
-struct BoolStateUpdate {
-    bool value;
-};
-
-// Data structure for string/text updates (e.g., direction like "NNW", "SE")
-struct CharStateUpdate {
-    static const uint8_t MaxLength = 16; // Sufficient for compass directions, status strings, etc.
-    uint8_t length;           // Actual length of the string (not including null terminator)
-    char value[MaxLength];   // Fixed-size buffer for the string (null-terminated)
-};
+#include "MessageBus.h"
 
 /**
  * @class BasePage
@@ -109,21 +51,19 @@ private:
     // Warning manager (shared across all pages)
     WarningManager* _warningManager;
 
+    // MessageBus for event subscriptions
+    MessageBus* _messageBus;
+
     // Navigation delegate — set by NextionFactory after construction.
     INavigationDelegate* _navDelegate = nullptr;
 
 protected:
-    
-    /**
-     * @brief Constructor for boat pages.
-     * @param serialPort Pointer to the Nextion serial stream
-     * @param warningMgr Pointer to the shared WarningManager
-     * @param commandMgrComputer Pointer to the SerialCommandManager for computer communication (optional)
-     */
+
     explicit BasePage(Stream* serialPort,
         WarningManager* warningMgr,
-        SerialCommandManager* commandMgrComputer = nullptr);
-    
+        SerialCommandManager* commandMgrComputer = nullptr,
+        MessageBus* messageBus = nullptr);
+
     /**
      * @brief Virtual destructor for proper cleanup
      */
@@ -146,6 +86,12 @@ protected:
      * @return Pointer to the WarningManager
      */
     WarningManager* getWarningManager() const { return _warningManager; }
+
+    /**
+     * @brief Get the message bus.
+     * @return Pointer to the MessageBus, or nullptr if not set
+     */
+    MessageBus* getMessageBus() const { return _messageBus; }
 
     /**
      * @brief Fire a "go to next page" navigation event.
