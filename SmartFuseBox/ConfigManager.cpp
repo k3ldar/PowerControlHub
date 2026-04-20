@@ -192,7 +192,7 @@ void ConfigManager::migrateV4toV5()
 	memset(_cfg.auth.reserved, 0x00, sizeof(_cfg.auth.reserved));
 
 	_cfg.version = ConfigVersion5;
-	_cfg.system.rebootOnSave = false;
+	_cfg.system.reserved1[0] = 0x00;
 	_cfg.sdCard.csPin = PinDisabled;
 }
 
@@ -316,7 +316,6 @@ void ConfigManager::resetToDefaults()
 	strncpy(_cfg.location.homePort, "Unknown", ConfigHomePortLength - 1);
 	_cfg.location.homePort[ConfigHomePortLength - 1] = '\0';
 	_cfg.system.timezoneOffset = 0; // UTC
-	_cfg.system.rebootOnSave = false;
 
 	_cfg.network.bluetoothEnabled = false;
 

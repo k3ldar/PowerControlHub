@@ -65,6 +65,28 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
 	if (SystemFunctions::commandMatches(command, ConfigSaveSettings))
 	{
 		result = _configController->save();
+
+		if (result == ConfigResult::Success)
+		{
+			const char* rebootStr = getParamValue(params, paramCount, "reboot");
+			if (rebootStr && SystemFunctions::parseBooleanValue(rebootStr))
+			{
+				if (SystemFunctions::canReboot())
+				{
+					sendAckOk(sender, command);
+					delay(100);
+					SystemFunctions::reboot();
+					return true;
+				}
+				else
+				{
+					char rebootVal[] = "required";
+					StringKeyValue rebootParam = makeParam("reboot", rebootVal);
+					sendAckOk(sender, command, &rebootParam);
+					return true;
+				}
+			}
+		}
 	}
 	else if (SystemFunctions::commandMatches(command, ConfigGetSettings))
 	{

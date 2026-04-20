@@ -74,7 +74,7 @@ void PageVhfRadio::onEnterPage()
 	char wrappedBuffer[134];
     SystemFunctions::wrapTextAtWordBoundary(callSignBuf, wrappedBuffer, sizeof(wrappedBuffer), 30);
 
-    sendText(ControlCallSign, callSignBuf);
+    sendText(ControlCallSign, wrappedBuffer);
 }
 
 void PageVhfRadio::begin()

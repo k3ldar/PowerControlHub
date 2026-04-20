@@ -97,9 +97,11 @@ void SensorNetworkHandler::formatStatusJson(char* buffer, size_t size)
         }
 
         // Write sensor entry (removed duplicate and fixed format)
+        char safeName[64];
+        SystemFunctions::sanitizeJsonString(sensor->getSensorName(), safeName, sizeof(safeName));
         int n = snprintf(buffer + written, size - written, 
             "\"%s\":{\"uid\":%d,\"idType\":%d,\"type\":%d,%s}",
-            sensor->getSensorName(),
+            safeName,
             sensor->getUid(), 
             static_cast<uint8_t>(sensor->getSensorIdType()),
             static_cast<uint8_t>(sensor->getSensorType()), 

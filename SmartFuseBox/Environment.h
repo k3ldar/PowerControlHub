@@ -26,6 +26,10 @@ constexpr char comfortHumid[] PROGMEM = "Humid";
 constexpr char comfortDry[] PROGMEM = "Dry";
 constexpr char comfortFair[] PROGMEM = "Fair";
 
+constexpr char condensationLow[] PROGMEM = "Low";
+constexpr char condensationWatch[] PROGMEM = "Watch";
+constexpr char condensationHigh[] PROGMEM = "High";
+
 enum class CondensationRisk
 { 
     Low, 
@@ -61,5 +65,52 @@ public:
         if (delta <= 0.5) return CondensationRisk::High;
         if (delta <= 2.0) return CondensationRisk::Watch;
         return CondensationRisk::Low;
+    }
+
+    /**
+     * @brief Return a PROGMEM comfort description string based on temperature, humidity and dew point.
+     *
+     * @param tempC    Air temperature in degrees Celsius
+     * @param humidity Relative humidity (0-100 %)
+     * @param dewPoint Pre-calculated dew point in degrees Celsius
+     * @return PROGMEM string pointer — copy with strncpy_P before use
+     */
+    static const char* getComfortDescription(double tempC, double humidity, double dewPoint)
+    {
+        if (tempC < 10 && humidity > 70)
+            return comfortColdDamp;
+
+        if (tempC < 12)
+            return comfortCold;
+
+        if (tempC > 26 && humidity > 65)
+            return comfortHotHumid;
+
+        if (dewPoint > 18)
+            return comfortHumid;
+
+        if (tempC >= 18 && tempC <= 24 && humidity < 65)
+            return comfortComfortable;
+
+        return comfortFair;
+    }
+
+    /**
+     * @brief Return a PROGMEM label string for a CondensationRisk value.
+     *
+     * @param risk Condensation risk level
+     * @return PROGMEM string pointer — copy with strncpy_P before use
+     */
+    static const char* getCondensationRiskLabel(CondensationRisk risk)
+    {
+        switch (risk)
+        {
+            case CondensationRisk::High:
+                return condensationHigh;
+            case CondensationRisk::Watch:
+                return condensationWatch;
+            default:
+                return condensationLow;
+        }
     }
 };

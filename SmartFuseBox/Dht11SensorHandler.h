@@ -25,6 +25,7 @@
 #include "WarningManager.h"
 #include "WarningType.h"
 #include "BaseSensor.h"
+#include "Environment.h"
 
 constexpr uint64_t TempHumidityCheckMs = 2500;
 
@@ -48,8 +49,14 @@ private:
 #if defined(MQTT_SUPPORT)
 	char _slugTemp[32];
 	char _slugHumidity[32];
+	char _slugDewPoint[32];
+	char _slugComfort[32];
+	char _slugCondensation[40];
 	char _nameTemp[48];
 	char _nameHumidity[48];
+	char _nameDewPoint[48];
+	char _nameComfort[48];
+	char _nameCondensation[48];
 #endif
 
 protected:
@@ -232,8 +239,14 @@ public:
 #if defined(MQTT_SUPPORT)
 		snprintf(_slugTemp, sizeof(_slugTemp), "%s_temperature", _safeSlug);
 		snprintf(_slugHumidity, sizeof(_slugHumidity), "%s_humidity", _safeSlug);
+		snprintf(_slugDewPoint, sizeof(_slugDewPoint), "%s_dew_point", _safeSlug);
+		snprintf(_slugComfort, sizeof(_slugComfort), "%s_comfort", _safeSlug);
+		snprintf(_slugCondensation, sizeof(_slugCondensation), "%s_condensation_risk", _safeSlug);
 		snprintf(_nameTemp, sizeof(_nameTemp), "%s Temperature", _name);
 		snprintf(_nameHumidity, sizeof(_nameHumidity), "%s Humidity", _name);
+		snprintf(_nameDewPoint, sizeof(_nameDewPoint), "%s Dew Point", _name);
+		snprintf(_nameComfort, sizeof(_nameComfort), "%s Comfort", _name);
+		snprintf(_nameCondensation, sizeof(_nameCondensation), "%s Condensation Risk", _name);
 #endif
 	}
 
@@ -254,8 +267,22 @@ public:
 		dtostrf(_temperatureOffset, 1, 1, celsiusOffset);
 		dtostrf(_humidityOffset, 1, 1, humidityOffset);
 
-		int written = snprintf(buffer, size, "\"name\":\"%s\",\"SensorPin\":%u,\"temperature\":%s,\"tempOffset\":%s,\"humidity\":%s,\"humOffset\":%s",
-			_name, _sensorPin, celsius, celsiusOffset, humidity, humidityOffset);
+		double dewPt = Environment::dewPoint(_celsius, _humidity);
+		char dewPointStr[8];
+		dtostrf(dewPt, 1, 1, dewPointStr);
+
+		char comfortBuf[24];
+		strncpy_P(comfortBuf, Environment::getComfortDescription(_celsius, _humidity, dewPt), sizeof(comfortBuf));
+		comfortBuf[sizeof(comfortBuf) - 1] = '\0';
+
+		CondensationRisk risk = Environment::condensationRisk(_celsius, dewPt, false);
+		char riskBuf[8];
+		strncpy_P(riskBuf, Environment::getCondensationRiskLabel(risk), sizeof(riskBuf));
+		riskBuf[sizeof(riskBuf) - 1] = '\0';
+
+		int written = snprintf(buffer, size,
+			"\"name\":\"%s\",\"SensorPin\":%u,\"temperature\":%s,\"tempOffset\":%s,\"humidity\":%s,\"humOffset\":%s,\"dew_point\":%s,\"comfort\":\"%s\",\"condensation_risk\":\"%s\"",
+			_name, _sensorPin, celsius, celsiusOffset, humidity, humidityOffset, dewPointStr, comfortBuf, riskBuf);
 
 		if (written < 0 || (size_t)written >= size)
 		{
@@ -282,28 +309,62 @@ public:
 #if defined(MQTT_SUPPORT)
 	uint8_t getMqttChannelCount() const override
 	{
-		return 2;
+		return 5;
 	}
 
 	MqttSensorChannel getMqttChannel(uint8_t channelIndex) const override
 	{
-		if (channelIndex == 0)
+		switch (channelIndex)
 		{
-			return { _nameTemp, _slugTemp, "temperature", "temperature", "\xc2\xb0""C", false };
+			case 0:
+				return { _nameTemp, _slugTemp, "temperature", "temperature", "\xc2\xb0""C", false };
+			case 1:
+				return { _nameHumidity, _slugHumidity, "humidity", "humidity", "%", false };
+			case 2:
+				return { _nameDewPoint, _slugDewPoint, "humidity", "temperature", "\xc2\xb0""C", false };
+			case 3:
+				return { _nameComfort, _slugComfort, "humidity", nullptr, nullptr, false };
+			case 4:
+				return { _nameCondensation, _slugCondensation, "humidity", nullptr, nullptr, false };
+			default:
+				return { _nameHumidity, _slugHumidity, "humidity", "humidity",    "%", false };
 		}
-
-		return { _nameHumidity, _slugHumidity, "humidity", "humidity", "%", false };
 	}
 
 	void getMqttValue(uint8_t channelIndex, char* buffer, size_t size) const override
 	{
-		if (channelIndex == 0)
+		switch (channelIndex)
 		{
-			dtostrf(_celsius, 1, 1, buffer);
-		}
-		else
-		{
-			snprintf(buffer, size, "%u", static_cast<uint8_t>(_humidity));
+			case 0:
+				dtostrf(_celsius, 1, 1, buffer);
+				break;
+			case 1:
+				snprintf(buffer, size, "%u", static_cast<uint8_t>(_humidity));
+				break;
+			case 2:
+			{
+				double dewPt = Environment::dewPoint(_celsius, _humidity);
+				dtostrf(dewPt, 1, 1, buffer);
+				break;
+			}
+			case 3:
+			{
+				double dewPt = Environment::dewPoint(_celsius, _humidity);
+				strncpy_P(buffer, Environment::getComfortDescription(_celsius, _humidity, dewPt), size);
+				buffer[size - 1] = '\0';
+				break;
+			}
+			case 4:
+			{
+				double dewPt = Environment::dewPoint(_celsius, _humidity);
+				CondensationRisk risk = Environment::condensationRisk(_celsius, dewPt, false);
+				strncpy_P(buffer, Environment::getCondensationRiskLabel(risk), size);
+				buffer[size - 1] = '\0';
+				break;
+			}
+			default:
+				if (size > 0) buffer[0] = '\0';
+				break;
 		}
 	}
 #endif

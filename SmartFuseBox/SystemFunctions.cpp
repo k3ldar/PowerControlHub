@@ -192,6 +192,22 @@ void SystemFunctions::resetSerial(Stream& serial)
     }
 }
 
+bool SystemFunctions::canReboot()
+{
+#if defined(ESP32)
+    return true;
+#else
+    return false;
+#endif
+}
+
+void SystemFunctions::reboot()
+{
+#if defined(ESP32)
+    ESP.restart();
+#endif
+}
+
 bool SystemFunctions::commandMatches(const char* command, const char* expected)
 {
     if (strlen(command) != strlen(expected))
@@ -377,6 +393,30 @@ void SystemFunctions::wrapTextAtWordBoundary(const char* input, char* output, si
             output[outPos++] = input[i++];
             currentLineLength++;
         }
+    }
+
+    output[outPos] = '\0';
+}
+
+void SystemFunctions::sanitizeJsonString(const char* input, char* output, size_t outputSize)
+{
+    if (!input || !output || outputSize == 0)
+        return;
+
+    size_t outPos = 0;
+
+    while (*input != '\0' && outPos < outputSize - 1)
+    {
+        char c = *input++;
+
+        if (c == '\\' || c == '"')
+        {
+            if (outPos + 2 > outputSize - 1)
+                break;
+            output[outPos++] = '\\';
+        }
+
+        output[outPos++] = c;
     }
 
     output[outPos] = '\0';

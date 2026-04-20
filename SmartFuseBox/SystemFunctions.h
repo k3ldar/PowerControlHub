@@ -213,14 +213,28 @@ public:
      */
     static bool hasElapsed(uint64_t now, uint64_t previous, uint64_t interval);
 
-    /**
-     * @brief Reset a serial port by flushing outgoing data and clearing incoming buffer.
-     *
-     * This can help recover from communication issues by ensuring the serial port is in a clean state.
-     *
+	/**
+	 * @brief Reset a serial port by flushing outgoing data and clearing incoming buffer.
+	 *
+	 * This can help recover from communication issues by ensuring the serial port is in a clean state.
+	 *
 	 * @param serial Reference to the Stream (e.g., HardwareSerial) to reset
-    */
-    static void resetSerial(Stream& serial);
+	*/
+	static void resetSerial(Stream& serial);
+
+	/**
+	 * @brief Returns true if this platform supports a software-triggered reboot.
+	 *
+	 * @return true on ESP32; false on all other platforms (Arduino R4 WiFi, R4 Minima, Mega 2560).
+	 */
+	static bool canReboot();
+
+	/**
+	 * @brief Perform a software reboot on supported platforms.
+	 *
+	 * Only has effect when canReboot() returns true (ESP32). On other platforms this is a no-op.
+	 */
+	static void reboot();
 
     /**
      * @brief Concatenate multiple strings into a provided buffer.
@@ -321,6 +335,20 @@ public:
     static int32_t indexOf(const char* str, char ch, size_t start);
 
     static void wrapTextAtWordBoundary(const char* input, char* output, size_t outputSize, size_t maxLineLength);
+
+    /**
+     * @brief Escape a string for safe embedding as a JSON string value.
+     *
+     * Replaces `"` with `\"` and `\` with `\\` so that the result can be placed
+     * inside JSON double-quoted fields without breaking the JSON structure.
+     * The output is always null-terminated. Characters that would overflow the
+     * buffer are silently dropped.
+     *
+     * @param input  Source string (RAM)
+     * @param output Destination buffer
+     * @param outputSize Size of destination buffer including null terminator
+     */
+    static void sanitizeJsonString(const char* input, char* output, size_t outputSize);
 
 	static bool progmemToBuffer(const char* progmemStr, char* buffer, size_t bufferSize);
 
