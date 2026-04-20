@@ -101,6 +101,7 @@ SmartFuseBoxApp::SmartFuseBoxApp(SerialCommandManager* commandMgrComputer)
       , _schedulerCommandHandler(&_relayController)
       , _serialHandlerCount(0)
       , _scheduleController(&_relayController, &_messageBus)
+      , _pendingRebootTime(0)
 
 #if defined(LED_MANAGER)
       , _ledManager(&_messageBus)
@@ -261,6 +262,13 @@ void SmartFuseBoxApp::setup(RemoteSensor** remoteSensors, uint8_t remoteSensorCo
 
     // Link config sync manager to handlers so they can coordinate config synchronization
     _ackHandler.setConfigController(&_configController);
+    _configHandler.setMessageBus(&_messageBus);
+
+    // Subscribe to deferred reboot requests
+    _messageBus.subscribe<RebootRequested>([this]()
+    {
+        _pendingRebootTime = SystemFunctions::millis64() + 500;
+    });
 
 #if defined(MQTT_SUPPORT)
     // Link MQTT config handler and controller
@@ -421,6 +429,11 @@ void SmartFuseBoxApp::loop()
 #endif
 
     SystemCpuMonitor::update();
+
+    if (_pendingRebootTime != 0 && now >= _pendingRebootTime)
+    {
+        SystemFunctions::reboot();
+    }
 
     delay(DefaultDelay);
 }

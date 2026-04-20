@@ -25,6 +25,7 @@
 
 // Forward declarations
 class ConfigController;
+class MessageBus;
 
 #if defined(CARD_CONFIG_LOADER)
 class SdCardConfigLoader;
@@ -40,6 +41,7 @@ class ConfigCommandHandler : public virtual BaseCommandHandler, public BaseConfi
 private:
 	IWifiController* _wifiController;
 	ConfigController* _configController;
+	MessageBus* _messageBus;
 
 #if defined(CARD_CONFIG_LOADER)
 	SdCardConfigLoader* _sdCardConfigLoader;
@@ -54,6 +56,8 @@ public:
 	explicit ConfigCommandHandler(
 		IWifiController* wifiController, 
 		ConfigController* configController);
+
+	void setMessageBus(MessageBus* messageBus);
 
 #if defined(CARD_CONFIG_LOADER)
 	void setSdCardConfigLoader(SdCardConfigLoader* sdCardConfigLoader);

@@ -192,7 +192,7 @@ void ConfigManager::migrateV4toV5()
 	memset(_cfg.auth.reserved, 0x00, sizeof(_cfg.auth.reserved));
 
 	_cfg.version = ConfigVersion5;
-	_cfg.system.reserved1[0] = 0x00;
+	memset(_cfg.system.reserved1, 0x00, sizeof(_cfg.system.reserved1));
 	_cfg.sdCard.csPin = PinDisabled;
 }
 

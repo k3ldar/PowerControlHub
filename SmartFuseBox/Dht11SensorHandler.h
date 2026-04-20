@@ -280,9 +280,12 @@ public:
 		strncpy_P(riskBuf, Environment::getCondensationRiskLabel(risk), sizeof(riskBuf));
 		riskBuf[sizeof(riskBuf) - 1] = '\0';
 
+		char safeName[64];
+		SystemFunctions::sanitizeJsonString(_name, safeName, sizeof(safeName));
+
 		int written = snprintf(buffer, size,
 			"\"name\":\"%s\",\"SensorPin\":%u,\"temperature\":%s,\"tempOffset\":%s,\"humidity\":%s,\"humOffset\":%s,\"dew_point\":%s,\"comfort\":\"%s\",\"condensation_risk\":\"%s\"",
-			_name, _sensorPin, celsius, celsiusOffset, humidity, humidityOffset, dewPointStr, comfortBuf, riskBuf);
+			safeName, _sensorPin, celsius, celsiusOffset, humidity, humidityOffset, dewPointStr, comfortBuf, riskBuf);
 
 		if (written < 0 || (size_t)written >= size)
 		{

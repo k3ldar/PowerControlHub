@@ -400,23 +400,73 @@ void SystemFunctions::wrapTextAtWordBoundary(const char* input, char* output, si
 
 void SystemFunctions::sanitizeJsonString(const char* input, char* output, size_t outputSize)
 {
-    if (!input || !output || outputSize == 0)
+    if (!output || outputSize == 0)
         return;
 
-    size_t outPos = 0;
+    output[0] = '\0';
 
-    while (*input != '\0' && outPos < outputSize - 1)
+    if (!input)
+		return;
+
+    size_t outPos = 0;
+    const size_t limit = outputSize - 1;
+
+    while (*input != '\0' && outPos < limit)
     {
-        char c = *input++;
+        uint8_t c = static_cast<uint8_t>(*input++);
 
         if (c == '\\' || c == '"')
         {
-            if (outPos + 2 > outputSize - 1)
-                break;
+            if (outPos + 2 > limit) break;
             output[outPos++] = '\\';
+            output[outPos++] = static_cast<char>(c);
         }
-
-        output[outPos++] = c;
+        else if (c == '\b')
+        {
+            if (outPos + 2 > limit) break;
+            output[outPos++] = '\\';
+            output[outPos++] = 'b';
+        }
+        else if (c == '\t')
+        {
+            if (outPos + 2 > limit) break;
+            output[outPos++] = '\\';
+            output[outPos++] = 't';
+        }
+        else if (c == '\n')
+        {
+            if (outPos + 2 > limit) break;
+            output[outPos++] = '\\';
+            output[outPos++] = 'n';
+        }
+        else if (c == '\f')
+        {
+            if (outPos + 2 > limit) break;
+            output[outPos++] = '\\';
+            output[outPos++] = 'f';
+        }
+        else if (c == '\r')
+        {
+            if (outPos + 2 > limit) break;
+            output[outPos++] = '\\';
+            output[outPos++] = 'r';
+        }
+        else if (c < 0x20)
+        {
+            // Generic control character: \u00XX (6 chars)
+            if (outPos + 6 > limit) break;
+            static const char hex[] = "0123456789abcdef";
+            output[outPos++] = '\\';
+            output[outPos++] = 'u';
+            output[outPos++] = '0';
+            output[outPos++] = '0';
+            output[outPos++] = hex[(c >> 4) & 0x0F];
+            output[outPos++] = hex[c & 0x0F];
+        }
+        else
+        {
+            output[outPos++] = static_cast<char>(c);
+        }
     }
 
     output[outPos] = '\0';

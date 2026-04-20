@@ -162,6 +162,7 @@ private:
 	ISerialCommandHandler* _serialHandlers[MaxSerialHandlerCount];
 	uint8_t _serialHandlerCount;
 	ScheduleController _scheduleController;
+	uint64_t _pendingRebootTime;
 
 #if defined(LED_MANAGER)
     LedMatrixManager _ledManager;

@@ -339,10 +339,13 @@ public:
     /**
      * @brief Escape a string for safe embedding as a JSON string value.
      *
-     * Replaces `"` with `\"` and `\` with `\\` so that the result can be placed
-     * inside JSON double-quoted fields without breaking the JSON structure.
-     * The output is always null-terminated. Characters that would overflow the
-     * buffer are silently dropped.
+     * Applies full JSON string escaping per RFC 8259:
+     *   - `\` -> `\\`
+     *   - `"` -> `\"`
+     *   - `\b` (0x08), `\t` (0x09), `\n` (0x0A), `\f` (0x0C), `\r` (0x0D) -> named escapes
+     *   - Any other byte < 0x20 -> `\u00XX`
+     * The output is always null-terminated. Characters whose escape sequence
+     * would not fit in the remaining buffer are silently dropped.
      *
      * @param input  Source string (RAM)
      * @param output Destination buffer
