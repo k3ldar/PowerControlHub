@@ -167,6 +167,11 @@ struct MqttMessageReceived
     using Callback = std::function<void(const char* topic, const char* payload)>;
 };
 
+struct RebootRequested
+{
+    using Callback = std::function<void()>;
+};
+
 class MessageBus {
 private:
     template<typename Event>

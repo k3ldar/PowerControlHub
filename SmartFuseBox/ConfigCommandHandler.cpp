@@ -19,6 +19,7 @@
 #include "ConfigCommandHandler.h"
 #include "ConfigController.h"
 #include "SystemFunctions.h"
+#include "MessageBus.h"
 
 #if defined(CARD_CONFIG_LOADER)
 #include "SdCardConfigLoader.h"
@@ -35,7 +36,8 @@ ConfigCommandHandler::ConfigCommandHandler(
 	ConfigController* configController)
 	:
 	_wifiController(wifiController),
-	_configController(configController)
+	_configController(configController),
+	_messageBus(nullptr)
 #if defined(CARD_CONFIG_LOADER)
 	, _sdCardConfigLoader(nullptr)
 #endif
@@ -44,6 +46,11 @@ ConfigCommandHandler::ConfigCommandHandler(
 	, _mqttController(nullptr)
 #endif
 {}
+
+void ConfigCommandHandler::setMessageBus(MessageBus* messageBus)
+{
+	_messageBus = messageBus;
+}
 
 #if defined(MQTT_SUPPORT)
 void ConfigCommandHandler::setMqttConfigHandler(MQTTConfigCommandHandler* mqttConfigHandler)
@@ -65,6 +72,29 @@ bool ConfigCommandHandler::handleCommand(SerialCommandManager* sender, const cha
 	if (SystemFunctions::commandMatches(command, ConfigSaveSettings))
 	{
 		result = _configController->save();
+
+		if (result == ConfigResult::Success)
+		{
+			const char* rebootStr = getParamValue(params, paramCount, "reboot");
+			if (rebootStr && SystemFunctions::parseBooleanValue(rebootStr))
+			{
+				if (SystemFunctions::canReboot() && _messageBus != nullptr)
+				{
+					char rebootVal[] = "pending";
+					StringKeyValue rebootParam = makeParam("reboot", rebootVal);
+					sendAckOk(sender, command, &rebootParam);
+					_messageBus->publish<RebootRequested>();
+					return true;
+				}
+				else
+				{
+					char rebootVal[] = "required";
+					StringKeyValue rebootParam = makeParam("reboot", rebootVal);
+					sendAckOk(sender, command, &rebootParam);
+					return true;
+				}
+			}
+		}
 	}
 	else if (SystemFunctions::commandMatches(command, ConfigGetSettings))
 	{

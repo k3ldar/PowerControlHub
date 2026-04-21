@@ -124,5 +124,5 @@ SunTimes SunCalculator::calculateSunTimes(float lat, float lon, uint16_t year, u
     float UT_rise = fmod(T_rise - lngHour + 24, 24);
     float UT_set = fmod(T_set - lngHour + 24, 24);
 
-    return { UT_rise + tzOffset, UT_set + tzOffset, true };
+    return { fmodf(UT_rise + tzOffset + 24.0f, 24.0f), fmodf(UT_set + tzOffset + 24.0f, 24.0f), true };
 }

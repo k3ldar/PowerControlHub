@@ -141,8 +141,7 @@ constexpr uint8_t ConfigLinkedRelayCount = 2;
 
 struct SystemConfig {
     int8_t  timezoneOffset;
-    bool    rebootOnSave;       // if true, device reboots after C0 persists config
-    uint8_t reserved1[3];
+    uint8_t reserved1[4];
     int8_t  reserved2[4];
 } __attribute__((packed));
 

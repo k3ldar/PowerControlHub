@@ -17,6 +17,7 @@
  */
 #include "Local.h"
 #include "WifiCommandBridge.h"
+#include "SystemFunctions.h"
 
 WifiCommandBridge::WifiCommandBridge()
     : _handlers(nullptr),
@@ -175,8 +176,10 @@ CommandResult WifiCommandBridge::buildJsonResponse(const char* command, char* re
     // Add error field on failure
     if (!success && pos < bufferSize)
     {
+        char safeResult[64];
+        SystemFunctions::sanitizeJsonString(resultBuf, safeResult, sizeof(safeResult));
         written = snprintf(responseBuffer + pos, bufferSize - pos,
-            ",\"error\":\"%s\"", resultBuf);
+            ",\"error\":\"%s\"", safeResult);
 
         if (written > 0)
             pos += (size_t)written;
@@ -212,8 +215,13 @@ CommandResult WifiCommandBridge::buildJsonResponse(const char* command, char* re
                     strncpy(key, tok, keyLen);      key[keyLen] = '\0';
                     strncpy(val, kvEq + 1, valLen); val[valLen] = '\0';
 
+                    char safeKey[DefaultMaxParamKeyLength + 1];
+                    char safeVal[DefaultMaxParamValueLength + 1];
+                    SystemFunctions::sanitizeJsonString(key, safeKey, sizeof(safeKey));
+                    SystemFunctions::sanitizeJsonString(val, safeVal, sizeof(safeVal));
+
                     written = snprintf(responseBuffer + pos, bufferSize - pos,
-                        ",\"%s\":\"%s\"", key, val);
+                        ",\"%s\":\"%s\"", safeKey, safeVal);
                     if (written > 0) pos += (size_t)written;
                 }
             }

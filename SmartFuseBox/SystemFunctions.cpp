@@ -192,6 +192,22 @@ void SystemFunctions::resetSerial(Stream& serial)
     }
 }
 
+bool SystemFunctions::canReboot()
+{
+#if defined(ESP32)
+    return true;
+#else
+    return false;
+#endif
+}
+
+void SystemFunctions::reboot()
+{
+#if defined(ESP32)
+    ESP.restart();
+#endif
+}
+
 bool SystemFunctions::commandMatches(const char* command, const char* expected)
 {
     if (strlen(command) != strlen(expected))
@@ -376,6 +392,80 @@ void SystemFunctions::wrapTextAtWordBoundary(const char* input, char* output, si
         {
             output[outPos++] = input[i++];
             currentLineLength++;
+        }
+    }
+
+    output[outPos] = '\0';
+}
+
+void SystemFunctions::sanitizeJsonString(const char* input, char* output, size_t outputSize)
+{
+    if (!output || outputSize == 0)
+        return;
+
+    output[0] = '\0';
+
+    if (!input)
+		return;
+
+    size_t outPos = 0;
+    const size_t limit = outputSize - 1;
+
+    while (*input != '\0' && outPos < limit)
+    {
+        uint8_t c = static_cast<uint8_t>(*input++);
+
+        if (c == '\\' || c == '"')
+        {
+            if (outPos + 2 > limit) break;
+            output[outPos++] = '\\';
+            output[outPos++] = static_cast<char>(c);
+        }
+        else if (c == '\b')
+        {
+            if (outPos + 2 > limit) break;
+            output[outPos++] = '\\';
+            output[outPos++] = 'b';
+        }
+        else if (c == '\t')
+        {
+            if (outPos + 2 > limit) break;
+            output[outPos++] = '\\';
+            output[outPos++] = 't';
+        }
+        else if (c == '\n')
+        {
+            if (outPos + 2 > limit) break;
+            output[outPos++] = '\\';
+            output[outPos++] = 'n';
+        }
+        else if (c == '\f')
+        {
+            if (outPos + 2 > limit) break;
+            output[outPos++] = '\\';
+            output[outPos++] = 'f';
+        }
+        else if (c == '\r')
+        {
+            if (outPos + 2 > limit) break;
+            output[outPos++] = '\\';
+            output[outPos++] = 'r';
+        }
+        else if (c < 0x20)
+        {
+            // Generic control character: \u00XX (6 chars)
+            if (outPos + 6 > limit) break;
+            static const char hex[] = "0123456789abcdef";
+            output[outPos++] = '\\';
+            output[outPos++] = 'u';
+            output[outPos++] = '0';
+            output[outPos++] = '0';
+            output[outPos++] = hex[(c >> 4) & 0x0F];
+            output[outPos++] = hex[c & 0x0F];
+        }
+        else
+        {
+            output[outPos++] = static_cast<char>(c);
         }
     }
 
