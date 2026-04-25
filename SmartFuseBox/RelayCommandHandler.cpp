@@ -112,17 +112,24 @@ bool RelayCommandHandler::handleCommand(SerialCommandManager* sender, const char
 			}
 
 			CommandResult result = _relayController->setRelayState(relayIndex, state > 0);
-			RelayResult status = static_cast<RelayResult>(result.status);
 
-            if (status == RelayResult::InvalidIndex)
-            {
-                sendAckErr(sender, command, F("Invalid relay index"), &params[0]);
-                return true;
-			}
-            else if (status == RelayResult::Reserved)
-            {
-                sendAckErr(sender, command, F("Relay is reserved for sound system"), &params[0]);
-                return true;
+			if (!result.success)
+			{
+				RelayResult status = static_cast<RelayResult>(result.status);
+
+				if (status == RelayResult::InvalidIndex)
+				{
+					sendAckErr(sender, command, F("Invalid relay index"), &params[0]);
+					return true;
+				}
+				else if (status == RelayResult::Reserved)
+				{
+					sendAckErr(sender, command, F("Relay is reserved for sound system"), &params[0]);
+					return true;
+				}
+
+				sendAckErr(sender, command, F("Failed to set relay state"), &params[0]);
+				return true;
 			}
 
 			broadcastRelayStatus(command, &params[0]);

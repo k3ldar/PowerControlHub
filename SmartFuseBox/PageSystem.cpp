@@ -75,11 +75,6 @@ void PageSystem::refresh(unsigned long now)
     {
         SerialCommandManager* compMgr = getCommandMgrComputer();
 
-        if (compMgr)
-        {
-            compMgr->sendDebug(F("Sending F2/F3"), F("SystemPage"));
-        }
-
         _lastRefreshTime = now;
 
         setFuseBoxCpu(SystemCpuMonitor::getCpuUsage());

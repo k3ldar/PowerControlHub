@@ -61,13 +61,13 @@
 
 
 // ─── Display Support ───────────────────────────────────────────────────────
-// Enable support for Nextion displays.
+// Enable support for Nextion displays (approx 52kb).
 #define NEXTION_DISPLAY_DEVICE
 
 // ─── Optional Features ────────────────────────────────────────────────────────
 // Remove the trailing underscore to enable each feature.
 
-// SD card support (experimental)
+// SD card support (experimental) (approx 32kb)
 #define SD_CARD_SUPPORT
 
 #if defined(SD_CARD_SUPPORT)
@@ -75,16 +75,16 @@
 #define CARD_CONFIG_LOADER_
 #endif
 
-// MQTT home-assistant discovery (requires WIFI_SUPPORT — enforced in BoardConfig.h)
+// MQTT home-assistant discovery (requires WIFI_SUPPORT — enforced in BoardConfig.h) (approx 40kb)
 #define MQTT_SUPPORT
 
 // OTA auto-update via GitHub releases (requires ESP32 + WIFI_SUPPORT — enforced in BoardConfig.h).
 // When enabled, the device checks for a new release every 24 hours and broadcasts the result.
 // Auto-applying the update is OFF by default; use the F12:apply=1 command or set the
-// OtaFlagAutoApply bit in SystemHeader::reserved[0] to enable automatic installs.
+// OtaFlagAutoApply bit in SystemHeader::reserved[0] to enable automatic installs. (approx 165kb)
 #define OTA_AUTO_UPDATE
 
-// Bluetooth BLE (mutually exclusive with WIFI_SUPPORT on Arduino Uno R4)
+// Bluetooth BLE (mutually exclusive with WIFI_SUPPORT on Arduino Uno R4) (approx 144kb)
 #define BLUETOOTH_SUPPORT_
 
 // Led Manager on arduino R4 Wifi, experimental at present time

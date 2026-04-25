@@ -149,7 +149,7 @@ bool WifiServer::begin()
 	else // Client mode - non-blocking initialization
 	{
 		sendDebug(F("Starting WiFi client connection"), F("WifiServer"));
-		
+
 		_radio->beginClient(_ssid, _password);
 		_connectionState = WifiConnectionState::Connecting;
 		_connectionStartTime = SystemFunctions::millis64();
@@ -682,6 +682,7 @@ void WifiServer::processClientRequest(uint8_t index)
 	{
 		sendDebug(F("Static asset request rejected"), F("WifiServer"));
 		send404(*client.client, isPersistent);
+
 		if (!isPersistent)
 		{
 			cleanupClient(index);
@@ -698,6 +699,7 @@ void WifiServer::processClientRequest(uint8_t index)
 	{
 		_messageBus->publish<WifiServerProcessingRequestChanged>(method, path, query, true);
 	}
+
 	sendDebug(F("Processing request"), F("WifiServer"));
 	bool handled = false;
 
@@ -965,28 +967,28 @@ bool WifiServer::dispatchToHandler(IWifiClient& client, INetworkCommandHandler* 
 	sendDebug(command, F("WifiServer"));
 	sendDebug(F("Query: "), F("WifiServer"));
 	sendDebug(query, F("WifiServer"));
-	
+
 	size_t routeLen = SystemFunctions::calculateLength(handler->getRoute());
 	size_t pathLen = SystemFunctions::calculateLength(path);
 
 	if (pathLen > routeLen)
 	{
-	    size_t commandLen = pathLen - routeLen;
+		size_t commandLen = pathLen - routeLen;
 
-	    if (commandLen >= sizeof(command))
-	    {
-	        sendDebug(F("Command too long"), F("WifiServer"));
-	        return false;
-	    }
-	    
-	    // Extract everything after the handler route
-	    SystemFunctions::substr(command, sizeof(command), path, SystemFunctions::calculateLength(handler->getRoute()), MaximumPathLength);
-	    
-	    // Remove leading slash if present
-	    if (SystemFunctions::startsWith(command, F("/")))
-	    {
-	        SystemFunctions::substr(command, sizeof(command), command, 1);
-	    }
+		if (commandLen >= sizeof(command))
+		{
+			sendDebug(F("Command too long"), F("WifiServer"));
+			return false;
+		}
+
+		// Extract everything after the handler route
+		SystemFunctions::substr(command, sizeof(command), path, SystemFunctions::calculateLength(handler->getRoute()), MaximumPathLength);
+
+		// Remove leading slash if present
+		if (SystemFunctions::startsWith(command, F("/")))
+		{
+			SystemFunctions::substr(command, sizeof(command), command, 1);
+		}
 	}
 
 	// Parse parameters:
@@ -1063,6 +1065,13 @@ bool WifiServer::dispatchToHandler(IWifiClient& client, INetworkCommandHandler* 
 	}
 
 	// Prepare response buffer
+	// If the handler produces HTML it streams the full HTTP response itself
+	if (handler->generateHtml(client))
+	{
+		sendDebug(F("Handler generated HTML"), F("WifiServer"));
+		return true;
+	}
+
 	char responseBuffer[MaximumJsonResponseBufferSize];
 	responseBuffer[0] = '\0';
 
@@ -1085,7 +1094,7 @@ bool WifiServer::dispatchToHandler(IWifiClient& client, INetworkCommandHandler* 
 			return true;
 		}
 
-		sendDebug(F("Handler error"), F("WifiServer"));
+		sendError(F("Handler error"), F("WifiServer"));
 	}
 
 	return false;
@@ -1111,9 +1120,9 @@ void WifiServer::updateClientConnection()
 					_lastRSSI = _radio->rssi();
 					IPAddress ip = _radio->localIP();
 					snprintf(_ipAddress, sizeof(_ipAddress), "%d.%d.%d.%d", ip[0], ip[1], ip[2], ip[3]);
-
-					sendDebug(F("WiFi connected!"), F("WifiServer"));
 					
+					sendDebug(F("WiFi connected!"), F("WifiServer"));
+
 					// Start the HTTP server now that we're connected
 					startServer();
 				}

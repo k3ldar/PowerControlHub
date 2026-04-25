@@ -47,14 +47,27 @@ public:
      * @param bufferSize Size of response buffer
      * @return CommandResult with success/status
      */
-    virtual CommandResult handleRequest(const char* method,
+	virtual CommandResult handleRequest(const char* method,
 		const char* command,
-        StringKeyValue* params,
+		StringKeyValue* params,
 		uint8_t paramCount,
-        char* responseBuffer,
-        size_t bufferSize) = 0;
-    
-    virtual ~INetworkCommandHandler() = default;
+		char* responseBuffer,
+		size_t bufferSize) = 0;
+
+	/**
+	 * @brief Optionally stream an HTML response directly to the client.
+	 *
+	 * Handlers that produce HTML (rather than JSON) should override this method,
+	 * write a complete HTTP response (headers + body) to @p client and return true.
+	 * The default implementation returns false, which causes the caller to fall
+	 * back to the standard JSON path via handleRequest().
+	 *
+	 * @param client The WiFi client to write to.
+	 * @return true  if the response was handled and written; false otherwise.
+	 */
+	virtual bool generateHtml(IWifiClient& client) const { return false; }
+
+	virtual ~INetworkCommandHandler() = default;
 
     uint8_t formatJsonResponse(char* buffer, size_t size, bool success, const char* message = nullptr)
     {
