@@ -70,7 +70,6 @@ CommandResult RelayNetworkHandler::handleRequest(const char* method,
 
 			if (!result.success)
 			{
-				RelayResult status = static_cast<RelayResult>(result.status);
 				return CommandResult::error(InvalidCommandParameters);
 			}
 

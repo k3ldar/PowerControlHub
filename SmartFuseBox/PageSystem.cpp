@@ -73,8 +73,6 @@ void PageSystem::refresh(unsigned long now)
 
     if (now - _lastRefreshTime >= RefreshSystemIntervalMs)
     {
-        SerialCommandManager* compMgr = getCommandMgrComputer();
-
         _lastRefreshTime = now;
 
         setFuseBoxCpu(SystemCpuMonitor::getCpuUsage());

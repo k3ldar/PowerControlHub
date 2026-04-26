@@ -472,6 +472,82 @@ void SystemFunctions::sanitizeJsonString(const char* input, char* output, size_t
     output[outPos] = '\0';
 }
 
+void SystemFunctions::escapeHtml(const char* input, char* output, size_t outputSize)
+{
+    if (!output || outputSize == 0)
+        return;
+
+    output[0] = '\0';
+
+    if (!input)
+        return;
+
+    size_t outPos = 0;
+    const size_t limit = outputSize - 1;
+
+    while (*input != '\0' && outPos < limit)
+    {
+        char c = *input++;
+
+        // Escape special HTML characters
+        if (c == '&')
+        {
+            // &amp; (5 chars)
+            if (outPos + 5 > limit) break;
+            output[outPos++] = '&';
+            output[outPos++] = 'a';
+            output[outPos++] = 'm';
+            output[outPos++] = 'p';
+            output[outPos++] = ';';
+        }
+        else if (c == '<')
+        {
+            // &lt; (4 chars)
+            if (outPos + 4 > limit) break;
+            output[outPos++] = '&';
+            output[outPos++] = 'l';
+            output[outPos++] = 't';
+            output[outPos++] = ';';
+        }
+        else if (c == '>')
+        {
+            // &gt; (4 chars)
+            if (outPos + 4 > limit) break;
+            output[outPos++] = '&';
+            output[outPos++] = 'g';
+            output[outPos++] = 't';
+            output[outPos++] = ';';
+        }
+        else if (c == '"')
+        {
+            // &quot; (6 chars)
+            if (outPos + 6 > limit) break;
+            output[outPos++] = '&';
+            output[outPos++] = 'q';
+            output[outPos++] = 'u';
+            output[outPos++] = 'o';
+            output[outPos++] = 't';
+            output[outPos++] = ';';
+        }
+        else if (c == '\'')
+        {
+            // &#39; (5 chars)
+            if (outPos + 5 > limit) break;
+            output[outPos++] = '&';
+            output[outPos++] = '#';
+            output[outPos++] = '3';
+            output[outPos++] = '9';
+            output[outPos++] = ';';
+        }
+        else
+        {
+            output[outPos++] = c;
+        }
+    }
+
+    output[outPos] = '\0';
+}
+
 bool SystemFunctions::progmemToBuffer(const char* progmemStr, char* buffer, size_t bufferSize)
 {
     if (!progmemStr || !buffer || bufferSize == 0)

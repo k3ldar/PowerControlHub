@@ -22,6 +22,7 @@
 #include "SensorController.h"
 #include "ConfigManager.h"
 #include "BaseSensor.h"
+#include "SystemFunctions.h"
 
 // ---------------------------------------------------------------------------
 // Page-level fragments
@@ -96,8 +97,8 @@ constexpr char SensorSectionStart[] =
 
 constexpr char SensorSectionEnd[] = "</div></div></div>";
 
-constexpr char SensorSectionA[] = "<div class=\"col-6 col-sm-3\"><div class=\"card h-100 text-center p-2\" style=\"background:#0d1b2a\">"
-							 "<div class=\"small text-muted mb-1\">";
+constexpr char SensorSectionA[] = "<div class=\"col-6 col-sm-3\"><div class=\"card h-100 text-center p-2\" style=\"background:#0d1b2a;color:white\">"
+							 "<div class=\"small mb-1\">";
 constexpr char SensorSectionB[] = "</div><div><span class=\"sv\" id=\"s";
 constexpr char SensorSectionC[] = "\">";
 constexpr char SensorSectionD[] = "</span></div></div></div>";
@@ -112,9 +113,11 @@ private:
 	SensorController*   _sensorController;
 
 	// Writes sensor value(s) from a BaseSensor to the client by calling its formatStatusJson.
-	// The sensor's JSON is wrapped in a small object with the sensor name as key.
+	// Extracts and displays the first meaningful value from the sensor's JSON output.
 	void printSensorValues(IWifiClient& client, BaseSensor* sensor, uint8_t slotId) const
 	{
+		(void)slotId; // Not used, but kept for future extensibility
+
 		if (!sensor)
 		{
 			client.print("--");
@@ -125,15 +128,15 @@ private:
 		sensorBuffer[0] = '\0';
 		sensor->formatStatusJson(sensorBuffer, sizeof(sensorBuffer));
 
-		// For display purposes, we'll parse the JSON and extract key values
-		// For now, just display the sensor type name or simplified value
-		// (A full JSON parser would be heavy for ESP32; keep it simple)
-		client.print("<div class=\"small\" style=\"word-break:break-all;\">");
-
 		// Extract and display first numeric value or string from JSON
 		// This is a simplified approach - shows raw sensor data
 		const char* ptr = sensorBuffer;
 		bool foundValue = false;
+
+		// Buffer to collect the value (HTML-escape it)
+		char valueBuffer[32];
+		int valuePos = 0;
+
 		while (*ptr && !foundValue)
 		{
 			if (*ptr == ':')
@@ -141,14 +144,14 @@ private:
 				ptr++;
 				while (*ptr == ' ' || *ptr == '"') ptr++;
 
-				// Print up to 20 chars or until comma/brace
-				int count = 0;
-				while (*ptr && *ptr != ',' && *ptr != '}' && *ptr != '"' && count < 20)
+				// Collect up to 30 chars or until comma/brace/quote
+				valuePos = 0;
+				while (*ptr && *ptr != ',' && *ptr != '}' && *ptr != '"' && valuePos < 30)
 				{
-					client.print(*ptr);
+					valueBuffer[valuePos++] = *ptr;
 					ptr++;
-					count++;
 				}
+				valueBuffer[valuePos] = '\0';
 				foundValue = true;
 			}
 			else
@@ -157,12 +160,17 @@ private:
 			}
 		}
 
-		if (!foundValue)
+		if (foundValue && valuePos > 0)
+		{
+			// HTML-escape the value before displaying
+			char escapedValue[64];
+			SystemFunctions::escapeHtml(valueBuffer, escapedValue, sizeof(escapedValue));
+			client.print(escapedValue);
+		}
+		else
 		{
 			client.print("--");
 		}
-
-		client.print("</div>");
 	}
 
 	// Writes one enabled toggle-switch column to the client.
@@ -179,10 +187,14 @@ private:
 		Config* config = ConfigManager::getConfigPtr();
 		const char* name = (config != nullptr) ? config->relay.relays[relayIndex].longName : "Relay";
 
+		// HTML-escape the relay name for safe display
+		char escapedName[64];
+		SystemFunctions::escapeHtml(name, escapedName, sizeof(escapedName));
+
 		client.print(SwitchSectionA);
 		client.print(slotId);
 		client.print(SwitchSectionB);
-		client.print(name);
+		client.print(escapedName);
 		client.print(SwitchSectionC);
 		client.print(slotId);
 		client.print(SwitchSectionD);
@@ -203,8 +215,12 @@ private:
 	// slotId is the 1-based display index used for HTML element IDs.
 	void buildSensor(IWifiClient& client, BaseSensor* sensor, uint8_t slotId) const
 	{
+		// HTML-escape the sensor name for safe display
+		char escapedName[64];
+		SystemFunctions::escapeHtml(sensor->getSensorName(), escapedName, sizeof(escapedName));
+
 		client.print(SensorSectionA);
-		client.print(sensor->getSensorName());
+		client.print(escapedName);
 		client.print(SensorSectionB);
 		client.print(slotId);
 		client.print(SensorSectionC);
@@ -269,7 +285,10 @@ public:
 		Config* config = ConfigManager::getConfigPtr();
 		if (config != nullptr && config->location.name[0] != '\0')
 		{
-			client.print(config->location.name);
+			// HTML-escape the location name for safe display in title and heading
+			char escapedLocation[64];
+			SystemFunctions::escapeHtml(config->location.name, escapedLocation, sizeof(escapedLocation));
+			client.print(escapedLocation);
 		}
 		else
 		{
