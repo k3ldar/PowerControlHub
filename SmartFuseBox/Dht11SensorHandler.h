@@ -186,8 +186,6 @@ protected:
 
 	uint64_t update() override
 	{
-		sendDebug("Reading DHT11 sensor...", _name);
-
 		float temperature = 0.0f;
 		float humidity    = 0.0f;
 		int result = readDht11(_sensorPin, temperature, humidity);

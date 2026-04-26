@@ -353,6 +353,24 @@ public:
      */
     static void sanitizeJsonString(const char* input, char* output, size_t outputSize);
 
+    /**
+     * @brief Escape a string for safe embedding in HTML content.
+     *
+     * Applies HTML entity escaping for the five special characters:
+     *   - `&` -> `&amp;`
+     *   - `<` -> `&lt;`
+     *   - `>` -> `&gt;`
+     *   - `"` -> `&quot;`
+     *   - `'` -> `&#39;`
+     * The output is always null-terminated. Characters whose escape sequence
+     * would not fit in the remaining buffer are silently dropped.
+     *
+     * @param input  Source string (RAM)
+     * @param output Destination buffer
+     * @param outputSize Size of destination buffer including null terminator
+	 */
+	static void escapeHtml(const char* input, char* output, size_t outputSize);
+
 	static bool progmemToBuffer(const char* progmemStr, char* buffer, size_t bufferSize);
 
 	static TimeParts msToTimeParts(uint64_t ms);

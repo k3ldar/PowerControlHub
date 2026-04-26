@@ -75,10 +75,11 @@ SmartFuseBoxApp::SmartFuseBoxApp(SerialCommandManager* commandMgrComputer)
     _soundNetworkHandler(&_soundController),
     _warningNetworkHandler(&_warningManager),
     _systemNetworkHandler(&_wifiController),
-    _sensorNetworkHandler(nullptr)
+    _sensorNetworkHandler(nullptr),
+	_webIndexNetworkHandler(nullptr)
 
 #if defined(SD_CARD_SUPPORT)
-      , _sdCardLogger(&_sensorCommandHandler, &_warningManager)
+	  , _sdCardLogger(&_sensorCommandHandler, &_warningManager)
 #endif
 
       , _sensorManager(nullptr)
@@ -235,6 +236,8 @@ void SmartFuseBoxApp::setup(RemoteSensor** remoteSensors, uint8_t remoteSensorCo
     _sensorManager    = new SensorManager(allHandlers, totalCount);
 
     _sensorNetworkHandler = new SensorNetworkHandler(_sensorController);
+    _webIndexNetworkHandler = new WebIndexNetworkHandler(&_relayController, _sensorController);
+
     _relayController.setup();
 
     // middleware
@@ -443,7 +446,7 @@ void SmartFuseBoxApp::configureWifiSupport(Config* config)
     // network command handlers
     INetworkCommandHandler* networkHandlers[] = { &_relayNetworkHandler, &_soundNetworkHandler, &_warningNetworkHandler,
         &_systemNetworkHandler, _sensorNetworkHandler, &_configNetworkHandler, &_schedulerNetworkHandler,
-        &_externalSensorNetworkHandler,
+        &_externalSensorNetworkHandler, _webIndexNetworkHandler,
         &_wifiCommandBridge
     };
     size_t networkHandlerCount = sizeof(networkHandlers) / sizeof(networkHandlers[0]);

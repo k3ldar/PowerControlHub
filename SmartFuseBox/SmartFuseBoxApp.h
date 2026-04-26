@@ -55,6 +55,7 @@
 #include "SensorNetworkHandler.h"
 #include "WarningNetworkHandler.h"
 #include "SchedulerNetworkHandler.h"
+#include "WebIndexNetworkHandler.h"
 #include "WifiCommandBridge.h"
 
 #if defined(SD_CARD_SUPPORT)
@@ -129,6 +130,7 @@ private:
     WarningNetworkHandler _warningNetworkHandler;
     SystemNetworkHandler _systemNetworkHandler;
     SensorNetworkHandler* _sensorNetworkHandler;
+	WebIndexNetworkHandler* _webIndexNetworkHandler;
 
 #if defined(SD_CARD_SUPPORT)
     SdCardLogger _sdCardLogger;

@@ -66,13 +66,9 @@ CommandResult RelayNetworkHandler::handleRequest(const char* method,
 			}
 
 			CommandResult result = _relayController->setRelayState(relayIndex, state > 0);
-			RelayResult status = static_cast<RelayResult>(result.status);
 
-			if (status == RelayResult::InvalidIndex)
-			{
-				return CommandResult::error(InvalidCommandParameters);
-			}
-			else if (status == RelayResult::Reserved)
+
+			if (!result.success)
 			{
 				return CommandResult::error(InvalidCommandParameters);
 			}

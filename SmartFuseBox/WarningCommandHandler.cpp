@@ -31,7 +31,6 @@ bool WarningCommandHandler::handleCommand(SerialCommandManager* sender, const ch
     if (!warningManager)
     {
         sendAckErr(sender, command, F("Warning manager not configured"));
-        sendDebugMessage(F("Warning manager not available"), F("WarningCommandHandler"));
         return false;
     }
 
