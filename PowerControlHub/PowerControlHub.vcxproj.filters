@@ -1,0 +1,710 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Header Files\Bluetooth">
+      <UniqueIdentifier>{5acd69d0-acce-44d6-a78e-47664e8e5636}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Bluetooth">
+      <UniqueIdentifier>{be3c0dfc-ca08-4b9c-96eb-f395e93dc72e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\SerialCommandHandlers">
+      <UniqueIdentifier>{0f51ff6d-4f20-4083-819f-fc82bf203688}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\SerialCommandHandlers">
+      <UniqueIdentifier>{116e7f36-ca32-4d49-9f14-c2cadc47a1be}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\BusinessLogic">
+      <UniqueIdentifier>{9f596ba8-b476-499a-b358-f705bee60d84}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\NetworkCommandHandlers">
+      <UniqueIdentifier>{709bf93c-ce84-4056-b2d5-8beffb18f024}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\NetworkCommandHandlers">
+      <UniqueIdentifier>{65b4b309-7c84-4a92-a16f-ca5115f39376}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\BusinessLogic">
+      <UniqueIdentifier>{0936f4f8-0dcf-4bae-b691-92dcc0d450a7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\MQTT">
+      <UniqueIdentifier>{5ae035a4-a7e2-4d8a-926d-cd93d7c54131}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\MQTT">
+      <UniqueIdentifier>{7b0ba44e-6aba-401f-b60f-cd04a80a9099}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Abstractions">
+      <UniqueIdentifier>{5dee2cac-51d8-47ae-aa48-8d1c8c895b82}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Scheduler">
+      <UniqueIdentifier>{f5e88426-01b4-4b58-86e2-4351e40fb19d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Scheduler">
+      <UniqueIdentifier>{7e859e50-9303-4ac2-b6cf-67c4d02f2121}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Wifi">
+      <UniqueIdentifier>{d4fd71c2-65d2-4063-85cd-025fd454bafd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\SDCard">
+      <UniqueIdentifier>{f48d29f5-d769-4b98-95b3-644826ed0f98}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Nextion">
+      <UniqueIdentifier>{b3847c11-0bbc-4a90-8aa9-fd4507fcbf5c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Nextion">
+      <UniqueIdentifier>{dafb435f-7360-4352-b4aa-45bb9b2c98cf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Other">
+      <UniqueIdentifier>{7694abdc-b60b-4f29-a0db-de19e00cc1cb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Other">
+      <UniqueIdentifier>{3e32da0a-967e-46f5-89d1-241953e77613}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Components">
+      <UniqueIdentifier>{b2560382-112e-4051-8e71-7cbe1f03a4f2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Components">
+      <UniqueIdentifier>{c01f5b86-3ca9-4b0f-854a-2b57b09e207d}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="SmartFuseBox.ino" />
+    <ClCompile Include="RelayCommandHandler.h">
+      <Filter>Header Files\SerialCommandHandlers</Filter>
+    </ClCompile>
+    <ClCompile Include="RelayCommandHandler.cpp">
+      <Filter>Source Files\SerialCommandHandlers</Filter>
+    </ClCompile>
+    <ClCompile Include="SoundCommandHandler.cpp">
+      <Filter>Source Files\SerialCommandHandlers</Filter>
+    </ClCompile>
+    <ClCompile Include="ConfigCommandHandler.cpp">
+      <Filter>Source Files\SerialCommandHandlers</Filter>
+    </ClCompile>
+    <ClCompile Include="BluetoothManager.cpp">
+      <Filter>Source Files\Bluetooth</Filter>
+    </ClCompile>
+    <ClCompile Include="BluetoothSystemService.cpp">
+      <Filter>Source Files\Bluetooth</Filter>
+    </ClCompile>
+    <ClCompile Include="BluetoothSensorService.cpp">
+      <Filter>Source Files\Bluetooth</Filter>
+    </ClCompile>
+    <ClCompile Include="BluetoothRelayService.cpp">
+      <Filter>Source Files\Bluetooth</Filter>
+    </ClCompile>
+    <ClCompile Include="WifiServer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ConfigManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="RelayNetworkHandler.cpp">
+      <Filter>Source Files\NetworkCommandHandlers</Filter>
+    </ClCompile>
+    <ClCompile Include="SoundController.cpp">
+      <Filter>Source Files\BusinessLogic</Filter>
+    </ClCompile>
+    <ClCompile Include="SoundNetworkHandler.cpp">
+      <Filter>Source Files\NetworkCommandHandlers</Filter>
+    </ClCompile>
+    <ClCompile Include="WarningNetworkHandler.cpp">
+      <Filter>Source Files\NetworkCommandHandlers</Filter>
+    </ClCompile>
+    <ClCompile Include="SystemNetworkHandler.cpp">
+      <Filter>Source Files\NetworkCommandHandlers</Filter>
+    </ClCompile>
+    <ClCompile Include="ConfigManager.cpp">
+      <Filter>Source Files\SharedCode</Filter>
+    </ClCompile>
+    <ClCompile Include="SensorNetworkHandler.cpp">
+      <Filter>Source Files\NetworkCommandHandlers</Filter>
+    </ClCompile>
+    <ClCompile Include="ConfigNetworkHandler.cpp">
+      <Filter>Source Files\NetworkCommandHandlers</Filter>
+    </ClCompile>
+    <ClCompile Include="ConfigController.cpp">
+      <Filter>Source Files\BusinessLogic</Filter>
+    </ClCompile>
+    <ClCompile Include="LedMatrixManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SdCardLogger.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SDCardConfigLoader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MicroSdDriver.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MQTTClient.cpp">
+      <Filter>Source Files\MQTT</Filter>
+    </ClCompile>
+    <ClCompile Include="MQTTConfigCommandHandler.cpp">
+      <Filter>Source Files\MQTT</Filter>
+    </ClCompile>
+    <ClCompile Include="MQTTController.cpp">
+      <Filter>Source Files\MQTT</Filter>
+    </ClCompile>
+    <ClCompile Include="MQTTHandler.cpp">
+      <Filter>Source Files\MQTT</Filter>
+    </ClCompile>
+    <ClCompile Include="MQTTHandler.cpp">
+      <Filter>Source Files\MQTT</Filter>
+    </ClCompile>
+    <ClCompile Include="MQTTRelayHandler.cpp">
+      <Filter>Source Files\MQTT</Filter>
+    </ClCompile>
+    <ClCompile Include="MQTTSensorHandler.cpp">
+      <Filter>Source Files\MQTT</Filter>
+    </ClCompile>
+    <ClCompile Include="MQTTSystemHandler.cpp">
+      <Filter>Source Files\MQTT</Filter>
+    </ClCompile>
+    <ClCompile Include="SmartFuseBoxApp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SensorCommandHandler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SensorCommandHandler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SensorCommandHandler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SensorCommandHandler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SchedulerNetworkHandler.cpp">
+      <Filter>Source Files\Scheduler</Filter>
+    </ClCompile>
+    <ClCompile Include="SchedulerCommandHandler.cpp">
+      <Filter>Source Files\Scheduler</Filter>
+    </ClCompile>
+    <ClCompile Include="ScheduleController.cpp">
+      <Filter>Source Files\Scheduler</Filter>
+    </ClCompile>
+    <ClCompile Include="SensorController.h">
+      <Filter>Header Files\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="AckCommandHandler.cpp">
+      <Filter>Source Files\SerialCommandHandlers</Filter>
+    </ClCompile>
+    <ClCompile Include="SystemCommandHandler.cpp">
+      <Filter>Source Files\SerialCommandHandlers</Filter>
+    </ClCompile>
+    <ClCompile Include="WarningCommandHandler.cpp">
+      <Filter>Source Files\SerialCommandHandlers</Filter>
+    </ClCompile>
+    <ClCompile Include="BroadcastManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DateTimeManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SystemCpuMonitor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SystemFunctions.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ToneManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="WarningManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="OtaManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BinaryPresenceSensor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="WifiCommandBridge.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PageAbout.cpp">
+      <Filter>Source Files\Nextion</Filter>
+    </ClCompile>
+    <ClCompile Include="BasePage.cpp">
+      <Filter>Source Files\Nextion</Filter>
+    </ClCompile>
+    <ClCompile Include="PageBuoys.cpp">
+      <Filter>Source Files\Nextion</Filter>
+    </ClCompile>
+    <ClCompile Include="PageCardinalMarkers.cpp">
+      <Filter>Source Files\Nextion</Filter>
+    </ClCompile>
+    <ClCompile Include="PageEnvironment.cpp">
+      <Filter>Source Files\Nextion</Filter>
+    </ClCompile>
+    <ClCompile Include="PageFlags.cpp">
+      <Filter>Source Files\Nextion</Filter>
+    </ClCompile>
+    <ClCompile Include="PageHome.cpp">
+      <Filter>Source Files\Nextion</Filter>
+    </ClCompile>
+    <ClCompile Include="PageMoonPhase.cpp">
+      <Filter>Source Files\Nextion</Filter>
+    </ClCompile>
+    <ClCompile Include="PageRelay.cpp">
+      <Filter>Source Files\Nextion</Filter>
+    </ClCompile>
+    <ClCompile Include="PageRelaySettings.cpp">
+      <Filter>Source Files\Nextion</Filter>
+    </ClCompile>
+    <ClCompile Include="PageSettings.cpp">
+      <Filter>Source Files\Nextion</Filter>
+    </ClCompile>
+    <ClCompile Include="PageSoundEmergency.cpp">
+      <Filter>Source Files\Nextion</Filter>
+    </ClCompile>
+    <ClCompile Include="PageSoundFog.cpp">
+      <Filter>Source Files\Nextion</Filter>
+    </ClCompile>
+    <ClCompile Include="PageSoundManeuvering.cpp">
+      <Filter>Source Files\Nextion</Filter>
+    </ClCompile>
+    <ClCompile Include="PageSoundOther.cpp">
+      <Filter>Source Files\Nextion</Filter>
+    </ClCompile>
+    <ClCompile Include="PageSoundOvertaking.cpp">
+      <Filter>Source Files\Nextion</Filter>
+    </ClCompile>
+    <ClCompile Include="PageSoundSignals.cpp">
+      <Filter>Source Files\Nextion</Filter>
+    </ClCompile>
+    <ClCompile Include="PageSystem.cpp">
+      <Filter>Source Files\Nextion</Filter>
+    </ClCompile>
+    <ClCompile Include="PageVhfChannels.cpp">
+      <Filter>Source Files\Nextion</Filter>
+    </ClCompile>
+    <ClCompile Include="PageVhfDistress.cpp">
+      <Filter>Source Files\Nextion</Filter>
+    </ClCompile>
+    <ClCompile Include="PageVhfRadio.cpp">
+      <Filter>Source Files\Nextion</Filter>
+    </ClCompile>
+    <ClCompile Include="PageWarning.cpp">
+      <Filter>Source Files\Nextion</Filter>
+    </ClCompile>
+    <ClCompile Include="Phonetic.cpp">
+      <Filter>Source Files\Other</Filter>
+    </ClCompile>
+    <ClCompile Include="SunCalculator.cpp">
+      <Filter>Source Files\Other</Filter>
+    </ClCompile>
+    <ClCompile Include="RtcDS1302Driver.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BaseNextionCommandHandler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NavigationController.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ExternalSensorNetworkHandler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BinaryPresenceSensor.h">
+      <Filter>Header Files\Components</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="__vm\.SmartFuseBox.vsarduino.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SoundCommandHandler.h">
+      <Filter>Header Files\SerialCommandHandlers</Filter>
+    </ClInclude>
+    <ClInclude Include="WaterSensorHandler.h">
+      <Filter>Header Files\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Local.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BluetoothSystemService.h">
+      <Filter>Header Files\Bluetooth</Filter>
+    </ClInclude>
+    <ClInclude Include="BluetoothManager.h">
+      <Filter>Header Files\Bluetooth</Filter>
+    </ClInclude>
+    <ClInclude Include="BluetoothServiceBase.h">
+      <Filter>Header Files\Bluetooth</Filter>
+    </ClInclude>
+    <ClInclude Include="BluetoothSensorService.h">
+      <Filter>Header Files\Bluetooth</Filter>
+    </ClInclude>
+    <ClInclude Include="BluetoothController.h">
+      <Filter>Header Files\Bluetooth</Filter>
+    </ClInclude>
+    <ClInclude Include="BluetoothRelayService.h">
+      <Filter>Header Files\Bluetooth</Filter>
+    </ClInclude>
+    <ClInclude Include="RelayController.h">
+      <Filter>Header Files\BusinessLogic</Filter>
+    </ClInclude>
+    <ClInclude Include="RelayNetworkHandler.h">
+      <Filter>Header Files\NetworkCommandHandlers</Filter>
+    </ClInclude>
+    <ClInclude Include="INetworkCommandHandler.h">
+      <Filter>Header Files\NetworkCommandHandlers</Filter>
+    </ClInclude>
+    <ClInclude Include="SoundController.h">
+      <Filter>Header Files\BusinessLogic</Filter>
+    </ClInclude>
+    <ClInclude Include="SoundNetworkHandler.h">
+      <Filter>Header Files\NetworkCommandHandlers</Filter>
+    </ClInclude>
+    <ClInclude Include="WarningNetworkHandler.h">
+      <Filter>Header Files\NetworkCommandHandlers</Filter>
+    </ClInclude>
+    <ClInclude Include="JsonVisitor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SensorNetworkHandler.h">
+      <Filter>Header Files\NetworkCommandHandlers</Filter>
+    </ClInclude>
+    <ClInclude Include="NetworkJsonVisitor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SystemNetworkHandler.h">
+      <Filter>Header Files\NetworkCommandHandlers</Filter>
+    </ClInclude>
+    <ClInclude Include="ConfigNetworkHandler.h">
+      <Filter>Header Files\NetworkCommandHandlers</Filter>
+    </ClInclude>
+    <ClInclude Include="ConfigController.h">
+      <Filter>Header Files\BusinessLogic</Filter>
+    </ClInclude>
+    <ClInclude Include="MessageBus.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LightSensorHandler.h">
+      <Filter>Header Files\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="SensorDataRecord.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MQTTRelayHandler.h">
+      <Filter>Header Files\MQTT</Filter>
+    </ClInclude>
+    <ClInclude Include="MQTTClient.h">
+      <Filter>Header Files\MQTT</Filter>
+    </ClInclude>
+    <ClInclude Include="MQTTConfigCommandHandler.h">
+      <Filter>Header Files\MQTT</Filter>
+    </ClInclude>
+    <ClInclude Include="MQTTController.h">
+      <Filter>Header Files\MQTT</Filter>
+    </ClInclude>
+    <ClInclude Include="MQTTDefinitions.h">
+      <Filter>Header Files\MQTT</Filter>
+    </ClInclude>
+    <ClInclude Include="MQTTHandler.h">
+      <Filter>Header Files\MQTT</Filter>
+    </ClInclude>
+    <ClInclude Include="MQTTHandler.h">
+      <Filter>Header Files\MQTT</Filter>
+    </ClInclude>
+    <ClInclude Include="MQTTSensorHandler.h">
+      <Filter>Header Files\MQTT</Filter>
+    </ClInclude>
+    <ClInclude Include="MQTTSystemHandler.h">
+      <Filter>Header Files\MQTT</Filter>
+    </ClInclude>
+    <ClInclude Include="SmartFuseBoxApp.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RemoteSensor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="IWifiRadio.h">
+      <Filter>Header Files\Abstractions</Filter>
+    </ClInclude>
+    <ClInclude Include="IWifiController.h">
+      <Filter>Header Files\Abstractions</Filter>
+    </ClInclude>
+    <ClInclude Include="IWifiClient.h">
+      <Filter>Header Files\Abstractions</Filter>
+    </ClInclude>
+    <ClInclude Include="IBluetoothRadio.h">
+      <Filter>Header Files\Abstractions</Filter>
+    </ClInclude>
+    <ClInclude Include="ScheduleController.h">
+      <Filter>Header Files\Scheduler</Filter>
+    </ClInclude>
+    <ClInclude Include="SchedulerCommandHandler.h">
+      <Filter>Header Files\Scheduler</Filter>
+    </ClInclude>
+    <ClInclude Include="SchedulerNetworkHandler.h">
+      <Filter>Header Files\Scheduler</Filter>
+    </ClInclude>
+    <ClInclude Include="BoardConfig.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Esp32WifiClient.h">
+      <Filter>Header Files\Wifi</Filter>
+    </ClInclude>
+    <ClInclude Include="Esp32WifiRadio.h">
+      <Filter>Header Files\Wifi</Filter>
+    </ClInclude>
+    <ClInclude Include="NullWifiClient.h">
+      <Filter>Header Files\Wifi</Filter>
+    </ClInclude>
+    <ClInclude Include="NullWifiRadio.h">
+      <Filter>Header Files\Wifi</Filter>
+    </ClInclude>
+    <ClInclude Include="R4WifiClient.h">
+      <Filter>Header Files\Wifi</Filter>
+    </ClInclude>
+    <ClInclude Include="R4WifiRadio.h">
+      <Filter>Header Files\Wifi</Filter>
+    </ClInclude>
+    <ClInclude Include="WifiController.h">
+      <Filter>Header Files\Wifi</Filter>
+    </ClInclude>
+    <ClInclude Include="WifiRadioBridge.h">
+      <Filter>Header Files\Wifi</Filter>
+    </ClInclude>
+    <ClInclude Include="WifiServer.h">
+      <Filter>Header Files\Wifi</Filter>
+    </ClInclude>
+    <ClInclude Include="BluetoothRadioBridge.h">
+      <Filter>Header Files\Bluetooth</Filter>
+    </ClInclude>
+    <ClInclude Include="NullBluetoothRadio.h">
+      <Filter>Header Files\Bluetooth</Filter>
+    </ClInclude>
+    <ClInclude Include="SystemSensorHandler.h">
+      <Filter>Header Files\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="MicroSdDriver.h">
+      <Filter>Header Files\SDCard</Filter>
+    </ClInclude>
+    <ClInclude Include="SdCardLogger.h">
+      <Filter>Header Files\SDCard</Filter>
+    </ClInclude>
+    <ClInclude Include="BaseSensor.h">
+      <Filter>Header Files\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Dht11SensorHandler.h">
+      <Filter>Header Files\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="AckCommandHandler.h">
+      <Filter>Header Files\SerialCommandHandlers</Filter>
+    </ClInclude>
+    <ClInclude Include="ConfigCommandHandler.h">
+      <Filter>Header Files\SerialCommandHandlers</Filter>
+    </ClInclude>
+    <ClInclude Include="SensorCommandHandler.h">
+      <Filter>Header Files\SerialCommandHandlers</Filter>
+    </ClInclude>
+    <ClInclude Include="SharedBaseCommandHandler.h">
+      <Filter>Header Files\SerialCommandHandlers</Filter>
+    </ClInclude>
+    <ClInclude Include="SystemCommandHandler.h">
+      <Filter>Header Files\SerialCommandHandlers</Filter>
+    </ClInclude>
+    <ClInclude Include="WarningCommandHandler.h">
+      <Filter>Header Files\SerialCommandHandlers</Filter>
+    </ClInclude>
+    <ClInclude Include="BroadcastManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Config.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ConfigManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DateTimeManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LoggingSupport.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Queue.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SystemCpuMonitor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SystemDefinitions.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SystemFunctions.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ToneManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="WarningManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="WarningType.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BaseConfigCommandHandler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SensorConfigCommandHandler.h">
+      <Filter>Header Files\SerialCommandHandlers</Filter>
+    </ClInclude>
+    <ClInclude Include="OtaManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FirmwareVersion.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PageAbout.h">
+      <Filter>Header Files\Nextion</Filter>
+    </ClInclude>
+    <ClInclude Include="BasePage.h">
+      <Filter>Header Files\Nextion</Filter>
+    </ClInclude>
+    <ClInclude Include="PageBuoys.h">
+      <Filter>Header Files\Nextion</Filter>
+    </ClInclude>
+    <ClInclude Include="PageCardinalMarkers.h">
+      <Filter>Header Files\Nextion</Filter>
+    </ClInclude>
+    <ClInclude Include="PageEnvironment.h">
+      <Filter>Header Files\Nextion</Filter>
+    </ClInclude>
+    <ClInclude Include="PageFlags.h">
+      <Filter>Header Files\Nextion</Filter>
+    </ClInclude>
+    <ClInclude Include="PageHome.h">
+      <Filter>Header Files\Nextion</Filter>
+    </ClInclude>
+    <ClInclude Include="PageMoonPhase.h">
+      <Filter>Header Files\Nextion</Filter>
+    </ClInclude>
+    <ClInclude Include="PageRelay.h">
+      <Filter>Header Files\Nextion</Filter>
+    </ClInclude>
+    <ClInclude Include="PageRelaySettings.h">
+      <Filter>Header Files\Nextion</Filter>
+    </ClInclude>
+    <ClInclude Include="PageSettings.h">
+      <Filter>Header Files\Nextion</Filter>
+    </ClInclude>
+    <ClInclude Include="PageSoundEmergency.h">
+      <Filter>Header Files\Nextion</Filter>
+    </ClInclude>
+    <ClInclude Include="PageSoundFog.h">
+      <Filter>Header Files\Nextion</Filter>
+    </ClInclude>
+    <ClInclude Include="PageSoundManeuvering.h">
+      <Filter>Header Files\Nextion</Filter>
+    </ClInclude>
+    <ClInclude Include="PageSoundOther.h">
+      <Filter>Header Files\Nextion</Filter>
+    </ClInclude>
+    <ClInclude Include="PageSoundOvertaking.h">
+      <Filter>Header Files\Nextion</Filter>
+    </ClInclude>
+    <ClInclude Include="PageSoundSignals.h">
+      <Filter>Header Files\Nextion</Filter>
+    </ClInclude>
+    <ClInclude Include="PageSplash.h">
+      <Filter>Header Files\Nextion</Filter>
+    </ClInclude>
+    <ClInclude Include="PageSystem.h">
+      <Filter>Header Files\Nextion</Filter>
+    </ClInclude>
+    <ClInclude Include="PageVhfChannels.h">
+      <Filter>Header Files\Nextion</Filter>
+    </ClInclude>
+    <ClInclude Include="PageVhfDistress.h">
+      <Filter>Header Files\Nextion</Filter>
+    </ClInclude>
+    <ClInclude Include="PageVhfRadio.h">
+      <Filter>Header Files\Nextion</Filter>
+    </ClInclude>
+    <ClInclude Include="PageWarning.h">
+      <Filter>Header Files\Nextion</Filter>
+    </ClInclude>
+    <ClInclude Include="NextionIds.h">
+      <Filter>Header Files\Nextion</Filter>
+    </ClInclude>
+    <ClInclude Include="GpsSensorHandler.h">
+      <Filter>Header Files\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Astronomy.h">
+      <Filter>Header Files\Other</Filter>
+    </ClInclude>
+    <ClInclude Include="Phonetic.h">
+      <Filter>Header Files\Other</Filter>
+    </ClInclude>
+    <ClInclude Include="SunCalculator.h">
+      <Filter>Header Files\Other</Filter>
+    </ClInclude>
+    <ClInclude Include="Environment.h">
+      <Filter>Header Files\Other</Filter>
+    </ClInclude>
+    <ClInclude Include="RgbLedFade.h">
+      <Filter>Header Files\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="RtcDS1302Driver.h">
+      <Filter>Header Files\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="NextionFactory.h">
+      <Filter>Source Files\Nextion</Filter>
+    </ClInclude>
+    <ClInclude Include="INavigationDelegate.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NavigationController.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="build_opt.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ExternalSensorConfigCommandHandler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ExternalSensorNetworkHandler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NextionConfigCommandHandler.h">
+      <Filter>Header Files\SerialCommandHandlers</Filter>
+    </ClInclude>
+    <ClInclude Include="LedMatrixManager.h">
+      <Filter>Header Files\Other</Filter>
+    </ClInclude>
+    <ClInclude Include="WifiCommandBridge.h">
+      <Filter>Header Files\Wifi</Filter>
+    </ClInclude>
+    <ClInclude Include="SensorFactory.h">
+      <Filter>Header Files\Components</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Wifi.md" />
+    <None Include="Docs\Sensors.md" />
+    <None Include="Docs\Commands.md" />
+    <None Include="SmartFuseBox\Docs\Commands.md" />
+    <None Include="Docs\Local.md" />
+    <None Include="Docs\Warnings.md" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="SmartFuseSync\TestData\config-commands.txt" />
+    <Text Include="SmartFuseSync\TestData\test-commands.txt" />
+    <Text Include="TestData\test-commands-wifi.txt" />
+  </ItemGroup>
+</Project>
