@@ -78,7 +78,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="SmartFuseBox.ino" />
     <ClCompile Include="RelayCommandHandler.h">
       <Filter>Header Files\SerialCommandHandlers</Filter>
     </ClCompile>
@@ -322,6 +321,7 @@
     <ClCompile Include="BinaryPresenceSensor.h">
       <Filter>Header Files\Components</Filter>
     </ClCompile>
+    <ClCompile Include="PowerControlHub.ino" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="__vm\.SmartFuseBox.vsarduino.h">
@@ -692,6 +692,12 @@
     </ClInclude>
     <ClInclude Include="SensorFactory.h">
       <Filter>Header Files\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="WebIndexNetworkHandler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="__vm\.PowerControlHub.vsarduino.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
