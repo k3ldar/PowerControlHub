@@ -6,7 +6,7 @@ PowerControlHub is an Arduino-based 12V power distribution and control system fo
 ---
 
 ## Table of Contents
-<img src="Docs/img/pcbway.jpg" width="180" align="right" alt="Prototype PCBs for PowerControlHub were supported by PCBWay" />
+<a href="/docs/pcbway.md"><img src="Docs/img/pcbway.jpg" width="180" align="right" alt="Prototype PCBs for PowerControlHub were supported by PCBWay" /></a>
 
 - [Overview](#overview)
 - [Key Features](#key-features)
