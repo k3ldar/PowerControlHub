@@ -1,5 +1,5 @@
 /*
- * SmartFuseBox
+ * PowerControlHub
  * Copyright (C) 2025 Simon Carter (s1cart3r@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
@@ -24,7 +24,7 @@
 #include <SerialCommandManager.h>
 #include <SensorManager.h>
 
-#include "SmartFuseBoxConstants.h"
+#include "PowerControlHubConstants.h"
 #include "MessageBus.h"
 #include "RelayController.h"
 #include "SoundController.h"
@@ -91,7 +91,7 @@
 #include "RemoteSensor.h"
 #include "SensorFactory.h"
 
-class SmartFuseBoxApp
+class PowerControlHubApp
 {
 private:
     SerialCommandManager* _commandMgrComputer;
@@ -176,7 +176,7 @@ private:
 
 #if defined(CARD_CONFIG_LOADER)
     SdCardConfigLoader _sdCardConfigLoader;
-    static SmartFuseBoxApp* _instance;
+    static PowerControlHubApp* _instance;
     static void onSdCardReadyCallback(bool isNewCard);
 #endif
 
@@ -184,7 +184,7 @@ private:
     void configureBluetoothSupport(Config* config);
 
 public:
-    explicit SmartFuseBoxApp(SerialCommandManager* commandMgrComputer);
+    explicit PowerControlHubApp(SerialCommandManager* commandMgrComputer);
 
     void setup(RemoteSensor** remoteSensors, uint8_t remoteSensorCount);
     void loop();

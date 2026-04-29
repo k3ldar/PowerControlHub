@@ -1,5 +1,5 @@
 /*
- * SmartFuseBox
+ * PowerControlHub
  * Copyright (C) 2025 Simon Carter (s1cart3r@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
@@ -19,7 +19,7 @@
 #include <SerialCommandManager.h>
 
 #include "Local.h"
-#include "SmartFuseBoxApp.h"
+#include "PowerControlHubApp.h"
 #include "SystemFunctions.h"
 
 #include "WaterSensorHandler.h"
@@ -43,13 +43,13 @@ void onComputerCommandReceived(SerialCommandManager* mgr);
 // - `commandMgrComputer` is local to your .ino so you can select the hardware
 //   Serial instance and baud rate appropriate for your board. Keep the callback
 //   `onComputerCommandReceived` in this file so it can access the serial manager.
-// - Construct `SmartFuseBoxApp` with a pointer to the serial manager. Then
+// - Construct `PowerControlHubApp` with a pointer to the serial manager. Then
 //   configure board-specific resources (e.g. GPS serial) via app accessors before
 //   calling `app.setup()`. Call `app.loop()` from `loop()`.
 
 SerialCommandManager commandMgrComputer(&COMPUTER_SERIAL, onComputerCommandReceived, '\n', ':', ';', '=', 500, 64);
 
-SmartFuseBoxApp app(&commandMgrComputer);
+PowerControlHubApp app(&commandMgrComputer);
 
 void setup()
 {

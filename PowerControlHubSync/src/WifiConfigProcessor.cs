@@ -5,7 +5,7 @@ using System.Text.Json;
 
 namespace SmartFuseSync;
 
-[CmdLineDescription("Manages configuration updates for SmartFuseBox devices via WiFi")]
+[CmdLineDescription("Manages configuration updates for PowerControlHub devices via WiFi")]
 internal class WifiConfigProcessor : BaseCommandLine, IDisposable
 {
     private HttpClient? _httpClient;
@@ -18,16 +18,16 @@ internal class WifiConfigProcessor : BaseCommandLine, IDisposable
 
     public override void DisplayHelp()
     {
-        Display.WriteLine(VerbosityLevel.Quiet, "WiFi configuration management commands for SmartFuseBox devices");
+        Display.WriteLine(VerbosityLevel.Quiet, "WiFi configuration management commands for PowerControlHub devices");
         Display.WriteLine(VerbosityLevel.Quiet, "Usage: wificonfig <command> [options]");
     }
 
     public override int Execute(string[] args) => 0;
 
-    [CmdLineDescription("Updates configuration from a file to SmartFuseBox device via HTTP")]
+    [CmdLineDescription("Updates configuration from a file to PowerControlHub device via HTTP")]
     public int Update(
         [CmdLineAbbreviation("f", "Path to the configuration file")] string filePath,
-        [CmdLineAbbreviation("i", "IP address of the SmartFuseBox device")] string ipAddress,
+        [CmdLineAbbreviation("i", "IP address of the PowerControlHub device")] string ipAddress,
         [CmdLineAbbreviation("p", "HTTP port")] int port = 80,
         [CmdLineAbbreviation("w", "WiFi SSID (replaces {{WIFI_SSID}} placeholder)")] string? wifiSsid = null,
         [CmdLineAbbreviation("x", "WiFi Password (replaces {{WIFI_PASSWORD}} placeholder)")] string? wifiPassword = null)
@@ -138,9 +138,9 @@ internal class WifiConfigProcessor : BaseCommandLine, IDisposable
         }
     }
 
-    [CmdLineDescription("Queries current OTA firmware status from SmartFuseBox device (F13)")]
+    [CmdLineDescription("Queries current OTA firmware status from PowerControlHub device (F13)")]
     public int OtaStatus(
-        [CmdLineAbbreviation("i", "IP address of the SmartFuseBox device")] string ipAddress,
+        [CmdLineAbbreviation("i", "IP address of the PowerControlHub device")] string ipAddress,
         [CmdLineAbbreviation("p", "HTTP port")] int port = 80)
     {
         if (!IsEnabled)
@@ -194,9 +194,9 @@ internal class WifiConfigProcessor : BaseCommandLine, IDisposable
         }
     }
 
-    [CmdLineDescription("Checks or applies an OTA firmware update on SmartFuseBox device (F12)")]
+    [CmdLineDescription("Checks or applies an OTA firmware update on PowerControlHub device (F12)")]
     public int OtaUpdate(
-        [CmdLineAbbreviation("i", "IP address of the SmartFuseBox device")] string ipAddress,
+        [CmdLineAbbreviation("i", "IP address of the PowerControlHub device")] string ipAddress,
         [CmdLineAbbreviation("a", "Apply the update if one is available")] bool apply = false,
         [CmdLineAbbreviation("p", "HTTP port")] int port = 80)
     {
@@ -263,9 +263,9 @@ internal class WifiConfigProcessor : BaseCommandLine, IDisposable
         return httpResponse.Content.ReadAsStringAsync().GetAwaiter().GetResult();
     }
 
-    [CmdLineDescription("Tests connection to a SmartFuseBox device")]
+    [CmdLineDescription("Tests connection to a PowerControlHub device")]
     public int Test(
-        [CmdLineAbbreviation("i", "IP address of the SmartFuseBox device")] string ipAddress,
+        [CmdLineAbbreviation("i", "IP address of the PowerControlHub device")] string ipAddress,
         [CmdLineAbbreviation("p", "HTTP port")] int port = 80)
     {
         if (!IsEnabled)
@@ -305,7 +305,7 @@ internal class WifiConfigProcessor : BaseCommandLine, IDisposable
     [CmdLineDescription("Runs test commands from a test file and validates responses via WiFi")]
     public int RunTests(
         [CmdLineAbbreviation("f", "Path to the test file")] string filePath,
-        [CmdLineAbbreviation("i", "IP address of the SmartFuseBox device")] string ipAddress,
+        [CmdLineAbbreviation("i", "IP address of the PowerControlHub device")] string ipAddress,
         [CmdLineAbbreviation("p", "HTTP port")] int port = 80)
     {
         if (!IsEnabled)

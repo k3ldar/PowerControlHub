@@ -1,14 +1,14 @@
-﻿# SmartFuseBox Command Reference
+﻿# PowerControlHub Command Reference
 
 ## Overview
 
-This document describes every command the SmartFuseBox (SFB) firmware understands.
+This document describes every command the PowerControlHub (PCH) firmware understands.
 Commands travel over two transports:
 
 | Transport | Format | Direction |
 |---|---|---|
 | **Serial / USB** | `<CMD>:<key>=<val>;<key>=<val>\n` | Bidirectional |
-| **WiFi REST** | `POST /api/<group>/<CMD>?<key>=<val>&…` | Client → SFB |
+| **WiFi REST** | `POST /api/<group>/<CMD>?<key>=<val>&…` | Client → PCH |
 
 ### Command-group prefix summary
 
@@ -44,7 +44,7 @@ These are commands used to configure the system settings and can only be sent fr
 
 | Command | Example | Purpose |
 |---|---|---|
-| `F0` — Heart beat | `F0:w=0x00` or `F0:w=0x00;t=1733328600` | Send at rated intervals to monitor connection health. If no ACK received, indicates connection loss. **Params:** `w=<hex_warnings>` - bitmask of active local warnings (hex format). `t=<timestamp>` - Unix timestamp for continuous time sync. Smart Fuse Box automatically updates clock from `t=` parameter. |
+| `F0` — Heart beat | `F0:w=0x00` or `F0:w=0x00;t=1733328600` | Send at rated intervals to monitor connection health. If no ACK received, indicates connection loss. **Params:** `w=<hex_warnings>` - bitmask of active local warnings (hex format). `t=<timestamp>` - Unix timestamp for continuous time sync. PowerControlHub automatically updates clock from `t=` parameter. |
 | `F1` — System Initialized | `F1` | Sent by the system when initialization is complete to signal readiness. No params. Used to notify connected devices or software that the control panel is ready for operation. |
 | `F2` — Free Memory | `F2` | When received will return the amount of free memory. |
 | `F3` — Cpu Usage | `F3` | When received will return the current CPU usage. No params. |
@@ -56,8 +56,8 @@ These are commands used to configure the system settings and can only be sent fr
 | `F9` — SD Card Log File Size | `F9` | Get current log file size in bytes. Returns `v=<bytes>` where bytes is the size of the active log file. Returns `v=0` if no file is open. No params. |
 | `F10` — RTC Diagnostic | `F10` | Perform DS1302 RTC diagnostics. Returns status message with RTC health (availability, running state, write protection, time validity). Returns error message if RTC fails any check. No params. |
 | `F11` — Uptime | F11 | Returns system uptime as "days HH:MM:SS" (e.g. 2d 03:12:45). No params. |
-| `F12` — OTA Check / Apply | `F12` or `F12:apply=1` | Trigger an OTA firmware check against the latest GitHub release. Without params (or `apply=0`) checks only and returns current status. With `apply=1` downloads and applies the update if one is available (or queues apply if a check is already in progress). Response params: `v=<current>` current firmware version, `av=<available>` available version tag (empty if none found yet), `s=<state>` OTA state string. **SFB only** — requires `OTA_AUTO_UPDATE`, ESP32 and WiFi in client mode. |
-| `F13` — OTA Status | `F13` | Query current OTA state without triggering a check. Response params: `v=<current>` current firmware version, `av=<available>` available version tag, `s=<state>` OTA state string (`idle`, `checking`, `available`, `downloading`, `rebooting`, `failed`, `uptodate`), `auto=<0\|1>` whether auto-apply is enabled. **SFB only** — requires `OTA_AUTO_UPDATE`, ESP32 and WiFi in client mode. |
+| `F12` — OTA Check / Apply | `F12` or `F12:apply=1` | Trigger an OTA firmware check against the latest GitHub release. Without params (or `apply=0`) checks only and returns current status. With `apply=1` downloads and applies the update if one is available (or queues apply if a check is already in progress). Response params: `v=<current>` current firmware version, `av=<available>` available version tag (empty if none found yet), `s=<state>` OTA state string. **PCH only** — requires `OTA_AUTO_UPDATE`, ESP32 and WiFi in client mode. |
+| `F13` — OTA Status | `F13` | Query current OTA state without triggering a check. Response params: `v=<current>` current firmware version, `av=<available>` available version tag, `s=<state>` OTA state string (`idle`, `checking`, `available`, `downloading`, `rebooting`, `failed`, `uptodate`), `auto=<0\|1>` whether auto-apply is enabled. **PCH only** — requires `OTA_AUTO_UPDATE`, ESP32 and WiFi in client mode. |
 
 
 **OTA behaviour (F12 / F13):**
@@ -80,7 +80,7 @@ Example: `GET /api/system/F2`
 | Command | Example | Purpose |
 |---|---|---|
 | `C0` — Save Settings | `C0` | Persist current in-memory config to EEPROM. Responds `SAVED` on success. No params. |
-| `C1` — Get Settings | `C1` | Request full config dump. SFB replies with multiple frames covering all groups (see below). No params. |
+| `C1` — Get Settings | `C1` | Request full config dump. PCH replies with multiple frames covering all groups (see below). No params. |
 | `C2` — Reset Settings | `C2` | Full reset of all config to factory defaults. No params. |
 | `C3` — Rename Location | `C3:Sea Wolf` | Set the location name. Value directly, no `v=` prefix. Empty name → error. |
 | `C4` — SPI Pins | `C4:sck=12;mosi=11;miso=13` | Set SD card SPI bus pins. Params: `sck=<pin>;mosi=<pin>;miso=<pin>`. Use `255` to clear any pin. Call `C0` to persist. |
@@ -115,7 +115,7 @@ Example: `GET /api/system/F2`
 | `C33` — Light Sensor Threshold | `C33:v=512` | Analogue threshold (0–1023) above which daytime is detected. Default 512. Uses a rolling average of the last 10 samples; 3 consecutive consistent readings required before day/night state changes (see `S16`). |
 
 **C1 response sequence:**  
-SFB sends back: `C3` (name), `C4` (SPI pins), `C5` (home-button mappings), `C7` (location type), `C9` (sound delay), `C10`–`C17` (WiFi/Bluetooth — SFB only), `C18` (RTC pins), `C20`–`C23` (location identity), `C24`–`C27` (LED config), `C28` (tones), `N1`–`N6` (Nextion config), `R6` per relay (names), `R7` per relay (colours), `R8` per relay (default states), `R9` (linked pairs), `R10` (action types), `R11` (pins), `S0` per sensor (sensor config), then `ACK:C1=ok`.
+PCH sends back: `C3` (name), `C4` (SPI pins), `C5` (home-button mappings), `C7` (location type), `C9` (sound delay), `C10`–`C17` (WiFi/Bluetooth — PCH only), `C18` (RTC pins), `C20`–`C23` (location identity), `C24`–`C27` (LED config), `C28` (tones), `N1`–`N6` (Nextion config), `R6` per relay (names), `R7` per relay (colours), `R8` per relay (default states), `R9` (linked pairs), `R10` (action types), `R11` (pins), `S0` per sensor (sensor config), then `ACK:C1=ok`.
 
 Common errors: `Missing param`, `Empty name`, `Invalid boat type`, `Invalid offset (-12 to +14)`, `MMSI must be 9 digits`, `Invalid speed (4, 8, 12, 16, 20, or 24 MHz)`, `Config not available`, `EEPROM commit failed`.
 

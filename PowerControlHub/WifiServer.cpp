@@ -1,5 +1,5 @@
 /*
- * SmartFuseBox
+ * PowerControlHub
  * Copyright (C) 2025 Simon Carter (s1cart3r@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
@@ -517,8 +517,8 @@ void WifiServer::processClientRequest(uint8_t index)
 				userAgent++;
 			}
 
-			// Check if User-Agent matches "SmartFuseBox/1.0"
-			if (strncmp(userAgent, "SmartFuseBox/1.0", 16) != 0)
+			// Check if User-Agent matches "PowerControlHub/1.0"
+			if (strncmp(userAgent, "PowerControlHub/1.0", 16) != 0)
 			{
 				// Not authorized for persistent connection
 				isPersistent = false;

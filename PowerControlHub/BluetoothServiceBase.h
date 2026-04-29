@@ -1,5 +1,5 @@
 /*
- * SmartFuseBox
+ * PowerControlHub
  * Copyright (C) 2025 Simon Carter (s1cart3r@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
@@ -26,7 +26,7 @@
 /**
  * @brief Abstract base class for Bluetooth BLE services.
  * 
- * This class provides a common interface for all Bluetooth services in the SmartFuseBox.
+ * This class provides a common interface for all Bluetooth services in the PowerControlHub.
  * Each service corresponds to a command category from Commands.md (System, Config, Relay, etc.)
  * and encapsulates its own service UUID, characteristics, and command handling logic.
  * 

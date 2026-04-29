@@ -1,5 +1,5 @@
 /*
- * SmartFuseBox
+ * PowerControlHub
  * Copyright (C) 2025 Simon Carter (s1cart3r@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
-#include "SmartFuseBoxApp.h"
+#include "PowerControlHubApp.h"
 
 #include "SystemCpuMonitor.h"
 #include "DateTimeManager.h"
@@ -30,7 +30,7 @@
 #if defined(CARD_CONFIG_LOADER)
 #include "SDCardConfigLoader.h"
 
-SmartFuseBoxApp* SmartFuseBoxApp::_instance = nullptr;
+PowerControlHubApp* PowerControlHubApp::_instance = nullptr;
 #endif
 
 constexpr uint8_t DefaultDelay = 5;
@@ -39,7 +39,7 @@ constexpr uint8_t DefaultDelay = 5;
 // Actual pins are loaded from config in setup() via syncPinsFromConfig().
 static uint8_t _disabledRelayPins[ConfigRelayCount];
 
-SmartFuseBoxApp::SmartFuseBoxApp(SerialCommandManager* commandMgrComputer)
+PowerControlHubApp::PowerControlHubApp(SerialCommandManager* commandMgrComputer)
     : _commandMgrComputer(commandMgrComputer),
     _messageBus(),
     _relayController(&_messageBus, (memset(_disabledRelayPins, DefaultValue, sizeof(_disabledRelayPins)), _disabledRelayPins), ConfigRelayCount),
@@ -121,7 +121,7 @@ SmartFuseBoxApp::SmartFuseBoxApp(SerialCommandManager* commandMgrComputer)
 #endif
 }
 
-void SmartFuseBoxApp::setup(RemoteSensor** remoteSensors, uint8_t remoteSensorCount)
+void PowerControlHubApp::setup(RemoteSensor** remoteSensors, uint8_t remoteSensorCount)
 {
     // retrieve config settings
     ConfigManager::begin();
@@ -145,8 +145,8 @@ void SmartFuseBoxApp::setup(RemoteSensor** remoteSensors, uint8_t remoteSensorCo
 
 	DateTimeManager::begin(config->rtc);
 
-	// Build remote sensors from RemoteSensorsConfig (populated by ConfigManager::load()).
-	// Sensors are created dynamically here; ownership stays with SmartFuseBoxApp (_remoteSensors).
+    // Build remote sensors from RemoteSensorsConfig (populated by ConfigManager::load()).
+    // Sensors are created dynamically here; ownership stays with PowerControlHubApp (_remoteSensors).
 	// Any sensors passed in by the caller are ignored when config has entries.
 	if (config->remoteSensors.count > 0)
 	{
@@ -193,7 +193,7 @@ void SmartFuseBoxApp::setup(RemoteSensor** remoteSensors, uint8_t remoteSensorCo
 
 
     // Build local sensors from SensorsConfig (populated by ConfigManager::load() above).
-    // SensorFactory allocates each enabled entry once; ownership stays with SmartFuseBoxApp.
+    // SensorFactory allocates each enabled entry once; ownership stays with PowerControlHubApp.
     {
         SensorFactoryContext ctx;
         ctx.messageBus = &_messageBus;
@@ -355,7 +355,7 @@ void SmartFuseBoxApp::setup(RemoteSensor** remoteSensors, uint8_t remoteSensorCo
     _scheduleController.begin();
 }
 
-void SmartFuseBoxApp::loop()
+void PowerControlHubApp::loop()
 {
     uint64_t now = SystemFunctions::millis64();
 
@@ -441,7 +441,7 @@ void SmartFuseBoxApp::loop()
     delay(DefaultDelay);
 }
 
-void SmartFuseBoxApp::configureWifiSupport(Config* config)
+void PowerControlHubApp::configureWifiSupport(Config* config)
 {
     // network command handlers
     INetworkCommandHandler* networkHandlers[] = { &_relayNetworkHandler, &_soundNetworkHandler, &_warningNetworkHandler,
@@ -473,13 +473,13 @@ void SmartFuseBoxApp::configureWifiSupport(Config* config)
 #endif
 }
 
-void SmartFuseBoxApp::configureBluetoothSupport(Config* config)
+void PowerControlHubApp::configureBluetoothSupport(Config* config)
 {
     _bluetoothController.applyConfig(config);
 }
 
 #if defined(CARD_CONFIG_LOADER)
-void SmartFuseBoxApp::onSdCardReadyCallback(bool isNewCard)
+void PowerControlHubApp::onSdCardReadyCallback(bool isNewCard)
 {
     if (_instance)
     {

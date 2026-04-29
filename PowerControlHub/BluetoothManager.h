@@ -1,5 +1,5 @@
 /*
- * SmartFuseBox
+ * PowerControlHub
  * Copyright (C) 2025 Simon Carter (s1cart3r@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
@@ -48,7 +48,7 @@
  * BluetoothServiceBase* services[] = { &systemService, &relayService };
  * BluetoothManager btManager(services, 2);
  * 
- * btManager.begin("SmartFuseBox");
+ * btManager.begin("PowerControlHub");
  * 
  * void loop()
  * {

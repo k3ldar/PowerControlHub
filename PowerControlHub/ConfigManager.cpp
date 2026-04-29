@@ -1,5 +1,5 @@
 /*
- * SmartFuseBox
+ * PowerControlHub
  * Copyright (C) 2025 Simon Carter (s1cart3r@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
@@ -321,7 +321,7 @@ void ConfigManager::resetToDefaults()
 
 	_cfg.network.wifiEnabled = false;
 	_cfg.network.accessMode = WifiMode::AccessPoint;
-	strncpy(_cfg.network.ssid, "SmartFuseBox", sizeof(_cfg.network.ssid) - 1);
+	strncpy(_cfg.network.ssid, "PowerControlHub", sizeof(_cfg.network.ssid) - 1);
 	_cfg.network.ssid[sizeof(_cfg.network.ssid) - 1] = '\0';
 	SystemFunctions::GenerateDefaultPassword(_cfg.network.password, sizeof(_cfg.network.password));
 	_cfg.network.password[sizeof(_cfg.network.password) - 1] = '\0';
@@ -348,7 +348,7 @@ void ConfigManager::resetToDefaults()
 	_cfg.mqtt.port = ConfigMqttDefaultPort;
 	_cfg.mqtt.username[0] = '\0';
 	_cfg.mqtt.password[0] = '\0';
-	strncpy(_cfg.mqtt.deviceId, "smartfusebox_01", ConfigMqttDeviceIdLength - 1);
+	strncpy(_cfg.mqtt.deviceId, "PowerControlHub_01", ConfigMqttDeviceIdLength - 1);
 	_cfg.mqtt.deviceId[ConfigMqttDeviceIdLength - 1] = '\0';
 	_cfg.mqtt.useHomeAssistantDiscovery = false;
 	_cfg.mqtt.keepAliveInterval = ConfigMqttKeepAliveDefault;

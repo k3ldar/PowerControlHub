@@ -1,5 +1,5 @@
 /*
- * SmartFuseBox
+ * PowerControlHub
  * Copyright (C) 2025 Simon Carter (s1cart3r@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,7 +16,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 #include "SoundController.h"
-#include "SmartFuseBoxConstants.h"
+#include "PowerControlHubConstants.h"
 #include "SystemFunctions.h"
 
 // Define sound patterns according to COLREGS

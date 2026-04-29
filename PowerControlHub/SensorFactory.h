@@ -1,5 +1,5 @@
 /*
- * SmartFuseBox
+ * PowerControlHub
  * Copyright (C) 2025 Simon Carter (s1cart3r@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
@@ -39,7 +39,7 @@
 #include "BinaryPresenceSensor.h"
 
 /**
- * @brief Dependencies injected by SmartFuseBoxApp into SensorFactory::create().
+ * @brief Dependencies injected by PowerControlHubApp into SensorFactory::create().
  *
  * Grouping them into a struct keeps the create() signature manageable and means
  * adding a new shared dependency does not require touching every call-site.
@@ -68,7 +68,7 @@ struct SensorFactoryContext
  * destroyed or recreated at runtime.  A reboot is required for config changes to
  * take effect, which is intentional.
  *
- * Usage (inside SmartFuseBoxApp::setup):
+ * Usage (inside PowerControlHubApp::setup):
  * @code
  *   SensorFactoryContext ctx{ &_messageBus, ... };
  *   uint8_t factoryCount = 0;

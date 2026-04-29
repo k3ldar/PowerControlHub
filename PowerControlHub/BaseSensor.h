@@ -1,5 +1,5 @@
 /*
- * SmartFuseBox
+ * PowerControlHub
  * Copyright (C) 2025 Simon Carter (s1cart3r@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
@@ -22,8 +22,8 @@
 #include "Local.h"
 #include "JsonVisitor.h"
 
-// Forward declaration to allow SmartFuseBoxApp to be declared friend below
-class SmartFuseBoxApp;
+// Forward declaration to allow PowerControlHubApp to be declared friend below
+class PowerControlHubApp;
 
 
 enum class SensorType : uint8_t
@@ -51,7 +51,7 @@ struct MqttSensorChannel
 class BaseSensor : public BaseSensorHandler, public JsonVisitor
 {
     // Allow top-level application class to access BaseSensor internals
-	friend class SmartFuseBoxApp;
+	friend class PowerControlHubApp;
 private:
 	uint8_t _uniqueId = 0;
 

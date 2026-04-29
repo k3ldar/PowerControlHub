@@ -1,5 +1,5 @@
 /*
- * SmartFuseBox
+ * PowerControlHub
  * Copyright (C) 2026 Simon Carter (s1cart3r@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
@@ -228,7 +228,7 @@ bool OtaManager::fetchLatestTag(char* tagOut, size_t tagLen)
     HTTPClient http;
     http.begin(secureClient, url);
     http.setTimeout(OtaHttpTimeout);
-    http.addHeader("User-Agent", "SmartFuseBox-OTA");
+    http.addHeader("User-Agent", "PowerControlHub-OTA");
     http.addHeader("Accept", "application/vnd.github+json");
 
     if (_broadcaster)
@@ -423,7 +423,7 @@ bool OtaManager::fetchChecksum(const char* tag, char* hashHexOut, size_t hashLen
 
     char url[256];
     snprintf(url, sizeof(url),
-        "https://github.com/%s/%s/releases/download/%s/SmartFuseBox-%s-%s.sha256",
+        "https://github.com/%s/%s/releases/download/%s/PowerControlHub-%s-%s.sha256",
         OtaGithubOwner, OtaGithubRepo, tag, CONFIG_IDF_TARGET, tag);
 
     if (_broadcaster)
@@ -440,7 +440,7 @@ bool OtaManager::fetchChecksum(const char* tag, char* hashHexOut, size_t hashLen
     ghHttp.begin(ghClient, url);
     ghHttp.setTimeout(OtaHttpTimeout);
     ghHttp.setFollowRedirects(HTTPC_DISABLE_FOLLOW_REDIRECTS);
-    ghHttp.addHeader("User-Agent", "SmartFuseBox-OTA");
+    ghHttp.addHeader("User-Agent", "PowerControlHub-OTA");
 
     int code = ghHttp.GET();
 
@@ -491,7 +491,7 @@ bool OtaManager::fetchChecksum(const char* tag, char* hashHexOut, size_t hashLen
     cdnHttp.begin(cdnClient, cdnUrl);
     cdnHttp.setTimeout(OtaHttpTimeout);
     cdnHttp.setFollowRedirects(HTTPC_FORCE_FOLLOW_REDIRECTS);
-    cdnHttp.addHeader("User-Agent", "SmartFuseBox-OTA");
+    cdnHttp.addHeader("User-Agent", "PowerControlHub-OTA");
 
     code = cdnHttp.GET();
 
@@ -591,7 +591,7 @@ bool OtaManager::downloadAndApply(const char* tag, const char* expectedHash)
 
     char url[256];
     snprintf(url, sizeof(url),
-        "https://github.com/%s/%s/releases/download/%s/SmartFuseBox-%s-%s.bin",
+        "https://github.com/%s/%s/releases/download/%s/PowerControlHub-%s-%s.bin",
         OtaGithubOwner, OtaGithubRepo, tag, CONFIG_IDF_TARGET, tag);
 
     if (_broadcaster)
@@ -608,7 +608,7 @@ bool OtaManager::downloadAndApply(const char* tag, const char* expectedHash)
     ghHttp.begin(ghClient, url);
     ghHttp.setTimeout(OtaHttpTimeout);
     ghHttp.setFollowRedirects(HTTPC_DISABLE_FOLLOW_REDIRECTS);
-    ghHttp.addHeader("User-Agent", "SmartFuseBox-OTA");
+    ghHttp.addHeader("User-Agent", "PowerControlHub-OTA");
 
     int code = ghHttp.GET();
 
@@ -646,7 +646,7 @@ bool OtaManager::downloadAndApply(const char* tag, const char* expectedHash)
     http.begin(secureClient, cdnUrl);
     http.setTimeout(30000);
     http.setFollowRedirects(HTTPC_FORCE_FOLLOW_REDIRECTS);
-    http.addHeader("User-Agent", "SmartFuseBox-OTA");
+    http.addHeader("User-Agent", "PowerControlHub-OTA");
 
     code = http.GET();
 

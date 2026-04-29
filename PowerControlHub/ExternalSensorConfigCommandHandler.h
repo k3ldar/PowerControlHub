@@ -1,5 +1,5 @@
 /*
- * SmartFuseBox
+ * PowerControlHub
  * Copyright (C) 2025 Simon Carter (s1cart3r@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
@@ -30,7 +30,7 @@
  * add/update is split across two commands.
  *
  * *** Important — reboot required ***
- * RemoteSensor instances are constructed once during SmartFuseBoxApp::setup().
+ * RemoteSensor instances are constructed once during PowerControlHubApp::setup().
  * Changes here only affect persisted config; they take effect at next boot.
  * Every mutating ACK carries a "reboot=1" field to make this explicit.
  *

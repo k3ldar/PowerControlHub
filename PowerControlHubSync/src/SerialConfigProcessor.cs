@@ -3,7 +3,7 @@ using System.IO.Ports;
 
 namespace SmartFuseSync;
 
-[CmdLineDescription("Manages configuration updates for SmartFuseBox devices via COM PORT")]
+[CmdLineDescription("Manages configuration updates for PowerControlHub devices via COM PORT")]
 internal class SerialConfigProcessor : BaseCommandLine, IDisposable
 {
     private SerialPort? _serialPort;
@@ -16,7 +16,7 @@ internal class SerialConfigProcessor : BaseCommandLine, IDisposable
 
     public override void DisplayHelp()
     {
-        Display.WriteLine(VerbosityLevel.Quiet, "Configuration management commands for SmartFuseBox devices");
+        Display.WriteLine(VerbosityLevel.Quiet, "Configuration management commands for PowerControlHub devices");
         Display.WriteLine(VerbosityLevel.Quiet, "Usage: config <command> [options]");
     }
 
@@ -25,7 +25,7 @@ internal class SerialConfigProcessor : BaseCommandLine, IDisposable
         return 0;
     }
 
-    [CmdLineDescription("Updates configuration from a file to SmartFuseBox device")]
+    [CmdLineDescription("Updates configuration from a file to PowerControlHub device")]
     public int Update(
         [CmdLineAbbreviation("f", "Path to the configuration file")] string filePath,
         [CmdLineAbbreviation("p", "COM port name (e.g., COM3)")] string portName,
@@ -180,7 +180,7 @@ internal class SerialConfigProcessor : BaseCommandLine, IDisposable
         }
     }
 
-    [CmdLineDescription("Tests connection to a SmartFuseBox device")]
+    [CmdLineDescription("Tests connection to a PowerControlHub device")]
     public int Test(
         [CmdLineAbbreviation("p", "COM port name (e.g., COM3)")] string portName,
         [CmdLineAbbreviation("b", "Baud rate for COM port connection")] int baudRate = 9600)
@@ -226,7 +226,7 @@ internal class SerialConfigProcessor : BaseCommandLine, IDisposable
         }
     }
 
-    [CmdLineDescription("Reads current configuration from SmartFuseBox device")]
+    [CmdLineDescription("Reads current configuration from PowerControlHub device")]
     public int Read(
         [CmdLineAbbreviation("p", "COM port name (e.g., COM3)")] string portName,
         [CmdLineAbbreviation("o", "Output file path to save configuration")] string? outputPath = null,

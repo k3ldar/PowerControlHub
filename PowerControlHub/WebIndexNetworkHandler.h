@@ -1,6 +1,6 @@
 #pragma once
 /*
- * SmartFuseBox
+ * PowerControlHub
  * Copyright (C) 2026 Simon Carter (s1cart3r@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify

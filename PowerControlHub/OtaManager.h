@@ -1,5 +1,5 @@
 /*
- * SmartFuseBox
+ * PowerControlHub
  * Copyright (C) 2026 Simon Carter (s1cart3r@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
@@ -34,12 +34,12 @@ constexpr uint64_t OtaCheckIntervalMs = 24UL * 60UL * 60UL * 1000UL;
 constexpr uint64_t OtaUpdatePollMs = 10000UL;
 
 // GitHub repository owner and name — update if the repo is ever moved.
-constexpr char OtaGithubOwner[] = "SmartFuseBox";
-constexpr char OtaGithubRepo[]  = "SmartFuseBox";
+constexpr char OtaGithubOwner[] = "k3ldar";
+constexpr char OtaGithubRepo[]  = "PowerControlHub";
 
 // Asset filenames include both the board target and the version tag, e.g.:
-//   SmartFuseBox-esp32-v0.9.2.2.bin
-//   SmartFuseBox-esp32-v0.9.2.2.sha256
+//   PowerControlHub-esp32-v0.9.2.2.bin
+//   PowerControlHub-esp32-v0.9.2.2.sha256
 // They are constructed at runtime in fetchChecksum() and downloadAndApply()
 // using CONFIG_IDF_TARGET (set by the ESP32 core) and the fetched tag string.
 
@@ -137,10 +137,10 @@ private:
 public:
     OtaManager(IWifiController* wifiController, BroadcastManager* broadcaster);
 
-    // Call once from SmartFuseBoxApp::setup().
+    // Call once from PowerControlHubApp::setup().
     void begin();
 
-    // Call every iteration of SmartFuseBoxApp::loop().
+    // Call every iteration of PowerControlHubApp::loop().
     void update(uint64_t now);
 
     // Request an immediate version check. Pass applyIfAvailable = true to also

@@ -171,7 +171,7 @@
     <ClCompile Include="MQTTSystemHandler.cpp">
       <Filter>Source Files\MQTT</Filter>
     </ClCompile>
-    <ClCompile Include="SmartFuseBoxApp.cpp">
+    <ClCompile Include="PowerControlHubApp.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="SensorCommandHandler.cpp">
@@ -426,7 +426,7 @@
     <ClInclude Include="MQTTSystemHandler.h">
       <Filter>Header Files\MQTT</Filter>
     </ClInclude>
-    <ClInclude Include="SmartFuseBoxApp.h">
+    <ClInclude Include="PowerControlHubApp.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="RemoteSensor.h">
@@ -697,6 +697,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="__vm\.PowerControlHub.vsarduino.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PowerControlHubConstants.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
