@@ -1,16 +1,8 @@
-﻿# PowerControlHub
-<table border="0"><tr>
-<td>
+﻿# PowerControlHub  <a href="Docs/pcbway.md" style="float:right;"><img src="Docs/img/pcbway.jpg" width="180" alt="Prototype PCBs for PowerControlHub were supported by PCBWay" /></a>
+
 **PowerControlHub** is an Arduino-based 12V power distribution and control system for marine and off-grid applications. It provides configurable fused relay switching, multi-protocol sensor telemetry, WiFi/BLE/MQTT connectivity, and a companion touchscreen control panel — all managed through a unified serial command protocol and EEPROM-persisted configuration.
-</td>
-<td align="right" valign="top">
 
-<a href="Docs/pcbway.md"><img src="Docs/img/pcbway.jpg" alt="Prototype PCBs for PowerControlHub were supported by PCBWay" /></a>
-
-</td>
-</tr></table>
-
-> Current firmware version: **0.9.1** — see [`FirmwareVersion.h`](PowerControlHub/FirmwareVersion.h).
+> Current firmware version: **0.9.1.x** — see [`FirmwareVersion.h`](PowerControlHub/FirmwareVersion.h).
 
 ---
 
