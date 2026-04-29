@@ -1,4 +1,4 @@
-name: Build SmartFuseBox Firmware
+name: Build PowerControlHub Firmware
 
 on:
   push:
@@ -36,15 +36,15 @@ jobs:
         arduino-cli lib install "TinyGPSPlus"
         arduino-cli lib install "DS1302"
 
-    - name: Compile SmartFuseBox firmware
+    - name: Compile PowerControlHub firmware
       run: |
         arduino-cli compile \
           --fqbn esp32:esp32:esp32s3 \
-          --output-dir SmartFuseBox/Build \
-          SmartFuseBox
+          --output-dir PowerControlHub/Build \
+          PowerControlHub
 
     - name: Upload firmware artifact
       uses: actions/upload-artifact@v4
       with:
-        name: SmartFuseBox-firmware
-        path: SmartFuseBox/Build/SmartFuseBox.ino.bin
+        name: PowerControlHub-firmware
+        path: PowerControlHub/Build/PowerControlHub.ino.bin

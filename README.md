@@ -1,8 +1,8 @@
-﻿# SmartFuseBox
+﻿# PowerControlHub
 
-**SmartFuseBox** is an Arduino-based 12V power distribution and control system for marine and off-grid applications. It provides configurable fused relay switching, multi-protocol sensor telemetry, WiFi/BLE/MQTT connectivity, and a companion touchscreen control panel — all managed through a unified serial command protocol and EEPROM-persisted configuration.
+**PowerControlHub** is an Arduino-based 12V power distribution and control system for marine and off-grid applications. It provides configurable fused relay switching, multi-protocol sensor telemetry, WiFi/BLE/MQTT connectivity, and a companion touchscreen control panel — all managed through a unified serial command protocol and EEPROM-persisted configuration.
 
-> Current firmware version: **0.9.0** — see [`FirmwareVersion.h`](SmartFuseBox/FirmwareVersion.h).
+> Current firmware version: **0.9.0** — see [`FirmwareVersion.h`](PowerControlHub/FirmwareVersion.h).
 
 ---
 
@@ -24,9 +24,9 @@
 
 ## Overview
 
-SmartFuseBox is a single-unit firmware target running on an Arduino Uno R4 WiFi or ESP32 NodeMCU-32. The Nextion touchscreen display is driven directly by the SFB controller over a dedicated hardware serial port (`Serial2` for GPS; display connected via `NextionControl`).
+PowerControlHub is a single-unit firmware target running on an Arduino Uno R4 WiFi or ESP32 NodeMCU-32. The Nextion touchscreen display is driven directly by the PCH controller over a dedicated hardware serial port (`Serial2` for GPS; display connected via `NextionControl`).
 
-The firmware entry point is `SmartFuseBoxApp`, which owns all subsystem instances and wires them together at startup. Host and debug communication uses a text-based framed serial protocol:
+The firmware entry point is `PowerControlHubApp`, which owns all subsystem instances and wires them together at startup. Host and debug communication uses a text-based framed serial protocol:
 
 ```
 <CMD>:<key>=<value>;<key>=<value>\n
@@ -92,7 +92,7 @@ Uses a platform-abstraction interface (`IWifiRadio`) to isolate board-specific W
   - `BluetoothSensorService` — sensor telemetry characteristics with notifications.
   - `BluetoothRelayService` — relay state read and write characteristics.
 - Single-client model. Advertising restarts automatically after disconnect.
-- No pairing or bonding. Device advertises as **"Smart Fuse Box"**.
+- No pairing or bonding. Device advertises as **"Power Control Hub"**.
 - Uses `IBluetoothRadio` interface — higher-level code operates exclusively through the interface pointer, with runtime null-checks replacing compile-time guards.
 - **Arduino Uno R4 WiFi constraint:** WiFi and BLE share the RF path on the ANNA-B112/ESP32-S3 modules; `BLUETOOTH_SUPPORT` and `WIFI_SUPPORT` are mutually exclusive on this board. Enforced by a compile-time `#error`. On ESP32, both can operate simultaneously.
 
@@ -134,8 +134,8 @@ Key events: `WarningChanged`, `RelayStatusChanged`, `TemperatureUpdated`, `Humid
 ### Over-the-Air Updates (OTA)
 
 - Available on **ESP32 + `WIFI_SUPPORT` + `OTA_AUTO_UPDATE`** only.
-- Polls the GitHub Releases API (`SmartFuseBox/SmartFuseBox`) every **24 hours**.
-- Downloads asset `SmartFuseBox-esp32-v{major}.{minor}.{patch}.{build}.bin` with SHA-256 checksum verification.
+- Polls the GitHub Releases API (`k3ldar/PowerControlHub`) every **24 hours**.
+- Downloads asset `PowerControlHub-esp32-v{major}.{minor}.{patch}.{build}.bin` with SHA-256 checksum verification.
 - TLS connections use pinned root CA certificates (Sectigo E46 for `api.github.com`; ISRG Root X1 for `assets.githubusercontent.com`).
 - **Auto-apply is disabled by default.** Enable via `F12:apply=1` or the `OtaFlagAutoApply` bit in `SystemHeader::reserved[0]`.
 - OTA state (`idle`, `checking`, `available`, `downloading`, `rebooting`, `failed`, `uptodate`) is queryable at any time via `F13`.
@@ -166,7 +166,7 @@ Key events: `WarningChanged`, `RelayStatusChanged`, `TemperatureUpdated`, `Humid
 ### Repository Structure
 
 ```
-SmartFuseBox/    Firmware source (relays, sensors, WiFi, BLE, MQTT, OTA, SD, Nextion display)
+PowerControlHub/    Firmware source (relays, sensors, WiFi, BLE, MQTT, OTA, SD, Nextion display)
 Docs/            Reference documentation
 TestData/        Serial command test scripts
 ```
@@ -174,7 +174,7 @@ TestData/        Serial command test scripts
 ### Subsystem Dependency Graph
 
 ```
-SmartFuseBoxApp
+PowerControlHubApp
 ├── MessageBus                  Pub/sub event bus (no dynamic allocation)
 ├── RelayController             Relay switching, linking, pulse, action types
 ├── SoundController             COLREGS signal sequencer -> horn relay
@@ -206,7 +206,7 @@ SmartFuseBoxApp
 
 ### Interface Abstraction Pattern
 
-WiFi and Bluetooth subsystems are each accessed through a platform-agnostic interface (`IWifiRadio`, `IBluetoothRadio`). Board-specific drivers (`R4WifiRadio`, `Esp32WifiRadio`, `BluetoothController`) are constructed only inside `SmartFuseBoxApp` under the appropriate `#if defined(...)` guard. All higher-level code operates through interface pointers with runtime null-checks, minimising preprocessor usage and enabling straightforward test doubles.
+WiFi and Bluetooth subsystems are each accessed through a platform-agnostic interface (`IWifiRadio`, `IBluetoothRadio`). Board-specific drivers (`R4WifiRadio`, `Esp32WifiRadio`, `BluetoothController`) are constructed only inside `PowerControlHubApp` under the appropriate `#if defined(...)` guard. All higher-level code operates through interface pointers with runtime null-checks, minimising preprocessor usage and enabling straightforward test doubles.
 
 ### Configuration Persistence
 
@@ -250,12 +250,12 @@ Board selection is controlled by a single `#define` in `Local.h` using the trail
 1. Clone the repository:
 
    ```
-   git clone https://github.com/SmartFuseBox/SmartFuseBox
+   git clone https://github.com/k3ldar/PowerControlHub
    ```
 
 2. Install all required libraries via the Arduino IDE Library Manager, and copy `NextionControl` manually.
 
-3. Open `SmartFuseBox/SmartFuseBox.ino` in the Arduino IDE.
+3. Open `k3ldar/PowerControlHub.ino` in the Arduino IDE.
 
 4. Edit `Local.h` to activate the correct board and feature flags (see [Configuration](#configuration)).
 
@@ -267,7 +267,7 @@ Full setup walkthrough: [Docs/SETUP.md](Docs/SETUP.md).
 
 ## Configuration
 
-All hardware-specific configuration is isolated in a single file: `SmartFuseBox/Local.h`. No other file requires modification for a standard hardware setup.
+All hardware-specific configuration is isolated in a single file: `PowerControlHub/Local.h`. No other file requires modification for a standard hardware setup.
 
 ### Board Selection
 
@@ -413,7 +413,7 @@ GET /api/system/F13
 
 ## License
 
-SmartFuseBox is released under the **GNU General Public License v3.0**.  
+PowerControlHub is released under the **GNU General Public License v3.0**.  
 See [LICENSE](LICENSE) for the full licence text.
 
 Copyright &copy; 2025 Simon Carter (`s1cart3r@gmail.com`)

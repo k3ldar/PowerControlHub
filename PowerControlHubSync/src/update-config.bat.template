@@ -1,0 +1,57 @@
+@echo off
+REM ===================================================================
+REM SmartFuseSync Configuration Update Script
+REM 
+REM IMPORTANT: This file contains WiFi credentials!
+REM Add this file to .gitignore - DO NOT commit to Git!
+REM ===================================================================
+
+REM Configuration
+set COM_PORT=COM3
+set BAUD_RATE=115200
+set CONFIG_FILE=..\TestData\config-commands.txt
+
+REM WiFi Credentials (CHANGE THESE!)
+set WIFI_SSID=YourNetworkName
+set WIFI_PASSWORD=YourNetworkPassword
+
+REM ===================================================================
+REM Do not edit below this line
+REM ===================================================================
+
+echo ===================================================================
+echo SmartFuseSync - Configuration Update
+echo ===================================================================
+echo.
+echo Configuration: %CONFIG_FILE%
+echo COM Port: %COM_PORT%
+echo Baud Rate: %BAUD_RATE%
+echo WiFi SSID: %WIFI_SSID%
+echo.
+echo WARNING: This will update the device configuration!
+echo Press Ctrl+C to cancel, or
+pause
+echo.
+
+dotnet run -- config update ^
+  -f "%CONFIG_FILE%" ^
+  -p %COM_PORT% ^
+  -b %BAUD_RATE% ^
+  -w "%WIFI_SSID%" ^
+  -x "%WIFI_PASSWORD%"
+
+if %errorlevel% equ 0 (
+    echo.
+    echo ===================================================================
+    echo SUCCESS: Configuration updated successfully!
+    echo ===================================================================
+) else (
+    echo.
+    echo ===================================================================
+    echo ERROR: Configuration update failed!
+    echo Check the error messages above.
+    echo ===================================================================
+)
+
+echo.
+pause

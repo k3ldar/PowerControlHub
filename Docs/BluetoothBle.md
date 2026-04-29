@@ -1,4 +1,4 @@
-# SmartFuseBox – Bluetooth BLE
+# PowerControlHub – Bluetooth BLE
 
 This document covers the Bluetooth BLE subsystem: component responsibilities, service and characteristic reference, connection lifecycle, and how to add a new service.
 
@@ -30,7 +30,7 @@ BluetoothController
 
 The Bluetooth subsystem uses a lightweight interface (`IBluetoothRadio`) to decouple higher-level application code from platform-specific BLE driver code. This pattern:
 
-- **Minimizes preprocessor usage** — `#if defined(BLUETOOTH_SUPPORT)` is only required where the concrete `BluetoothController` is constructed (`SmartFuseBoxApp`).
+- **Minimizes preprocessor usage** — `#if defined(BLUETOOTH_SUPPORT)` is only required where the concrete `BluetoothController` is constructed (`PowerControlHubApp`).
 - **Enables runtime control** — higher-level controllers (`ConfigController`, `SystemSensorHandler`, etc.) accept nullable `IBluetoothRadio*` pointers and use runtime null-checks instead of compile-time guards.
 - **Simplifies testing** — test doubles can implement `IBluetoothRadio` without requiring Arduino/BLE libraries.
 - **Mirrors Wi-Fi pattern** — follows the same architecture as `IWifiRadio` for consistency.
@@ -50,9 +50,9 @@ Key methods:
 
 ### `BluetoothController`
 
-Concrete implementation of `IBluetoothRadio`. Top-level lifecycle owner that manages the ArduinoBLE stack and all services. Constructed inside `SmartFuseBoxApp` only when `BLUETOOTH_SUPPORT` is defined.
+Concrete implementation of `IBluetoothRadio`. Top-level lifecycle owner that manages the ArduinoBLE stack and all services. Constructed inside `PowerControlHubApp` only when `BLUETOOTH_SUPPORT` is defined.
 
-**Composition:** `SmartFuseBoxApp` exposes a `bluetoothController()` accessor that returns `IBluetoothRadio*`:
+**Composition:** `PowerControlHubApp` exposes a `bluetoothController()` accessor that returns `IBluetoothRadio*`:
 - Returns `&_bluetoothController` when `BLUETOOTH_SUPPORT` is defined.
 - Returns `nullptr` otherwise.
 
@@ -96,7 +96,7 @@ Abstract base class. All services inherit from it and implement:
 - **Single client** — only one BLE central can be connected at a time.
 - **Advertising** — starts automatically on `begin()` and restarts automatically after every disconnect.
 - **No pairing / bonding** — all characteristics are open; security is physical proximity.
-- **Device name** — advertised as **"Smart Fuse Box"**.
+- **Device name** — advertised as **"Power Control Hub"**.
 
 ---
 
@@ -109,7 +109,7 @@ Abstract base class. All services inherit from it and implement:
 | Characteristic | UUID | Type | Properties | Update Interval | Description |
 |---|---|---|---|---|---|
 | Heartbeat | `beb5483e-36e1-4688-b7f5-ea07361b26a0` | `uint32` | Read, Notify | 1000 ms | Monotonically incrementing counter; confirms BLE stack is alive |
-| Initialized | `beb5483e-36e1-4688-b7f5-ea07361b26a1` | `uint8` | Read, Notify | On event | `0xFF` at startup; set to `1` once the SFB firmware has finished initialising |
+| Initialized | `beb5483e-36e1-4688-b7f5-ea07361b26a1` | `uint8` | Read, Notify | On event | `0xFF` at startup; set to `1` once the PCH firmware has finished initialising |
 | Free Memory | `beb5483e-36e1-4688-b7f5-ea07361b26a2` | `uint32` | Read, Notify | 5000 ms | Available heap in bytes |
 | CPU Usage | `beb5483e-36e1-4688-b7f5-ea07361b26a3` | `float` | Read, Notify | 2000 ms | CPU load as a percentage (0.0 – 100.0) |
 
@@ -195,9 +195,9 @@ public:
 };
 ```
 
-**Wiring (e.g., `SmartFuseBox.ino`):**
+**Wiring (e.g., `PowerControlHub.ino`):**
 ```cpp
-SmartFuseBoxApp app(&commandMgrComputer, &commandMgrLink, Relays, ConfigRelayCount);
+PowerControlHubApp app(&commandMgrComputer, &commandMgrLink, Relays, ConfigRelayCount);
 
 // Fetch interface pointer (returns nullptr if not compiled in)
 IBluetoothRadio* bluetooth = app.bluetoothController();
@@ -313,7 +313,7 @@ if (_myService)
 
 - **Separation of concerns:** Platform/driver code (`BluetoothController`, ArduinoBLE headers) is compiled only when `BLUETOOTH_SUPPORT` is defined. Application logic (`ConfigController`, sensor handlers) depends only on `IBluetoothRadio` and compiles everywhere.
 - **Minimal #if usage:** The only places requiring `#if defined(BLUETOOTH_SUPPORT)` are:
-  1. `SmartFuseBoxApp.h` — around the concrete `BluetoothController` member declaration.
-  2. `SmartFuseBoxApp.cpp` — around construction and initialization of `BluetoothController`.
-  3. `SmartFuseBoxApp::bluetoothController()` — to return `nullptr` when not compiled in.
+  1. `PowerControlHubApp.h` — around the concrete `BluetoothController` member declaration.
+  2. `PowerControlHubApp.cpp` — around construction and initialization of `BluetoothController`.
+  3. `PowerControlHubApp::bluetoothController()` — to return `nullptr` when not compiled in.
 - **Testability:** Mock implementations of `IBluetoothRadio` can be injected into components for unit testing without requiring BLE hardware or libraries.

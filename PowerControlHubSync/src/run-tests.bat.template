@@ -1,0 +1,44 @@
+@echo off
+REM ===================================================================
+REM SmartFuseSync Test Runner Script
+REM Safe to commit - no credentials required
+REM ===================================================================
+
+REM Configuration
+set COM_PORT=COM3
+set BAUD_RATE=115200
+set TEST_FILE=..\TestData\test-commands.txt
+
+REM ===================================================================
+
+echo ===================================================================
+echo SmartFuseSync - Automated Test Suite
+echo ===================================================================
+echo.
+echo Test File: %TEST_FILE%
+echo COM Port: %COM_PORT%
+echo Baud Rate: %BAUD_RATE%
+echo.
+pause
+echo.
+
+dotnet run -- config runtests ^
+  -f "%TEST_FILE%" ^
+  -p %COM_PORT% ^
+  -b %BAUD_RATE%
+
+if %errorlevel% equ 0 (
+    echo.
+    echo ===================================================================
+    echo SUCCESS: All tests passed!
+    echo ===================================================================
+) else (
+    echo.
+    echo ===================================================================
+    echo WARNING: Some tests failed!
+    echo Review the output above for details.
+    echo ===================================================================
+)
+
+echo.
+pause

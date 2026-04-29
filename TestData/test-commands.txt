@@ -59,7 +59,7 @@ C9:v=100 -> ACK:C9=ok:*
 C9:v=255 -> ACK:C9=ok:*
 
 # ============================================================
-# CONFIGURATION COMMANDS - WiFi Settings (SFB)
+# CONFIGURATION COMMANDS - WiFi Settings (PCH)
 # ============================================================
 C11:v=0 -> ACK:C11=ok:*
 C11:v=1 -> ACK:C11=ok:*
@@ -72,7 +72,7 @@ C15:v=8080 -> ACK:C15=ok:*
 C17:192.168.4.1 -> ACK:C17=ok:*
 
 # ============================================================
-# CONFIGURATION COMMANDS - Bluetooth Settings (SFB)
+# CONFIGURATION COMMANDS - Bluetooth Settings (PCH)
 # ============================================================
 C10:v=0 -> ACK:C10=ok:*|ACK:C10=Bluetooth init failed:*
 C10:v=1 -> ACK:C10=ok:*|ACK:C10=Bluetooth init failed:*
