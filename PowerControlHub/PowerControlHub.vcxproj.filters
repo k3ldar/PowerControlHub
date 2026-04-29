@@ -710,10 +710,9 @@
     <None Include="SmartFuseBox\Docs\Commands.md" />
     <None Include="Docs\Local.md" />
     <None Include="Docs\Warnings.md" />
+    <None Include="vcxproj.filters" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="SmartFuseSync\TestData\config-commands.txt" />
-    <Text Include="SmartFuseSync\TestData\test-commands.txt" />
-    <Text Include="TestData\test-commands-wifi.txt" />
   </ItemGroup>
 </Project>
