@@ -5,7 +5,7 @@
 </td>
 <td align="right" valign="top">
 
-<a href="Docs/pcbway.md"><img src="Docs/img/pcbway.png" alt="Prototype PCBs for PowerControlHub were supported by PCBWay" width="392" /></a>
+<a href="Docs/pcbway.md"><img src="Docs/img/pcbway.jpg" alt="Prototype PCBs for PowerControlHub were supported by PCBWay" /></a>
 
 </td>
 </tr></table>
