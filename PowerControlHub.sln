@@ -17,7 +17,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{B2F18220-A
 		..\LICENSE = ..\LICENSE
 		..\Docs\Local.md = ..\Docs\Local.md
 		..\Docs\MessageBus.md = ..\Docs\MessageBus.md
-		..\README.md = ..\README.md
+		Docs\pcbway.md = Docs\pcbway.md
 		..\Docs\RestApi.md = ..\Docs\RestApi.md
 		..\Docs\ScheduleEvents.md = ..\Docs\ScheduleEvents.md
 		..\Docs\Sensors.md = ..\Docs\Sensors.md
@@ -44,6 +44,11 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PowerControlHub", "PowerControlHub\PowerControlHub.vcxproj", "{BF57E525-5F6C-4BC1-9C83-B7ECAC52B23C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PowerControlHubSync", "PowerControlHubSync\src\PowerControlHubSync.csproj", "{31F2CD6A-B9E7-9FD4-3808-399C52A59619}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{BE620726-06BF-40F2-9AFC-50D6B6BAB1E5}"
+	ProjectSection(SolutionItems) = preProject
+		README.md = README.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
