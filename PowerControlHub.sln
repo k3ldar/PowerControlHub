@@ -3,11 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 18
 VisualStudioVersion = 18.3.11206.111
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SymLinks", "SymLinks", "{6BEDDF33-F479-4FE4-B2E7-CD5DA6C98DA1}"
-	ProjectSection(SolutionItems) = preProject
-		..\SymLinks\SymLinkDefinitionsSmartFuseBox.txt = ..\SymLinks\SymLinkDefinitionsSmartFuseBox.txt
-	EndProjectSection
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{B2F18220-A117-4398-ABED-D0C31F1F5844}"
 	ProjectSection(SolutionItems) = preProject
 		..\Docs\BluetoothBle.md = ..\Docs\BluetoothBle.md
