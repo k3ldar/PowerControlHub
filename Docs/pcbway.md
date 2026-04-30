@@ -10,7 +10,7 @@ This support has made it possible to move quickly from design to real-world vali
 
 ---
 
-## 📸 Prototype Boards
+## Prototype Boards
 
 ![PowerControlHub PCB](/Docs/img/pcb4.jpg)
 ![PowerControlHub PCB](/Docs/img/pcb3.jpg)
@@ -19,7 +19,7 @@ This support has made it possible to move quickly from design to real-world vali
 
 ---
 
-## 🧪 What’s Next
+## What’s Next
 
 These boards will be used for real-world testing, including:
 
@@ -32,17 +32,17 @@ Updates and findings will be added here as testing progresses.
 
 ---
 
-## 🧩 Hardware Design
+## Hardware Design
 
 The current design is based around an **8-relay configuration**, with full KiCad source files available in the repository:
 
 If you're interested in adapting the design:
 
-> 💡 A **4-relay variant** could be a useful smaller/cheaper option — if you’d like to design one, feel free to fork the project or submit a PR.
+> A **4-relay variant** could be a useful smaller/cheaper option — if you’d like to design one, feel free to fork the project or submit a PR.
 
 ---
 
-## 📦 Enclosure (Work in Progress)
+## Enclosure (Work in Progress)
 
 A custom **3D-printed enclosure** is currently being developed to house the board and associated components.
 
@@ -54,7 +54,7 @@ Preview images and STL files will be added soon.
 
 ---
 
-## 🙏 Acknowledgement
+## Acknowledgement
 
 PCB prototyping and assembly support for this project was provided by [PCBWay](https://www.pcbway.com), enabling rapid iteration from concept to physical hardware.
 
