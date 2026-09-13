@@ -25,13 +25,16 @@ public class PowerHubService
 {
     private readonly IDashboardConnection _dashboardConnection;
     private readonly IConfigConnection _configConnection;
+    private readonly IDashboardProvider _dashboardProvider;
 
     public PowerHubService(IDashboardConnection dashboardConnection,
         IConfigConnection configConnection,
-        IMessageBus messageBus)
+        IMessageBus messageBus,
+        IDashboardProvider dashboardProvider)
     {
         _dashboardConnection = dashboardConnection ?? throw new ArgumentNullException(nameof(dashboardConnection));
         _configConnection = configConnection ?? throw new ArgumentNullException(nameof(configConnection));
+        _dashboardProvider = dashboardProvider ?? throw new ArgumentNullException(nameof(dashboardProvider));
 
         messageBus.Subscribe<AuthConfigChanged>(OnAuthConfigChanged);
     }
@@ -39,6 +42,8 @@ public class PowerHubService
     public bool IsConfigured => _dashboardConnection.IsConfigured;
 
     public string BaseUrl => _dashboardConnection is DashboardConnection dc ? dc.BaseUrl : string.Empty;
+
+    public IndexModel CurrentIndex => _dashboardProvider?.CurrentIndex;
 
     public void Configure(string ipAddress, int port, string apiKey = "", string hmacKey = "")
     {

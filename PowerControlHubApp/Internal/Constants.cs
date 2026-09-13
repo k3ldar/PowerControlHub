@@ -12,6 +12,8 @@ namespace PowerControlHubApp.Internal
 #endif
         public const string ApplicationNameWithIcon = IconWarning + SingleSpace + ApplicationName;
         public const string ApplicationName = "Power Control Hub";
+        public const string AndroidLogTag = "PowerControlHub";
+        public const string UnknownExceptionMessage = "Unknown exception";
         public const string SummarySeparator = ";";
         public const string IconTimePrefix = "🕐";
         public const string IconExternalSensor = "📡";
@@ -28,7 +30,7 @@ namespace PowerControlHubApp.Internal
         public const string IconLocalSensor = "🔌";
         public const string IconRelaySymbol = "⚡";
         public const string IconRemove = "🗑";
-        public const string NavBack = "...";
+        public const string NavBack = "..";
         public const string FailSeparator = ";";
         public const string ColorAsHex1 = "#44cc44";
         public const string ColorError = "#cc4444";

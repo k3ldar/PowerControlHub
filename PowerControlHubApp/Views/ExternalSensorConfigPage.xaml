@@ -55,13 +55,6 @@
         <!-- Content -->
         <Grid Grid.Row="2" IsVisible="{Binding IsConnected}">
 
-            <!-- Loading indicator -->
-            <ActivityIndicator IsRunning="{Binding IsBusy}"
-                               IsVisible="{Binding IsBusy}"
-                               Color="{DynamicResource AppAccent}"
-                               VerticalOptions="Center"
-                               HorizontalOptions="Center" />
-
             <!-- Status / error message -->
             <Label Text="{Binding StatusMessage}"
                    IsVisible="{Binding HasStatus}"

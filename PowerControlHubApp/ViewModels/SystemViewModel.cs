@@ -318,11 +318,7 @@ public class SystemViewModel : BaseViewModel
             return;
 
         string message = string.Format(OtaDialogMessage, AvailableFirmwareVersion);
-        bool confirmed = await Application.Current.Windows[0].Page.DisplayAlertAsync(
-                OtaDialogTitle,
-                message,
-                OtaDialogAccept,
-                MsgCancel);
+        bool confirmed = await ConfirmAsync(OtaDialogTitle, message, OtaDialogAccept, MsgCancel);
 
         if (!confirmed)
             return;

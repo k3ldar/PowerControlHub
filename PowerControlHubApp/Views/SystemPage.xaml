@@ -21,7 +21,7 @@
                 <!-- Settings navigation card -->
                 <Border BackgroundColor="{DynamicResource AppHelpCardBg}" Stroke="{DynamicResource AppHelpCardStroke}"
                         StrokeShape="RoundRectangle 8" Padding="14">
-                    <HorizontalStackLayout Spacing="16" IsEnabled="{Binding IsConnected}">
+                    <FlexLayout Direction="Row" Wrap="Wrap" JustifyContent="Start" AlignItems="Center" IsEnabled="{Binding IsConnected}">
                         <Button Text="{x:Static localization:AppResources.Time}"
                                 Command="{Binding NavigateToTimeSettingsCommand}"
                                 FontSize="16"
@@ -29,6 +29,7 @@
                                 BackgroundColor="Transparent"
                                 TextColor="{DynamicResource AppAccent}"
                                 Padding="4"
+                                Margin="8"
                                 BorderColor="Blue"
                                 BorderWidth="1"/>
                         <Button Text="{x:Static localization:AppResources.RTC}"
@@ -38,6 +39,7 @@
                                 BackgroundColor="Transparent"
                                 TextColor="{DynamicResource AppAccent}"
                                 Padding="4"
+                                Margin="8"
                                 BorderColor="Blue"
                                 BorderWidth="1"/>
                         <Button Text="{x:Static localization:AppResources.Location}"
@@ -47,6 +49,7 @@
                                 BackgroundColor="Transparent"
                                 TextColor="{DynamicResource AppAccent}"
                                 Padding="4"
+                                Margin="8"
                                 BorderColor="Blue"
                                 BorderWidth="1"/>
                         <Button Text="{x:Static localization:AppResources.MQTT}"
@@ -56,6 +59,7 @@
                                 BackgroundColor="Transparent"
                                 TextColor="{DynamicResource AppAccent}"
                                 Padding="4"
+                                Margin="8"
                                 BorderColor="Blue"
                                 BorderWidth="1"/>
                         <Button Text="{x:Static localization:AppResources.SDCard}"
@@ -65,6 +69,7 @@
                                 BackgroundColor="Transparent"
                                 TextColor="{DynamicResource AppAccent}"
                                 Padding="4"
+                                Margin="8"
                                 BorderColor="Blue"
                                 BorderWidth="1"/>
                         <Button Text="{x:Static localization:AppResources.Security}"
@@ -74,6 +79,7 @@
                                 BackgroundColor="Transparent"
                                 TextColor="{DynamicResource AppAccent}"
                                 Padding="4"
+                                Margin="8"
                                 BorderColor="Blue"
                                 BorderWidth="1"/>
                         <Button Text="{x:Static localization:AppResources.Nextion}"
@@ -83,6 +89,7 @@
                                 BackgroundColor="Transparent"
                                 TextColor="{DynamicResource AppAccent}"
                                 Padding="4"
+                                Margin="8"
                                 BorderColor="Blue"
                                 BorderWidth="1"/>
                         <Button Text="{x:Static localization:AppResources.Buzzer}"
@@ -92,9 +99,10 @@
                                 BackgroundColor="Transparent"
                                 TextColor="{DynamicResource AppAccent}"
                                 Padding="4"
+                                Margin="8"
                                 BorderColor="Blue"
                                 BorderWidth="1"/>
-                    </HorizontalStackLayout>
+                    </FlexLayout>
                 </Border>
 
                 <!-- Language selection card -->

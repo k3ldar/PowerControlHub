@@ -338,3 +338,6 @@ StaticElectrics/__vm/
 /SmartFuseBox/__vm/.SmartFuseBox.vsarduino.h
 /LocalOnly
 /.github/copilot-instructions.md
+/PowerControlHubApp/pch-release-key.keystore
+/directory.props.build
+/BuildPlayStoreApp.txt

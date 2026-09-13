@@ -269,7 +269,7 @@ public sealed class NextionSettingsViewModel : BaseViewModel
 
     public async Task RebootAsync()
     {
-        bool confirmed = await Application.Current.Windows[0].Page.DisplayAlertAsync(NextionRebootTitle, NextionRebootMessage, Reboot, Cancel);
+        bool confirmed = await ConfirmAsync(NextionRebootTitle, NextionRebootMessage, Reboot, Cancel);
 
         if (!confirmed)
             return;
@@ -277,11 +277,11 @@ public sealed class NextionSettingsViewModel : BaseViewModel
         try
         {
             await Service.SaveSettingsAsync();
-            await Application.Current.Windows[0].Page.DisplayAlertAsync(Reboot, NextionRebootSavedMessage, OK);
+            await AlertAsync(Reboot, NextionRebootSavedMessage, OK);
         }
         catch
         {
-            await Application.Current.Windows[0].Page.DisplayAlertAsync(Reboot, NextionRebootFailed, OK);
+            await AlertAsync(Reboot, NextionRebootFailed, OK);
         }
     }
 
