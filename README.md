@@ -1,7 +1,7 @@
 ﻿# PowerControlHub  
 PowerControlHub is an Arduino-based 12V power distribution and control system for marine and off-grid applications. It provides configurable fused relay switching, multi-protocol sensor telemetry, WiFi/BLE/MQTT connectivity, and a companion touchscreen control panel — all managed through a unified serial command protocol and EEPROM-persisted configuration.
 
-> Current firmware version: **0.9.1.x** — see [`FirmwareVersion.h`](PowerControlHub/FirmwareVersion.h).
+> Current firmware version: **1.0.0.0** — see [`FirmwareVersion.h`](PowerControlHub/FirmwareVersion.h).
 
 ---
 
