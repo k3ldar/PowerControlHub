@@ -32,6 +32,7 @@ public class SensorTemplateSelector : DataTemplateSelector
             SensorType.Water => WaterTemplate ?? GenericTemplate,
             SensorType.System => SystemTemplate ?? GenericTemplate,
             SensorType.BinaryPresence => BinaryPresenceTemplate ?? GenericTemplate,
+            SensorType.ReedSwitch => BinaryPresenceTemplate ?? GenericTemplate,
             _ => GenericTemplate
         };
     }

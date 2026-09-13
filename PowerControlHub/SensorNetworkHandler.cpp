@@ -422,7 +422,7 @@ CommandResult SensorNetworkHandler::handleRequest(const char* method,
 		return CommandResult::ok();
 	}
 
-	// ---- S7-S23: Sensor Telemetry Queries (return full status) ----
+	// ---- S7-S24: Sensor Telemetry Queries (return full status) ----
 	if (SystemFunctions::commandMatches(command, SensorTemperature) ||
 		SystemFunctions::commandMatches(command, SensorHumidity) ||
 		SystemFunctions::commandMatches(command, SensorBearing) ||
@@ -439,7 +439,8 @@ CommandResult SensorNetworkHandler::handleRequest(const char* method,
 		SystemFunctions::commandMatches(command, SensorGpsSatellites) ||
 		SystemFunctions::commandMatches(command, SensorGpsDistance) ||
 		SystemFunctions::commandMatches(command, SensorBinaryPresence) ||
-		SystemFunctions::commandMatches(command, SensorVoltage))
+		SystemFunctions::commandMatches(command, SensorVoltage) ||
+		SystemFunctions::commandMatches(command, SensorReed))
 	{
 		if (!_sensorController)
 		{

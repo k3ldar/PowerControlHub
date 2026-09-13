@@ -192,6 +192,7 @@ E0:i=<idx>;mt=<mqttTypeSlug>;md=<mqttDeviceClass>;mu=<mqttUnit>;bin=<0|1>
 | `4` | SystemSensor |
 | `5` | BinaryPresenceSensor |
 | `6` | VoltageSensor |
+| `7` | ReedSensor |
 
 **How external sensors receive value updates:**  
 After boot the `name` field doubles as the sensor's serial command ID. An external device pushes readings by sending the name as a command:
@@ -336,7 +337,7 @@ Route: `/api/config/{command}` (shares the config route)
 ## Sensor Commands — `S`
 
 `S0`–`S6` are configuration commands (persisted in EEPROM, **reboot required**).  
-`S7`–`S23` are live telemetry commands (sensor readings).
+`S7`–`S24` are live telemetry commands (sensor readings).
 
 ### Sensor Configuration — `S0`–`S6`
 
@@ -391,6 +392,9 @@ The table below shows what each storage field means for each sensor type and whi
 | | | `options1[1]` | R2 in tenths of kΩ (`75`=7.5 kΩ; `0`=default 7.5 kΩ) | `S6:i=<idx>;s=1;o=0;v=<val>` |
 | | | `options2[0]` | R1 in whole kΩ (`30`=30 kΩ; `0`=default 30 kΩ) | `S6:i=<idx>;s=0;o=1;v=<val>` |
 | | | `options2[1]` | Low-voltage warning threshold in tenths of a volt (`114`=11.4 V; `0`=disabled) | `S6:i=<idx>;s=1;o=1;v=<val>` |
+| `7` | Reed Sensor | `pins[0]` | Sensor pin | `S4:i=<idx>;s=0;v=<pin>` |
+| | | `pins[1]` | Active output pin (driven HIGH while contact active; `255`=disabled) | `S4:i=<idx>;s=1;v=<pin>` |
+| | | `options1[0]` | Contact type: `0`=normally open (NO), `1`=normally closed (NC) | `S1:…;o0=<val>;o1=0` |
 
 **Voltage sensor setup example (30 kΩ / 7.5 kΩ divider, 12 V system, warn below 11.4 V):**
 ```
@@ -419,7 +423,7 @@ C0                      # Save to EEPROM — reboot to activate
 ```
 > **Note:** If either RX or TX pin is `255` (disabled) the GPS sensor will **not** be created at boot and a `GpsInvalidConfig` warning will be raised. Both pins must be set before saving.
 
-### Sensor Telemetry — `S7`–`S23`
+### Sensor Telemetry — `S7`–`S24`
 
 | Command | Example | Purpose |
 |---|---|---|
@@ -440,6 +444,7 @@ C0                      # Save to EEPROM — reboot to activate
 | `S21` — GPS Distance | `S21:v=1.23` | Total distance travelled. |
 | `S22` — Binary Presence | `S22:v=1;name=PIR` | Pin-change event: `v=1` detected, `v=0` clear. `name` = configured sensor name. |
 | `S23` — Voltage | `S23:v=12.45;avg=12.41` | Voltage reading from the DC 0–25 V module. `v`=latest sample in volts (2 d.p.), `avg`=10-reading rolling average in volts (2 d.p.). Raises `LowVoltage` warning when `avg` drops below the configured threshold; clears when it recovers. |
+| `S24` — Reed | `S24:v=1;name=Reed` | Contact state-change event: `v=1` active (detected), `v=0` clear. Sent only when the contact changes state. `name` = configured sensor name. |
 
 ### WiFi sensor commands
 Route: `/api/sensor/`  

@@ -16,6 +16,7 @@ namespace PowerControlHubApp.Models
             SensorTypeSystem,      // 4  System
             SensorTypeBinaryPresence, // 5  Binary Presence
             SensorTypeVoltage,     // 6  Voltage
+            SensorTypeReed,        // 7  Reed
         };
 
         [JsonPropertyName(JsonSensorIndex)]

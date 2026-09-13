@@ -117,6 +117,20 @@ constexpr SensorTypeDescriptor SensorDescriptors[] = {
 			{ "Low Warn (Vx10)", "int16", 0, 500, 0, PinUse::Sensor },
 		},
 	},
+	[static_cast<size_t>(SensorIdList::ReedSensor)] = {
+		.name = "Reed Sensor",
+		.pins = {
+			{ "Sensor Pin", "gpio", 0, 39, 255, PinUse::Sensor },
+			{ "Active Pin", "gpio", 0, 39, 255, PinUse::Output },
+			{ "Unused", "none", 0, 0, 0, PinUse::Sensor },
+			{ "Unused", "none", 0, 0, 0, PinUse::Sensor },
+		},
+		.options1 = {
+			{ "NO/NC", "int8", 0, 1, 0, PinUse::Sensor },
+			{ "Unused", "none", 0, 0, 0, PinUse::Sensor },
+		},
+		.options2 = { { "Unused", "none", 0, 0, 0, PinUse::Sensor }, { "Unused", "none", 0, 0, 0, PinUse::Sensor } },
+	},
 };
 
 static_assert(

@@ -574,6 +574,8 @@ public class LocalSensorDetailViewModel : BaseViewModel
             SensorTypeOptions.Add(SensorTypeGpsPicker);
             SensorTypeOptions.Add(SensorTypeSystemPicker);
             SensorTypeOptions.Add(SensorTypeBinaryPresencePicker);
+            SensorTypeOptions.Add(SensorTypeVoltagePicker);
+            SensorTypeOptions.Add(SensorTypeReedPicker);
         }
     }
 

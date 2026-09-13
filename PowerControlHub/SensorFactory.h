@@ -38,6 +38,7 @@
 #include "SystemSensorHandler.h"
 #include "BinaryPresenceSensor.h"
 #include "VoltageSensorHandler.h"
+#include "ReedSensorHandler.h"
 
 /**
  * @brief Dependencies injected by PowerControlHubApp into SensorFactory::create().
@@ -266,6 +267,32 @@ private:
 					onClearPayload,
 					pulseDurationSec);
 			}
+
+            case SensorIdList::ReedSensor:
+            {
+                if (entry.pins[0] == PinDisabled)
+                {
+                    if (ctx.warningManager != nullptr)
+                        ctx.warningManager->raiseWarning(WarningType::BinarySensorFailure);
+
+                    return nullptr;
+                }
+
+                // pins[0] = sensor pin
+                // pins[1] = active output pin (PinDisabled = not fitted)
+                // options1[0] = contact type (0 = normally open, 1 = normally closed)
+                uint8_t sensorPin = entry.pins[0];
+                bool normallyOpen = (entry.options1[0] == ReedContactNormallyOpen);
+                uint8_t activePin = entry.pins[1];
+
+                return new ReedSensorHandler(
+                    ctx.messageBus,
+                    ctx.broadcastManager,
+                    sensorPin,
+                    normallyOpen,
+                    activePin,
+                    entry.name);
+            }
 
             case SensorIdList::GpsSensor:
             {

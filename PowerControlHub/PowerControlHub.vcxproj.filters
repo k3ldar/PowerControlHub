@@ -721,12 +721,4 @@
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
-  <ItemGroup>
-    <None Include="PowerControlHubApp\Models\Json\SystemLocationTypesResponseModel.cs" />
-    <None Include="PowerControlHubApp\ViewModels\LocationSettingsViewModel.cs" />
-    <None Include="PowerControlHubApp\Views\LocationSettingsPage.xaml.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Page Include="PowerControlHubApp\Views\LocationSettingsPage.xaml" />
-  </ItemGroup>
 </Project>

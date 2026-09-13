@@ -5,6 +5,7 @@ VisualStudioVersion = 18.3.11206.111
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{B2F18220-A117-4398-ABED-D0C31F1F5844}"
 	ProjectSection(SolutionItems) = preProject
+		Docs\AddSensor.md = Docs\AddSensor.md
 		Docs\Architecture.md = Docs\Architecture.md
 		Docs\BluetoothBle.md = Docs\BluetoothBle.md
 		Docs\BOM.md = Docs\BOM.md
@@ -109,12 +110,14 @@ Global
 		{9A5A950B-B42B-40DE-BDA7-299184BB23BA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9A5A950B-B42B-40DE-BDA7-299184BB23BA}.Debug|ARM.ActiveCfg = Debug|Any CPU
 		{9A5A950B-B42B-40DE-BDA7-299184BB23BA}.Debug|ARM.Build.0 = Debug|Any CPU
+		{9A5A950B-B42B-40DE-BDA7-299184BB23BA}.Debug|ARM.Deploy.0 = Debug|Any CPU
 		{9A5A950B-B42B-40DE-BDA7-299184BB23BA}.Debug|ARM64.ActiveCfg = Debug|Any CPU
 		{9A5A950B-B42B-40DE-BDA7-299184BB23BA}.Debug|ARM64.Build.0 = Debug|Any CPU
 		{9A5A950B-B42B-40DE-BDA7-299184BB23BA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9A5A950B-B42B-40DE-BDA7-299184BB23BA}.Release|Any CPU.Build.0 = Release|Any CPU
 		{9A5A950B-B42B-40DE-BDA7-299184BB23BA}.Release|ARM.ActiveCfg = Release|Any CPU
 		{9A5A950B-B42B-40DE-BDA7-299184BB23BA}.Release|ARM.Build.0 = Release|Any CPU
+		{9A5A950B-B42B-40DE-BDA7-299184BB23BA}.Release|ARM.Deploy.0 = Release|Any CPU
 		{9A5A950B-B42B-40DE-BDA7-299184BB23BA}.Release|ARM64.ActiveCfg = Release|Any CPU
 		{9A5A950B-B42B-40DE-BDA7-299184BB23BA}.Release|ARM64.Build.0 = Release|Any CPU
 	EndGlobalSection

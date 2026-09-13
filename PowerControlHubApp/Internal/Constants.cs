@@ -331,6 +331,7 @@ namespace PowerControlHubApp.Internal
         public const int SensorEnumSystem = 4;
         public const int SensorEnumBinaryPresence = 5;
         public const int SensorEnumVoltage = 6;
+        public const int SensorEnumReed = 7;
 
         // Sensor telemetry JSON property names
         public const string JsonSensorIdType = "idType";
