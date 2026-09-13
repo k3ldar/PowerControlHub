@@ -28,6 +28,7 @@ public abstract class BaseViewModel : INotifyPropertyChanged
     private string _systemUptime = DoubleDash;
     private bool _hasWarnings;
     private bool _isApplyingRemoteState = true;
+    private bool _hasData;
 
     protected BaseViewModel(PowerHubService service, LogService log)
     {
@@ -40,6 +41,7 @@ public abstract class BaseViewModel : INotifyPropertyChanged
 
     protected LogService Log => _log;
     protected PowerHubService Service => _service;
+    protected IndexModel LastKnownIndex => _service.CurrentIndex;
 
     public ObservableCollection<LogEntryViewModel> LogEntries => _log.Entries;
 
@@ -242,6 +244,8 @@ public abstract class BaseViewModel : INotifyPropertyChanged
         if (IsBusy)
             return;
 
+        ApplyCachedIfNeeded();
+
         IsBusy = true;
         DeviceUrl = _service.BaseUrl;
 
@@ -254,9 +258,8 @@ public abstract class BaseViewModel : INotifyPropertyChanged
                 IsApplyingRemoteState = true;
                 try
                 {
-                    UpdateSystem(index.System);
-                    UpdateHasWarnings(index.Warning);
-                    OnDataFetched(index);
+                    ApplyIndex(index);
+                    _hasData = true;
                     IsConnected = true;
                     StatusMessage = $"Updated {DateTime.Now:HH:mm:ss}";
                 }
@@ -291,6 +294,39 @@ public abstract class BaseViewModel : INotifyPropertyChanged
         }
     }
 
+    private void ApplyIndex(IndexModel index)
+    {
+        UpdateSystem(index.System);
+        UpdateHasWarnings(index.Warning);
+        OnDataFetched(index);
+    }
+
+    private void ApplyCachedIfNeeded()
+    {
+        if (_hasData)
+            return;
+
+        IndexModel cached = _service.CurrentIndex;
+
+        if (cached is null)
+            return;
+
+        _hasData = true;
+
+        MainThread.BeginInvokeOnMainThread(() =>
+        {
+            IsApplyingRemoteState = true;
+            try
+            {
+                ApplyIndex(cached);
+            }
+            finally
+            {
+                IsApplyingRemoteState = false;
+            }
+        });
+    }
+
     /// <summary>
     /// Override to apply view-model-specific updates after the common data
     /// has been fetched and system status has been written.
@@ -323,6 +359,31 @@ public abstract class BaseViewModel : INotifyPropertyChanged
         HasWarnings = warning != null && !string.IsNullOrEmpty(warning.Active) &&
                       !warning.Active.Equals(NullByte, StringComparison.OrdinalIgnoreCase) &&
                       !warning.Active.Equals(NibbleZero, StringComparison.OrdinalIgnoreCase);
+    }
+
+    protected static Task<bool> ConfirmAsync(string title, string message, string accept, string cancel)
+    {
+        Page page = CurrentPage();
+
+        if (page is null)
+            return Task.FromResult(false);
+
+        return page.DisplayAlertAsync(title, message, accept, cancel);
+    }
+
+    protected static Task AlertAsync(string title, string message, string cancel)
+    {
+        Page page = CurrentPage();
+
+        if (page is null)
+            return Task.CompletedTask;
+
+        return page.DisplayAlertAsync(title, message, cancel);
+    }
+
+    private static Page CurrentPage()
+    {
+        return Application.Current?.Windows.FirstOrDefault()?.Page ?? Shell.Current?.CurrentPage;
     }
 
     public event PropertyChangedEventHandler PropertyChanged;

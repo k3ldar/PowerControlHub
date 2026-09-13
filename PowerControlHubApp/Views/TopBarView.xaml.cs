@@ -1,4 +1,5 @@
 using System.Windows.Input;
+using Microsoft.Maui.Devices;
 using static PowerControlHubApp.Internal.Constants;
 namespace PowerControlHubApp.Views;
 
@@ -9,6 +10,9 @@ public partial class TopBarView : ContentView
 
     public static readonly BindableProperty ShowBackButtonProperty =
         BindableProperty.Create(nameof(ShowBackButton), typeof(bool), typeof(TopBarView), false);
+
+    public static readonly BindableProperty ShowMenuButtonProperty =
+        BindableProperty.Create(nameof(ShowMenuButton), typeof(bool), typeof(TopBarView), false);
 
     public static readonly BindableProperty BackCommandProperty =
         BindableProperty.Create(nameof(BackCommand), typeof(ICommand), typeof(TopBarView));
@@ -33,6 +37,7 @@ public partial class TopBarView : ContentView
     {
         InitializeComponent();
         UpdateHasRightButton();
+        UpdateMenuButton();
     }
 
     protected override void OnPropertyChanged(string propertyName = null)
@@ -42,6 +47,10 @@ public partial class TopBarView : ContentView
         if (propertyName == nameof(RightButtonText) || propertyName == nameof(RightButtonCommand))
         {
             UpdateHasRightButton();
+        }
+        else if (propertyName == nameof(ShowBackButton))
+        {
+            UpdateMenuButton();
         }
     }
 
@@ -55,6 +64,12 @@ public partial class TopBarView : ContentView
     {
         get => (bool)GetValue(ShowBackButtonProperty);
         set => SetValue(ShowBackButtonProperty, value);
+    }
+
+    public bool ShowMenuButton
+    {
+        get => (bool)GetValue(ShowMenuButtonProperty);
+        set => SetValue(ShowMenuButtonProperty, value);
     }
 
     public ICommand BackCommand
@@ -90,6 +105,17 @@ public partial class TopBarView : ContentView
     private void UpdateHasRightButton()
     {
         HasRightButton = !string.IsNullOrEmpty(RightButtonText) || RightButtonCommand != null;
+    }
+
+    private void UpdateMenuButton()
+    {
+        ShowMenuButton = !ShowBackButton && DeviceInfo.Platform == DevicePlatform.Android;
+    }
+
+    internal void OnMenuClicked(object sender, EventArgs e)
+    {
+        if (Shell.Current is not null)
+            Shell.Current.FlyoutIsPresented = true;
     }
 
     internal async void OnBackClicked(object sender, EventArgs e)

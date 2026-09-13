@@ -213,11 +213,6 @@
                         FontAttributes="Bold"
                         Margin="0,8,0,0" />
 
-                <ActivityIndicator IsRunning="{Binding IsSaving}"
-                                   IsVisible="{Binding IsSaving}"
-                                   Color="{DynamicResource AppAccent}"
-                                   HeightRequest="20" />
-
                 <!-- Status -->
                 <Label Text="{Binding StatusMessage}"
                        TextColor="{DynamicResource AppAccent}"

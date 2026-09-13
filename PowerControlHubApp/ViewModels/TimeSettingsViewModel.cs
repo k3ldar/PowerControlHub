@@ -126,6 +126,11 @@ public sealed class TimeSettingsViewModel : BaseViewModel
         if (!Service.IsConfigured || _isRefreshing)
             return;
 
+        IndexModel cached = LastKnownIndex;
+
+        if (cached is not null)
+            ApplyTimeAndTimezone(cached);
+
         IsRefreshing = true;
 
         try
@@ -134,23 +139,7 @@ public sealed class TimeSettingsViewModel : BaseViewModel
 
             MainThread.BeginInvokeOnMainThread(() =>
             {
-                if (index?.System?.Time.Year >= MinimumValidDateTimeYear)
-                {
-                    _deviceTimeAtCapture = index.System.Time;
-                    _captureUtcTicks = DateTime.UtcNow.Ticks;
-                    DeviceTime = _deviceTimeAtCapture.ToString(DeviceTimeFormat);
-                }
-                else
-                {
-                    DeviceTime = DoubleDash;
-                }
-
-                if (index?.Config != null)
-                {
-                    int offset = index.Config.TimezoneOffset;
-                    MatchTimezoneIndexByOffset(offset);
-                }
-
+                ApplyTimeAndTimezone(index);
                 StatusMessage = $"Updated {DateTime.Now:HH:mm:ss}";
                 OnPropertyChanged(nameof(HasStatusMessage));
             });
@@ -170,6 +159,23 @@ public sealed class TimeSettingsViewModel : BaseViewModel
         {
             IsRefreshing = false;
         }
+    }
+
+    private void ApplyTimeAndTimezone(IndexModel index)
+    {
+        if (index?.System?.Time.Year >= MinimumValidDateTimeYear)
+        {
+            _deviceTimeAtCapture = index.System.Time;
+            _captureUtcTicks = DateTime.UtcNow.Ticks;
+            DeviceTime = _deviceTimeAtCapture.ToString(DeviceTimeFormat);
+        }
+        else
+        {
+            DeviceTime = DoubleDash;
+        }
+
+        if (index?.Config != null)
+            MatchTimezoneIndexByOffset(index.Config.TimezoneOffset);
     }
 
     private void MatchTimezoneIndexByOffset(int offsetHours)

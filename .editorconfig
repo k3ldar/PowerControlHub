@@ -9,13 +9,13 @@ dotnet_diagnostic.CC0009.severity = error
 dotnet_diagnostic.CC0010.severity = error
 
 
-dotnet_diagnostic.IDE0028.severity = error
-dotnet_diagnostic.IDE0290.severity = none
-dotnet_diagnostic.IDE0305.severity = error
+dotnet_diagnostic.IDE0028.severity = error # Use collection initializer
+dotnet_diagnostic.IDE0290.severity = none # Use 'var' when variable type is apparent
+dotnet_diagnostic.IDE0305.severity = error # Use 'var' when variable type is apparent
 
 
-dotnet_diagnostic.CS0144.severity = error
-dotnet_diagnostic.CS8632.severity = error
+dotnet_diagnostic.CS0144.severity = error # The body of 'method' cannot be an iterator block because 'type' does not implement 'IEnumerable' or 'IEnumerator'
+dotnet_diagnostic.CS8632.severity = error # nullable reference types
 
 
-dotnet_diagnostic.CA1822.severity = error
+dotnet_diagnostic.CA1822.severity = error # mark members as static

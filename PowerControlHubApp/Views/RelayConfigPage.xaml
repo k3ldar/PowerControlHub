@@ -58,13 +58,6 @@
         <!-- ── Content ── -->
         <Grid Grid.Row="2" IsVisible="{Binding IsConnected}">
 
-            <!-- Loading indicator -->
-            <ActivityIndicator IsRunning="{Binding IsBusy}"
-                               IsVisible="{Binding IsBusy}"
-                               Color="{DynamicResource AppAccent}"
-                               VerticalOptions="Center"
-                               HorizontalOptions="Center" />
-
             <!-- Relay list -->
             <CollectionView ItemsSource="{Binding Relays}"
                             Margin="16,12">

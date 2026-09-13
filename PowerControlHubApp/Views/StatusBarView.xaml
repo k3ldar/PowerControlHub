@@ -9,18 +9,18 @@
     <ContentView.Content>
         <Grid RowDefinitions="Auto,Auto,Auto">
             <!-- ── System status bar (memory/cpu/time/fw) ── -->
-            <Grid Grid.Row="0" BackgroundColor="{DynamicResource AppBarBg}" Padding="12,6" ColumnDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,*,Auto,Auto">
-                <Label Grid.Column="0" Text="{x:Static localization:AppResources.MemLabel}" TextColor="{DynamicResource AppBarText}" VerticalOptions="Center" Margin="12,0" />
-                <Label Grid.Column="1" Text="{Binding SystemFreeMemory}" TextColor="{DynamicResource AppBarText}" VerticalOptions="Center" Margin="6,0" />
-                <Label Grid.Column="2" Text="{x:Static localization:AppResources.CpuLabel}" TextColor="{DynamicResource AppBarText}" VerticalOptions="Center" Margin="12,0" />
-                <Label Grid.Column="3" Text="{Binding SystemCpuUsage}" TextColor="{DynamicResource AppBarText}" VerticalOptions="Center" Margin="6,0" />
-                <Label Grid.Column="4" Text="⚠" TextColor="{Binding SystemStatusColor}" VerticalOptions="Center" FontSize="14" IsVisible="{Binding HasWarnings}" Margin="4,0,0,0" />
-                <Label Grid.Column="5" Text="{x:Static localization:AppResources.SystemTitle}" TextColor="{Binding SystemStatusColor}" VerticalOptions="Center" FontAttributes="Bold">
+            <Grid x:Name="SystemStatusGrid" Grid.Row="0" BackgroundColor="{DynamicResource AppBarBg}" Padding="12,6" ColumnDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,*,Auto,Auto" SizeChanged="OnSystemStatusGridSizeChanged">
+                <Label x:Name="MemLabel" Grid.Column="0" Text="{x:Static localization:AppResources.MemLabel}" TextColor="{DynamicResource AppBarText}" VerticalOptions="Center" Margin="12,0" />
+                <Label x:Name="MemValue" Grid.Column="1" Text="{Binding SystemFreeMemory}" TextColor="{DynamicResource AppBarText}" VerticalOptions="Center" Margin="6,0" />
+                <Label x:Name="CpuLabel" Grid.Column="2" Text="{x:Static localization:AppResources.CpuLabel}" TextColor="{DynamicResource AppBarText}" VerticalOptions="Center" Margin="12,0" />
+                <Label x:Name="CpuValue" Grid.Column="3" Text="{Binding SystemCpuUsage}" TextColor="{DynamicResource AppBarText}" VerticalOptions="Center" Margin="6,0" />
+                <Label x:Name="WarningLabel" Grid.Column="4" Text="⚠" TextColor="{Binding SystemStatusColor}" VerticalOptions="Center" FontSize="14" IsVisible="{Binding HasWarnings}" Margin="4,0,0,0" />
+                <Label x:Name="SystemLabel" Grid.Column="5" Text="{x:Static localization:AppResources.SystemTitle}" TextColor="{Binding SystemStatusColor}" VerticalOptions="Center" FontAttributes="Bold">
                     <Label.GestureRecognizers>
                         <TapGestureRecognizer Command="{Binding SystemLabelTappedCommand}" NumberOfTapsRequired="1" />
                     </Label.GestureRecognizers>
                 </Label>
-                <Label Grid.Column="6" TextColor="{Binding SystemFirmwareColor}" VerticalOptions="Center" HorizontalOptions="End">
+                <Label x:Name="FirmwareLabel" Grid.Column="6" TextColor="{Binding SystemFirmwareColor}" VerticalOptions="Center" HorizontalOptions="End">
                     <Label.FormattedText>
                         <FormattedString>
                             <Span Text="{x:Static localization:AppResources.FwPrefix}" />
@@ -31,7 +31,7 @@
                         <TapGestureRecognizer Command="{Binding FirmwareLabelTappedCommand}" NumberOfTapsRequired="1" />
                     </Label.GestureRecognizers>
                 </Label>
-                <Label Grid.Column="7" TextColor="{DynamicResource AppBarText}" VerticalOptions="Center" Margin="12,0" FontSize="11">
+                <Label x:Name="TimeLabel" Grid.Column="7" TextColor="{DynamicResource AppBarText}" VerticalOptions="Center" Margin="12,0" FontSize="11">
                     <Label.FormattedText>
                         <FormattedString>
                             <Span Text="{x:Static internal:Constants.IconTimePrefix}" />
@@ -39,11 +39,11 @@
                         </FormattedString>
                     </Label.FormattedText>
                 </Label>
-                <Label Grid.Column="8" Text="{Binding SystemUptime}" TextColor="{DynamicResource AppBarText}" VerticalOptions="Center" Margin="12,0" />
+                <Label x:Name="UptimeLabel" Grid.Column="8" Text="{Binding SystemUptime}" TextColor="{DynamicResource AppBarText}" VerticalOptions="Center" Margin="12,0" />
             </Grid>
 
             <Grid Grid.Row="1" BackgroundColor="{DynamicResource AppBarBg}" Padding="12,6"
-                  ColumnDefinitions="Auto,Auto,*,Auto,Auto">
+                  ColumnDefinitions="Auto,Auto,*,Auto,Auto,Auto">
                 <BoxView Grid.Column="1"
                          Color="{Binding StatusColor}"
                          WidthRequest="9" HeightRequest="9"
@@ -65,6 +65,14 @@
                         Command="{Binding RefreshCommand}"
                         IsEnabled="{Binding IsNotBusy}"
                         ToolTipProperties.Text="{x:Static localization:AppResources.RefreshNowTooltip}" />
+                <ActivityIndicator Grid.Column="4"
+                   IsRunning="{Binding IsBusy}"
+                   IsVisible="{Binding IsBusy}"
+                   Color="{DynamicResource AppBarText}"
+                   WidthRequest="14"
+                   HeightRequest="14"
+                   VerticalOptions="Center"
+                   Margin="6,0,0,0" />
                 <Button Grid.Column="4"
                         Text="📋"
                         FontSize="14"

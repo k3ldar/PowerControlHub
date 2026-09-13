@@ -6,42 +6,31 @@
     xmlns:views="clr-namespace:PowerControlHubApp.Views"
     xmlns:localization="clr-namespace:PowerControlHubApp.Resources.Localization"
     Title="PowerControlHub"
+    FlyoutBehavior="Flyout"
     Shell.NavBarIsVisible="False">
 
-    <ShellContent
-        x:Name="DashboardPage"
-        Title="{x:Static localization:AppResources.Dashboard}"
-        Route="DashboardPage"
-        ContentTemplate="{DataTemplate views:DashboardPage}" />
+    <FlyoutItem Title="{x:Static localization:AppResources.Dashboard}" Route="DashboardPage">
+        <ShellContent x:Name="DashboardPage" ContentTemplate="{DataTemplate views:DashboardPage}" />
+    </FlyoutItem>
 
-    <ShellContent
-        x:Name="RelayConfigPage"
-        Title="{x:Static localization:AppResources.Relays}"
-        Route="RelayConfigPage"
-        ContentTemplate="{DataTemplate views:RelayConfigPage}" />
+    <FlyoutItem Title="{x:Static localization:AppResources.Relays}" Route="RelayConfigPage">
+        <ShellContent x:Name="RelayConfigPage" ContentTemplate="{DataTemplate views:RelayConfigPage}" />
+    </FlyoutItem>
 
-    <ShellContent
-        x:Name="SensorConfigPage"
-        Title="{x:Static localization:AppResources.LocalSensorsTitle}"
-        Route="SensorConfigPage"
-        ContentTemplate="{DataTemplate views:LocalSensorConfigPage}" />
+    <FlyoutItem Title="{x:Static localization:AppResources.LocalSensorsTitle}" Route="SensorConfigPage">
+        <ShellContent x:Name="SensorConfigPage" ContentTemplate="{DataTemplate views:LocalSensorConfigPage}" />
+    </FlyoutItem>
 
-    <ShellContent
-        x:Name="ExternalSensorConfigPage"
-        Title="{x:Static localization:AppResources.ExternalSensors}"
-        Route="ExternalSensorConfigPage"
-        ContentTemplate="{DataTemplate views:ExternalSensorConfigPage}" />
+    <FlyoutItem Title="{x:Static localization:AppResources.ExternalSensors}" Route="ExternalSensorConfigPage">
+        <ShellContent x:Name="ExternalSensorConfigPage" ContentTemplate="{DataTemplate views:ExternalSensorConfigPage}" />
+    </FlyoutItem>
 
-    <ShellContent
-        x:Name="SettingsPage"
-        Title="{x:Static localization:AppResources.Settings}"
-        Route="SettingsPage"
-        ContentTemplate="{DataTemplate views:SettingsPage}" />
+    <FlyoutItem Title="{x:Static localization:AppResources.Settings}" Route="SettingsPage">
+        <ShellContent x:Name="SettingsPage" ContentTemplate="{DataTemplate views:SettingsPage}" />
+    </FlyoutItem>
 
-    <ShellContent
-        x:Name="SystemPage"
-        Title="{x:Static localization:AppResources.SystemTitle}"
-        Route="SystemPage"
-        ContentTemplate="{DataTemplate views:SystemPage}" />
+    <FlyoutItem Title="{x:Static localization:AppResources.SystemTitle}" Route="SystemPage">
+        <ShellContent x:Name="SystemPage" ContentTemplate="{DataTemplate views:SystemPage}" />
+    </FlyoutItem>
 
 </Shell>

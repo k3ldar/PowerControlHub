@@ -246,7 +246,7 @@ public class ExternalSensorDetailViewModel : BaseViewModel
         if (!Service.IsConfigured || _sensorIndex < 0)
             return;
 
-        bool confirmed = await Application.Current.Windows[0].Page.DisplayAlertAsync(
+        bool confirmed = await ConfirmAsync(
             RemoveSensor,
             $"Remove sensor at index {_sensorIndex}?\n\nThis cannot be undone.",
             Remove,

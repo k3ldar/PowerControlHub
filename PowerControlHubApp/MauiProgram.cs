@@ -81,7 +81,8 @@ namespace PowerControlHubApp
                 PowerHubService service = new PowerHubService(
                     sp.GetRequiredService<IDashboardConnection>(),
                     sp.GetRequiredService<IConfigConnection>(),
-                    sp.GetRequiredService<IMessageBus>());
+                    sp.GetRequiredService<IMessageBus>(),
+                    sp.GetRequiredService<IDashboardProvider>());
 
                 return service;
             });

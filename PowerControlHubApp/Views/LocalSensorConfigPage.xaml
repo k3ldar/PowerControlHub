@@ -60,13 +60,6 @@
         <!-- Content -->
         <Grid Grid.Row="2" IsVisible="{Binding IsConnected}">
 
-            <!-- Loading indicator -->
-            <ActivityIndicator IsRunning="{Binding IsBusy}"
-                               IsVisible="{Binding IsBusy}"
-                               Color="{DynamicResource AppAccent}"
-                               VerticalOptions="Center"
-                               HorizontalOptions="Center" />
-
             <!-- Sensor list (8 preconfigured slots) -->
             <CollectionView ItemsSource="{Binding Sensors}"
                             Margin="16,12">

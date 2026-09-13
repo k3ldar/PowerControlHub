@@ -7,6 +7,16 @@
     <Grid Padding="12,10" ColumnDefinitions="Auto,*,Auto"
           BackgroundColor="{DynamicResource AppBarBg}">
 
+        <!-- Menu button -->
+        <Button Grid.Column="0"
+                Text="☰"
+                FontSize="20"
+                BackgroundColor="Transparent"
+                TextColor="{DynamicResource AppBarText}"
+                Padding="0,0,8,0"
+                Clicked="OnMenuClicked"
+                IsVisible="{Binding Source={x:Reference TopBar}, Path=ShowMenuButton}" />
+
         <!-- Back button -->
         <Button Grid.Column="0"
                 Text="‹"
