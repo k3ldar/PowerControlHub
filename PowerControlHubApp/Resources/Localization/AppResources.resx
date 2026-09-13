@@ -480,6 +480,9 @@
   <data name="SensorTypeVoltage" xml:space="preserve">
     <value>Voltage</value>
   </data>
+  <data name="SensorTypeReed" xml:space="preserve">
+    <value>Reed</value>
+  </data>
   <data name="SensorTypeUnknown" xml:space="preserve">
     <value>Unknown</value>
   </data>
@@ -506,6 +509,9 @@
   </data>
   <data name="SensorTypeVoltagePicker" xml:space="preserve">
     <value>Voltage (6)</value>
+  </data>
+  <data name="SensorTypeReedPicker" xml:space="preserve">
+    <value>Reed (7)</value>
   </data>
   <data name="SuffixCelsius" xml:space="preserve">
     <value>°C</value>

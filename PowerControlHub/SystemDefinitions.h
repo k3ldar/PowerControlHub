@@ -165,6 +165,7 @@ constexpr char SensorGpsSatellites[] = "S20";
 constexpr char SensorGpsDistance[] = "S21";
 constexpr char SensorBinaryPresence[] = "S22";
 constexpr char SensorVoltage[] = "S23";
+constexpr char SensorReed[] = "S24";
 
 constexpr char NextionGetConfig[] = "N0";
 constexpr char NextionEnabled[] = "N1";
@@ -249,6 +250,7 @@ enum class SensorIdList : uint8_t
     SystemSensor = 0x4,
     BinaryPresenceSensor = 0x5,
     VoltageSensor = 0x6,
+	ReedSensor = 0x7,
 
     Count,
     None = 0xFF

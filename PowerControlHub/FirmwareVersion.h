@@ -22,7 +22,7 @@
 // On release builds these values are overwritten by the CI workflow from the
 // git tag (v<major>.<minor>.<patch>.<build>) — do not edit the four lines below.
 // For local/development builds these fallback values are used instead.
-constexpr uint8_t FirmwareMajor = 0;
-constexpr uint8_t FirmwareMinor = 9;
+constexpr uint8_t FirmwareMajor = 1;
+constexpr uint8_t FirmwareMinor = 0;
 constexpr uint8_t FirmwarePatch = 0;
-constexpr uint8_t FirmwareBuild = 3;
+constexpr uint8_t FirmwareBuild = 0;

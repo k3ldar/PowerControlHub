@@ -63,6 +63,7 @@ namespace PowerControlHubApp.Models
                     SensorEnumSystem => SensorTypeSystem,
                     SensorEnumBinaryPresence => SensorTypeBinaryPresence,
                     SensorEnumVoltage => SensorTypeVoltage,
+                    SensorEnumReed => SensorTypeReed,
                     _ => SensorTypeUnknown
                 };
             }

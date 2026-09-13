@@ -3146,7 +3146,25 @@ namespace PowerControlHubApp.Resources.Localization {
                 return ResourceManager.GetString("SensorTypePresenceShort", resourceCulture);
             }
         }
-        
+
+        /// <summary>
+        ///   Looks up a localized string similar to Reed.
+        /// </summary>
+        public static string SensorTypeReed {
+            get {
+                return ResourceManager.GetString("SensorTypeReed", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Reed (7).
+        /// </summary>
+        public static string SensorTypeReedPicker {
+            get {
+                return ResourceManager.GetString("SensorTypeReedPicker", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to System.
         /// </summary>

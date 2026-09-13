@@ -171,6 +171,7 @@ public class ExternalSensorDetailViewModel : BaseViewModel
             SensorTypeOptions.Add(SensorTypeSystemPicker);
             SensorTypeOptions.Add(SensorTypeBinaryPresencePicker);
             SensorTypeOptions.Add(SensorTypeVoltagePicker);
+            SensorTypeOptions.Add(SensorTypeReedPicker);
         }
     }
 

@@ -13,5 +13,6 @@ public enum SensorType : byte
     System = 0x4,
     BinaryPresence = 0x5,
     Voltage = 0x6,
+    ReedSwitch = 0x7,
     Unknown = 0xFF
 }
